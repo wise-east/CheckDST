@@ -88,9 +88,6 @@ fi
 
 MODEL_PATH="bert-base-uncased" 
 # MODEL_PATH="convbert-dg"
-# MODEL_PATH="/data/home/justincho/trippy-public-master/results/multiwoz23_lr1e-4_2022-01-06_22:52:41_fewshot_False_50"
-# MODEL_PATH="/data/home/justincho/trippy-public-master/results/multiwoz23_lr1e-4_2022-01-06_22:52:41_fewshot_False_51"
-# MODEL_PATH="/data/home/justincho/trippy-public-master/results/multiwoz23_lr1e-4_2022-01-06_22:52:41_fewshot_False_52"
 
 # for step in test; do
 splits=(train dev test)
