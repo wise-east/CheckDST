@@ -1,0 +1,5 @@
+pandas
+tensorboardX==2.0
+transformers==2.9.1
+loguru
+seaborn

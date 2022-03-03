@@ -1,0 +1,46 @@
+{
+  "cola": {
+    "n_class": 2,
+    "task_type": "classification"
+  },
+  "mnli": {
+    "n_class": 3,
+    "task_type": "classification"
+  },
+  "mrpc": {
+    "n_class": 2,
+    "task_type": "classification"
+  },
+  "qnli": {
+    "n_class": 2,
+    "task_type": "classification"
+  },
+  "qqp": {
+    "n_class": 2,
+    "task_type": "classification"
+  },
+  "rte": {
+    "n_class": 2,
+    "task_type": "classification"
+  },
+  "sst": {
+    "n_class": 2,
+    "task_type": "classification"
+  },
+  "stsb": {
+    "n_class": 1,
+    "task_type": "regression"
+  },
+  "wnli": {
+    "n_class": 2,
+    "task_type": "classification"
+  },
+  "squad": {
+    "n_class": 2,
+    "task_type": "span"
+  },
+  "squad-v2": {
+    "n_class": 2,
+    "task_type": "span"
+  }
+}
