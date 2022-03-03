@@ -6,3 +6,4 @@ runs/
 *.out
 *.png
 *.csv
+*_slurm.sh

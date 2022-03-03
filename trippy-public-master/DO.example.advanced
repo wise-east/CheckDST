@@ -1,15 +1,5 @@
 #!/bin/bash
 
-#SBATCH --partition=a100 
-#SBATCH --gres=gpu:1
-#SBATCH --time=48:00:00 # run for one day
-#SBATCH --cpus-per-task=10
-#SBATCH --job-name=trippy
-
-source /data/home/justincho/miniconda/etc/profile.d/conda.sh
-cd /data/home/justincho/trippy-public-master
-conda activate trippy
-
 # Parameters ------------------------------------------------------
 
 #TASK="sim-m"

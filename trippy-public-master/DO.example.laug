@@ -1,16 +1,5 @@
 #!/bin/bash
 
-#SBATCH --partition=a100 
-#SBATCH --gres=gpu:1
-#SBATCH --time=6:00:00 # run for one day
-#SBATCH --cpus-per-task=10
-#SBATCH --job-name=trippy_laug
-
-
-source /data/home/justincho/miniconda/etc/profile.d/conda.sh
-cd /data/home/justincho/trippy-public-master
-conda activate trippy
-
 # Parameters ------------------------------------------------------
 
 #TASK="sim-m"
@@ -45,16 +34,13 @@ LR="1e-4"
 
 
 # dialoglue path
-# OUT_DIR="/data/home/justincho/dialoglue/trippy/results/multiwoz_trippy_2021-12-08_01:45:08"
 OUT_DIR=$1
-# OUT_DIR="/data/home/justincho/trippy-public-master/results/multiwoz23_lr1e-4_2021-12-05_07:59:48"
 
 # Main ------------------------------------------------------------
 
 # MODEL_PATH="bert-base-uncased" 
 # MODEL_PATH="convbert-dg"
 MODEL_PATH=$OUT_DIR 
-# MODEL_PATH="/data/home/justincho/trippy-public-master/results/multiwoz23_lr1e-4_gpu2/checkpoint-5920"
 
 # for step in dev; do
 # for step in train dev test; do

@@ -159,3 +159,6 @@ _generated/
 
 # npm compilation
 crowdsourcing/**/package-lock.json
+
+# custom
+images/
