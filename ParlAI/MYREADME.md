@@ -15,8 +15,6 @@ What's missing:
 - Automatically keeping track of all training runs and their time stamps
     - ideally automatically be able to group/filter training runs based on configurations to easily organize results. (take advantage of .opt files?)
 
-
-
 ### Other script descriptions
 
 - `cancel_jobs.sh`
