@@ -51,3 +51,6 @@ urllib3>=1.26.5
 websocket-client==0.56.0
 websocket-server==0.4
 jsonlines==1.2.0
+
+# additional to ParlAI 
+loguru 
