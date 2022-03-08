@@ -156,8 +156,14 @@ class MultiWozDSTTeacher(FixedDialogTeacher):
             # this is a hack for multitasking.
             self.version = "2.3"
 
+        datapath = opt['datapath']
+        # if explicitly set by environment variable, override 
+        env_datapath = os.environ.get("DATAPATH", "")
+        if env_datapath: 
+            datapath = env_datapath
+
         data_dir = os.path.join(
-            opt['datapath'], 'multiwoz_dst', 'MULTIWOZ' + str(self.version)
+            datapath, 'multiwoz_dst', 'MULTIWOZ' + str(self.version)
         )
         if self.version == "laug":
             # no real use for this unless we want to see what results we get with faulty labels and context from the LAUG data

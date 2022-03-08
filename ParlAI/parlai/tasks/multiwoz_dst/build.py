@@ -21,7 +21,11 @@ RESOURCES = [
 
 def build(opt):
     # get path to data directory
-    dpath = os.path.join(opt['datapath'], 'multiwoz_dst')
+    datapath=opt['datapath']
+    env_datapath = os.environ.get("DATAPATH", "")
+    if env_datapath: 
+        datapath = env_datapath
+    dpath = os.path.join(datapath, 'multiwoz_dst')
     # define version if any
     version = '1.0'
 

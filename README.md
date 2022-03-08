@@ -1,60 +1,51 @@
 # CheckDST
-Official repo for CheckDST 
+Official repo for [CheckDST](https://openreview.net/forum?id=I_YteLtAYsM): <em>Measuring Real-World Generalization of Dialogue State Tracking Performance</em>
 
-Supported models: 
-- ParlAI generation models
-    - `parlai eval_model --task multiwoz_dst_laug --model-file $MODEL_DIR --aug all` 
-- TripPy classification models
-    - `DO.example.laug $MODEL_DIR all` 
+- Supported models: 
+    - [ParlAI generation models](#generation-models)
+    - [TripPy](#classification-models)-based classification models 
+        - e.g. [ConvBERT-DG](https://github.com/alexa/dialoglue), [TripPy-COCO](https://arxiv.org/pdf/2010.12850.pdf), etc.
 
-TBD: 
-- evaluate HuggingFace checkpoints with CheckDST
+- TBD 
+    - HuggingFace checkpoints
 
-## Data: 
-The augmented MultiWOZ2.3 for speech disfluencies and paraphrases can be found in the [LAUG repo](https://github.com/thu-coai/LAUG#supported-datasets). 
-After requesting for data from the LAUG repo, you will get a URL for downloading the data. 
 
+## Preparing the data: 
+
+Following these steps will prepare the proper data format for both ParlAI and TripPy models, as well as downloading the original/raw data files provided by all of MultiWOZ2.1, 2.2, and 2.3. 
+
+1. Request for LAUG data: 
+    - The augmented [MultiWOZ 2.3](https://github.com/lexmen318/MultiWOZ-coref) for speech disfluencies and paraphrases can be found in the [LAUG repo](https://github.com/thu-coai/LAUG#supported-datasets). 
+
+1. Set the URL you received for downloading the data as the environment variable `LAUG_DOWNLOAD_LINK` in [set_envs.sh](set_envs.sh) 
+1. Create a new environment (e.g. conda), install ParlAI, and set environment variables
+```bash
+source set_envs.sh 
+conda create -n parlai python=3.7 
+cd ParlAI
+pip install -e . 
+cd ../data
 ```
-wget $LAUG_DOWNLOAD_LINK laug.zip
-unzip laug.zip 
-```
-The data will be in `laug/data/multiwoz/SD` for speech disfluencies and `laug/data/multiwoz/TP` for paraphrases. 
-The dataset augmented with replaced named entities can be found in [NED_data.zip](NED_data.zip), given in this repo.
+
+4. Execute the data preparation script `./prepare_multiwoz_dst.sh`
+    - You can learn more about the data preparation details [here](data/README.md)
+
+**Note** 
+- There are some strange inconsistencies between dialogues in MultiWOZ 2.3 and LAUG: some of the context and slot labels in the LAUG dialogues have typos. Therefore, we use the original MultiWOZ 2.3 dataset. 
+
 
 ## Generation Models 
 
-For generation models, we used [ParlAI](https://parl.ai). `ParlAI` contains a copy of the ParlAI project with compatible modifications to enable evaluate generation models with CheckDSTs. 
+For generation models, we used [ParlAI](https://parl.ai). `ParlAI/` contains a copy of the ParlAI project with compatible modifications to enable evaluating generation models with CheckDSTs. 
 
-#### Instructions: 
-
-1. Create a folder for data inside `ParlAI`: i.e. `mkdir ParlAI/data` 
-1. Place the data from the [data section](#data) into `ParlAI/data` 
-1. Create an environment: `conda create -n parlai python=3.7` 
-1. Follow steps in [ParlAI](ParlAI/README.md) to install `ParlAI` 
-1. (optional) Train a ParlAI model: e.g. `parlai train_model --task multiwoz_dst` 
-1. Evaluate on CheckDST: `parlai eval_model --task multiwoz_dst_laug --model-file $MODELDIR --aug $AUGTYPE` where `$AUGTYPE` is one of `[SD, TP, NEI]`
-1. CheckDST results are available as `model.train_report_$AUGTYPE.json` files in the model directory. 
+Detailed instructions can be found in the [ParlAI CheckDST Readme](ParlAI/CHECKDST_README.md)
+- Instructions on replicating PrefineDST results can also be found here. 
 
 
-Refer to the ParlAI [docs](https://www.parl.ai/docs/) for additional customization. 
+## Classification Models 
 
+`trippy-public-master/` contains a copy of the [official TripPy repo](https://gitlab.cs.uni-duesseldorf.de/general/dsml/trippy-public) with compatible modifications to enable evaluating existing TripPy models with CheckDST. 
 
-## Classification (TripPy) Models 
+`dialoglue/` contains a copy of the [DialoGLUE repo](https://github.com/alexa/dialoglue) for running the ConvBERT-DG variant of the TripPy model. 
 
-`trippy-public-master` contains a copy of the [official TripPy repo](https://gitlab.cs.uni-duesseldorf.de/general/dsml/trippy-public) with compatible modifications to enable evaluating existing TripPy models with CheckDST. 
-
-#### Instructions: 
-
-1. Create a folder for data inside `trippy-public-master`: i.e. `mkdir trippy-public-master/data` 
-1. Place the data from the [data section](#data) into a `trippy-public-master/data` 
-1. Set up your environment according to the [TripPy README](trippy-public-master/README.md)
-    * It is recommended to create a separate environment than that used for ParlAI models due to dependency problems. 
-1. (optional) Train a TripPy model using `DO.example.advanced`
-1. `DO.example.laug $MODELDIR $AUGTYPE` where `$AUGTYPE` is one of `[SD, TP, NEI]`
-1. Process the output of TripPy scripts and print out CheckDST results: `python checkdst.py $RESULTSDIR` where `$RESULTSDIR` is the parent directory of trained models.
-
-TripPy-based models can use `trippy-public-master/DO.example.laug` to evaluate models with CheckDST.  
-
-
-`dialoglue` contains a copy of the [DialoGLUE repo](https://github.com/alexa/dialoglue) for running the ConvBERT variant of the TripPy model. 
-
+Detailed instructions can be found in the [TripPy CheckDST Readme](trippy-public-master/CHECKDST_README.md)

@@ -10,6 +10,7 @@ from io import BytesIO
 from zipfile import ZipFile
 import difflib
 import numpy as np
+from loguru import logger
 
 np.set_printoptions(precision=3)
 
@@ -19,14 +20,18 @@ np.random.seed(2)
 '''
 Most of the codes are from https://github.com/budzianowski/multiwoz
 '''
+PARLAI_DIR = os.environ.get("PARLAI_DIR", "ParlAI")
 
+logger.info(PARLAI_DIR)
 
 # GLOBAL VARIABLES
 DICT_SIZE = 400
 MAX_LENGTH = 100
 IGNORE_KEYS_IN_GOAL = ['eod', 'topic', 'messageLen', 'message']
+mapping_fn = os.path.join(PARLAI_DIR, 'parlai/tasks/multiwoz_dst/utils/mapping.pair')
+logger.info(mapping_fn)
 
-fin = open('./parlai/tasks/multiwoz_dst/utils/mapping.pair', 'r')
+fin = open(mapping_fn, 'r')
 replacements = []
 for line in fin.readlines():
     tok_from, tok_to = line.replace('\n', '').split('\t')
