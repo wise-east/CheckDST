@@ -228,7 +228,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
             '-swap',
             '--swap_entity',
             type=str,
-            default="gibberish",
+            default="scramble",
             help="one of ['g_sgd', 'scramble', 'gibberish'] ",
         )
         agent.add_argument(
@@ -289,11 +289,11 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
         # load from environment if available 
         env_datapath = os.environ.get("DATAPATH", "")
         datapath = env_datapath if env_datapath else datapath 
-        data_dir = os.path.join(opt['datapath'], 'checkdst', opt['augmentation_method'])
+        data_dir = os.path.join(datapath, 'checkdst', opt['augmentation_method'])
 
         # for NER invariance, load from original data and augment it dynamically
         if opt['augmentation_method'].lower() == "ned":
-            data_dir = os.path.join(opt['datapath'], 'checkdst', 'orig')
+            data_dir = os.path.join(datapath, 'checkdst', opt['augmentation_method'])
 
         data_path = os.path.join(data_dir, 'data_reformat_official_v2.3_slots.json')
 
@@ -390,7 +390,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
         )
 
         # needed for calculating CheckDST for trippy evaluation 
-        save_path = f"data/checkdst/NED/changed_dialids_{self.datatype}_{self.few_shot}.txt"
+        save_path = os.path.join(self.data_dir, f"parlai_changed_dialids_{self.datatype}_fewshot_{self.few_shot}.txt")
         if not os.path.isfile(save_path):
             with open(save_path, "w") as f:
                 for did in changed_dialids:
@@ -446,7 +446,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
                 self.messages[episode_idx]['context'] = context
                 self.messages[episode_idx]['slots_inf'] = label
 
-        if self.data_aug.lower() not in {"NED", "orig"}:
+        if self.data_aug.lower() not in {"ned", "orig"}:
             # create separate samples for the original examples and the perturbed ones
             unfolded_messages = []
             for episode_idx, msg in enumerate(self.messages):
@@ -477,7 +477,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
                     f"idx: {idx}, {idx+1}\n\t Original example: {self.messages[idx]}\n\tAugmented example: {self.messages[idx+1]}"
                 )
 
-        elif self.data_aug.lower() == "NED":
+        elif self.data_aug.lower() == "ned":
             # dynamically augment examples
             self.messages = self.ned_augment(self.messages)
         # for original data, there is nothing to do
@@ -745,7 +745,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
         return action
 
 
-class DefaultTeacher(MultiWozDSTTeacher):
+class DefaultTeacher(MultiWozCheckDSTTeacher):
     """
     Default teacher.
     """

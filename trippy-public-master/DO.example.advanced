@@ -126,6 +126,7 @@ for step in $splits; do
 			--delexicalize_sys_utts \
 			--class_aux_feats_inform \
 			--class_aux_feats_ds \
+			--fewshot $FEWSHOT \
 			${args_add} \
 			2>&1 | tee ${OUT_DIR}/${step}.log
     fi 

@@ -33,6 +33,40 @@ def my_strip(context):
     return context.strip().lower()
 
 
+def normalize_dialogue_ids(mwoz_dict): 
+
+    new_dict = {} 
+    for k, v in mwoz_dict.items(): 
+        if ".json" not in k: 
+            new_key = k + ".json"
+        else: 
+            new_key = k 
+        new_dict[new_key] = v 
+
+    return new_dict 
+
+def test_match(orig_data, aug_data): 
+    """ make sure that tp/sd testsets are the same as the original except for the new text"""
+    orig_data = normalize_dialogue_ids(orig_data)
+    aug_data = normalize_dialogue_ids(aug_data)
+    assert orig_data.keys() == aug_data.keys(), "no match"
+    print("Keys match")
+    return 
+
+def replace_dict_values_str(obj, orig_slot, new_slot): 
+    # obj['attraction']['semi']['area'] = "hi"
+    # return 
+    # print(obj)
+    if isinstance(obj, dict): 
+        for k, v in obj.items(): 
+            obj[k] = replace_dict_values_str(v, orig_slot, new_slot)
+    elif isinstance(obj, str): 
+        obj = obj.replace(orig_slot, new_slot)
+    elif isinstance(obj, list): 
+        for idx in range(len(obj)): 
+            obj[idx] = replace_dict_values_str(obj[idx], orig_slot, new_slot)    
+    return obj 
+
 def normalize_slot_key(slot_key):
 
     slot_key = slot_key.replace(" '", "'").replace(",", "").lower().strip()
@@ -131,6 +165,16 @@ def proper_dst_format(slot_str):
 
 
 def read_zipped_json(filepath, filename):
+    """Load zipped json file directly 
+
+    Args:
+        filepath (str): path of zipped file 
+        filename (str): file within zipped file that is to be loaded 
+            (usually the file name only with out the .zip suffix)
+
+    Returns:
+        Dict: returns json file within the zipped file 
+    """
     print("zip file path = ", filepath)
     archive = zipfile.ZipFile(filepath, 'r')
     return json.load(archive.open(filename))

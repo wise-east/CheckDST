@@ -89,9 +89,16 @@ done
 
 ## match naming convention
 mv laug_dst checkdst
-# mv checkdst/orig checkdst/NED
+mv checkdst/orig checkdst/NED
 mv checkdst/SD checkdst/SDI 
-mv checkdst/TP checkdst/TPI
+mv checkdst/TP checkdst/PI
+
+# get unchanged NED dialogue ids 
+parlai dd -t multiwoz_checkdst -aug NED -dt test
+
 
 # format data for trippy models 
+# split MultiWOZ2.3 data.json file into train/val/test splits 
+python split_data.py multiwoz_dst/MULTIWOZ2.3/data.json multiwoz_dst/MULTIWOZ2.1
+
 # python prep_data_for_trippy.py 

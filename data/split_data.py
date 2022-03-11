@@ -1,19 +1,22 @@
 import json 
+import os
 from collections import defaultdict
 import sys 
 from pathlib import Path 
 
 data_path = sys.argv[1]
+split_files_path = sys.argv[2]
+
 data_path = Path(data_path).absolute()
 cur_dir = data_path.parent
-# data_path="data.json"
+print(data_path)
 
 with data_path.open("r") as f: 
     data = json.load(f)
 
 split_keys = {} 
 for key in ["val", "test"]: 
-    with open(f"{key}ListFile.json", "r") as f: 
+    with open(os.path.join(split_files_path, f"{key}ListFile.json"), "r") as f: 
         split_keys[key] = f.read().splitlines()
 
 data_splits = {

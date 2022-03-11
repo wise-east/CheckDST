@@ -295,8 +295,8 @@ def evaluate(args, model, tokenizer, processor, prefix=""):
 
     # Write final predictions (for evaluation with external tool)
     output_prediction_file = os.path.join(args.output_dir, "pred_res.%s.%s.json" % (args.predict_type, prefix))
-    if args.laug_inv: 
-        output_prediction_file = output_prediction_file.replace(".json", f"{args.laug_inv}.json")
+    if args.checkdst_inv: 
+        output_prediction_file = output_prediction_file.replace(".json", f"{args.checkdst_inv}.json")
 
     logger.info(f"Saving predictions to {output_prediction_file}")
     with open(output_prediction_file, "w") as f:
@@ -629,13 +629,15 @@ def main():
                         help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
                              "See details at https://nvidia.github.io/apex/amp.html")
 
-    # LAUG parameters 
-    parser.add_argument("--laug_inv", default="", type=str,
+    # checkdst parameters 
+    parser.add_argument("--checkdst_inv", default="", type=str,
+        help="type of invariance used")
+    parser.add_argument("--fewshot", default="", type=str,
         help="type of invariance used")
 
     args = parser.parse_args()
-    if args.laug_inv not in ["NEI", "TP", "SD"]: 
-        args.laug_inv = ""
+    if args.checkdst_inv not in ["NEI", "TP", "SD"]: 
+        args.checkdst_inv = ""
 
     # if fewshot in model path, use fewshot data 
     if "fewshot_True" in args.model_name_or_path or "fs_True" in args.model_name_or_path: 
