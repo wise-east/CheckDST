@@ -41,13 +41,13 @@ class IGCTeacher(AbstractImageTeacher):
     """
 
     def __init__(self, opt: Opt, shared: PT.TShared = None):
-        self.blank_image_id = '0000'
+        self.blank_image_id = "0000"
         super().__init__(opt, shared)
         if shared is not None:
-            self.valid_image_ids = shared['valid_image_ids']
+            self.valid_image_ids = shared["valid_image_ids"]
         if self.image_features_dict is not None:
             self.image_features_dict[self.blank_image_id] = self.blank_image_features
-        self.multi_ref = opt.get('igc_multi_ref', False)
+        self.multi_ref = opt.get("igc_multi_ref", False)
 
     @classmethod
     def add_cmdline_args(
@@ -59,12 +59,12 @@ class IGCTeacher(AbstractImageTeacher):
         for multi-reference labels.
         """
         super().add_cmdline_args(parser, partial_opt=partial_opt)
-        agent = parser.add_argument_group('IGC Arguments')
+        agent = parser.add_argument_group("IGC Arguments")
         agent.add_argument(
-            '--igc-multi-ref',
-            type='bool',
+            "--igc-multi-ref",
+            type="bool",
             default=False,
-            help='specify to evaluate on multi-reference labels',
+            help="specify to evaluate on multi-reference labels",
         )
         return parser
 
@@ -94,7 +94,7 @@ class IGCTeacher(AbstractImageTeacher):
         :return:
             the path to the dataset
         """
-        data_path = os.path.join(opt['datapath'], 'igc')
+        data_path = os.path.join(opt["datapath"], "igc")
         return data_path
 
     def get_image_features_path(self, task, image_model_name, dt):
@@ -102,13 +102,13 @@ class IGCTeacher(AbstractImageTeacher):
         Override so that subclasses can see same image features.
         """
         # In default implementation, self.data_path already has task name added
-        image_features_path = os.path.join(self.data_path, 'image_features')
+        image_features_path = os.path.join(self.data_path, "image_features")
 
         if not os.path.isdir(image_features_path):
             PathManager.mkdirs(image_features_path)
 
         return os.path.join(
-            image_features_path, f'{image_model_name}_{dt}_features_dict'
+            image_features_path, f"{image_model_name}_{dt}_features_dict"
         )
 
     def num_episodes(self) -> int:
@@ -146,20 +146,20 @@ class IGCTeacher(AbstractImageTeacher):
             data[self.image_id_key] = self.blank_image_id
         image_features = self.get_image_features(data)
 
-        conversation = [data['context'], data['question'], data['response']]
+        conversation = [data["context"], data["question"], data["response"]]
         labels = [conversation[entry_idx]]
         if self.multi_ref and entry_idx != 0:
-            key = 'questions' if entry_idx == 1 else 'responses'
-            labels = data[f'multiref_{key}'].split('***')
-        text = '' if entry_idx == 0 else conversation[entry_idx - 1]
+            key = "questions" if entry_idx == 1 else "responses"
+            labels = data[f"multiref_{key}"].split("***")
+        text = "" if entry_idx == 0 else conversation[entry_idx - 1]
         episode_done = entry_idx >= len(conversation) - 2
 
         action = {
-            'text': text,
-            'image_id': image_id,
-            'episode_done': episode_done,
-            'image': image_features,
-            'labels': labels,
+            "text": text,
+            "image_id": image_id,
+            "episode_done": episode_done,
+            "image": image_features,
+            "labels": labels,
         }
 
         return action
@@ -169,14 +169,14 @@ class IGCTeacher(AbstractImageTeacher):
         Override to load CSV files.
         """
 
-        dt = opt['datatype'].split(':')[0]
-        dt_str = 'test' if dt == 'test' else 'val'
-        dp = os.path.join(self.get_data_path(opt), f'IGC_crowd_{dt_str}.csv')
+        dt = opt["datatype"].split(":")[0]
+        dt_str = "test" if dt == "test" else "val"
+        dp = os.path.join(self.get_data_path(opt), f"IGC_crowd_{dt_str}.csv")
         if not os.path.exists(dp):
             raise RuntimeError(
-                'Please download the IGC Dataset from '
-                'https://www.microsoft.com/en-us/download/details.aspx?id=55324. '
-                'Then, make sure to put the two .csv files in {}'.format(
+                "Please download the IGC Dataset from "
+                "https://www.microsoft.com/en-us/download/details.aspx?id=55324. "
+                "Then, make sure to put the two .csv files in {}".format(
                     self.get_data_path(opt)
                 )
             )
@@ -187,28 +187,28 @@ class IGCTeacher(AbstractImageTeacher):
             self._download_images(opt)
 
         self.data = []
-        with PathManager.open(dp, newline='\n') as csv_file:
-            reader = csv.reader(csv_file, delimiter=',')
+        with PathManager.open(dp, newline="\n") as csv_file:
+            reader = csv.reader(csv_file, delimiter=",")
             fields = []
             for i, row in enumerate(reader):
                 if i == 0:
                     fields = row
                 else:
                     ep = dict(zip(fields, row))
-                    ep['image_id'] = f'{ep["id"]}'
+                    ep["image_id"] = f'{ep["id"]}'
                     self.data.append(ep)
 
-        if dt == 'train':
+        if dt == "train":
             # Take first 90% of valid set as train
             self.data = self.data[: int(len(self.data) * 0.9)]
-        elif dt == 'valid':
+        elif dt == "valid":
             self.data = self.data[int(len(self.data) * 0.9) :]
 
         self.valid_image_ids = []
         for d in self.data:
-            img_path = os.path.join(self.get_image_path(opt), d['image_id'])
+            img_path = os.path.join(self.get_image_path(opt), d["image_id"])
             if PathManager.exists(img_path):
-                self.valid_image_ids.append(d['image_id'])
+                self.valid_image_ids.append(d["image_id"])
 
         self.valid_image_ids = set(self.valid_image_ids)
         return self.data
@@ -219,22 +219,22 @@ class IGCTeacher(AbstractImageTeacher):
         """
         urls = []
         ids = []
-        for dt in ['test', 'val']:
-            df = os.path.join(self.get_data_path(opt), f'IGC_crowd_{dt}.csv')
-            with PathManager.open(df, newline='\n') as csv_file:
-                reader = csv.reader(csv_file, delimiter=',')
+        for dt in ["test", "val"]:
+            df = os.path.join(self.get_data_path(opt), f"IGC_crowd_{dt}.csv")
+            with PathManager.open(df, newline="\n") as csv_file:
+                reader = csv.reader(csv_file, delimiter=",")
                 fields = []
                 for i, row in enumerate(reader):
                     if i == 0:
                         fields = row
                     else:
                         data = dict(zip(fields, row))
-                        urls.append(data['url'])
-                        ids.append(data['id'])
+                        urls.append(data["url"])
+                        ids.append(data["id"])
         PathManager.mkdirs(self.get_image_path(opt))
         # Make one blank image
-        image = Image.new('RGB', (100, 100), color=0)
-        image.save(os.path.join(self.get_image_path(opt), self.blank_image_id), 'JPEG')
+        image = Image.new("RGB", (100, 100), color=0)
+        image.save(os.path.join(self.get_image_path(opt), self.blank_image_id), "JPEG")
         # Download the rest
         download_multiprocess(urls, self.get_image_path(opt), dest_filenames=ids)
 
@@ -243,13 +243,13 @@ class IGCTeacher(AbstractImageTeacher):
             img_path = os.path.join(self.get_image_path(opt), fp)
             if PathManager.exists(img_path):
                 try:
-                    Image.open(img_path).convert('RGB')
+                    Image.open(img_path).convert("RGB")
                 except OSError:
                     PathManager.rm(img_path)
 
     def share(self) -> PT.TShared:
         shared = super().share()
-        shared['valid_image_ids'] = self.valid_image_ids
+        shared["valid_image_ids"] = self.valid_image_ids
         return shared
 
 
@@ -263,12 +263,12 @@ class IGCOneSideTeacher(ABC, IGCTeacher):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt=partial_opt)
-        agent = parser.add_argument_group('IGCResponseOnly Arguments')
+        agent = parser.add_argument_group("IGCResponseOnly Arguments")
         agent.add_argument(
-            '--igc-multi-ref',
-            type='bool',
+            "--igc-multi-ref",
+            type="bool",
             default=False,
-            help='specify true to evaluate on multi-reference labels',
+            help="specify true to evaluate on multi-reference labels",
         )
         return parser
 
@@ -305,16 +305,16 @@ class IGCOneSideTeacher(ABC, IGCTeacher):
 
         labels = [data[self.get_label_key()]]
         if self.multi_ref:
-            labels = data[f'multiref_{self.get_label_key()}s'].split('***')
+            labels = data[f"multiref_{self.get_label_key()}s"].split("***")
 
         text = self.get_text(data)
 
         action = {
-            'text': text,
-            'image_id': image_id,
-            'episode_done': True,
-            'image': image_features,
-            'labels': labels,
+            "text": text,
+            "image_id": image_id,
+            "episode_done": True,
+            "image": image_features,
+            "labels": labels,
         }
 
         return action
@@ -326,10 +326,10 @@ class ResponseOnlyTeacher(IGCOneSideTeacher):
     """
 
     def get_label_key(self) -> str:
-        return 'response'
+        return "response"
 
     def get_text(self, data) -> str:
-        return '\n'.join([data['context'], data['question']])
+        return "\n".join([data["context"], data["question"]])
 
 
 class QuestionOnlyTeacher(IGCOneSideTeacher):
@@ -338,10 +338,10 @@ class QuestionOnlyTeacher(IGCOneSideTeacher):
     """
 
     def get_label_key(self) -> str:
-        return 'question'
+        return "question"
 
     def get_text(self, data) -> str:
-        return data['context']
+        return data["context"]
 
 
 class DefaultTeacher(IGCTeacher):

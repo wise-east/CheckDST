@@ -19,36 +19,36 @@ import random
 
 def setup_args(parser=None):
     if parser is None:
-        parser = ParlaiParser(True, True, 'Like interactive, but adds a safety filter')
-    parser.add_argument('-d', '--display-examples', type='bool', default=False)
+        parser = ParlaiParser(True, True, "Like interactive, but adds a safety filter")
+    parser.add_argument("-d", "--display-examples", type="bool", default=False)
     parser.add_argument(
-        '--display-prettify',
-        type='bool',
+        "--display-prettify",
+        type="bool",
         default=False,
-        help='Set to use a prettytable when displaying '
-        'examples with text candidates',
+        help="Set to use a prettytable when displaying "
+        "examples with text candidates",
     )
     parser.add_argument(
-        '--display-add-fields',
+        "--display-add-fields",
         type=str,
-        default='',
+        default="",
         help='Display these fields when verbose is off (e.g., "--display-add-fields label_candidates,beam_texts")',
     )
     parser.add_argument(
-        '-it',
-        '--interactive-task',
-        type='bool',
+        "-it",
+        "--interactive-task",
+        type="bool",
         default=True,
-        help='Create interactive version of task',
+        help="Create interactive version of task",
     )
-    parser.set_defaults(interactive_mode=True, task='interactive')
+    parser.set_defaults(interactive_mode=True, task="interactive")
     SafeLocalHumanAgent.add_cmdline_args(parser, partial_opt=None)
     return parser
 
 
 def safe_interactive(opt):
     if isinstance(opt, ParlaiParser):
-        logging.error('interactive should be passed opt not Parser')
+        logging.error("interactive should be passed opt not Parser")
         opt = opt.parse_args()
 
     # Create model and assign it to the specified task
@@ -61,18 +61,18 @@ def safe_interactive(opt):
     while True:
         world.parley()
         bot_act = world.get_acts()[-1]
-        if 'bot_offensive' in bot_act and bot_act['bot_offensive']:
+        if "bot_offensive" in bot_act and bot_act["bot_offensive"]:
             agent.reset()
 
-        if opt.get('display_examples'):
-            print('---')
+        if opt.get("display_examples"):
+            print("---")
             print(world.display())
         if world.epoch_done():
-            logging.info('epoch done')
+            logging.info("epoch done")
             break
 
 
-@register_script('safe_interactive')
+@register_script("safe_interactive")
 class SafeInteractive(ParlaiScript):
     @classmethod
     def setup_args(cls):
@@ -82,6 +82,6 @@ class SafeInteractive(ParlaiScript):
         return safe_interactive(self.opt)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     random.seed(42)
     SafeInteractive.main()

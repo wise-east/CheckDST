@@ -29,7 +29,7 @@ class SimpleMessengerOverworld(World):
 
     def parley(self):
         self.episodeDone = True
-        return 'default'
+        return "default"
 
 
 class OnboardWorld(World):

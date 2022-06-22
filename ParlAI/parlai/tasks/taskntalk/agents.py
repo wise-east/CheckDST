@@ -13,22 +13,22 @@ import os
 import random
 
 
-def _path(opt, task_size='small'):
+def _path(opt, task_size="small"):
     """Return path to json file of dataset - it can be train/valid file
     of small/large dataset. Validation data is used for test as well,
     because labels are inferred from the image and task itself.
     """
-    dt = opt['datatype'].split(':')[0]
+    dt = opt["datatype"].split(":")[0]
     # ensure data is built
     build(opt)
-    if dt == 'train':
-        file_name = 'train.json'
-    elif dt == 'valid' or dt == 'test':
-        file_name = 'valid.json'
+    if dt == "train":
+        file_name = "train.json"
+    elif dt == "valid" or dt == "test":
+        file_name = "valid.json"
     else:
-        raise RuntimeError('Not valid datatype.')
+        raise RuntimeError("Not valid datatype.")
 
-    data_path = os.path.join(opt['datapath'], 'taskntalk', task_size, file_name)
+    data_path = os.path.join(opt["datapath"], "taskntalk", task_size, file_name)
     return data_path
 
 
@@ -42,25 +42,25 @@ class AbstractTaskNTalk(Teacher):
 
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
-        self.id = 'taskntalk'
+        self.id = "taskntalk"
         if not shared:
-            self._setup_data(self.opt['datafile'])
+            self._setup_data(self.opt["datafile"])
         else:
-            self.data = shared['data']
-            self.task_defn = shared['task_defn']
-            self.task_index = shared['task_index']
+            self.data = shared["data"]
+            self.task_defn = shared["task_defn"]
+            self.task_index = shared["task_index"]
 
     def _setup_data(self, data_path):
         """
         Read the json file and store images and task definitions.
         """
-        print('loading: ' + data_path)
+        print("loading: " + data_path)
         with PathManager.open(data_path) as data_file:
             json_data = json.load(data_file)
-            self.data = json_data['data']
-            self.task_defn = json_data['task_defn']
+            self.data = json_data["data"]
+            self.task_defn = json_data["task_defn"]
         # images are [color, shape, style] lists (example: ['red', 'square', 'dotted'])
-        self.task_index = {'color': 0, 'shape': 1, 'style': 2}
+        self.task_index = {"color": 0, "shape": 1, "style": 2}
         random.shuffle(self.data)
 
     def share(self):
@@ -68,9 +68,9 @@ class AbstractTaskNTalk(Teacher):
         Share images and task definitions with other teachers.
         """
         shared = super().share()
-        shared['data'] = self.data
-        shared['task_defn'] = self.task_defn
-        shared['task_index'] = self.task_index
+        shared["data"] = self.data
+        shared["task_defn"] = self.task_defn
+        shared["task_index"] = self.task_index
         return shared
 
     def __len__(self):
@@ -92,10 +92,10 @@ class AbstractTaskNTalk(Teacher):
         task = random.choice(self.task_defn)
         labels = [image[self.task_index[attr]] for attr in task]
         action = {
-            'image': ' '.join(image),
-            'text': ' '.join(task),
-            'labels': [' '.join(labels)],
-            'episode_done': True,
+            "image": " ".join(image),
+            "text": " ".join(task),
+            "labels": [" ".join(labels)],
+            "episode_done": True,
         }
         # TODO(kd): fetch all data for valid/test
         return action
@@ -107,7 +107,7 @@ class SmallTeacher(AbstractTaskNTalk):
     """
 
     def __init__(self, opt, shared=None):
-        opt['datafile'] = _path(opt, 'small')
+        opt["datafile"] = _path(opt, "small")
         super().__init__(opt, shared)
 
 
@@ -117,7 +117,7 @@ class LargeTeacher(AbstractTaskNTalk):
     """
 
     def __init__(self, opt, shared=None):
-        opt['datafile'] = _path(opt, 'large')
+        opt["datafile"] = _path(opt, "large")
         super().__init__(opt, shared)
 
 

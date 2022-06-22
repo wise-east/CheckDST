@@ -11,19 +11,19 @@ import os
 
 RESOURCES = [
     DownloadableFile(
-        'https://raw.githubusercontent.com/deepmipt/turing-data/master/data_1501534800.tar.gz',
-        'data_1501534800.tar.gz',
-        'f1a4e7ee7264220cef6bf067b77d6f501023877643e77516c7acd66fbcdf0aaf',
+        "https://raw.githubusercontent.com/deepmipt/turing-data/master/data_1501534800.tar.gz",
+        "data_1501534800.tar.gz",
+        "f1a4e7ee7264220cef6bf067b77d6f501023877643e77516c7acd66fbcdf0aaf",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'ConvAIChitChat')
-    version = '1501534800'
+    dpath = os.path.join(opt["datapath"], "ConvAIChitChat")
+    version = "1501534800"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
 
         if build_data.built(dpath):
             build_data.remove_dir(dpath)
@@ -33,12 +33,12 @@ def build(opt):
             downloadable_file.download_file(dpath)
 
         os.rename(
-            os.path.join(dpath, 'data_train_' + version + '.json'),
-            os.path.join(dpath, 'train.json'),
+            os.path.join(dpath, "data_train_" + version + ".json"),
+            os.path.join(dpath, "train.json"),
         )
         os.rename(
-            os.path.join(dpath, 'data_test_' + version + '.json'),
-            os.path.join(dpath, 'test.json'),
+            os.path.join(dpath, "data_test_" + version + ".json"),
+            os.path.join(dpath, "test.json"),
         )
 
         build_data.mark_done(dpath, version_string=version)

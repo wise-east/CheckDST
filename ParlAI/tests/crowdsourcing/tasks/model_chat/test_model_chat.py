@@ -16,7 +16,7 @@ import parlai.utils.testing as testing_utils
 
 
 # Inputs
-AGENT_DISPLAY_IDS = ('Worker',)
+AGENT_DISPLAY_IDS = ("Worker",)
 AGENT_MESSAGES = [
     ("What are you nervous about?",),
     ("Do you have any plans for the weekend?",),
@@ -29,7 +29,7 @@ AGENT_MESSAGES = [
 AGENT_TASK_DATA = [
     (
         {
-            'problem_data_for_prior_message': {
+            "problem_data_for_prior_message": {
                 "bucket_0": False,
                 "bucket_1": False,
                 "bucket_2": True,
@@ -91,17 +91,17 @@ try:
 
                 # Paths
                 expected_states_folder = os.path.join(
-                    os.path.dirname(os.path.abspath(__file__)), 'expected_states'
+                    os.path.dirname(os.path.abspath(__file__)), "expected_states"
                 )
                 expected_chat_data_path = os.path.join(
-                    expected_states_folder, 'final_chat_data.json'
+                    expected_states_folder, "final_chat_data.json"
                 )
-                expected_state_path = os.path.join(expected_states_folder, 'state.json')
-                model_opt_path = os.path.join(tmpdir, 'model_opts.yaml')
-                chat_data_folder = os.path.join(tmpdir, 'final_chat_data')
+                expected_state_path = os.path.join(expected_states_folder, "state.json")
+                model_opt_path = os.path.join(tmpdir, "model_opts.yaml")
+                chat_data_folder = os.path.join(tmpdir, "final_chat_data")
 
                 # Create a model opt file for the fixed-response model
-                with open(model_opt_path, 'w') as f:
+                with open(model_opt_path, "w") as f:
                     model_opt_contents = f"""\
 fixed_response: >
     --model fixed_response
@@ -112,26 +112,26 @@ fixed_response: >
                 num_convos = 10
                 args = ModelChatBlueprintArgs()
                 overrides = [
-                    f'+mephisto.blueprint.{key}={val}'
+                    f"+mephisto.blueprint.{key}={val}"
                     for key, val in args.__dict__.items()
                     if key
                     in [
-                        'max_onboard_time',
-                        'max_resp_time',
-                        'override_opt',
-                        'random_seed',
-                        'world_file',
+                        "max_onboard_time",
+                        "max_resp_time",
+                        "override_opt",
+                        "random_seed",
+                        "world_file",
                     ]
                 ] + [
-                    'mephisto.blueprint.annotations_config_path=${task_dir}/task_config/annotations_config.json',
-                    f'mephisto.blueprint.conversations_needed_string=\"fixed_response:{num_convos:d}\"',
-                    f'mephisto.blueprint.chat_data_folder={chat_data_folder}',
-                    '+mephisto.blueprint.left_pane_text_path=${task_dir}/task_config/left_pane_text.html',
-                    '+mephisto.blueprint.max_concurrent_responses=1',
-                    f'mephisto.blueprint.model_opt_path={model_opt_path}',
-                    f'+mephisto.blueprint.num_conversations={num_convos:d}',
-                    '+mephisto.blueprint.onboard_task_data_path=${task_dir}/task_config/onboard_task_data.json',
-                    '+mephisto.blueprint.task_description_file=${task_dir}/task_config/task_description.html',
+                    "mephisto.blueprint.annotations_config_path=${task_dir}/task_config/annotations_config.json",
+                    f'mephisto.blueprint.conversations_needed_string="fixed_response:{num_convos:d}"',
+                    f"mephisto.blueprint.chat_data_folder={chat_data_folder}",
+                    "+mephisto.blueprint.left_pane_text_path=${task_dir}/task_config/left_pane_text.html",
+                    "+mephisto.blueprint.max_concurrent_responses=1",
+                    f"mephisto.blueprint.model_opt_path={model_opt_path}",
+                    f"+mephisto.blueprint.num_conversations={num_convos:d}",
+                    "+mephisto.blueprint.onboard_task_data_path=${task_dir}/task_config/onboard_task_data.json",
+                    "+mephisto.blueprint.task_description_file=${task_dir}/task_config/task_description.html",
                 ]
                 # TODO: remove all of these params once Hydra 1.1 is released with
                 #  support for recursive defaults
@@ -166,7 +166,7 @@ fixed_response: >
                 with open(expected_chat_data_path) as f:
                     expected_chat_data = json.load(f)
                 results_path = list(
-                    glob.glob(os.path.join(chat_data_folder, '*/*_*_*_sandbox.json'))
+                    glob.glob(os.path.join(chat_data_folder, "*/*_*_*_sandbox.json"))
                 )[0]
                 with open(results_path) as f:
                     actual_chat_data = json.load(f)
@@ -177,10 +177,9 @@ fixed_response: >
         def _remove_non_deterministic_keys(self, actual_state: dict) -> dict:
             actual_state = super()._remove_non_deterministic_keys(actual_state)
             custom_data = self._get_custom_data(actual_state)
-            del custom_data['dialog'][0]['message_id']
+            del custom_data["dialog"][0]["message_id"]
             # This chat task additionally includes a message_id in the first message
             return actual_state
-
 
 except ImportError:
     pass

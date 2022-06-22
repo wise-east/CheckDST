@@ -21,22 +21,22 @@ class UbuntuTeacher(DialogTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        self.datatype = opt['datatype']
+        self.datatype = opt["datatype"]
         build(opt)
-        opt['datafile'] = os.path.join(
-            opt['datapath'], 'Ubuntu', opt['datatype'].split(':')[0] + '.csv'
+        opt["datafile"] = os.path.join(
+            opt["datapath"], "Ubuntu", opt["datatype"].split(":")[0] + ".csv"
         )
         super().__init__(opt, shared)
 
     def setup_data(self, path):
-        print('loading: ' + path)
-        with PathManager.open(path, 'r', newline='') as read:
+        print("loading: " + path)
+        with PathManager.open(path, "r", newline="") as read:
             csv_read = csv.reader(read)
             next(csv_read)  # eat header
 
             for line in csv_read:
                 fields = [
-                    s.replace('__eou__', '.').replace('__eot__', '\n').strip()
+                    s.replace("__eou__", ".").replace("__eot__", "\n").strip()
                     for s in line
                 ]
                 context = fields[0]
@@ -51,17 +51,17 @@ class UbuntuTeacher(DialogTeacher):
 
 class MultiturnTeacher(FixedDialogTeacher):
     def __init__(self, opt, shared=None):
-        self.datatype = opt['datatype']
-        opt['datafile'] = os.path.join(
-            opt['datapath'], 'Ubuntu', opt['datatype'].split(':')[0] + '.csv'
+        self.datatype = opt["datatype"]
+        opt["datafile"] = os.path.join(
+            opt["datapath"], "Ubuntu", opt["datatype"].split(":")[0] + ".csv"
         )
         super().__init__(opt, shared)
 
         if shared:
-            self.data = shared['data']
+            self.data = shared["data"]
         else:
             build(opt)
-            fold = opt.get('datatype', 'train').split(':')[0]
+            fold = opt.get("datatype", "train").split(":")[0]
             self._setup_data(fold)
 
         self.num_exs = sum(len(d) for d in self.data)
@@ -78,19 +78,19 @@ class MultiturnTeacher(FixedDialogTeacher):
 
     def _setup_data(self, fold):
         self.data = []
-        fpath = os.path.join(self.opt['datapath'], 'Ubuntu', fold + '.csv')
-        print('loading: ' + fpath)
-        with PathManager.open(fpath, 'r', newline='') as read:
+        fpath = os.path.join(self.opt["datapath"], "Ubuntu", fold + ".csv")
+        print("loading: " + fpath)
+        with PathManager.open(fpath, "r", newline="") as read:
             csv_read = csv.reader(read)
             next(csv_read)  # eat header
 
             for line in csv_read:
-                fields = line[0].strip().split('__eou__ __eot__')
+                fields = line[0].strip().split("__eou__ __eot__")
                 fields.append(line[1].strip())
                 dialog = []
                 for field in fields:
-                    if field != '':
-                        dialog.append(field.replace('__eou__', '.').strip())
+                    if field != "":
+                        dialog.append(field.replace("__eou__", ".").strip())
                 if len(dialog) > 2:
                     self.data.append(dialog)
 
@@ -105,12 +105,12 @@ class MultiturnTeacher(FixedDialogTeacher):
 
         episode_done = 1 + speaker_id + 2 * entry_idx >= len(full_eps) - 2
 
-        action = {'text': their_turn, 'labels': [my_turn], 'episode_done': episode_done}
+        action = {"text": their_turn, "labels": [my_turn], "episode_done": episode_done}
         return action
 
     def share(self):
         shared = super().share()
-        shared['data'] = self.data
+        shared["data"] = self.data
         return shared
 
 

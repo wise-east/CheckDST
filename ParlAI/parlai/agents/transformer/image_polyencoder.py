@@ -39,13 +39,13 @@ class ImagePolyencoderAgent(PolyencoderAgent, TorchImageAgent):
         """
         PolyencoderAgent.add_cmdline_args(parser, partial_opt=partial_opt)
         TorchImageAgent.add_cmdline_args(parser, partial_opt=partial_opt)
-        agent = parser.add_argument_group('ImagePolyencoder Args')
+        agent = parser.add_argument_group("ImagePolyencoder Args")
         agent.add_argument(
-            '--image-combination-mode',
+            "--image-combination-mode",
             type=str,
-            default='prepend',
-            choices=['add', 'append', 'prepend'],
-            help='How to combine image embedding (if used) with context embedding',
+            default="prepend",
+            choices=["add", "append", "prepend"],
+            help="How to combine image embedding (if used) with context embedding",
         )
         # TODO: more thoroughly test out whether one of these choices is best and add a
         #  'recommended' arg here. 'add' and 'prepend' seem to be roughly similar in
@@ -89,7 +89,7 @@ class ImagePolyencoderAgent(PolyencoderAgent, TorchImageAgent):
             else:
                 if orig_features is not None:
                     warn_once(
-                        'Unsupported image feature format. Image features will be ignored!'
+                        "Unsupported image feature format. Image features will be ignored!"
                     )
                 processed_features_list.append(processed_zero_features)
 
@@ -114,20 +114,20 @@ class ImagePolyencoderAgent(PolyencoderAgent, TorchImageAgent):
         """
         Override PolyencoderAgent's context inputs into the model.
         """
-        return {'ctxt_tokens': batch.text_vec, 'ctxt_image': batch.image}
+        return {"ctxt_tokens": batch.text_vec, "ctxt_image": batch.image}
 
     def load_state_dict(self, state_dict):
         """
         Override to account for weights used for image features.
         """
-        for tensor in ['dummy_image_enc', 'ones_mask']:
-            key = f'encoder_ctxt.{tensor}'
+        for tensor in ["dummy_image_enc", "ones_mask"]:
+            key = f"encoder_ctxt.{tensor}"
             if hasattr(self.model.encoder_ctxt, tensor) and key not in state_dict:
                 state_dict[key] = getattr(self.model.encoder_ctxt, tensor)
-        if hasattr(self.model.encoder_ctxt, 'image_encoder'):
+        if hasattr(self.model.encoder_ctxt, "image_encoder"):
             for layer_idx, layer in enumerate(self.model.encoder_ctxt.image_encoder):
-                for tensor in ['weight', 'bias']:
-                    key = f'encoder_ctxt.image_encoder.{layer_idx}.{tensor}'
+                for tensor in ["weight", "bias"]:
+                    key = f"encoder_ctxt.image_encoder.{layer_idx}.{tensor}"
                     if hasattr(layer, tensor) and key not in state_dict:
                         state_dict[key] = getattr(layer, tensor)
         super().load_state_dict(state_dict)
@@ -160,19 +160,19 @@ class ImagePolyencoderModule(PolyEncoderModule):
         """
         if for_context:
             if reduction_type is not None:
-                raise NotImplementedError('No encoder output reductions supported!')
+                raise NotImplementedError("No encoder output reductions supported!")
             embeddings = self._get_embeddings(
-                dict_=dict_, null_idx=null_idx, embedding_size=opt['embedding_size']
+                dict_=dict_, null_idx=null_idx, embedding_size=opt["embedding_size"]
             )
             return ContextWithImageEncoder(
                 opt=opt,
                 vocabulary_size=len(dict_),
                 embedding=embeddings,
                 padding_idx=null_idx,
-                image_encoder_num_layers=opt['image_encoder_num_layers'],
-                image_features_dim=opt['image_features_dim'],
-                image_combination_mode=opt['image_combination_mode'],
-                n_image_tokens=opt['n_image_tokens'],
+                image_encoder_num_layers=opt["image_encoder_num_layers"],
+                image_features_dim=opt["image_features_dim"],
+                image_combination_mode=opt["image_combination_mode"],
+                n_image_tokens=opt["n_image_tokens"],
             )
         else:
             # The candidate encoder is the same as for PolyEncoderModule
@@ -188,17 +188,17 @@ class ImagePolyencoderModule(PolyEncoderModule):
         """
         Override PolyEncoderModule's inputs into the context encoder.
         """
-        assert set(ctxt_inputs.keys()) == {'ctxt_tokens', 'ctxt_image'}
+        assert set(ctxt_inputs.keys()) == {"ctxt_tokens", "ctxt_image"}
         return {
-            'src_tokens': ctxt_inputs['ctxt_tokens'],
-            'image_features': ctxt_inputs['ctxt_image'],
+            "src_tokens": ctxt_inputs["ctxt_tokens"],
+            "image_features": ctxt_inputs["ctxt_image"],
         }
 
     def _get_context_batch_size(self, **ctxt_inputs: torch.Tensor) -> int:
         """
         Return the batch size of the context.
         """
-        if ctxt_inputs['ctxt_tokens'] is not None:
-            return ctxt_inputs['ctxt_tokens'].size(0)
+        if ctxt_inputs["ctxt_tokens"] is not None:
+            return ctxt_inputs["ctxt_tokens"].size(0)
         else:
-            return ctxt_inputs['ctxt_image'].size(0)
+            return ctxt_inputs["ctxt_image"].size(0)

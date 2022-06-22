@@ -15,16 +15,16 @@ from parlai.core.script import register_script
 from parlai.scripts.eval_model import EvalModel
 
 
-@register_script('convert_to_json', hidden=True)
+@register_script("convert_to_json", hidden=True)
 class DumpDataToConversations(EvalModel):
     @classmethod
     def setup_args(cls):
         parser = EvalModel.setup_args()
-        parser.description = 'Convert data to json format'
+        parser.description = "Convert data to json format"
         parser.set_defaults(model="repeat_label")
         parser.set_defaults(world_logs="tmp")
         return parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     DumpDataToConversations.main()

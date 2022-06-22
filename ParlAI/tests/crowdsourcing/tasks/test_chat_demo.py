@@ -309,7 +309,7 @@ AGENT_MESSAGES = [
     ("Hi! How are you?", "I'm pretty good - you?"),
     ("I'm okay - how was your weekend?", "I was fine. Did you do anything fun?"),
 ]
-AGENT_DISPLAY_IDS = ('Chat Agent 1', 'Chat Agent 2')
+AGENT_DISPLAY_IDS = ("Chat Agent 1", "Chat Agent 2")
 FORM_MESSAGES = (
     "How much did you enjoy talking to this user?: A lot\nDo you think this user is a bot or a human?: Definitely a human\nEnter any comment here: Yes\n",
     "How much did you enjoy talking to this user?: Not at all\nDo you think this user is a bot or a human?: Definitely a bot\nEnter any comment here: No\n",
@@ -338,7 +338,7 @@ FORM_RESPONSES = (
         {"question": "Enter any comment here", "response": "No"},
     ],
 )
-FORM_TASK_DATA = [{'form_responses': responses} for responses in FORM_RESPONSES]
+FORM_TASK_DATA = [{"form_responses": responses} for responses in FORM_RESPONSES]
 # TODO: move this all to a YAML file given the upcoming pytest regressions framework
 
 
@@ -354,8 +354,8 @@ try:
 
     TASK_DIRECTORY = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(mephisto.__file__))),
-        'examples',
-        'parlai_chat_task_demo',
+        "examples",
+        "parlai_chat_task_demo",
     )
 
     class TestChatDemo(AbstractParlAIChatTest, unittest.TestCase):
@@ -381,15 +381,15 @@ try:
 
             # Set up the config and database
             overrides = [
-                '+mephisto.blueprint.world_file=${task_dir}/demo_worlds.py',
-                '+mephisto.blueprint.task_description_file=${task_dir}/task_description.html',
-                '+mephisto.blueprint.num_conversations=1',
-                '+mephisto.task.allowed_concurrent=0',
-                '+mephisto.task.assignment_duration_in_seconds=600',
-                '+mephisto.task.max_num_concurrent_units=0',
-                '+mephisto.task.maximum_units_per_worker=0',
-                '+num_turns=3',
-                '+turn_timeout=300',
+                "+mephisto.blueprint.world_file=${task_dir}/demo_worlds.py",
+                "+mephisto.blueprint.task_description_file=${task_dir}/task_description.html",
+                "+mephisto.blueprint.num_conversations=1",
+                "+mephisto.task.allowed_concurrent=0",
+                "+mephisto.task.assignment_duration_in_seconds=600",
+                "+mephisto.task.max_num_concurrent_units=0",
+                "+mephisto.task.maximum_units_per_worker=0",
+                "+num_turns=3",
+                "+turn_timeout=300",
             ]
             # TODO: remove all of these params once Hydra 1.1 is released with support
             #  for recursive defaults
@@ -418,7 +418,6 @@ try:
                 form_task_data=FORM_TASK_DATA,
                 expected_states=EXPECTED_STATES,
             )
-
 
 except ImportError:
     pass

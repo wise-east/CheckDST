@@ -13,18 +13,18 @@ import parlai.utils.testing as testing_utils
 
 class TestSelfChat(unittest.TestCase):
     def test_vanilla(self):
-        SelfChat.main(model='fixed_response', fixed_response='hi')
+        SelfChat.main(model="fixed_response", fixed_response="hi")
 
     def test_convai2(self):
         SelfChat.main(
-            task='convai2', model='fixed_response', fixed_response='hi', dt='valid'
+            task="convai2", model="fixed_response", fixed_response="hi", dt="valid"
         )
 
     def test_ed(self):
         SelfChat.main(
-            task='empathetic_dialogues',
-            model='fixed_response',
-            fixed_response='hi',
+            task="empathetic_dialogues",
+            model="fixed_response",
+            fixed_response="hi",
             seed_messages_from_task=True,
         )
 
@@ -32,20 +32,20 @@ class TestSelfChat(unittest.TestCase):
         from parlai.scripts.display_data import DisplayData
 
         with self.assertRaises(RuntimeError):
-            DisplayData.main(task='self_chat')
+            DisplayData.main(task="self_chat")
 
     def test_seed_messages_from_file(self):
         with testing_utils.capture_output() as output:
             with NamedTemporaryFile() as tmpfile:
-                tmpfile.write(b'howdy\nunique message')
+                tmpfile.write(b"howdy\nunique message")
                 tmpfile.seek(0)
                 SelfChat.main(
-                    model='fixed_response',
-                    fixed_response='hi',
+                    model="fixed_response",
+                    fixed_response="hi",
                     seed_messages_from_file=tmpfile.name,
                     num_self_chats=10,
                     selfchat_max_turns=2,
                 )
             output = output.getvalue()
-        assert 'howdy' in output
-        assert 'unique message' in output
+        assert "howdy" in output
+        assert "unique message" in output

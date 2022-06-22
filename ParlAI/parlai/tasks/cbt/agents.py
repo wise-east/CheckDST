@@ -13,45 +13,45 @@ import os
 def _path(task, opt):
     # Build the data if it doesn't exist.
     build(opt)
-    suffix = ''
-    dt = opt['datatype'].split(':')[0]
-    if dt == 'train':
-        suffix = 'train'
-    elif dt == 'test':
-        suffix = 'test_2500ex'
-    elif dt == 'valid':
-        suffix = 'valid_2000ex'
+    suffix = ""
+    dt = opt["datatype"].split(":")[0]
+    if dt == "train":
+        suffix = "train"
+    elif dt == "test":
+        suffix = "test_2500ex"
+    elif dt == "valid":
+        suffix = "valid_2000ex"
 
     return os.path.join(
-        opt['datapath'], 'CBT', 'CBTest', 'data', task + '_' + suffix + '.txt'
+        opt["datapath"], "CBT", "CBTest", "data", task + "_" + suffix + ".txt"
     )
 
 
 class NETeacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
-        opt['datafile'] = _path('cbtest_NE', opt)
-        opt['cloze'] = True
+        opt["datafile"] = _path("cbtest_NE", opt)
+        opt["cloze"] = True
         super().__init__(opt, shared)
 
 
 class CNTeacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
-        opt['datafile'] = _path('cbtest_CN', opt)
-        opt['cloze'] = True
+        opt["datafile"] = _path("cbtest_CN", opt)
+        opt["cloze"] = True
         super().__init__(opt, shared)
 
 
 class VTeacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
-        opt['datafile'] = _path('cbtest_V', opt)
-        opt['cloze'] = True
+        opt["datafile"] = _path("cbtest_V", opt)
+        opt["cloze"] = True
         super().__init__(opt, shared)
 
 
 class PTeacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
-        opt['datafile'] = _path('cbtest_P', opt)
-        opt['cloze'] = True
+        opt["datafile"] = _path("cbtest_P", opt)
+        opt["cloze"] = True
         super().__init__(opt, shared)
 
 
@@ -59,5 +59,5 @@ class PTeacher(FbDeprecatedDialogTeacher):
 class DefaultTeacher(MultiTaskTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        opt['task'] = 'cbt:NE,cbt:CN,cbt:V,cbt:P'
+        opt["task"] = "cbt:NE,cbt:CN,cbt:V,cbt:P"
         super().__init__(opt, shared)

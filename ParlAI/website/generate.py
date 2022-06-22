@@ -14,12 +14,12 @@ import markdown
 import shutil
 from mdx_gfm import PartialGithubFlavoredMarkdownExtension
 
-GIT_ROOT_LEVEL = git.Git().rev_parse('--show-toplevel')
-WEBSITE_ROOT = os.path.join(GIT_ROOT_LEVEL, 'website')
-TEMPLATES = os.path.join(WEBSITE_ROOT, 'templates')
-OUT_DIR = os.path.join(WEBSITE_ROOT, 'build')
+GIT_ROOT_LEVEL = git.Git().rev_parse("--show-toplevel")
+WEBSITE_ROOT = os.path.join(GIT_ROOT_LEVEL, "website")
+TEMPLATES = os.path.join(WEBSITE_ROOT, "templates")
+OUT_DIR = os.path.join(WEBSITE_ROOT, "build")
 
-STATIC_FILE_EXTS = {'.css', '.jpg', '.jpeg', '.png', '.json', '.jsonl', '.html', '.md'}
+STATIC_FILE_EXTS = {".css", ".jpg", ".jpeg", ".png", ".json", ".jsonl", ".html", ".md"}
 
 
 def ghmarkdown(source):
@@ -47,79 +47,79 @@ def _write_file(partial_filename, content):
     _mkdirp(os.path.dirname(filename))
 
     print("writing {} bytes to {}".format(len(content), filename))
-    with open(filename, 'w') as f:
+    with open(filename, "w") as f:
         f.write(content)
 
 
 def wrap_base(content, title):
-    template = _read_file(os.path.join(TEMPLATES, 'base.html'))
-    template = template.replace('{{{CONTENT}}}', content)
-    template = template.replace('{{{TITLE}}}', title)
+    template = _read_file(os.path.join(TEMPLATES, "base.html"))
+    template = template.replace("{{{CONTENT}}}", content)
+    template = template.replace("{{{TITLE}}}", title)
     return template
 
 
 def make_errorpage():
-    content = _read_file(os.path.join(TEMPLATES, 'error.html'))
+    content = _read_file(os.path.join(TEMPLATES, "error.html"))
     html = wrap_base(content, "Error")
-    _write_file('error.html', html)
+    _write_file("error.html", html)
 
 
 def make_aboutpage():
-    template = _read_file(os.path.join(TEMPLATES, 'about.html'))
-    readme = _read_file(os.path.join(GIT_ROOT_LEVEL, 'README.md'))
+    template = _read_file(os.path.join(TEMPLATES, "about.html"))
+    readme = _read_file(os.path.join(GIT_ROOT_LEVEL, "README.md"))
     # filter out the circleci badge from the about page
     readme = "\n".join(
         [l for l in readme.split("\n") if not l.startswith("[![CircleCI]")]
     )
     readme_html = ghmarkdown(readme)
     readme_html = readme_html.replace("docs/source/\\", "/docs/")
-    content = template.replace('{{{CONTENT}}}', readme_html)
+    content = template.replace("{{{CONTENT}}}", readme_html)
     html = wrap_base(content, "About | ParlAI")
-    _write_file('about/index.html', html)
+    _write_file("about/index.html", html)
 
 
 def make_homepage():
-    template = _read_file(os.path.join(TEMPLATES, 'home.html'))
+    template = _read_file(os.path.join(TEMPLATES, "home.html"))
     html = wrap_base(template, "ParlAI")
-    _write_file('index.html', html)
+    _write_file("index.html", html)
 
 
 def make_projects_landing():
-    template = _read_file(os.path.join(TEMPLATES, 'project.html'))
-    landing = _read_file(os.path.join(GIT_ROOT_LEVEL, 'projects/README.md'))
+    template = _read_file(os.path.join(TEMPLATES, "project.html"))
+    landing = _read_file(os.path.join(GIT_ROOT_LEVEL, "projects/README.md"))
     landing = landing.replace(
-        'This directory also contains subfolders for some of the projects which are '
-        'housed in the ParlAI repo, others are maintained via external websites. '
-        'Please also refer',
-        'See the [ParlAI projects](https://github.com/facebookresearch/ParlAI/'
-        'tree/main/projects) page on GitHub for more information. Refer',
+        "This directory also contains subfolders for some of the projects which are "
+        "housed in the ParlAI repo, others are maintained via external websites. "
+        "Please also refer",
+        "See the [ParlAI projects](https://github.com/facebookresearch/ParlAI/"
+        "tree/main/projects) page on GitHub for more information. Refer",
     )
-    landing_html = template.replace('{{{CONTENT}}}', ghmarkdown(landing))
+    landing_html = template.replace("{{{CONTENT}}}", ghmarkdown(landing))
     html = wrap_base(landing_html, "Projects | ParlAI")
-    _write_file('projects/index.html', html)
+    _write_file("projects/index.html", html)
 
 
 def make_projects_individual():
-    template = _read_file(os.path.join(TEMPLATES, 'project.html'))
-    projects_dir = os.path.join(GIT_ROOT_LEVEL, 'projects')
+    template = _read_file(os.path.join(TEMPLATES, "project.html"))
+    projects_dir = os.path.join(GIT_ROOT_LEVEL, "projects")
     possible_projects = os.listdir(projects_dir)
     projects = [
         pp
         for pp in possible_projects
-        if os.path.exists(os.path.join(projects_dir, pp, 'README.md'))
+        if os.path.exists(os.path.join(projects_dir, pp, "README.md"))
     ]
     for p in projects:
         project_dir = os.path.join(projects_dir, p)
-        content = _read_file(os.path.join(project_dir, 'README.md'))
-        content_html = template.replace('{{{CONTENT}}}', ghmarkdown(content))
+        content = _read_file(os.path.join(project_dir, "README.md"))
+        content_html = template.replace("{{{CONTENT}}}", ghmarkdown(content))
         content_html = content_html.replace(
             'src="',
             'src="https://raw.githubusercontent.com/facebookresearch/'
-            'ParlAI/main/projects/{}'.format(p + '/' if p else ''),
+            "ParlAI/main/projects/{}".format(p + "/" if p else ""),
         )
         title = p.title().replace("_", " ")
         html = wrap_base(content_html, title)
-        _write_file(os.path.join('projects', p, 'index.html'), html)
+        _write_file(os.path.join("projects", p, "index.html"), html)
 
         # if there are any static files in the project folder, copy them over
         # to the website
@@ -129,7 +129,7 @@ def make_projects_individual():
             if ext in STATIC_FILE_EXTS:
                 src = os.path.join(project_dir, fn)
                 nice_src = os.path.relpath(src, GIT_ROOT_LEVEL)
-                dest = os.path.join(OUT_DIR, 'projects', p, fn)
+                dest = os.path.join(OUT_DIR, "projects", p, fn)
                 nice_dest = os.path.relpath(dest, GIT_ROOT_LEVEL)
                 print(f"Copy {nice_src} -> {nice_dest}")
                 shutil.copyfile(src, dest)
@@ -143,5 +143,5 @@ def main():
     make_projects_individual()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

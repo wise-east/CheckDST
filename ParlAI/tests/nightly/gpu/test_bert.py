@@ -20,8 +20,8 @@ class TestBertModel(unittest.TestCase):
     def test_biencoder(self):
         valid, test = testing_utils.train_model(
             dict(
-                task='integration_tests:overfit',
-                model='bert_ranker/bi_encoder_ranker',
+                task="integration_tests:overfit",
+                model="bert_ranker/bi_encoder_ranker",
                 max_train_steps=500,
                 batchsize=2,
                 candidates="inline",
@@ -30,13 +30,13 @@ class TestBertModel(unittest.TestCase):
                 text_truncate=8,
             )
         )
-        self.assertGreaterEqual(test['accuracy'], 0.5)
+        self.assertGreaterEqual(test["accuracy"], 0.5)
 
     def test_crossencoder(self):
         valid, test = testing_utils.train_model(
             dict(
-                task='integration_tests:overfit',
-                model='bert_ranker/cross_encoder_ranker',
+                task="integration_tests:overfit",
+                model="bert_ranker/cross_encoder_ranker",
                 max_train_steps=500,
                 batchsize=2,
                 learningrate=1e-3,
@@ -46,8 +46,8 @@ class TestBertModel(unittest.TestCase):
                 label_truncate=8,
             )
         )
-        self.assertGreaterEqual(test['accuracy'], 0.8)
+        self.assertGreaterEqual(test["accuracy"], 0.8)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

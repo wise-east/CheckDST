@@ -34,7 +34,7 @@ def _path(opt):
     """
     # ensure data is built
     build(opt)
-    return os.path.join(opt['datapath'], 'taskmaster-1', opt['fn'])
+    return os.path.join(opt["datapath"], "taskmaster-1", opt["fn"])
 
 
 def gen_ep_cheatsheet(convo):
@@ -54,13 +54,13 @@ def gen_ep_cheatsheet(convo):
     # Assumed that length of convo is greater than two due to filtering cond
     for idx in range(1, len(convo)):
         # find first USER with reply
-        if convo[idx - 1]['speaker'] == "USER" and convo[idx]['speaker'] == "ASSISTANT":
+        if convo[idx - 1]["speaker"] == "USER" and convo[idx]["speaker"] == "ASSISTANT":
             if cheatsheet[0] == -1:
                 cheatsheet[0] = idx - 1
             # find last USER with reply
             cheatsheet[1] = idx - 1
         # find first ASSISTANT with reply
-        if convo[idx - 1]['speaker'] == "ASSISTANT" and convo[idx]['speaker'] == "USER":
+        if convo[idx - 1]["speaker"] == "ASSISTANT" and convo[idx]["speaker"] == "USER":
             if cheatsheet[2] == -1:
                 cheatsheet[2] = idx - 1
             # find last ASSISTANT with reply
@@ -108,10 +108,10 @@ def join_speech(utt1, utt2):
     new_utt["index"] = utt1["index"]
     new_utt["text"] = utt1["text"] + "\n" + utt2["text"]
     new_utt["speaker"] = utt1["speaker"]
-    if 'ctr' in utt1:
-        new_utt['ctr'] = utt1['ctr'] + 1
+    if "ctr" in utt1:
+        new_utt["ctr"] = utt1["ctr"] + 1
     else:
-        new_utt['ctr'] = 2
+        new_utt["ctr"] = 2
     return new_utt
 
 
@@ -126,7 +126,7 @@ def smoothen_convo(conversation, opt):
     :param opt:
         options dict, mainly useful for accessing value of exclude_invalid_data
     """
-    dialogue = conversation['utterances']
+    dialogue = conversation["utterances"]
     conversation_stack = []
     for speech in dialogue:
         if (
@@ -140,9 +140,9 @@ def smoothen_convo(conversation, opt):
     corrupt = False
     for speech in conversation_stack:
         if (
-            opt.get('exclude_invalid_data', True)
-            and 'ctr' in speech
-            and speech['ctr'] > 5
+            opt.get("exclude_invalid_data", True)
+            and "ctr" in speech
+            and speech["ctr"] > 5
         ):
             corrupt = True
         processed_conversation += [speech]

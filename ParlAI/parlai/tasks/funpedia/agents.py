@@ -18,19 +18,19 @@ Task for rephrasing sentences from Wikipedia conditioned on a persona.
 
 def _path(opt):
     build(opt)
-    datatype = opt['datatype'].split(':')[0]
+    datatype = opt["datatype"].split(":")[0]
     return os.path.join(
-        opt['datapath'],
-        'rephrase_sentences',
-        'rephrase_sentences_' + datatype + '_0703.txt',
+        opt["datapath"],
+        "rephrase_sentences",
+        "rephrase_sentences_" + datatype + "_0703.txt",
     )
 
 
 def _choose_sentence_path(opt):
     build(opt)
-    datatype = opt['datatype'].split(':')[0]
+    datatype = opt["datatype"].split(":")[0]
     return os.path.join(
-        opt['datapath'], 'rephrase_sentences', 'choose_sentence_' + datatype + '.txt'
+        opt["datapath"], "rephrase_sentences", "choose_sentence_" + datatype + ".txt"
     )
 
 
@@ -65,7 +65,7 @@ class FunpediaTeacher(FixedDialogTeacher):
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
         if shared:
-            self.entries = shared['entries']
+            self.entries = shared["entries"]
         else:
             self.entries = []
             self.datafile = _path(opt)
@@ -75,7 +75,7 @@ class FunpediaTeacher(FixedDialogTeacher):
 
     def share(self):
         shared = super().share()
-        shared['entries'] = self.entries
+        shared["entries"] = self.entries
         return shared
 
     def num_episodes(self):
@@ -86,14 +86,14 @@ class FunpediaTeacher(FixedDialogTeacher):
         return len(self.entries)
 
     def _setup_data(self):
-        title_prefix = '1 passage title: '
+        title_prefix = "1 passage title: "
         title_prefix_len = len(title_prefix)
-        persona_prefix = '2 personality: '
+        persona_prefix = "2 personality: "
         persona_prefix_len = len(persona_prefix)
-        text_prefix = '3 '
+        text_prefix = "3 "
         text_prefix_len = len(text_prefix)
 
-        data_reader = grouper(_strip_reader(self.datafile), 3, '')
+        data_reader = grouper(_strip_reader(self.datafile), 3, "")
 
         for title, persona, text in data_reader:
             if not title:
@@ -112,18 +112,18 @@ class FunpediaTeacher(FixedDialogTeacher):
             passage, label = text.split("\t")
 
             self.entries.append(
-                {'title': title, 'label': label, 'passage': passage, 'persona': persona}
+                {"title": title, "label": label, "passage": passage, "persona": persona}
             )
 
     def get_text(self, entry):
-        return '\n'.join([entry['title'], entry['persona'], entry['passage']])
+        return "\n".join([entry["title"], entry["persona"], entry["passage"]])
 
     def _build_action(self, entry):
         return {
-            'text': self.get_text(entry),
-            'labels': [entry['label']],
-            'reward': 0,
-            'episode_done': True,
+            "text": self.get_text(entry),
+            "labels": [entry["label"]],
+            "reward": 0,
+            "episode_done": True,
         }
 
     def get(self, episode_idx, entry_idx=0):
@@ -137,7 +137,7 @@ class NopersonaTeacher(FunpediaTeacher):
     """
 
     def get_text(self, entry):
-        return entry['title'] + "\n" + entry['passage']
+        return entry["title"] + "\n" + entry["passage"]
 
 
 class LmTeacher(FunpediaTeacher):
@@ -146,7 +146,7 @@ class LmTeacher(FunpediaTeacher):
     """
 
     def get_text(self, entry):
-        return ''
+        return ""
 
 
 class EchoTeacher(FunpediaTeacher):
@@ -159,7 +159,7 @@ class EchoTeacher(FunpediaTeacher):
     def _setup_data(self):
         super()._setup_data()
         for i in range(len(self.entries)):
-            self.entries[i]['label'] = self.entries[i]['passage']
+            self.entries[i]["label"] = self.entries[i]["passage"]
 
 
 class SentencechooseTeacher(FbDeprecatedDialogTeacher):
@@ -171,14 +171,14 @@ class SentencechooseTeacher(FbDeprecatedDialogTeacher):
 
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        opt['datafile'] = _choose_sentence_path(opt)
+        opt["datafile"] = _choose_sentence_path(opt)
         super().__init__(opt, shared)
 
     def next_example(self):
         action, epoch_done = super().next_example()
-        action.force_set('label_candidates', list(action['label_candidates']))
-        if '' in action['label_candidates']:
-            action['label_candidates'].remove('')
+        action.force_set("label_candidates", list(action["label_candidates"]))
+        if "" in action["label_candidates"]:
+            action["label_candidates"].remove("")
         return action, epoch_done
 
 

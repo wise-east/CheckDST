@@ -13,15 +13,15 @@ import os.path
 from parlai.core.build_data import built, download as download_path, mark_done
 import parlai.utils.logging as logger
 
-path = 'https://dl.fbaipublicfiles.com/dpr/wikipedia_split/psgs_w100.tsv.gz'
+path = "https://dl.fbaipublicfiles.com/dpr/wikipedia_split/psgs_w100.tsv.gz"
 
 
 def download(datapath):
-    dpath = os.path.join(datapath, 'models/hallucination/wiki_passages')
-    fname = 'psgs_w100.tsv.gz'
+    dpath = os.path.join(datapath, "models/hallucination/wiki_passages")
+    fname = "psgs_w100.tsv.gz"
     gzip_file = os.path.join(dpath, fname)
-    new_file = os.path.join(dpath, fname.replace('.gz', ''))
-    version = 'v1.0'
+    new_file = os.path.join(dpath, fname.replace(".gz", ""))
+    version = "v1.0"
     if not built(dpath, version):
         os.makedirs(dpath)
         download_path(path, dpath, fname)

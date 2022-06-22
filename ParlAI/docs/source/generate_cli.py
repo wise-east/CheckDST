@@ -17,7 +17,7 @@ def render_script(fout, key, registration):
     if description:
         fout.write(f"__Short description:__ {description}\n\n")
     if registration.aliases:
-        aliases = ", ".join(f'`{a}`' for a in registration.aliases)
+        aliases = ", ".join(f"`{a}`" for a in registration.aliases)
         fout.write(f"__Aliases:__ {aliases}\n")
 
     mod = importlib.import_module(registration.klass.__module__)
@@ -29,14 +29,14 @@ def render_script(fout, key, registration):
 
     actions = []
     for action in script_parser._actions:
-        if hasattr(action, 'hidden') and action.hidden:
+        if hasattr(action, "hidden") and action.hidden:
             # some options are marked hidden
             continue
         if action.dest == argparse.SUPPRESS:
             continue
-        if action.dest == 'help' or action.dest == 'helpall':
+        if action.dest == "help" or action.dest == "helpall":
             continue
-        action_strings = ",  ".join(f'`{a}`' for a in action.option_strings)
+        action_strings = ",  ".join(f"`{a}`" for a in action.option_strings)
         if not action_strings:
             continue
         description = []
@@ -44,15 +44,15 @@ def render_script(fout, key, registration):
             h = action.help
             if not h[0].isupper():
                 h = h[0].upper() + h[1:]
-            h = h.replace("%(default)s", f'`{action.default}`')
+            h = h.replace("%(default)s", f"`{action.default}`")
             description += [h]
         # list choices if there are any
         if action.choices:
-            description += ["Choices: " + ", ".join(f'`{c}`' for c in action.choices)]
+            description += ["Choices: " + ", ".join(f"`{c}`" for c in action.choices)]
         default_value = ""
         if action.default and action.default != argparse.SUPPRESS:
             default_value += f"Default: `{action.default}`.  "
-        if hasattr(action, 'recommended') and action.recommended:
+        if hasattr(action, "recommended") and action.recommended:
             default_value += f"Recommended: `{action.recommended}`. "
 
         # special escape for a few args which use a literal newline as their default
@@ -72,7 +72,7 @@ def render_script(fout, key, registration):
     fout.write("| ------- | --------- |\n")
     for action, description in actions:
         fout.write(f"| {action} | {description} |\n")
-    fout.write('\n\n')
+    fout.write("\n\n")
 
 
 def main():
@@ -99,5 +99,5 @@ def main():
             render_script(fout, key, registration)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

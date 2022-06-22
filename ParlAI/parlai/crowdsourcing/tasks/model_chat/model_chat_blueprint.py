@@ -40,8 +40,8 @@ def get_task_path():
     return os.path.dirname(os.path.realpath(__file__))
 
 
-BLUEPRINT_TYPE = 'model_chat_blueprint'
-IMAGE_CHAT_BLUEPRINT_TYPE = 'model_image_chat_blueprint'
+BLUEPRINT_TYPE = "model_chat_blueprint"
+IMAGE_CHAT_BLUEPRINT_TYPE = "model_image_chat_blueprint"
 
 
 @dataclass
@@ -72,18 +72,18 @@ class SharedModelImageChatTaskState(SharedBaseModelChatTaskState):
 class BaseModelChatBlueprintArgs(ParlAIChatBlueprintArgs):
     _group: str = field(
         default="BaseModelChatBlueprint",
-        metadata={'help': "Args that are common to all model-chat tasks"},
+        metadata={"help": "Args that are common to all model-chat tasks"},
     )
     custom_source_dir: str = field(
-        default=os.path.join(get_task_path(), 'frontend'),
+        default=os.path.join(get_task_path(), "frontend"),
         metadata={"help": "Path to frontend code"},
     )
-    num_turns: int = field(default=6, metadata={"help": 'minimum number of turns'})
+    num_turns: int = field(default=6, metadata={"help": "minimum number of turns"})
     random_seed: int = field(
-        default=42, metadata={"help": 'Seed for random operations'}
+        default=42, metadata={"help": "Seed for random operations"}
     )
     annotation_question: str = field(
-        default='Does this comment require any annotations? (Check all that apply)',
+        default="Does this comment require any annotations? (Check all that apply)",
         metadata={
             "help": "The string displayed above the checkboxes for each annotation in the task."
         },
@@ -95,7 +95,7 @@ class BaseModelChatBlueprintArgs(ParlAIChatBlueprintArgs):
     task_model_parallel: bool = field(
         default=True,
         metadata={
-            "help": 'Whether to load models to be used with model_parallel True.'
+            "help": "Whether to load models to be used with model_parallel True."
         },
     )
     max_resp_time: int = field(
@@ -116,7 +116,7 @@ class BaseModelChatBlueprintArgs(ParlAIChatBlueprintArgs):
         metadata={"help": "Set seed for pulling the context info (for testing)"},
     )
     task_config_path: str = field(
-        default=os.path.join(get_task_path(), 'task_config'),
+        default=os.path.join(get_task_path(), "task_config"),
         metadata={"help": "Base path to pull task configuration information"},
     )
     task_description_file: str = field(
@@ -136,7 +136,7 @@ class BaseModelChatBlueprintArgs(ParlAIChatBlueprintArgs):
         },
     )
     final_rating_question: str = field(
-        default='Please rate your partner on a scale of 1-5.',
+        default="Please rate your partner on a scale of 1-5.",
         metadata={"help": "Text to show when asking worker to make their final rating"},
     )
     max_concurrent_responses: int = field(
@@ -188,11 +188,11 @@ class BaseModelChatBlueprint(ParlAIChatBlueprint, ABC):
             full_path
         ), f"Target left pane text path {full_path} doesn't exist"
 
-        if args.blueprint.get("chat_data_folder") == '':
-            raise ValueError('Must provide a valid chat data folder')
-        assert '~' not in args.blueprint.chat_data_folder, (
+        if args.blueprint.get("chat_data_folder") == "":
+            raise ValueError("Must provide a valid chat data folder")
+        assert "~" not in args.blueprint.chat_data_folder, (
             f'"~" can\'t currently be parsed in the chat data folder path '
-            f'{args.blueprint.chat_data_folder}'
+            f"{args.blueprint.chat_data_folder}"
         )
         # Currently Hydra overrides the tilde key at lower levels as described here: https://hydra.cc/docs/next/advanced/override_grammar/basic/#grammar
         # Thus the TILDE key cannot be used in replacement for $HOME variable
@@ -236,21 +236,21 @@ class BaseModelChatBlueprint(ParlAIChatBlueprint, ABC):
 
         # Move shared state into the world opt, so that it can be used by the world
         shared_state.onboarding_world_opt.update(
-            {'skip_onboarding': self.annotations_config is None}
+            {"skip_onboarding": self.annotations_config is None}
         )
         # The onboarding checks how well workers annotate conversations, so it should be
         # skipped if we are not annotating
         shared_state.world_opt.update(
             {
-                'block_qualification': args.blueprint.block_qualification,
-                'annotations_config': self.annotations_config,
-                'semaphore': semaphore,
-                'shared_bot_agents': shared_state.shared_models,
-                'num_turns': args.blueprint.num_turns,
-                'max_resp_time': args.blueprint.max_resp_time,
-                'is_sandbox': args.provider.requester_name == 'MOCK_REQUESTER',
-                'check_acceptability': args.blueprint.check_acceptability,
-                'chat_data_folder': args.blueprint.chat_data_folder,
+                "block_qualification": args.blueprint.block_qualification,
+                "annotations_config": self.annotations_config,
+                "semaphore": semaphore,
+                "shared_bot_agents": shared_state.shared_models,
+                "num_turns": args.blueprint.num_turns,
+                "max_resp_time": args.blueprint.max_resp_time,
+                "is_sandbox": args.provider.requester_name == "MOCK_REQUESTER",
+                "check_acceptability": args.blueprint.check_acceptability,
+                "chat_data_folder": args.blueprint.chat_data_folder,
             }
         )
 
@@ -271,7 +271,7 @@ class BaseModelChatBlueprint(ParlAIChatBlueprint, ABC):
         Specifies what options within a task_config should be forwarded to the client
         for use by the task's frontend.
         """
-        if self.args.blueprint.get('annotations_config_path', '') != '':
+        if self.args.blueprint.get("annotations_config_path", "") != "":
             with open(
                 self.args.blueprint.annotations_config_path, "r", encoding="utf-8-sig"
             ) as f:
@@ -282,10 +282,10 @@ class BaseModelChatBlueprint(ParlAIChatBlueprint, ABC):
         return {
             "min_num_turns": self.args.blueprint.num_turns,
             "task_description": self.full_task_description,
-            "task_title": self.args.task.get('task_title', None),
+            "task_title": self.args.task.get("task_title", None),
             "annotation_question": self.args.blueprint.annotation_question,
             "annotation_buckets": annotation_buckets,
-            "onboarding_data": getattr(self, 'onboard_task_data', None),
+            "onboarding_data": getattr(self, "onboard_task_data", None),
             "left_pane_text": self.left_pane_text,
             "frame_height": 650,
             "final_rating_question": self.args.blueprint.final_rating_question,
@@ -299,16 +299,16 @@ class ModelChatBlueprintArgs(BaseModelChatBlueprintArgs):
     _group: str = field(
         default="ModelChatBlueprint",
         metadata={
-            'help': "This task runs conversations between a human and one of a set of "
+            "help": "This task runs conversations between a human and one of a set of "
             "provided models, asking workers to evaluate individual turns and "
             "the overall model quality."
         },
     )
     conversation_start_mode: str = field(
-        default='hi',
+        default="hi",
         metadata={
             "help": 'Set to "hi" to show "Hi!" at the beginning of the conversation, or '
-            'set to a task name to specify a custom context'
+            "set to a task name to specify a custom context"
         },
     )
     include_persona: bool = field(
@@ -330,7 +330,7 @@ class ModelChatBlueprintArgs(BaseModelChatBlueprintArgs):
         },
     )
     world_file: str = field(
-        default=os.path.join(get_task_path(), 'worlds.py'),
+        default=os.path.join(get_task_path(), "worlds.py"),
         metadata={"help": "Path to file containing parlai world"},
     )
 
@@ -362,16 +362,16 @@ class ModelChatBlueprint(BaseModelChatBlueprint):
             or len(shared_state.conversations_needed) == 0
         ):
             assert (
-                args.blueprint.get('conversations_needed_string', None) is not None
+                args.blueprint.get("conversations_needed_string", None) is not None
             ), (
                 "Must provide a string of needed conversations per model if not providing "
                 "a conversations needed dict"
             )
             try:
                 conversations_needed = {}
-                parts = args.blueprint.conversations_needed_string.split(',')
+                parts = args.blueprint.conversations_needed_string.split(",")
                 for part in parts:
-                    model_name, num_string = part.split(':')
+                    model_name, num_string = part.split(":")
                     conversations_needed[model_name] = int(num_string)
             except Exception as e:
                 raise Exception(
@@ -429,11 +429,11 @@ class ModelChatBlueprint(BaseModelChatBlueprint):
             args.blueprint.include_persona
             # 'hi' mode does not use a context generator and instead just displays "Hi!"
             # at the start of the conversation
-            or args.blueprint.conversation_start_mode != 'hi'
+            or args.blueprint.conversation_start_mode != "hi"
         ):
-            if args.blueprint.conversation_start_mode == 'hi':
+            if args.blueprint.conversation_start_mode == "hi":
                 # Default to using the context from BlendedSkillTalk
-                task = 'blended_skill_talk'
+                task = "blended_skill_talk"
             else:
                 task = args.blueprint.conversation_start_mode
             context_generator = get_context_generator(
@@ -450,10 +450,10 @@ class ModelChatBlueprint(BaseModelChatBlueprint):
         # can be used by the worlds
         shared_state.onboarding_world_opt.update(
             {
-                'onboard_statistics': shared_state.onboard_statistics,
-                'statistics_condition': statistics_condition,
-                'max_onboard_time': args.blueprint.max_onboard_time,
-                'onboard_task_data': self.onboard_task_data,
+                "onboard_statistics": shared_state.onboard_statistics,
+                "statistics_condition": statistics_condition,
+                "max_onboard_time": args.blueprint.max_onboard_time,
+                "onboard_task_data": self.onboard_task_data,
                 "onboarding_qualification": args.blueprint.get(
                     "onboarding_qualification"
                 ),
@@ -461,12 +461,12 @@ class ModelChatBlueprint(BaseModelChatBlueprint):
         )
         shared_state.world_opt.update(
             {
-                'conversations_needed': conversations_needed,
-                'run_statistics': shared_state.run_statistics,
-                'context_generator': context_generator,
-                'statistics_condition': statistics_condition,
-                'conversation_start_mode': args.blueprint.conversation_start_mode,
-                'include_persona': args.blueprint.include_persona,
+                "conversations_needed": conversations_needed,
+                "run_statistics": shared_state.run_statistics,
+                "context_generator": context_generator,
+                "statistics_condition": statistics_condition,
+                "conversation_start_mode": args.blueprint.conversation_start_mode,
+                "include_persona": args.blueprint.include_persona,
             }
         )
 
@@ -477,9 +477,9 @@ class ModelChatBlueprint(BaseModelChatBlueprint):
 
         conversations_needed_string = args.blueprint.conversations_needed_string
         conversations_needed = {}
-        parts = conversations_needed_string.split(',')
+        parts = conversations_needed_string.split(",")
         for part in parts:
-            model_name, num_string = part.split(':')
+            model_name, num_string = part.split(":")
             conversations_needed[model_name] = int(num_string)
 
         return conversations_needed
@@ -501,7 +501,7 @@ class ModelImageChatBlueprintArgs(BaseModelChatBlueprintArgs):
     _group: str = field(
         default="ModelImageChatBlueprint",
         metadata={
-            'help': "This task runs conversations between a human and one of a set of "
+            "help": "This task runs conversations between a human and one of a set of "
             "provided models, asking workers chat about a provided image."
         },
     )
@@ -518,16 +518,16 @@ class ModelImageChatBlueprintArgs(BaseModelChatBlueprintArgs):
         },
     )
     num_conversations: int = field(
-        default=10, metadata={'help': 'The number of conversations to collect'}
+        default=10, metadata={"help": "The number of conversations to collect"}
     )
     stack_folder: str = field(
-        default=os.path.join(get_task_path(), 'image_stack'),
+        default=os.path.join(get_task_path(), "image_stack"),
         metadata={
-            "help": 'Folder in which to save backups of the stack of which image-and-model combinations have had HITs launched'
+            "help": "Folder in which to save backups of the stack of which image-and-model combinations have had HITs launched"
         },
     )
     world_file: str = field(
-        default=os.path.join(get_task_path(), 'worlds_image_chat.py'),
+        default=os.path.join(get_task_path(), "worlds_image_chat.py"),
         metadata={"help": "Path to file containing ParlAI world for image chat"},
     )
 
@@ -568,23 +568,23 @@ class ModelImageChatBlueprint(BaseModelChatBlueprint):
 
         super().__init__(task_run=task_run, args=args, shared_state=shared_state)
 
-        with open(args.blueprint.image_context_path, 'rb') as f:
+        with open(args.blueprint.image_context_path, "rb") as f:
             shared_state.image_contexts = pickle.load(f)
 
         # Create the stack to keep track of how many workers have seen which
         # combinations of images and models
         image_opt = {
-            'evals_per_image_model_combo': args.blueprint.evals_per_image_model_combo,
-            'num_images': len(shared_state.image_contexts),
-            'models': list(shared_state.shared_models.keys()),
-            'stack_folder': args.blueprint.stack_folder,
+            "evals_per_image_model_combo": args.blueprint.evals_per_image_model_combo,
+            "num_images": len(shared_state.image_contexts),
+            "models": list(shared_state.shared_models.keys()),
+            "stack_folder": args.blueprint.stack_folder,
         }
         shared_state.image_stack = ImageStack(image_opt)
 
         shared_state.world_opt.update(
             {
-                'image_contexts': shared_state.image_contexts,
-                'image_stack': shared_state.image_stack,
+                "image_contexts": shared_state.image_contexts,
+                "image_stack": shared_state.image_stack,
             }
         )
 

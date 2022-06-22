@@ -16,8 +16,8 @@ def _path(opt):
     build(opt)
 
     # set up path to data (specific to each dataset)
-    jsons_path = os.path.join(opt['datapath'], 'multiwoz_v20', 'MULTIWOZ2 2')
-    conversations_path = os.path.join(jsons_path, 'data.json')
+    jsons_path = os.path.join(opt["datapath"], "multiwoz_v20", "MULTIWOZ2 2")
+    conversations_path = os.path.join(jsons_path, "data.json")
     return conversations_path, jsons_path
 
 
@@ -44,23 +44,23 @@ class MultiWozTeacher(FixedDialogTeacher):
 
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
-        opt['datafile'], jsons_path = _path(opt)
-        self._setup_data(opt['datafile'], jsons_path)
-        self.id = 'multiwoz_v20'
+        opt["datafile"], jsons_path = _path(opt)
+        self._setup_data(opt["datafile"], jsons_path)
+        self.id = "multiwoz_v20"
         self.reset()
 
     def _setup_data(self, data_path, jsons_path):
-        print('loading: ' + data_path)
+        print("loading: " + data_path)
         with PathManager.open(data_path) as data_file:
             self.messages = json.load(data_file)
 
-        test_path = os.path.join(jsons_path, 'testListFile.json')
-        valid_path = os.path.join(jsons_path, 'valListFile.json')
-        if self.datatype.startswith('test'):
+        test_path = os.path.join(jsons_path, "testListFile.json")
+        valid_path = os.path.join(jsons_path, "valListFile.json")
+        if self.datatype.startswith("test"):
             with PathManager.open(test_path) as f:
                 test_data = {line.strip(): self.messages[line.strip()] for line in f}
                 self.messages = test_data
-        elif self.datatype.startswith('valid'):
+        elif self.datatype.startswith("valid"):
             with PathManager.open(valid_path) as f:
                 valid_data = {line.strip(): self.messages[line.strip()] for line in f}
                 self.messages = valid_data
@@ -78,7 +78,7 @@ class MultiWozTeacher(FixedDialogTeacher):
     def num_examples(self):
         examples = 0
         for data in self.messages:
-            examples += len(data['log']) // 2
+            examples += len(data["log"]) // 2
         return examples
 
     def num_episodes(self):
@@ -86,13 +86,13 @@ class MultiWozTeacher(FixedDialogTeacher):
 
     def get(self, episode_idx, entry_idx=0):
         log_idx = entry_idx * 2
-        entry = self.messages[episode_idx]['log'][log_idx]['text']
-        episode_done = log_idx == len(self.messages[episode_idx]['log']) - 2
+        entry = self.messages[episode_idx]["log"][log_idx]["text"]
+        episode_done = log_idx == len(self.messages[episode_idx]["log"]) - 2
         action = {
-            'id': self.id,
-            'text': entry,
-            'episode_done': episode_done,
-            'labels': [self.messages[episode_idx]['log'][log_idx + 1]['text']],
+            "id": self.id,
+            "text": entry,
+            "episode_done": episode_done,
+            "labels": [self.messages[episode_idx]["log"][log_idx + 1]["text"]],
         }
         return action
 

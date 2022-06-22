@@ -15,7 +15,7 @@ class TestWrapper(unittest.TestCase):
     def test_label_to_text_teacher(self):
 
         # Set up regular teacher
-        kwargs = {'task': 'integration_tests:multiturn'}
+        kwargs = {"task": "integration_tests:multiturn"}
         parser = setup_args()
         parser.set_defaults(**kwargs)
         opt = parser.parse_args([])
@@ -24,8 +24,8 @@ class TestWrapper(unittest.TestCase):
 
         # Set up label-to-text teacher
         kwargs = {
-            'task': 'wrapper:labelToTextTeacher',
-            'wrapper_task': 'integration_tests:multiturn',
+            "task": "wrapper:labelToTextTeacher",
+            "wrapper_task": "integration_tests:multiturn",
         }
         parser = setup_args()
         parser.set_defaults(**kwargs)
@@ -40,11 +40,11 @@ class TestWrapper(unittest.TestCase):
             label_to_text_world.parley()
             label_to_text_example = label_to_text_world.get_acts()[0]
             self.assertEqual(
-                label_to_text_example['text'], regular_example['labels'][0]
+                label_to_text_example["text"], regular_example["labels"][0]
             )
-            self.assertEqual(label_to_text_example['labels'], [''])
+            self.assertEqual(label_to_text_example["labels"], [""])
             num_examples += 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

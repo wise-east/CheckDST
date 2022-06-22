@@ -11,19 +11,19 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/md_gender/gend_multiclass_10072020.tgz',
-        'gend_multiclass_10072020.tgz',
-        'c2c03257c53497b9e453600201fc7245b55dec1d98965093b4657fdb54822e9d',
+        "http://parl.ai/downloads/md_gender/gend_multiclass_10072020.tgz",
+        "gend_multiclass_10072020.tgz",
+        "c2c03257c53497b9e453600201fc7245b55dec1d98965093b4657fdb54822e9d",
     )
 ]
 
 
 def build(opt):
-    version = 'v1.0'
-    dpath = os.path.join(opt['datapath'], 'md_gender')
+    version = "v1.0"
+    dpath = os.path.join(opt["datapath"], "md_gender")
 
     if not build_data.built(dpath, version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

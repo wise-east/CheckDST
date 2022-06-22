@@ -40,11 +40,11 @@ class WebsocketManager(ChatServiceManager):
         """
         super().__init__(opt)
         self.opt = opt
-        self.port = opt.get('port')
+        self.port = opt.get("port")
         self.subs = {}
 
         self.app = None
-        self.debug = opt.get('is_debug', False)
+        self.debug = opt.get("is_debug", False)
 
         self.message_sender = WebsocketManager.MessageSender()
 
@@ -54,7 +54,7 @@ class WebsocketManager(ChatServiceManager):
         self._complete_setup()
 
     def parse_additional_args(self, opt):
-        self.should_load_model = self.config['additional_args'].get('load_model', True)
+        self.should_load_model = self.config["additional_args"].get("load_model", True)
 
     def _complete_setup(self):
         """
@@ -70,18 +70,18 @@ class WebsocketManager(ChatServiceManager):
         """
         Load model if necessary.
         """
-        if 'models' in self.opt and self.should_load_model:
+        if "models" in self.opt and self.should_load_model:
             model_params = {}
             model_info = {}
-            for model in self.opt['models']:
-                model_opt = self.opt['models'][model]
-                override = model_opt.get('override', {})
+            for model in self.opt["models"]:
+                model_opt = self.opt["models"][model]
+                override = model_opt.get("override", {})
                 if type(override) is list:
-                    model_opt['override'] = override[0]
+                    model_opt["override"] = override[0]
                 model_params[model] = create_agent(model_opt).share()
-                model_info[model] = {'override': override}
-            self.runner_opt['model_info'] = model_info
-            self.runner_opt['shared_bot_params'] = model_params
+                model_info[model] = {"override": override}
+            self.runner_opt["model_info"] = model_info
+            self.runner_opt["shared_bot_params"] = model_params
 
     def _handle_message_read(self, event):
         """
@@ -110,11 +110,11 @@ class WebsocketManager(ChatServiceManager):
                 needed_agents = self.max_agents_for[world_type]
                 if len(agent_pool) >= needed_agents:
                     log_utils.print_and_log(
-                        logging.INFO, 'starting pool', should_print=True
+                        logging.INFO, "starting pool", should_print=True
                     )
                     # enough agents in pool to start new conversation
                     self.conversation_index += 1
-                    task_id = 't_{}'.format(self.conversation_index)
+                    task_id = "t_{}".format(self.conversation_index)
 
                     # Add the required number of valid agents to the conv
                     agent_states = [w for w in agent_pool[:needed_agents]]
@@ -127,7 +127,7 @@ class WebsocketManager(ChatServiceManager):
                         state.set_active_agent(agent)
                         agents.append(agent)
                         # reset wait message state
-                        state.stored_data['seen_wait_message'] = False
+                        state.stored_data["seen_wait_message"] = False
                     assign_role_function = utils.get_assign_roles_fn(
                         self.world_module, self.taskworld_map[world_type]
                     )
@@ -203,7 +203,7 @@ class WebsocketManager(ChatServiceManager):
         """
         message_callback = self._on_new_message
 
-        options['log_to_stderr'] = True
+        options["log_to_stderr"] = True
         tornado.options.parse_command_line([])
 
         return tornado.web.Application(
@@ -211,7 +211,7 @@ class WebsocketManager(ChatServiceManager):
                 (
                     r"/websocket",
                     MessageSocketHandler,
-                    {'subs': self.subs, 'message_callback': message_callback},
+                    {"subs": self.subs, "message_callback": message_callback},
                 )
             ],
             debug=self.debug,
@@ -234,7 +234,7 @@ class WebsocketManager(ChatServiceManager):
             quick_replies = list(quick_replies)
 
         message = json.dumps(
-            {'text': message.replace('\n', '<br />'), 'quick_replies': quick_replies}
+            {"text": message.replace("\n", "<br />"), "quick_replies": quick_replies}
         )
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -258,7 +258,7 @@ class WebsocketManager(ChatServiceManager):
 
         Returns a tornado future for tracking the `write_message` action.
         """
-        message = {'text': '', 'payload': payload, 'quick_replies': quick_replies}
+        message = {"text": "", "payload": payload, "quick_replies": quick_replies}
         payload = json.dumps(message)
 
         loop = asyncio.new_event_loop()

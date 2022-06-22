@@ -22,15 +22,15 @@ class MockDict(Agent):
     Mock Dictionary Agent which just implements indexing and txt2vec.
     """
 
-    null_token = '__null__'
+    null_token = "__null__"
     NULL_IDX = 0
-    start_token = '__start__'
+    start_token = "__start__"
     BEG_IDX = 1001
-    end_token = '__end__'
+    end_token = "__end__"
     END_IDX = 1002
-    p1_token = '__p1__'
+    p1_token = "__p1__"
     P1_IDX = 2001
-    p2_token = '__p2__'
+    p2_token = "__p2__"
     P2_IDX = 2002
 
     def __init__(self, opt, shared=None):
@@ -114,7 +114,7 @@ class MockTorchAgent(TorchAgent):
         """
         Return confirmation of training.
         """
-        return Output([f'Training {i}!' for i in range(batch.batchsize)])
+        return Output([f"Training {i}!" for i in range(batch.batchsize)])
 
     def eval_step(self, batch):
         """
@@ -122,7 +122,7 @@ class MockTorchAgent(TorchAgent):
         """
         return Output(
             [
-                f'Evaluating {i} (responding to {batch.text_vec.tolist()})!'
+                f"Evaluating {i} (responding to {batch.text_vec.tolist()})!"
                 for i in range(batch.batchsize)
             ]
         )
@@ -171,7 +171,7 @@ class MockTrainUpdatesAgent(MockTorchAgent):
 
     def train_step(self, batch):
         ret = super().train_step(batch)
-        update_freq = self.opt.get('update_freq', 1)
+        update_freq = self.opt.get("update_freq", 1)
         if update_freq == 1:
             self._number_training_updates += 1
         else:

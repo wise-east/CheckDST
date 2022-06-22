@@ -13,12 +13,12 @@ from parlai.core.build_data import download_models
 
 
 def download(datapath):
-    version = 'v1.0'
-    fnames = ['md_gender_classifier.tgz']
+    version = "v1.0"
+    fnames = ["md_gender_classifier.tgz"]
     download_models(
-        opt={'datapath': datapath},
+        opt={"datapath": datapath},
         fnames=fnames,
-        model_folder='md_gender',
+        model_folder="md_gender",
         version=version,
         use_model_type=False,
     )

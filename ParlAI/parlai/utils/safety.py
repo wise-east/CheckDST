@@ -28,16 +28,16 @@ class OffensiveLanguageClassifier:
     def __init__(
         self,
         shared: TShared = None,
-        custom_model_file='zoo:dialogue_safety/single_turn/model',
+        custom_model_file="zoo:dialogue_safety/single_turn/model",
     ):
         if not shared:
             self.model = self._create_safety_model(custom_model_file)
         else:
-            self.model = create_agent_from_shared(shared['model'])
+            self.model = create_agent_from_shared(shared["model"])
         self.classes = {OK_CLASS: False, NOT_OK_CLASS: True}
 
     def share(self):
-        shared = {'model': self.model.share()}
+        shared = {"model": self.model.share()}
         return shared
 
     def _create_safety_model(self, custom_model_file):
@@ -46,7 +46,7 @@ class OffensiveLanguageClassifier:
         parser = ParlaiParser(False, False)
         TransformerClassifierAgent.add_cmdline_args(parser, partial_opt=None)
         parser.set_params(
-            model='transformer/classifier',
+            model="transformer/classifier",
             model_file=custom_model_file,
             print_scores=True,
             data_parallel=False,
@@ -58,10 +58,10 @@ class OffensiveLanguageClassifier:
         """
         Returns the probability that a message is safe according to the classifier.
         """
-        act = {'text': text, 'episode_done': True}
+        act = {"text": text, "episode_done": True}
         self.model.observe(act)
-        response = self.model.act()['text']
-        pred_class, prob = [x.split(': ')[-1] for x in response.split('\n')]
+        response = self.model.act()["text"]
+        pred_class, prob = [x.split(": ")[-1] for x in response.split("\n")]
         pred_not_ok = self.classes[pred_class]  # check whether classified as NOT OK
         prob = float(prob)  # cast string to float
 
@@ -98,28 +98,28 @@ class OffensiveStringMatcher:
             # Build the data if it doesn't exist.
             build()
             return os.path.join(
-                self.datapath, 'OffensiveLanguage', 'OffensiveLanguage.txt'
+                self.datapath, "OffensiveLanguage", "OffensiveLanguage.txt"
             )
 
         def build():
-            version = 'v1.0'
-            dpath = os.path.join(self.datapath, 'OffensiveLanguage')
+            version = "v1.0"
+            dpath = os.path.join(self.datapath, "OffensiveLanguage")
             if not build_data.built(dpath, version):
-                logging.info(f'building data: {dpath}')
+                logging.info(f"building data: {dpath}")
                 if build_data.built(dpath):
                     # An older version exists, so remove these outdated files.
                     build_data.remove_dir(dpath)
                 build_data.make_dir(dpath)
 
                 # Download the data.
-                fname = 'OffensiveLanguage.txt'
-                url = 'http://parl.ai/downloads/offensive_language/' + fname
+                fname = "OffensiveLanguage.txt"
+                url = "http://parl.ai/downloads/offensive_language/" + fname
                 build_data.download(url, dpath, fname)
 
                 # Mark the data as built.
                 build_data.mark_done(dpath, version)
 
-        if datapath is not None and datapath.endswith('.txt'):
+        if datapath is not None and datapath.endswith(".txt"):
             # Load custom file.
             self.datafile = datapath
         else:
@@ -129,71 +129,71 @@ class OffensiveStringMatcher:
                 from parlai.core.params import ParlaiParser
 
                 parser = ParlaiParser(False, False)
-                self.datapath = parser.parse_args([])['datapath']
+                self.datapath = parser.parse_args([])["datapath"]
             else:
                 self.datapath = datapath
             self.datafile = _path()
 
         # store a token trie: e.g.
         # {'2': {'girls': {'1': {'cup': {'__END__': True}}}}
-        self.END = '__END__'
+        self.END = "__END__"
         self.max_len = 1
         self.offensive_trie = {}
         self.word_prefixes = [
-            'de',
-            'de-',
-            'dis',
-            'dis-',
-            'ex',
-            'ex-',
-            'mis',
-            'mis-',
-            'pre',
-            'pre-',
-            'non',
-            'non-',
-            'semi',
-            'semi-',
-            'sub',
-            'sub-',
-            'un',
-            'un-',
+            "de",
+            "de-",
+            "dis",
+            "dis-",
+            "ex",
+            "ex-",
+            "mis",
+            "mis-",
+            "pre",
+            "pre-",
+            "non",
+            "non-",
+            "semi",
+            "semi-",
+            "sub",
+            "sub-",
+            "un",
+            "un-",
         ]
         self.word_suffixes = [
-            'a',
-            'able',
-            'as',
-            'dom',
-            'ed',
-            'er',
-            'ers',
-            'ery',
-            'es',
-            'est',
-            'ful',
-            'fy',
-            'ies',
-            'ify',
-            'in',
-            'ing',
-            'ish',
-            'less',
-            'ly',
-            's',
-            'y',
+            "a",
+            "able",
+            "as",
+            "dom",
+            "ed",
+            "er",
+            "ers",
+            "ery",
+            "es",
+            "est",
+            "ful",
+            "fy",
+            "ies",
+            "ify",
+            "in",
+            "ing",
+            "ish",
+            "less",
+            "ly",
+            "s",
+            "y",
         ]
         self.allow_list = [
-            'butter',
-            'buttery',
-            'spicy',
-            'spiced',
-            'spices',
-            'spicier',
-            'spicing',
-            'twinkies',
+            "butter",
+            "buttery",
+            "spicy",
+            "spiced",
+            "spices",
+            "spicier",
+            "spicing",
+            "twinkies",
         ]
 
-        with PathManager.open(self.datafile, 'r') as f:
+        with PathManager.open(self.datafile, "r") as f:
             for p in f.read().splitlines():
                 mod_ps = [p]
                 mod_ps += [pref + p for pref in self.word_prefixes]
@@ -233,7 +233,7 @@ class OffensiveStringMatcher:
             if toks[i] in node:
                 node = node[toks[i]]
                 if self.END in node:
-                    return ' '.join(toks[j] for j in range(idx, i + 1))
+                    return " ".join(toks[j] for j in range(idx, i + 1))
             else:
                 break
         return False

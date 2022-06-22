@@ -13,5 +13,5 @@ from parlai.core.teachers import Teacher
 class DefaultTeacher(Teacher):
     def __init__(self, opt, shared=None):
         raise RuntimeError(
-            '-t self_chat is a dummy helper, and not meant to be used directly.'
+            "-t self_chat is a dummy helper, and not meant to be used directly."
         )

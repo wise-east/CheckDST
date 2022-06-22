@@ -23,10 +23,10 @@ class MessengerEchoOnboardWorld(OnboardWorld):
     def parley(self):
         self.agent.observe(
             {
-                'id': 'Onboarding',
-                'text': 'Welcome to the onboarding world for our echo bot. '
-                'The next message you send will be echoed. Use [DONE] '
-                'to finish the chat.',
+                "id": "Onboarding",
+                "text": "Welcome to the onboarding world for our echo bot. "
+                "The next message you send will be echoed. Use [DONE] "
+                "to finish the chat.",
             }
         )
         self.episodeDone = True
@@ -49,15 +49,15 @@ class MessengerEchoTaskWorld(World):
 
     @staticmethod
     def assign_roles(agents):
-        agents[0].disp_id = 'EchoAgent'
+        agents[0].disp_id = "EchoAgent"
 
     def parley(self):
         a = self.agent.act()
         if a is not None:
-            if '[DONE]' in a['text']:
+            if "[DONE]" in a["text"]:
                 self.episodeDone = True
             else:
-                a['id'] = 'World'
+                a["id"] = "World"
                 self.agent.observe(a)
 
     def episode_done(self):
@@ -87,30 +87,30 @@ class MessengerOnboardDataOnboardWorld(OnboardWorld):
     @staticmethod
     def assign_roles(agents):
         for a in agents:
-            a.disp_id = 'Agent'
+            a.disp_id = "Agent"
 
     def parley(self):
         if self.turn == 0:
             self.agent.observe(
                 {
-                    'id': 'Onboarding',
-                    'text': 'Welcome to the onboarding world the onboarding '
-                    'data demo.\nEnter your name.',
+                    "id": "Onboarding",
+                    "text": "Welcome to the onboarding world the onboarding "
+                    "data demo.\nEnter your name.",
                 }
             )
             a = self.agent.act()
             while a is None:
                 a = self.agent.act()
-            self.data['name'] = a['text']
+            self.data["name"] = a["text"]
             self.turn = self.turn + 1
         elif self.turn == 1:
             self.agent.observe(
-                {'id': 'Onboarding', 'text': '\nEnter your favorite color.'}
+                {"id": "Onboarding", "text": "\nEnter your favorite color."}
             )
             a = self.agent.act()
             while a is None:
                 a = self.agent.act()
-            self.data['color'] = a['text']
+            self.data["color"] = a["text"]
             self.episodeDone = True
 
 
@@ -131,16 +131,16 @@ class MessengerOnboardDataTaskWorld(World):
 
     @staticmethod
     def assign_roles(agents):
-        agents[0].disp_id = 'DataAgent'
+        agents[0].disp_id = "DataAgent"
 
     def parley(self):
-        name = self.agent.onboard_data['name']
-        color = self.agent.onboard_data['color']
+        name = self.agent.onboard_data["name"]
+        color = self.agent.onboard_data["color"]
         self.agent.observe(
             {
-                'id': 'World',
-                'text': 'During onboarding, you said your name was {} and your '
-                'favorite color was {}'.format(name, color),
+                "id": "World",
+                "text": "During onboarding, you said your name was {} and your "
+                "favorite color was {}".format(name, color),
             }
         )
         self.episodeDone = True
@@ -172,28 +172,28 @@ class MessengerChatOnboardWorld(OnboardWorld):
     @staticmethod
     def assign_roles(agents):
         for a in agents:
-            a.disp_id = 'Agent'
+            a.disp_id = "Agent"
 
     def parley(self):
         if self.turn == 0:
             self.agent.observe(
                 {
-                    'id': 'Onboarding',
-                    'text': 'Welcome to the onboarding world free chat. '
-                    'Enter your display name.',
+                    "id": "Onboarding",
+                    "text": "Welcome to the onboarding world free chat. "
+                    "Enter your display name.",
                 }
             )
             a = self.agent.act()
             while a is None:
                 a = self.agent.act()
-            self.data['user_name'] = a['text']
+            self.data["user_name"] = a["text"]
             self.turn = self.turn + 1
         elif self.turn == 1:
             self.agent.observe(
                 {
-                    'id': 'Onboarding',
-                    'text': 'You will be matched with a random person. Say [DONE] '
-                    'to end the chat.',
+                    "id": "Onboarding",
+                    "text": "You will be matched with a random person. Say [DONE] "
+                    "to end the chat.",
                 }
             )
             self.episodeDone = True
@@ -217,15 +217,15 @@ class MessengerChatTaskWorld(World):
     @staticmethod
     def assign_roles(agents):
         for a in agents:
-            a.disp_id = 'Agent'
+            a.disp_id = "Agent"
 
     def parley(self):
         for x in [0, 1]:
             a = self.agents[x].act()
             if a is not None:
-                if '[DONE]' in a['text']:
+                if "[DONE]" in a["text"]:
                     self.agents[x - 1].observe(
-                        {'id': 'World', 'text': 'The other agent has ended the chat.'}
+                        {"id": "World", "text": "The other agent has ended the chat."}
                     )
                     self.episodeDone = True
                 else:
@@ -246,13 +246,13 @@ class MessengerOverworld(World):
     """
 
     DEMOS = {
-        'echo': (MessengerEchoOnboardWorld, MessengerEchoTaskWorld),
-        'onboard data': (
+        "echo": (MessengerEchoOnboardWorld, MessengerEchoTaskWorld),
+        "onboard data": (
             MessengerOnboardDataOnboardWorld,
             MessengerOnboardDataTaskWorld,
         ),
-        'chat': (MessengerChatOnboardWorld, MessengerChatTaskWorld),
-        'EXIT': (None, None),
+        "chat": (MessengerChatOnboardWorld, MessengerChatTaskWorld),
+        "EXIT": (None, None),
     }
 
     def __init__(self, opt, agent):
@@ -268,7 +268,7 @@ class MessengerOverworld(World):
     @staticmethod
     def assign_roles(agents):
         for a in agents:
-            a.disp_id = 'Agent'
+            a.disp_id = "Agent"
 
     def episode_done(self):
         return self.episodeDone
@@ -277,28 +277,28 @@ class MessengerOverworld(World):
         if self.first_time:
             self.agent.observe(
                 {
-                    'id': 'Overworld',
-                    'text': 'Welcome to the overworld for the ParlAI messenger '
-                    'demo. Choose one of the demos from the listed quick '
-                    'replies. ',
-                    'quick_replies': self.DEMOS.keys(),
+                    "id": "Overworld",
+                    "text": "Welcome to the overworld for the ParlAI messenger "
+                    "demo. Choose one of the demos from the listed quick "
+                    "replies. ",
+                    "quick_replies": self.DEMOS.keys(),
                 }
             )
             self.first_time = False
         a = self.agent.act()
         if a is not None:
-            if a['text'] in self.DEMOS:
+            if a["text"] in self.DEMOS:
                 self.agent.observe(
-                    {'id': 'Overworld', 'text': 'Transferring to ' + a['text']}
+                    {"id": "Overworld", "text": "Transferring to " + a["text"]}
                 )
                 self.episodeDone = True
-                return a['text']
+                return a["text"]
             else:
                 self.agent.observe(
                     {
-                        'id': 'Overworld',
-                        'text': 'Invalid option. Choose one of the demos from the '
-                        'listed quick replies. ',
-                        'quick_replies': self.DEMOS.keys(),
+                        "id": "Overworld",
+                        "text": "Invalid option. Choose one of the demos from the "
+                        "listed quick replies. ",
+                        "quick_replies": self.DEMOS.keys(),
                     }
                 )

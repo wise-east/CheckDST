@@ -12,31 +12,31 @@ import os
 import json
 import random
 
-VERSION = '1.0'
+VERSION = "1.0"
 RESOURCES = [
     DownloadableFile(
-        'https://nlp.stanford.edu/data/coqa/coqa-train-v1.0.json',
-        'coqa-train-v1.0.json',
-        'b0fdb2bc1bd38dd3ca2ce5fa2ac3e02c6288ac914f241ac409a655ffb6619fa6',
+        "https://nlp.stanford.edu/data/coqa/coqa-train-v1.0.json",
+        "coqa-train-v1.0.json",
+        "b0fdb2bc1bd38dd3ca2ce5fa2ac3e02c6288ac914f241ac409a655ffb6619fa6",
         zipped=False,
     ),
     DownloadableFile(
-        'https://nlp.stanford.edu/data/coqa/coqa-dev-v1.0.json',
-        'coqa-dev-v1.0.json',
-        'dfa367a9733ce53222918d0231d9b3bedc2b8ee831a2845f62dfc70701f2540a',
+        "https://nlp.stanford.edu/data/coqa/coqa-dev-v1.0.json",
+        "coqa-dev-v1.0.json",
+        "dfa367a9733ce53222918d0231d9b3bedc2b8ee831a2845f62dfc70701f2540a",
         zipped=False,
     ),
 ]
 
 
 def make_parlai_format(outpath, dtype, data):
-    print('building parlai:' + dtype)
+    print("building parlai:" + dtype)
 
     # import pdb; pdb.set_trace()
-    with PathManager.open(os.path.join(outpath, dtype + '.txt'), 'w') as fout:
+    with PathManager.open(os.path.join(outpath, dtype + ".txt"), "w") as fout:
         for each in data:
             output = []
-            story = each['story'].replace('\n', '\\n')
+            story = each["story"].replace("\n", "\\n")
 
             templates = [
                 f"Answer my questions given the following passage: {story}",
@@ -45,32 +45,32 @@ def make_parlai_format(outpath, dtype, data):
                 f"Here's a story: {story}",
                 f"{story} Answer the questions based on the given story.",
             ]
-            for question, ans in zip(each['questions'], each['answers']):
-                question_txt = ''
-                if question['turn_id'] == 1:
+            for question, ans in zip(each["questions"], each["answers"]):
+                question_txt = ""
+                if question["turn_id"] == 1:
                     # include the context in the very first turn
                     context = random.choice(templates)
-                    question_txt = context + '\\n' + question['input_text']
+                    question_txt = context + "\\n" + question["input_text"]
                 else:
-                    question_txt = question['input_text']
+                    question_txt = question["input_text"]
                 output.append(
-                    'text:{question}\tlabels:{labels}'.format(
+                    "text:{question}\tlabels:{labels}".format(
                         question=question_txt,
-                        labels=ans['input_text'].replace('|', ' __PIPE__ '),
+                        labels=ans["input_text"].replace("|", " __PIPE__ "),
                     )
                 )
-                if question['turn_id'] < len(each['questions']):
-                    output.append('\n')
-            output.append('\t\tepisode_done:True\n')
-            fout.write(''.join(output))
+                if question["turn_id"] < len(each["questions"]):
+                    output.append("\n")
+            output.append("\t\tepisode_done:True\n")
+            fout.write("".join(output))
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'CoQA')
+    dpath = os.path.join(opt["datapath"], "CoQA")
     version = VERSION
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)
@@ -80,13 +80,13 @@ def build(opt):
         for downloadable_file in RESOURCES:
             downloadable_file.download_file(dpath)
 
-        with PathManager.open(os.path.join(dpath, 'coqa-train-v1.0.json')) as f:
-            data = json.load(f)['data']
-            make_parlai_format(dpath, 'train', data)
+        with PathManager.open(os.path.join(dpath, "coqa-train-v1.0.json")) as f:
+            data = json.load(f)["data"]
+            make_parlai_format(dpath, "train", data)
 
-        with PathManager.open(os.path.join(dpath, 'coqa-dev-v1.0.json')) as f:
-            data = json.load(f)['data']
-            make_parlai_format(dpath, 'valid', data)
+        with PathManager.open(os.path.join(dpath, "coqa-dev-v1.0.json")) as f:
+            data = json.load(f)["data"]
+            make_parlai_format(dpath, "valid", data)
 
         # Mark the data as built.
         build_data.mark_done(dpath, version_string=version)

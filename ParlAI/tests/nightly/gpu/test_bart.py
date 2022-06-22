@@ -24,41 +24,41 @@ class TestBartModel(unittest.TestCase):
         Test out-of-the-box BART on repeat task.
         """
         valid, _ = testing_utils.eval_model(
-            dict(task='integration_tests', model='bart', num_examples=10)
+            dict(task="integration_tests", model="bart", num_examples=10)
         )
-        self.assertAlmostEqual(valid['ppl'].value(), 1.0, places=1)
+        self.assertAlmostEqual(valid["ppl"].value(), 1.0, places=1)
 
     def test_bart_gen(self):
         """
         Test out-of-the-box BART generation.
         """
-        opt = ParlaiParser(True, True).parse_args(['--model', 'bart'])
+        opt = ParlaiParser(True, True).parse_args(["--model", "bart"])
         bart = create_agent(opt)
         text = "Don't have a cow, Man!"
-        obs = {"text": text, 'episode_done': True}
+        obs = {"text": text, "episode_done": True}
         bart.observe(obs)
         act = bart.act()
 
-        self.assertEqual(act['text'], text)
+        self.assertEqual(act["text"], text)
 
     def test_bart_cache_text_vec(self):
         """
         Test BART text vec caching
         """
-        opt = ParlaiParser(True, True).parse_args(['--model', 'bart'])
+        opt = ParlaiParser(True, True).parse_args(["--model", "bart"])
         bart = create_agent(opt)
 
         # obs 1
         text = "Don't have a cow, Man!"
-        in_obs = {'text': text, 'episode_done': True}
+        in_obs = {"text": text, "episode_done": True}
         out_obs = bart.observe(in_obs)
-        cached_text_vec = out_obs['text_vec']
+        cached_text_vec = out_obs["text_vec"]
         _ = bart.act()
 
         # obs 2
-        in_obs = {'text_vec': cached_text_vec, 'episode_done': True}
+        in_obs = {"text_vec": cached_text_vec, "episode_done": True}
         out_obs = bart.observe(in_obs)
-        cached_text_vec_2 = out_obs['text_vec']
+        cached_text_vec_2 = out_obs["text_vec"]
 
         self.assertEqual(cached_text_vec.tolist(), cached_text_vec_2.tolist())
 
@@ -69,13 +69,13 @@ class TestBartModel(unittest.TestCase):
         """
         with tempdir() as tmpdir:
             # test finetuning
-            mf = os.path.join(tmpdir, 'model')
+            mf = os.path.join(tmpdir, "model")
             valid, test = testing_utils.train_model(
                 dict(
-                    task='integration_tests:reverse',
-                    model='bart',
-                    dict_file='zoo:bart/bart_large/model.dict',
-                    optimizer='sgd',
+                    task="integration_tests:reverse",
+                    model="bart",
+                    dict_file="zoo:bart/bart_large/model.dict",
+                    optimizer="sgd",
                     learningrate=1,
                     batchsize=2,
                     num_epochs=1,
@@ -86,18 +86,18 @@ class TestBartModel(unittest.TestCase):
                     fp16=True,
                 )
             )
-            self.assertAlmostEqual(valid['ppl'].value(), 1.0, places=1)
-            self.assertAlmostEqual(test['ppl'].value(), 1.0, places=1)
+            self.assertAlmostEqual(valid["ppl"].value(), 1.0, places=1)
+            self.assertAlmostEqual(test["ppl"].value(), 1.0, places=1)
 
             # test generation
-            opt = ParlaiParser(True, True).parse_args(['--model-file', mf])
+            opt = ParlaiParser(True, True).parse_args(["--model-file", mf])
             bart = create_agent(opt)
-            text = '1 2 3 4'
-            obs = {'text': text, 'episode_done': True}
+            text = "1 2 3 4"
+            obs = {"text": text, "episode_done": True}
             bart.observe(obs)
             act = bart.act()
-            self.assertEqual(act['text'], text[::-1])
+            self.assertEqual(act["text"], text[::-1])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -20,15 +20,15 @@ def load_jsonl(fn):
 def extract_target_components_from_worldlogs_line(line_item):
 
     # import pdb; pdb.set_trace()
-    turn_input = line_item['dialog'][0][0]
-    turn_output = line_item['dialog'][0][1]
+    turn_input = line_item["dialog"][0][0]
+    turn_output = line_item["dialog"][0][1]
     extracted = {
-        "context": turn_input['text'],
+        "context": turn_input["text"],
         "dial_id": f"{turn_input['dial_id'].replace('.json', '')}-{turn_input['turn_num']}",
         "aug_type": turn_input.get("aug_type", "Not found"),
-        "gold": turn_input['eval_labels'][0],
-        "pred": turn_output['text'],
-        "requires_coref": "coref_jga" in turn_output['metrics'],
+        "gold": turn_input["eval_labels"][0],
+        "pred": turn_output["text"],
+        "requires_coref": "coref_jga" in turn_output["metrics"],
     }
     # context may not be necessary as it can be mapped back to the original data file
 

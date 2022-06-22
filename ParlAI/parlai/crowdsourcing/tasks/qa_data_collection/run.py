@@ -47,7 +47,7 @@ class ScriptConfig(MTurkRunScriptConfig):
     monitoring_log_rate: int = field(
         default=30,
         metadata={
-            'help': 'Frequency in seconds of logging the monitoring of the crowdsourcing task'
+            "help": "Frequency in seconds of logging the monitoring of the crowdsourcing task"
         },
     )
     turn_timeout: int = field(

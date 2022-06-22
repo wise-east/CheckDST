@@ -10,10 +10,10 @@
 
 from .build import build
 
-VERSION = 'v1.0'
+VERSION = "v1.0"
 
 
 def download(datapath):
     build(
-        datapath, 'vocab_alpha1e0_v1.tgz', model_type='vocab_alpha1e0', version=VERSION
+        datapath, "vocab_alpha1e0_v1.tgz", model_type="vocab_alpha1e0", version=VERSION
     )

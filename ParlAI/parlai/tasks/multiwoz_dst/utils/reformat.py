@@ -29,13 +29,13 @@ trade - my:{'book stay', 'pricerange', 'destination', 'leaveat', 'book people', 
  total 31 type 6 domain
 """
 SLOT_TYPE_MAPPING = {
-    'pricerange': 'price',
-    'destination': 'dest',
-    'leaveat': 'leave',
-    'arriveby': 'arrive',
-    'departure': "depart",
-    'book stay': 'stay',
-    'book people': 'people',
+    "pricerange": "price",
+    "destination": "dest",
+    "leaveat": "leave",
+    "arriveby": "arrive",
+    "departure": "depart",
+    "book stay": "stay",
+    "book people": "people",
     "book time": "time",
     "book day": "day",
 }
@@ -43,7 +43,7 @@ SLOT_TYPE_MAPPING = {
 
 class Reformat_Multiwoz(object):
     """
-    reformat multiwoz (maybe sgd later) into 
+    reformat multiwoz (maybe sgd later) into
     utt-to-slots
     """
 
@@ -88,7 +88,7 @@ class Reformat_Multiwoz(object):
     def load_txt(self, file_path):
         with open(file_path) as df:
             data = df.read().lower().split("\n")
-            data.remove('')
+            data.remove("")
         return data
 
     def remove_triplets(self, b_list, mid_idx):
@@ -119,7 +119,7 @@ class Reformat_Multiwoz(object):
                 ...
             }
 
-        formatting for 2.2 and 2.3 
+        formatting for 2.2 and 2.3
         """
         self.load_dials()
         self.dials_form = {}
@@ -149,8 +149,8 @@ class Reformat_Multiwoz(object):
                 user_utt = dial["log"][turn_num * 2]["text"]
                 sys_resp = dial["log"][turn_num * 2 + 1]["text"]
                 # any turn that comes after requiring coreference resolution will also need coref resolution
-                need_coref = "coreference" in dial['log'][turn_num * 2] or need_coref
-                turn['need_coref'] = need_coref
+                need_coref = "coreference" in dial["log"][turn_num * 2] or need_coref
+                turn["need_coref"] = need_coref
 
                 # # # skip examples that have sys/user utterance order mixed up
                 # # # Applied from TripPy implementation
@@ -252,29 +252,29 @@ class Reformat_Multiwoz(object):
             turn_num = 0
             bspan = {}  # {dom:{slot_type:val, ...}, ...}
             context = []
-            for turn in dial['turns']:
+            for turn in dial["turns"]:
                 # turn number
-                turn_form['turn_num'] = turn_num
+                turn_form["turn_num"] = turn_num
 
-                if turn['speaker'] == 'user':
+                if turn["speaker"] == "user":
                     # dialog history/context
                     turn_form["context"] = " ".join(context)
 
                     # belief span
-                    turn_form['slots_inf'], bspan = self._extract_slots(
-                        bspan, turn['frames'], turn['utterance'], turn_form["context"]
+                    turn_form["slots_inf"], bspan = self._extract_slots(
+                        bspan, turn["frames"], turn["utterance"], turn_form["context"]
                     )
 
                     # user utterance
-                    turn_form['utt'] = self._tokenize_punc(turn['utterance'])
+                    turn_form["utt"] = self._tokenize_punc(turn["utterance"])
 
-                if turn['speaker'] == 'system':
+                if turn["speaker"] == "system":
                     # turn_form['sys'] = self._tokenize_punc(turn['utterance'])
-                    context.append("Sys: " + self._tokenize_punc(turn['utterance']))
+                    context.append("Sys: " + self._tokenize_punc(turn["utterance"]))
 
-                if 'utt' in turn_form:
+                if "utt" in turn_form:
                     self.dials_form[dial_id].append(turn_form)
-                    context.append("User: " + turn_form['utt'])
+                    context.append("User: " + turn_form["utt"])
                     turn_form = {}
                     turn_num += 1
 
@@ -451,7 +451,7 @@ class Reformat_Multiwoz(object):
         output: "dom1 slot_type1 slot_val_err , dom2 ..."
 
         param: err num per turn
-               err ratio over types(add/remove/replace) 
+               err ratio over types(add/remove/replace)
                err ratio over domains
         """
         # err_stat_path = "finetune_gpt2/results/best_accm_noend_len100_all_analyze.json"

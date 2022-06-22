@@ -10,8 +10,8 @@
 
 from .build import build
 
-VERSION = 'v1.0'
+VERSION = "v1.0"
 
 
 def download(datapath):
-    build(datapath, 'dict3B_v0.tgz', model_type='dict_3B', version=VERSION)
+    build(datapath, "dict3B_v0.tgz", model_type="dict_3B", version=VERSION)

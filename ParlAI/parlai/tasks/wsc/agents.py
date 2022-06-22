@@ -15,18 +15,18 @@ import random
 
 class WICTeacher(DialogTeacher):
     def __init__(self, opt, shared=None):
-        self.datatype = opt['datatype']
+        self.datatype = opt["datatype"]
         # build(opt)  # NOTE: the call to build here
-        suffix = 'train' if opt['datatype'].startswith('train') else 'val'
+        suffix = "train" if opt["datatype"].startswith("train") else "val"
         # whatever is placed into datafile will be passed as the argument to
         # setup_data in the next section.
-        opt['datafile'] = os.path.join(opt['datapath'], 'WSC', suffix + '.jsonl')
-        self.id = 'WSC'
+        opt["datafile"] = os.path.join(opt["datapath"], "WSC", suffix + ".jsonl")
+        self.id = "WSC"
         super().__init__(opt, shared)
 
     def setup_data(self, path):
         # note that path is the value provided by opt['datafile']
-        print('loading: ' + path)
+        print("loading: " + path)
         with open(path, "r") as f:
             self.data = f.readlines()
 
@@ -41,11 +41,11 @@ class WICTeacher(DialogTeacher):
 
             templates = [
                 (
-                    f"{text} In the previous sentence, does the pronoun \"{span2_text}\" refer to {span1_text}? Yes or no?",
+                    f'{text} In the previous sentence, does the pronoun "{span2_text}" refer to {span1_text}? Yes or no?',
                     "yes" if label else "no",
                 ),
                 (
-                    f"{text} Here, by \"{span2_text}\" they mean \"{span1_text}\". Yes or no?",
+                    f'{text} Here, by "{span2_text}" they mean "{span1_text}". Yes or no?',
                     "yes" if label else "no",
                 ),
                 (
@@ -57,19 +57,19 @@ class WICTeacher(DialogTeacher):
                     "yes" if label else "no",
                 ),
                 (
-                    f"{text} Here, does \"{span2_text}\" stand for {span1_text}? Yes or no?",
+                    f'{text} Here, does "{span2_text}" stand for {span1_text}? Yes or no?',
                     "yes" if label else "no",
                 ),
                 (
-                    f"Passage: {text} Question: In the passage above, does the pronoun \"{span2_text}\" refer to {span1_text}? Answer:",
+                    f'Passage: {text} Question: In the passage above, does the pronoun "{span2_text}" refer to {span1_text}? Answer:',
                     "yes" if label else "no",
                 ),
                 (
-                    f"{text} In the previous sentence, can the pronoun \"{span2_text}\" be replaced with \"{span1_text}\"? Yes or no?",
+                    f'{text} In the previous sentence, can the pronoun "{span2_text}" be replaced with "{span1_text}"? Yes or no?',
                     "yes" if label else "no",
                 ),
                 (
-                    f"{text} In the passage above, the pronoun \"{span2_text}\" refers to {span1_text}. True or false?",
+                    f'{text} In the passage above, the pronoun "{span2_text}" refers to {span1_text}. True or false?',
                     "True" if label else "False",
                 ),
             ]

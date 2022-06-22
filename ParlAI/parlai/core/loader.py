@@ -15,7 +15,7 @@ import importlib
 
 from collections import namedtuple
 
-script_registration = namedtuple('script_registration', ('klass', 'hidden', 'aliases'))
+script_registration = namedtuple("script_registration", ("klass", "hidden", "aliases"))
 
 
 ##############################################################
@@ -98,13 +98,13 @@ def _name_to_agent_class(name: str):
     :return:
         class of agent, e.g. LocalHumanAgent.
     """
-    words = name.split('_')
-    class_name = ''
+    words = name.split("_")
+    class_name = ""
     for w in words:
         # capitalize the first letter
         class_name += w[0].upper() + w[1:]
     # add Agent to the end of the name
-    class_name += 'Agent'
+    class_name += "Agent"
     return class_name
 
 
@@ -139,39 +139,39 @@ def load_agent_module(agent_path: str):
     if agent_path in AGENT_REGISTRY:
         return AGENT_REGISTRY[agent_path]
 
-    repo = 'parlai'
-    if agent_path.startswith('internal:'):
+    repo = "parlai"
+    if agent_path.startswith("internal:"):
         # To switch to local repo, useful for non-public projects
         # (make a directory called 'parlai_internal' with your private agents)
         # this will follow the same paths but look in parlai_internal instead
-        repo = 'parlai_internal'
+        repo = "parlai_internal"
         agent_path = agent_path[9:]
-    elif agent_path.startswith('fb:'):
-        repo = 'parlai_fb'
+    elif agent_path.startswith("fb:"):
+        repo = "parlai_fb"
         agent_path = agent_path[3:]
 
-    if agent_path.startswith('projects:'):
+    if agent_path.startswith("projects:"):
         # e.g. -m projects:personachat:kvmemnn
-        path_list = agent_path.split(':')
+        path_list = agent_path.split(":")
         if len(path_list) != 3:
             raise RuntimeError(
-                'projects paths should follow pattern '
-                'projects:folder:model; you used {}'
-                ''.format(agent_path)
+                "projects paths should follow pattern "
+                "projects:folder:model; you used {}"
+                "".format(agent_path)
             )
         folder_name = path_list[1]
         model_name = path_list[2]
-        module_name = 'projects.{p}.{m}.{m}'.format(m=model_name, p=folder_name)
+        module_name = "projects.{p}.{m}.{m}".format(m=model_name, p=folder_name)
         class_name = _name_to_agent_class(model_name)
-    elif ':' in agent_path:
+    elif ":" in agent_path:
         # e.g. -m "parlai.agents.seq2seq.seq2seq:Seq2seqAgent"
-        path_list = agent_path.split(':')
+        path_list = agent_path.split(":")
         module_name = path_list[0]
         class_name = path_list[1]
-    elif '/' in agent_path:
+    elif "/" in agent_path:
         # e.g. -m my_agent/special_variant
         # will check parlai.agents.my_agent.special_variant:SpecialVariantAgent
-        path_list = agent_path.split('/')
+        path_list = agent_path.split("/")
         module_name = "%s.agents.%s.%s" % (repo, path_list[0], path_list[1])
         class_name = _name_to_agent_class(path_list[1])
     else:
@@ -202,17 +202,17 @@ def _get_task_path_and_repo(taskname: str):
     :param taskname: path to task class (specified in format detailed below)
     """
     task = taskname.strip()
-    repo = 'parlai'
-    if task.startswith('internal:'):
+    repo = "parlai"
+    if task.startswith("internal:"):
         # To switch to local repo, useful for non-public projects
         # (make a directory called 'parlai_internal' with your private agents)
-        repo = 'parlai_internal'
+        repo = "parlai_internal"
         task = task[9:]
-    elif task.startswith('fb:'):
-        repo = 'parlai_fb'
+    elif task.startswith("fb:"):
+        repo = "parlai_fb"
         task = task[3:]
 
-    task_path_list = task.split(':')
+    task_path_list = task.split(":")
 
     return task_path_list, repo
 
@@ -238,7 +238,7 @@ def load_task_module(taskname: str):
     task_path_list, repo = _get_task_path_and_repo(taskname)
     task_path = task_path_list[0]
 
-    if '.' in task_path:
+    if "." in task_path:
         module_name = task_path
     else:
         task = task_path.lower()
@@ -281,14 +281,14 @@ def load_teacher_module(taskname: str):
     task_module = load_task_module(taskname)
     task_path_list, repo = _get_task_path_and_repo(taskname)
 
-    if len(task_path_list) > 1 and '=' not in task_path_list[1]:
+    if len(task_path_list) > 1 and "=" not in task_path_list[1]:
         task_path_list[1] = task_path_list[1][0].upper() + task_path_list[1][1:]
         teacher = task_path_list[1]
-        if '.' not in task_path_list[0] and 'Teacher' not in teacher:
+        if "." not in task_path_list[0] and "Teacher" not in teacher:
             # Reformat from underscore to CamelCase and append "Teacher" to
             # class name by default if a complete path is not given.
-            words = teacher.split('_')
-            teacher_name = ''
+            words = teacher.split("_")
+            teacher_name = ""
             for w in words:
                 teacher_name += w[0].upper() + w[1:]
             teacher = teacher_name + "Teacher"
@@ -354,13 +354,13 @@ def load_world_module(
         World module (or None, if not enough info to determine is present)
     """
     task = taskname.strip()
-    repo = 'parlai'
-    if task.startswith('internal:'):
+    repo = "parlai"
+    if task.startswith("internal:"):
         # To switch to local repo, useful for non-public projects
         # (make a directory called 'parlai_internal' with your private agents)
-        repo = 'parlai_internal'
+        repo = "parlai_internal"
         task = task[9:]
-    task_path_list = task.split(':')
+    task_path_list = task.split(":")
 
     if len(task_path_list) > 1:
         task_path_list[1] = task_path_list[1][0].upper() + task_path_list[1][1:]
@@ -377,13 +377,13 @@ def load_world_module(
         else:
             world_name = "DefaultWorld"
 
-    if '.' in task_path_list[0]:
+    if "." in task_path_list[0]:
         # The case of opt['task'] = 'parlai.tasks.squad.agents:DefaultTeacher'
         # (i.e. specifying your own path directly)
-        module_name_parts = task_path_list[0].split('.')
-        if module_name_parts[-1] == 'agents':
+        module_name_parts = task_path_list[0].split(".")
+        if module_name_parts[-1] == "agents":
             # The world will be located in ".worlds", so correct the path
-            module_name = '.'.join(module_name_parts[:-1]) + '.worlds'
+            module_name = ".".join(module_name_parts[:-1]) + ".worlds"
         else:
             module_name = task_path_list[0]
     else:

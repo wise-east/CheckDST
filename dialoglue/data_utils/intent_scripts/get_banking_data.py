@@ -10,8 +10,10 @@ import os
 
 import requests
 
-_GITHUB_URL_BASE = ("https://raw.githubusercontent.com/PolyAI-LDN/"
-                    "task-specific-datasets/master/banking_data/")
+_GITHUB_URL_BASE = (
+    "https://raw.githubusercontent.com/PolyAI-LDN/"
+    "task-specific-datasets/master/banking_data/"
+)
 _FILES = ["train.csv", "test.csv", "categories.json"]
 
 
@@ -19,9 +21,8 @@ def _get_script_flags():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--data_dir",
-        help="Path to dir where to save train, test, validation, "
-             "categories.json",
-        required=True
+        help="Path to dir where to save train, test, validation, " "categories.json",
+        required=True,
     )
     return parser.parse_args()
 

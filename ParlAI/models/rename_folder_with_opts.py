@@ -23,12 +23,12 @@ for subdir in subdirs:
 
     opts = json.load(opt_path.open("r"))
 
-    lr = opts['learningrate']
-    batch_size = opts['batchsize']
-    update_freq = opts['update_freq']
-    fewshot = opts['few_shot']
-    useprompts = opts['use_prompts']
-    seed = opts['rand_seed']
+    lr = opts["learningrate"]
+    batch_size = opts["batchsize"]
+    update_freq = opts["update_freq"]
+    fewshot = opts["few_shot"]
+    useprompts = opts["use_prompts"]
+    seed = opts["rand_seed"]
 
     newpath = f"fs_{fewshot}"
     newpath += f"_prompts_{useprompts}"

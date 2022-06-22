@@ -34,53 +34,53 @@ class RepeatLabelAgent(Agent):
     def add_cmdline_args(
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
-        group = parser.add_argument_group('RepeatLabel Arguments')
+        group = parser.add_argument_group("RepeatLabel Arguments")
         group.add_argument(
-            '--return_one_random_answer',
-            type='bool',
+            "--return_one_random_answer",
+            type="bool",
             default=True,
-            help='return one answer from the set of labels',
+            help="return one answer from the set of labels",
         )
         group.add_argument(
-            '--cant_answer_percent',
+            "--cant_answer_percent",
             type=float,
             default=0,
-            help='set value in range[0,1] to set chance of '
-            'replying with special message',
+            help="set value in range[0,1] to set chance of "
+            "replying with special message",
         )
         group.add_argument(
-            '--cant_answer_message',
+            "--cant_answer_message",
             type=str,
             default="I don't know.",
-            help='Message sent when the model cannot answer',
+            help="Message sent when the model cannot answer",
         )
         return parser
 
     def __init__(self, opt, shared=None):
         super().__init__(opt)
-        self.returnOneRandomAnswer = opt.get('return_one_random_answer', True)
-        self.cantAnswerPercent = opt.get('cant_answer_percent', 0)
-        self.cantAnswerMessage = opt.get('cant_answer_message', "I don't know.")
-        self.id = 'RepeatLabelAgent'
+        self.returnOneRandomAnswer = opt.get("return_one_random_answer", True)
+        self.cantAnswerPercent = opt.get("cant_answer_percent", 0)
+        self.cantAnswerMessage = opt.get("cant_answer_message", "I don't know.")
+        self.id = "RepeatLabelAgent"
 
     def act(self):
         obs = self.observation
         if obs is None:
-            return {'text': 'Nothing to repeat yet.'}
+            return {"text": "Nothing to repeat yet."}
         reply = {}
-        reply['id'] = self.getID()
-        labels = obs.get('labels', obs.get('eval_labels', None))
+        reply["id"] = self.getID()
+        labels = obs.get("labels", obs.get("eval_labels", None))
         if labels:
             if random.random() >= self.cantAnswerPercent:
                 if self.returnOneRandomAnswer:
-                    reply['text'] = labels[random.randrange(len(labels))]
+                    reply["text"] = labels[random.randrange(len(labels))]
                 else:
-                    reply['text'] = ', '.join(labels)
+                    reply["text"] = ", ".join(labels)
             else:
                 # Some 'self.cantAnswerPercent' percentage of the time
                 # the agent does not answer.
-                reply['text'] = self.cantAnswerMessage
+                reply["text"] = self.cantAnswerMessage
         else:
-            reply['text'] = self.cantAnswerMessage
-        reply['episode_done'] = False
+            reply["text"] = self.cantAnswerMessage
+        reply["episode_done"] = False
         return Message(reply)

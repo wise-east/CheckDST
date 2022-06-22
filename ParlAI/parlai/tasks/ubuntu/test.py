@@ -8,8 +8,8 @@ from parlai.utils.testing import AutoTeacherTest  # noqa: F401
 
 
 class TestDefaultTeacher(AutoTeacherTest):
-    task = 'ubuntu'
+    task = "ubuntu"
 
 
 class TestMultiturnTeacher(AutoTeacherTest):
-    task = 'ubuntu:multiturn'
+    task = "ubuntu:multiturn"

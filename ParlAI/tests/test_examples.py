@@ -21,8 +21,8 @@ class TestExampleSeq2Seq(unittest.TestCase):
     def test_generation(self):
         valid, test = testing_utils.train_model(
             dict(
-                task='integration_tests:nocandidate',
-                model='examples/seq2seq',
+                task="integration_tests:nocandidate",
+                model="examples/seq2seq",
                 learningrate=LR,
                 batchsize=BATCH_SIZE,
                 num_epochs=NUM_EPOCHS,
@@ -32,8 +32,8 @@ class TestExampleSeq2Seq(unittest.TestCase):
             )
         )
 
-        self.assertGreater(valid['token_acc'], 0.8)
-        self.assertGreater(test['token_acc'], 0.8)
+        self.assertGreater(valid["token_acc"], 0.8)
+        self.assertGreater(test["token_acc"], 0.8)
 
     @testing_utils.retry(ntries=3)
     def test_repeater(self):
@@ -42,17 +42,17 @@ class TestExampleSeq2Seq(unittest.TestCase):
         """
         valid, test = testing_utils.train_model(
             dict(
-                task='integration_tests',
-                model='examples/tra',
+                task="integration_tests",
+                model="examples/tra",
                 num_epochs=NUM_EPOCHS,
                 batchsize=BATCH_SIZE,
             )
         )
 
-        self.assertGreater(valid['accuracy'], 0.8)
-        self.assertGreater(test['accuracy'], 0.8)
-        self.assertEqual(test['exs'], 100)
+        self.assertGreater(valid["accuracy"], 0.8)
+        self.assertGreater(test["accuracy"], 0.8)
+        self.assertEqual(test["exs"], 100)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

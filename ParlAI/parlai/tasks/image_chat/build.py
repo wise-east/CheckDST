@@ -10,19 +10,19 @@ from parlai.tasks.personality_captions.download_images import download_images
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/image_chat/image_chat.tgz',
-        'image_chat.tgz',
-        'ad733e181de33f1085166bb7af17fcf228504bd48228ed8cc20c5e7a9fa5d259',
+        "http://parl.ai/downloads/image_chat/image_chat.tgz",
+        "image_chat.tgz",
+        "ad733e181de33f1085166bb7af17fcf228504bd48228ed8cc20c5e7a9fa5d259",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'image_chat')
-    image_path = os.path.join(opt['datapath'], 'yfcc_images')
-    version = '1.0'
+    dpath = os.path.join(opt["datapath"], "image_chat")
+    image_path = os.path.join(opt["datapath"], "yfcc_images")
+    version = "1.0"
     if not build_data.built(dpath, version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)
@@ -36,7 +36,7 @@ def build(opt):
 
     if (
         not build_data.built(image_path, version)
-        and not opt.get('yfcc_path')
-        and opt.get('load_images')
+        and not opt.get("yfcc_path")
+        and opt.get("load_images")
     ):
-        download_images(opt, task='image_chat')
+        download_images(opt, task="image_chat")

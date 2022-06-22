@@ -9,11 +9,11 @@ MAIN = "https://github.com/facebookresearch/ParlAI/tree/main"
 
 categories = set()
 for task_dict in task_list:
-    categories.update(task_dict.get('tags', []))
+    categories.update(task_dict.get("tags", []))
 categories = sorted(categories)
 category_task_list = {x: [] for x in categories}
 
-fout = open('task_list.inc', 'w')
+fout = open("task_list.inc", "w")
 
 s = "They consist of:  "
 for t in categories:
@@ -21,11 +21,11 @@ for t in categories:
 fout.write("\n")
 
 for task_dict in task_list:
-    tags = task_dict.get('tags', [])
+    tags = task_dict.get("tags", [])
     if not tags:
-        if 'Uncategorized' not in category_task_list:
-            category_task_list['Uncategorized'] = []
-        category_task_list['Uncategorized'].append(task_dict)
+        if "Uncategorized" not in category_task_list:
+            category_task_list["Uncategorized"] = []
+        category_task_list["Uncategorized"].append(task_dict)
     for tag in tags:
         if tag in category_task_list:
             category_task_list[tag].append(task_dict)
@@ -34,16 +34,16 @@ for num_category, (category, tl) in enumerate(category_task_list.items()):
     if num_category != 0:
         fout.write("\n-----\n\n")
 
-    fout.write(f'## {category} Tasks\n')
+    fout.write(f"## {category} Tasks\n")
 
     for task_dict in tl:
-        id = task_dict.get('id', None)
-        display_name = task_dict.get('display_name', None)
-        task = task_dict.get('task', None)
-        tags = task_dict.get('tags', None)
-        description = task_dict.get('description', None)
-        notes = task_dict.get('notes', None)
-        code_urlend = task[: max(task.find(':'), len(task))]
+        id = task_dict.get("id", None)
+        display_name = task_dict.get("display_name", None)
+        task = task_dict.get("task", None)
+        tags = task_dict.get("tags", None)
+        description = task_dict.get("description", None)
+        notes = task_dict.get("notes", None)
+        code_urlend = task[: max(task.find(":"), len(task))]
         code_url = f"{MAIN}/parlai/tasks/{code_urlend}"
         links = task_dict.get("links", {})
         assert isinstance(links, dict), f"task {id} is poorly formatted"

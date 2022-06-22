@@ -12,19 +12,19 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/ubuntu/ubuntu.tar.gz',
-        'ubuntu.tar.gz',
-        '87caf297381287247cbff3aa7cc2f4609f3b12c40e8535688168d7413740e0d0',
+        "http://parl.ai/downloads/ubuntu/ubuntu.tar.gz",
+        "ubuntu.tar.gz",
+        "87caf297381287247cbff3aa7cc2f4609f3b12c40e8535688168d7413740e0d0",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'Ubuntu')
+    dpath = os.path.join(opt["datapath"], "Ubuntu")
     version = None
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

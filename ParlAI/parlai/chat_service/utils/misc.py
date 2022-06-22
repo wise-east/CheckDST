@@ -85,7 +85,7 @@ def get_eligibility_fn(world_module, world_name):
         the eligibility function if available, else None
     """
     return get_world_fn_attr(
-        world_module, world_name, 'eligibility_function', raise_if_missing=False
+        world_module, world_name, "eligibility_function", raise_if_missing=False
     )
 
 
@@ -102,7 +102,7 @@ def get_assign_roles_fn(world_module, world_name):
         the assign roles function if available, else None
     """
     return get_world_fn_attr(
-        world_module, world_name, 'assign_roles', raise_if_missing=False
+        world_module, world_name, "assign_roles", raise_if_missing=False
     )
 
 
@@ -116,7 +116,7 @@ def default_assign_roles_fn(agents):
         list of agents
     """
     for i, a in enumerate(agents):
-        a.disp_id = f'Agent_{i}'
+        a.disp_id = f"Agent_{i}"
 
 
 class SafetyDetectionResult(Enum):

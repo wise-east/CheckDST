@@ -22,7 +22,7 @@ TASK_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
 
 defaults = [
-    {'mephisto/blueprint': BLUEPRINT_TYPE},
+    {"mephisto/blueprint": BLUEPRINT_TYPE},
     {"mephisto/architect": "local"},
     {"mephisto/provider": "mock"},
     {"conf": "example"},
@@ -33,7 +33,7 @@ def check_override_opt(args):
     with open(args.blueprint.override_opt.completed_run_stats) as f:
         override_opt = json.load(f)
     if (
-        override_opt['bot_model_name']
+        override_opt["bot_model_name"]
         != args.blueprint.conversations_needed_string.split(":")[0]
     ):
         raise AssertionError(
@@ -48,12 +48,12 @@ class ScriptConfig(MTurkRunScriptConfig):
     monitoring_log_rate: int = field(
         default=30,
         metadata={
-            'help': 'Frequency in seconds of logging the monitoring of the crowdsourcing task'
+            "help": "Frequency in seconds of logging the monitoring of the crowdsourcing task"
         },
     )
 
 
-register_script_config(name='scriptconfig', module=ScriptConfig)
+register_script_config(name="scriptconfig", module=ScriptConfig)
 
 
 @hydra.main(config_path="hydra_configs", config_name="scriptconfig")

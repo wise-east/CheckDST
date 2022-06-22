@@ -15,12 +15,12 @@ import os.path
 
 
 def download(datapath):
-    model_name = 'sensitive_topics_classifier'
+    model_name = "sensitive_topics_classifier"
     mdir = os.path.join(get_model_dir(datapath), model_name)
-    version = 'v1'
+    version = "v1"
     if not built(mdir, version):
-        opt = {'datapath': datapath}
-        fnames = ['sensitive_topics_classifier2.tgz']
+        opt = {"datapath": datapath}
+        fnames = ["sensitive_topics_classifier2.tgz"]
         download_models(
             opt,
             fnames,

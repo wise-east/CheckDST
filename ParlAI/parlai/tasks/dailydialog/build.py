@@ -12,19 +12,19 @@ import os
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/dailydialog/dailydialog.tar.gz',
-        'dailydialog.tar.gz',
-        'c3adb09bd715b9fa5cd1ac41613b7de61eb5afbe477826a6146abefef573e6bb',
+        "http://parl.ai/downloads/dailydialog/dailydialog.tar.gz",
+        "dailydialog.tar.gz",
+        "c3adb09bd715b9fa5cd1ac41613b7de61eb5afbe477826a6146abefef573e6bb",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'dailydialog')
-    version = 'None'
+    dpath = os.path.join(opt["datapath"], "dailydialog")
+    version = "None"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

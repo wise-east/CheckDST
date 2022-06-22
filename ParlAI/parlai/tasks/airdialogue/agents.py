@@ -17,7 +17,7 @@ def _path(opt):
     build(opt)
 
     # set up path to data (specific to each dataset)
-    jsons_path = os.path.join(opt['datapath'], 'airdialogue_data', 'airdialogue')
+    jsons_path = os.path.join(opt["datapath"], "airdialogue_data", "airdialogue")
     return jsons_path
 
 
@@ -34,23 +34,23 @@ class AirDialogueTeacher(FixedDialogTeacher):
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
         jsons_path = _path(opt)
-        self.datatype = opt['datatype'].split(':')[0]
+        self.datatype = opt["datatype"].split(":")[0]
         if shared is not None:
-            self.messages = shared['messages']
+            self.messages = shared["messages"]
         else:
             self.messages = []
             self._setup_data(jsons_path)
         # self._setup_data(jsons_path)
-        self.id = 'airdialogue'
+        self.id = "airdialogue"
         self.reset()
 
     def _setup_data(self, jsons_path):
-        train_path = os.path.join(jsons_path, 'train_data.json')
-        test_valid_path = os.path.join(jsons_path, 'dev_data.json')
-        if self.datatype.startswith('test'):
+        train_path = os.path.join(jsons_path, "train_data.json")
+        test_valid_path = os.path.join(jsons_path, "dev_data.json")
+        if self.datatype.startswith("test"):
             self.save_messages_from_path(test_valid_path)
             self.messages = self.messages[len(self.messages) // 2 :]
-        elif self.datatype.startswith('valid'):
+        elif self.datatype.startswith("valid"):
             self.save_messages_from_path(test_valid_path)
             self.messages = self.messages[: len(self.messages) // 2]
         else:
@@ -60,11 +60,11 @@ class AirDialogueTeacher(FixedDialogTeacher):
         with PathManager.open(json_path) as f:
             for line in f:
                 if len(line) > 1:
-                    self.messages.append(json.loads(line)['dialogue'])
+                    self.messages.append(json.loads(line)["dialogue"])
 
     def share(self):
         shared = super().share()
-        shared['messages'] = self.messages
+        shared["messages"] = self.messages
         return shared
 
     def num_examples(self):
@@ -79,20 +79,20 @@ class AirDialogueTeacher(FixedDialogTeacher):
     def get(self, episode_idx, entry_idx=0):
         log_idx = entry_idx * 2
         entry = self.messages[episode_idx][log_idx]
-        entry = entry.split(': ')[1]
+        entry = entry.split(": ")[1]
         last_backnforth_idx = len(self.messages[episode_idx]) - 2
         # sometimes the first speaker is at the end with no reply
         if len(self.messages[episode_idx]) % 2 == 1:
             last_backnforth_idx -= 1
         episode_done = log_idx >= last_backnforth_idx
         label_text = self.messages[episode_idx][log_idx + 1]
-        label_text = label_text.split(': ')[1]
+        label_text = label_text.split(": ")[1]
         labels = [label_text]
         action = {
-            'id': self.id,
-            'text': entry,
-            'episode_done': episode_done,
-            'labels': labels,
+            "id": self.id,
+            "text": entry,
+            "episode_done": episode_done,
+            "labels": labels,
         }
         return Message(action)
 

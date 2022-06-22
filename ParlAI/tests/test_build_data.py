@@ -22,11 +22,11 @@ class TestBuildData(unittest.TestCase):
     Basic tests on the build_data.py download_multiprocess.
     """
 
-    dest_filenames = ('mnist0.tar.gz', 'mnist1.tar.gz', 'mnist2.tar.gz')
+    dest_filenames = ("mnist0.tar.gz", "mnist1.tar.gz", "mnist2.tar.gz")
 
     def setUp(self):
-        self.datapath = ParlaiParser().parse_args([])['datapath']
-        self.datapath = os.path.join(self.datapath, 'build_data_pyt_data')
+        self.datapath = ParlaiParser().parse_args([])["datapath"]
+        self.datapath = os.path.join(self.datapath, "build_data_pyt_data")
         PathManager.mkdirs(self.datapath)
 
         for d in self.dest_filenames:
@@ -38,9 +38,9 @@ class TestBuildData(unittest.TestCase):
 
     def test_download_multiprocess(self):
         urls = [
-            'https://parl.ai/downloads/mnist/mnist.tar.gz',
-            'https://parl.ai/downloads/mnist/mnist.tar.gz.BAD',
-            'https://parl.ai/downloads/mnist/mnist.tar.gz.BAD',
+            "https://parl.ai/downloads/mnist/mnist.tar.gz",
+            "https://parl.ai/downloads/mnist/mnist.tar.gz.BAD",
+            "https://parl.ai/downloads/mnist/mnist.tar.gz.BAD",
         ]
 
         download_results = build_data.download_multiprocess(
@@ -49,18 +49,18 @@ class TestBuildData(unittest.TestCase):
 
         output_filenames, output_statuses, output_errors = zip(*download_results)
         self.assertEqual(
-            output_filenames, self.dest_filenames, 'output filenames not correct'
+            output_filenames, self.dest_filenames, "output filenames not correct"
         )
         self.assertEqual(
-            output_statuses, (200, 403, 403), 'output http statuses not correct'
+            output_statuses, (200, 403, 403), "output http statuses not correct"
         )
 
     def test_download_multiprocess_chunks(self):
         # Tests that the three finish downloading but may finish in any order
         urls = [
-            'https://parl.ai/downloads/mnist/mnist.tar.gz',
-            'https://parl.ai/downloads/mnist/mnist.tar.gz.BAD',
-            'https://parl.ai/downloads/mnist/mnist.tar.gz.BAD',
+            "https://parl.ai/downloads/mnist/mnist.tar.gz",
+            "https://parl.ai/downloads/mnist/mnist.tar.gz.BAD",
+            "https://parl.ai/downloads/mnist/mnist.tar.gz.BAD",
         ]
 
         download_results = build_data.download_multiprocess(
@@ -69,19 +69,19 @@ class TestBuildData(unittest.TestCase):
 
         output_filenames, output_statuses, output_errors = zip(*download_results)
 
-        self.assertIn('mnist0.tar.gz', output_filenames)
-        self.assertIn('mnist1.tar.gz', output_filenames)
-        self.assertIn('mnist2.tar.gz', output_filenames)
-        self.assertIn(200, output_statuses, 'unexpected error code')
-        self.assertIn(403, output_statuses, 'unexpected error code')
+        self.assertIn("mnist0.tar.gz", output_filenames)
+        self.assertIn("mnist1.tar.gz", output_filenames)
+        self.assertIn("mnist2.tar.gz", output_filenames)
+        self.assertIn(200, output_statuses, "unexpected error code")
+        self.assertIn(403, output_statuses, "unexpected error code")
 
     def test_connectionerror_download(self):
-        with unittest.mock.patch('requests.Session.get') as Session:
+        with unittest.mock.patch("requests.Session.get") as Session:
             Session.side_effect = requests.exceptions.ConnectTimeout
             with testing_utils.tempdir() as tmpdir:
                 with self.assertRaises(RuntimeError):
                     build_data.download(
-                        'http://test.com/bad', tmpdir, 'foo', num_retries=3
+                        "http://test.com/bad", tmpdir, "foo", num_retries=3
                     )
             assert Session.call_count == 3
 
@@ -147,6 +147,6 @@ class TestUnzip(unittest.TestCase):
             assert not os.path.exists(zname)
 
 
-if __name__ == '__main__':
-    multiprocessing.set_start_method('spawn')
+if __name__ == "__main__":
+    multiprocessing.set_start_method("spawn")
     unittest.main()

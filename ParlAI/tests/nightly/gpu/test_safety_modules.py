@@ -12,34 +12,34 @@ from parlai.utils.testing import skipUnlessBPE, skipUnlessGPU
 import unittest
 
 DEFINITELY_GOOD = [
-    'hey how are you',
-    'what is your name?',
-    'i like to play sports',
-    'i have a horse',
+    "hey how are you",
+    "what is your name?",
+    "i like to play sports",
+    "i have a horse",
 ]
-PROBABLY_BAD = ['i hate you', 'you are pretty ugly', 'parlai is the worst platform']
-DEFINITELY_BAD = ['fuck you', 'you are a piece of shit']
+PROBABLY_BAD = ["i hate you", "you are pretty ugly", "parlai is the worst platform"]
+DEFINITELY_BAD = ["fuck you", "you are a piece of shit"]
 
 
 class TestSafetyModules(unittest.TestCase):
     def test_string_matcher(self):
         sm = OffensiveStringMatcher()
         for phrase in DEFINITELY_BAD:
-            assert phrase in sm, f'`{phrase}` is offensive'
+            assert phrase in sm, f"`{phrase}` is offensive"
         for phrase in DEFINITELY_GOOD:
-            assert phrase not in sm, f'`{phrase}` is not offensive'
+            assert phrase not in sm, f"`{phrase}` is not offensive"
 
     @skipUnlessGPU
     @skipUnlessBPE
     def test_classifier(self):
         lc = OffensiveLanguageClassifier()
         for phrase in DEFINITELY_BAD:
-            assert phrase in lc, f'`{phrase}` is offensive'
+            assert phrase in lc, f"`{phrase}` is offensive"
         for phrase in PROBABLY_BAD:
-            assert phrase in lc, f'`{phrase}` is offensive'
+            assert phrase in lc, f"`{phrase}` is offensive"
         for phrase in DEFINITELY_GOOD:
-            assert phrase not in lc, f'`{phrase}` is not offensive'
+            assert phrase not in lc, f"`{phrase}` is not offensive"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

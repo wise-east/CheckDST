@@ -20,11 +20,11 @@ class LongTermMemoryMutator(ManyEpisodeMutator):
     def many_episode_mutation(self, episode: List[Message]) -> List[List[Message]]:
         history = []
         for message in episode:
-            if message['text'] == '__SILENCE__':
+            if message["text"] == "__SILENCE__":
                 continue
-            history.append(message.pop('text'))
-            message['text'] = '\n'.join(history)
-            labels = message.pop('labels')
-            message['labels'] = ["personal_knowledge"]
+            history.append(message.pop("text"))
+            message["text"] = "\n".join(history)
+            labels = message.pop("labels")
+            message["labels"] = ["personal_knowledge"]
             yield [message]
             history.append(random.choice(labels))

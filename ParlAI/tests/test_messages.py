@@ -12,12 +12,12 @@ import unittest
 class TestUtils(unittest.TestCase):
     def test_message(self):
         message = Message()
-        message['text'] = 'lol'
+        message["text"] = "lol"
         err = None
         try:
-            message['text'] = 'rofl'
+            message["text"] = "rofl"
         except RuntimeError as e:
             err = e
-        assert err is not None, 'Message allowed override'
+        assert err is not None, "Message allowed override"
         message_copy = message.copy()
-        assert type(message_copy) == Message, 'Message did not copy properly'
+        assert type(message_copy) == Message, "Message did not copy properly"

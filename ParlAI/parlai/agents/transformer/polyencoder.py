@@ -40,59 +40,59 @@ class PolyencoderAgent(TorchRankerAgent):
         Add command-line arguments specifically for this agent.
         """
         TransformerRankerAgent.add_cmdline_args(parser, partial_opt=partial_opt)
-        agent = parser.add_argument_group('Polyencoder Arguments')
+        agent = parser.add_argument_group("Polyencoder Arguments")
         agent.add_argument(
-            '--polyencoder-type',
+            "--polyencoder-type",
             type=str,
-            default='codes',
-            choices=['codes', 'n_first'],
-            help='Type of polyencoder, either we compute'
-            'vectors using codes + attention, or we '
-            'simply take the first N vectors.',
-            recommended='codes',
+            default="codes",
+            choices=["codes", "n_first"],
+            help="Type of polyencoder, either we compute"
+            "vectors using codes + attention, or we "
+            "simply take the first N vectors.",
+            recommended="codes",
         )
         agent.add_argument(
-            '--poly-n-codes',
+            "--poly-n-codes",
             type=int,
             default=64,
-            help='number of vectors used to represent the context'
-            'in the case of n_first, those are the number'
-            'of vectors that are considered.',
+            help="number of vectors used to represent the context"
+            "in the case of n_first, those are the number"
+            "of vectors that are considered.",
             recommended=64,
         )
         agent.add_argument(
-            '--poly-attention-type',
+            "--poly-attention-type",
             type=str,
-            default='basic',
-            choices=['basic', 'sqrt', 'multihead'],
-            help='Type of the top aggregation layer of the poly-'
-            'encoder (where the candidate representation is'
-            'the key)',
-            recommended='basic',
+            default="basic",
+            choices=["basic", "sqrt", "multihead"],
+            help="Type of the top aggregation layer of the poly-"
+            "encoder (where the candidate representation is"
+            "the key)",
+            recommended="basic",
         )
         agent.add_argument(
-            '--poly-attention-num-heads',
+            "--poly-attention-num-heads",
             type=int,
             default=4,
-            help='In case poly-attention-type is multihead, '
-            'specify the number of heads',
+            help="In case poly-attention-type is multihead, "
+            "specify the number of heads",
         )
 
         # Those arguments are here in case where polyencoder type is 'code'
         agent.add_argument(
-            '--codes-attention-type',
+            "--codes-attention-type",
             type=str,
-            default='basic',
-            choices=['basic', 'sqrt', 'multihead'],
-            help='Type ',
-            recommended='basic',
+            default="basic",
+            choices=["basic", "sqrt", "multihead"],
+            help="Type ",
+            recommended="basic",
         )
         agent.add_argument(
-            '--codes-attention-num-heads',
+            "--codes-attention-num-heads",
             type=int,
             default=4,
-            help='In case codes-attention-type is multihead, '
-            'specify the number of heads',
+            help="In case codes-attention-type is multihead, "
+            "specify the number of heads",
         )
         return agent
 
@@ -102,17 +102,17 @@ class PolyencoderAgent(TorchRankerAgent):
         opt_from_disk = super(PolyencoderAgent, cls).upgrade_opt(opt_from_disk)
 
         polyencoder_attention_keys_value = opt_from_disk.get(
-            'polyencoder_attention_keys'
+            "polyencoder_attention_keys"
         )
         if polyencoder_attention_keys_value is not None:
             # 2020-02-19 We are deprecating this flag because it was used for a one-time
             # set of experiments and won't be used again. This flag was defaulted to
             # 'context', so throw an exception otherwise.
-            if polyencoder_attention_keys_value == 'context':
-                del opt_from_disk['polyencoder_attention_keys']
+            if polyencoder_attention_keys_value == "context":
+                del opt_from_disk["polyencoder_attention_keys"]
             else:
                 raise NotImplementedError(
-                    'This --polyencoder-attention-keys mode (found in commit 06f0d9f) is no longer supported!'
+                    "This --polyencoder-attention-keys mode (found in commit 06f0d9f) is no longer supported!"
                 )
 
         return opt_from_disk
@@ -133,8 +133,8 @@ class PolyencoderAgent(TorchRankerAgent):
         """
         Add the start and end token to the labels.
         """
-        kwargs['add_start'] = True
-        kwargs['add_end'] = True
+        kwargs["add_start"] = True
+        kwargs["add_end"] = True
         obs = super().vectorize(*args, **kwargs)
         return obs
 
@@ -143,11 +143,11 @@ class PolyencoderAgent(TorchRankerAgent):
         Add the start and end token to the text.
         """
         obs = super()._set_text_vec(*args, **kwargs)
-        if 'text_vec' in obs and 'added_start_end_tokens' not in obs:
+        if "text_vec" in obs and "added_start_end_tokens" not in obs:
             obs.force_set(
-                'text_vec', self._add_start_end_tokens(obs['text_vec'], True, True)
+                "text_vec", self._add_start_end_tokens(obs["text_vec"], True, True)
             )
-            obs['added_start_end_tokens'] = True
+            obs["added_start_end_tokens"] = True
         return obs
 
     def vectorize_fixed_candidates(self, *args, **kwargs):
@@ -157,8 +157,8 @@ class PolyencoderAgent(TorchRankerAgent):
         Override to add start and end token when computing the candidate encodings in
         interactive mode.
         """
-        kwargs['add_start'] = True
-        kwargs['add_end'] = True
+        kwargs["add_start"] = True
+        kwargs["add_end"] = True
         return super().vectorize_fixed_candidates(*args, **kwargs)
 
     def _make_candidate_encs(self, vecs):
@@ -263,14 +263,14 @@ class PolyencoderAgent(TorchRankerAgent):
         This is intentionally overridable so that richer models can pass additional
         inputs.
         """
-        return {'ctxt_tokens': batch.text_vec}
+        return {"ctxt_tokens": batch.text_vec}
 
     def load_state_dict(self, state_dict):
         """
         Override to account for codes.
         """
-        if self.model.type == 'codes' and 'codes' not in state_dict:
-            state_dict['codes'] = self.model.codes
+        if self.model.type == "codes" and "codes" not in state_dict:
+            state_dict["codes"] = self.model.codes
         super().load_state_dict(state_dict)
 
     def _resize_token_embeddings(self, state_dict, msg=None):
@@ -281,16 +281,16 @@ class PolyencoderAgent(TorchRankerAgent):
         """
         # map extra special tokens carefully
         new_size = self.model.encoder_ctxt.embeddings.weight.size()[0]
-        orig_size = state_dict['encoder_ctxt.embeddings.weight'].size()[0]
-        logging.info(f'Resizing token embeddings from {orig_size} to {new_size}')
+        orig_size = state_dict["encoder_ctxt.embeddings.weight"].size()[0]
+        logging.info(f"Resizing token embeddings from {orig_size} to {new_size}")
         if new_size <= orig_size:
             # new size should be greater than original size,
             # as we are adding special tokens
             raise RuntimeError(msg)
 
         for emb_weights in [
-            'encoder_ctxt.embeddings.weight',
-            'encoder_cand.embeddings.weight',
+            "encoder_ctxt.embeddings.weight",
+            "encoder_cand.embeddings.weight",
         ]:
             # get new_embs
             old_embs = state_dict[emb_weights]
@@ -324,43 +324,43 @@ class PolyEncoderModule(torch.nn.Module):
             opt=opt,
             dict_=dict_,
             null_idx=null_idx,
-            reduction_type=opt['reduction_type'],
+            reduction_type=opt["reduction_type"],
             for_context=False,
         )
 
-        self.type = opt['polyencoder_type']
-        self.n_codes = opt['poly_n_codes']
-        self.attention_type = opt['poly_attention_type']
-        self.attention_num_heads = opt['poly_attention_num_heads']
-        self.codes_attention_type = opt['codes_attention_type']
-        self.codes_attention_num_heads = opt['codes_attention_num_heads']
-        embed_dim = opt['embedding_size']
+        self.type = opt["polyencoder_type"]
+        self.n_codes = opt["poly_n_codes"]
+        self.attention_type = opt["poly_attention_type"]
+        self.attention_num_heads = opt["poly_attention_num_heads"]
+        self.codes_attention_type = opt["codes_attention_type"]
+        self.codes_attention_num_heads = opt["codes_attention_num_heads"]
+        embed_dim = opt["embedding_size"]
 
         # In case it's a polyencoder with code.
-        if self.type == 'codes':
+        if self.type == "codes":
             # experimentally it seems that random with size = 1 was good.
             codes = torch.empty(self.n_codes, embed_dim)
             codes = torch.nn.init.uniform_(codes)
             self.codes = torch.nn.Parameter(codes)
 
             # The attention for the codes.
-            if self.codes_attention_type == 'multihead':
+            if self.codes_attention_type == "multihead":
                 self.code_attention = MultiHeadAttention(
-                    opt, self.codes_attention_num_heads, embed_dim, opt['dropout']
+                    opt, self.codes_attention_num_heads, embed_dim, opt["dropout"]
                 )
-            elif self.codes_attention_type == 'sqrt':
+            elif self.codes_attention_type == "sqrt":
                 self.code_attention = PolyBasicAttention(
-                    self.type, self.n_codes, dim=2, attn='sqrt', get_weights=False
+                    self.type, self.n_codes, dim=2, attn="sqrt", get_weights=False
                 )
-            elif self.codes_attention_type == 'basic':
+            elif self.codes_attention_type == "basic":
                 self.code_attention = PolyBasicAttention(
-                    self.type, self.n_codes, dim=2, attn='basic', get_weights=False
+                    self.type, self.n_codes, dim=2, attn="basic", get_weights=False
                 )
 
         # The final attention (the one that takes the candidate as key)
-        if self.attention_type == 'multihead':
+        if self.attention_type == "multihead":
             self.attention = MultiHeadAttention(
-                opt, self.attention_num_heads, opt['embedding_size'], opt['dropout']
+                opt, self.attention_num_heads, opt["embedding_size"], opt["dropout"]
             )
         else:
             self.attention = PolyBasicAttention(
@@ -390,7 +390,7 @@ class PolyEncoderModule(torch.nn.Module):
             a TransformerEncoder, initialized correctly
         """
         embeddings = self._get_embeddings(
-            dict_=dict_, null_idx=null_idx, embedding_size=opt['embedding_size']
+            dict_=dict_, null_idx=null_idx, embedding_size=opt["embedding_size"]
         )
         return TransformerEncoder(
             opt=opt,
@@ -404,7 +404,7 @@ class PolyEncoderModule(torch.nn.Module):
         embeddings = torch.nn.Embedding(
             len(dict_), embedding_size, padding_idx=null_idx
         )
-        torch.nn.init.normal_(embeddings.weight, 0, embedding_size ** -0.5)
+        torch.nn.init.normal_(embeddings.weight, 0, embedding_size**-0.5)
         return embeddings
 
     def attend(self, attention_layer, queries, keys, values, mask):
@@ -433,7 +433,7 @@ class PolyEncoderModule(torch.nn.Module):
         elif isinstance(attention_layer, MultiHeadAttention):
             return attention_layer(queries, keys, values, mask)[0]
         else:
-            raise Exception('Unrecognized type of attention')
+            raise Exception("Unrecognized type of attention")
 
     def encode(
         self, cand_tokens: Optional[torch.Tensor], **ctxt_inputs: torch.Tensor
@@ -467,9 +467,9 @@ class PolyEncoderModule(torch.nn.Module):
             cand_embed = cand_embed.view(bsz, num_cands, -1)
 
         if len(ctxt_inputs) > 0:
-            assert 'ctxt_tokens' in ctxt_inputs
-            if ctxt_inputs['ctxt_tokens'] is not None:
-                assert len(ctxt_inputs['ctxt_tokens'].shape) == 2
+            assert "ctxt_tokens" in ctxt_inputs
+            if ctxt_inputs["ctxt_tokens"] is not None:
+                assert len(ctxt_inputs["ctxt_tokens"].shape) == 2
             bsz = self._get_context_batch_size(**ctxt_inputs)
             # get context_representation. Now that depends on the cases.
             ctxt_out, ctxt_mask = self.encoder_ctxt(
@@ -477,7 +477,7 @@ class PolyEncoderModule(torch.nn.Module):
             )
             dim = ctxt_out.size(2)
 
-            if self.type == 'codes':
+            if self.type == "codes":
                 ctxt_rep = self.attend(
                     self.code_attention,
                     queries=self.codes.repeat(bsz, 1, 1),
@@ -487,7 +487,7 @@ class PolyEncoderModule(torch.nn.Module):
                 )
                 ctxt_rep_mask = ctxt_rep.new_ones(bsz, self.n_codes).byte()
 
-            elif self.type == 'n_first':
+            elif self.type == "n_first":
                 # Expand the output if it is not long enough
                 if ctxt_out.size(1) < self.n_codes:
                     difference = self.n_codes - ctxt_out.size(1)
@@ -508,7 +508,7 @@ class PolyEncoderModule(torch.nn.Module):
         Can be overridden by subclasses that do not always have text tokens in the
         context.
         """
-        return ctxt_inputs['ctxt_tokens'].size(0)
+        return ctxt_inputs["ctxt_tokens"].size(0)
 
     def _context_encoder_input(self, ctxt_inputs: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -523,8 +523,8 @@ class PolyEncoderModule(torch.nn.Module):
         argument names than that of the model itself. This is intentionally overridable
         so that richer models can pass additional inputs.
         """
-        assert set(ctxt_inputs.keys()) == {'ctxt_tokens'}
-        return {'input': ctxt_inputs['ctxt_tokens']}
+        assert set(ctxt_inputs.keys()) == {"ctxt_tokens"}
+        return {"input": ctxt_inputs["ctxt_tokens"]}
 
     def score(self, ctxt_rep, ctxt_rep_mask, cand_embed):
         """
@@ -583,7 +583,7 @@ class PolyEncoderModule(torch.nn.Module):
             ctxt_rep is not None and ctxt_rep_mask is not None and cand_rep is not None
         ):
             return self.score(ctxt_rep, ctxt_rep_mask, cand_rep)
-        raise Exception('Unsupported operation')
+        raise Exception("Unsupported operation")
 
 
 class PolyBasicAttention(BasicAttention):
@@ -604,7 +604,7 @@ class PolyBasicAttention(BasicAttention):
         polyencoder type is 'codes'
         """
         lhs_emb = super().forward(*args, **kwargs)
-        if self.poly_type == 'codes' and self.n_codes == 1 and len(lhs_emb.shape) == 2:
+        if self.poly_type == "codes" and self.n_codes == 1 and len(lhs_emb.shape) == 2:
             lhs_emb = lhs_emb.unsqueeze(self.dim - 1)
         return lhs_emb
 

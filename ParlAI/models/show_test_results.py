@@ -29,8 +29,8 @@ for dir in dirs:
             with trainstats.open("r") as f:
                 results = json.load(f)
             if "final_test_report" in results:
-                jga = results['final_test_report'].get("joint goal acc", -1)
-                loss = results['final_test_report'].get("loss", -1)
+                jga = results["final_test_report"].get("joint goal acc", -1)
+                loss = results["final_test_report"].get("loss", -1)
 
             if jga != -1 and jga < 0.3:
                 print(f"strange JGA, check dir: \t{jga:.3f} {str(shortened_dir)}")

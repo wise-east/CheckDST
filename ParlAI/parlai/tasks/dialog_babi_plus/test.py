@@ -8,8 +8,8 @@ from parlai.utils.testing import AutoTeacherTest  # noqa: F401
 
 
 class TestDefaultTeacher(AutoTeacherTest):
-    task = 'dialog_babi_plus'
+    task = "dialog_babi_plus"
 
 
 class TestKbTeacher(AutoTeacherTest):
-    task = 'dialog_babi_plus:KB'
+    task = "dialog_babi_plus:KB"

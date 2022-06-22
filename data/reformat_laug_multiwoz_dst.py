@@ -24,14 +24,14 @@ for inv in invs:
 
     for key in keys:
         data = read_zipped_json(
-            os.path.join(data_dir, sub_dir, key + '.json.zip'), key + '.json'
+            os.path.join(data_dir, sub_dir, key + ".json.zip"), key + ".json"
         )
-        print('load {}, size {}'.format(key, len(data)))
+        print("load {}, size {}".format(key, len(data)))
 
         results = {}
         skipped_error = 0
         for title, sess in tqdm(data.items()):
-            logs = sess['log']
+            logs = sess["log"]
             context = ""
             title = title.replace(".json", "")
             # this is for keeping track of augmented conversation if there is any augmentation for 'text' field such that is different from the 'originalText' field
@@ -40,7 +40,7 @@ for inv in invs:
             slots = {}
             for i, diag in enumerate(logs):
                 # format utterance
-                text = normalize_text(diag['text'])
+                text = normalize_text(diag["text"])
 
                 # odd turns are user turns. add DST example
                 if i % 2 == 0:
@@ -48,11 +48,11 @@ for inv in invs:
                     turn_num = int(i / 2)
                     # ignore slots. will get it from v23 anyways
                     turn = {
-                        'turn_num': turn_num,
-                        'dial_id': title.lower() + ".json",
+                        "turn_num": turn_num,
+                        "dial_id": title.lower() + ".json",
                         "context": my_strip(context),
                     }
-                    sample_name = turn['dial_id'] + f"-{turn_num}"
+                    sample_name = turn["dial_id"] + f"-{turn_num}"
 
                     # if we are reformatting a datset with augmentation, keep the original text as well
                     if sub_dir != "orig":
@@ -66,8 +66,8 @@ for inv in invs:
                             # pprint(diag)
                             # load original context from official data and use it.
                             context_ = official_data[key][
-                                turn['dial_id'] + f"-{turn_num}"
-                            ]['context']
+                                turn["dial_id"] + f"-{turn_num}"
+                            ]["context"]
                             orig_text = context_.split("<user>")[-1]
                         else:
                             context_ += "<user> " + orig_text + " "

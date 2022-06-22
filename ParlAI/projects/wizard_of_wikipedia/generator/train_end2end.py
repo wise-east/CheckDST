@@ -6,14 +6,14 @@
 
 from parlai.scripts.train_model import setup_args, TrainLoop
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = setup_args()
     parser.set_defaults(
-        task='wizard_of_wikipedia:generator:random_split',
-        model='projects.wizard_of_wikipedia.generator.agents:EndToEndAgent',
-        model_file='/tmp/end2end_generator/model',
+        task="wizard_of_wikipedia:generator:random_split",
+        model="projects.wizard_of_wikipedia.generator.agents:EndToEndAgent",
+        model_file="/tmp/end2end_generator/model",
         dict_lower=True,
-        dict_tokenizer='bpe',
+        dict_tokenizer="bpe",
         n_layers=5,
         n_heads=2,
         dropout=0.20,
@@ -21,8 +21,8 @@ if __name__ == '__main__':
         embedding_size=256,
         log_every_n_secs=10,
         validation_patience=12,
-        validation_metric='ppl',
-        validation_metric_mode='min',
+        validation_metric="ppl",
+        validation_metric_mode="min",
         validation_every_n_epochs=0.5,
         n_positions=128,
         truncate=128,
@@ -32,8 +32,8 @@ if __name__ == '__main__':
         learningrate=5e-4,
         warmup_updates=5000,
         clip=0.1,
-        lr_scheduler='invsqrt',
-        embedding_type='fasttext',
+        lr_scheduler="invsqrt",
+        embedding_type="fasttext",
         beam_size=1,
         skip_generation=False,
         batchsize=64,

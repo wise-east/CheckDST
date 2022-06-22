@@ -18,16 +18,16 @@ from parlai.utils.misc import recursive_getattr
 
 # Mapping from BERT key to ParlAI Key
 BERT_EMB_DICT_MAP = {
-    'embeddings.word_embeddings': 'embeddings',
-    'embeddings.position_embeddings': 'position_embeddings',
-    'embeddings.token_type_embeddings': 'segment_embeddings',
-    'embeddings.LayerNorm': 'norm_embeddings',
-    'embeddings.dropout': 'dropout',
+    "embeddings.word_embeddings": "embeddings",
+    "embeddings.position_embeddings": "position_embeddings",
+    "embeddings.token_type_embeddings": "segment_embeddings",
+    "embeddings.LayerNorm": "norm_embeddings",
+    "embeddings.dropout": "dropout",
 }
 
 
 # List of weight keys not necessary in ParlAI Model
-BERT_COMPATIBILITY_KEYS = ['embeddings.position_ids']
+BERT_COMPATIBILITY_KEYS = ["embeddings.position_ids"]
 
 
 class BertConversionUtils:
@@ -40,7 +40,7 @@ class BertConversionUtils:
         datapath: str,
         state_dict: Dict[str, torch.Tensor],
         pretrained_dpr_path: str,
-        encoder_type: str = 'query',
+        encoder_type: str = "query",
     ) -> Dict[str, torch.Tensor]:
         """
         Load BERT State from HF Model, convert to ParlAI Model.
@@ -57,7 +57,7 @@ class BertConversionUtils:
         """
 
         try:
-            bert_model = BertModel.from_pretrained('bert-base-uncased')
+            bert_model = BertModel.from_pretrained("bert-base-uncased")
         except OSError:
             model_path = PathManager.get_local_path(
                 os.path.join(datapath, "bert_base_uncased")
@@ -92,20 +92,20 @@ class BertConversionUtils:
         :param encoder_type:
             whether we're loading a document or query encoder.
         """
-        saved_state = torch.load(pretrained_dpr_path, map_location='cpu')
+        saved_state = torch.load(pretrained_dpr_path, map_location="cpu")
         model_to_load = (
-            bert_model.module if hasattr(bert_model, 'module') else bert_model
+            bert_model.module if hasattr(bert_model, "module") else bert_model
         )
 
-        prefix = 'question_model.' if encoder_type == 'query' else 'ctx_model.'
+        prefix = "question_model." if encoder_type == "query" else "ctx_model."
         prefix_len = len(prefix)
         encoder_state = {
             key[prefix_len:]: value
-            for (key, value) in saved_state['model_dict'].items()
+            for (key, value) in saved_state["model_dict"].items()
             if key.startswith(prefix)
         }
         encoder_state.update(
-            {k: v for k, v in saved_state['model_dict'].items() if 'encode_proj' in k}
+            {k: v for k, v in saved_state["model_dict"].items() if "encode_proj" in k}
         )
         try:
             model_to_load.load_state_dict(encoder_state)
@@ -132,7 +132,7 @@ class BertConversionUtils:
             mapped_key = each_key
 
             # 0. Skip pooler
-            if 'pooler' in each_key:
+            if "pooler" in each_key:
                 continue
 
             # 1. Map Embeddings
@@ -140,34 +140,34 @@ class BertConversionUtils:
                 mapped_key = mapped_key.replace(emb, BERT_EMB_DICT_MAP[emb])
 
             # 2. Map Layers
-            if 'encoder' in each_key and 'layer' in each_key:
-                mapped_key = mapped_key.replace('encoder.layer', 'layers')
+            if "encoder" in each_key and "layer" in each_key:
+                mapped_key = mapped_key.replace("encoder.layer", "layers")
             # 3. map attention
-            if 'attention' in each_key:
+            if "attention" in each_key:
                 mapped_key = mapped_key.replace(
-                    'attention.self.query', 'attention.q_lin'
+                    "attention.self.query", "attention.q_lin"
                 )
-                mapped_key = mapped_key.replace('attention.self.key', 'attention.k_lin')
+                mapped_key = mapped_key.replace("attention.self.key", "attention.k_lin")
                 mapped_key = mapped_key.replace(
-                    'attention.self.value', 'attention.v_lin'
-                )
-                mapped_key = mapped_key.replace(
-                    'attention.self.dropout', 'attention.attn_dropout'
+                    "attention.self.value", "attention.v_lin"
                 )
                 mapped_key = mapped_key.replace(
-                    'attention.output.dense', 'attention.out_lin'
+                    "attention.self.dropout", "attention.attn_dropout"
                 )
-                mapped_key = mapped_key.replace('attention.output.LayerNorm', 'norm1')
                 mapped_key = mapped_key.replace(
-                    'attention.output.dropout', 'ffn.relu_dropout'
+                    "attention.output.dense", "attention.out_lin"
+                )
+                mapped_key = mapped_key.replace("attention.output.LayerNorm", "norm1")
+                mapped_key = mapped_key.replace(
+                    "attention.output.dropout", "ffn.relu_dropout"
                 )
             # 4. Map FFN
-            if 'intermediate' in each_key:
-                mapped_key = mapped_key.replace('intermediate.dense', 'ffn.lin1')
-            if 'output' in each_key:
-                mapped_key = mapped_key.replace('output.dense', 'ffn.lin2')
-                mapped_key = mapped_key.replace('output.LayerNorm', 'norm2')
-                mapped_key = mapped_key.replace('output.dropout', 'dropout')
+            if "intermediate" in each_key:
+                mapped_key = mapped_key.replace("intermediate.dense", "ffn.lin1")
+            if "output" in each_key:
+                mapped_key = mapped_key.replace("output.dense", "ffn.lin2")
+                mapped_key = mapped_key.replace("output.LayerNorm", "norm2")
+                mapped_key = mapped_key.replace("output.dropout", "dropout")
 
             return_dict[mapped_key] = state_dict[each_key]
 

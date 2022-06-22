@@ -17,27 +17,27 @@ import parlai.tasks.md_gender.utils as gend_utils
 def get_threshold_preds(
     act, axis, self_threshold=-1, partner_threshold=-1, prettify=True
 ):
-    pred = act['text']
+    pred = act["text"]
     if prettify:
-        pred = pred.split(':')[-1]
+        pred = pred.split(":")[-1]
 
-    if 'sorted_scores' in act:
-        scores = F.softmax(act['sorted_scores'].float()).tolist()
+    if "sorted_scores" in act:
+        scores = F.softmax(act["sorted_scores"].float()).tolist()
         scores = [round(x, 4) for x in scores]
-        cands = act['text_candidates']
+        cands = act["text_candidates"]
         if prettify:
             cands = [
-                cand.split(':')[-1].replace('gender-neutral', 'neutral')
+                cand.split(":")[-1].replace("gender-neutral", "neutral")
                 for cand in cands
             ]
 
-        if axis == 'self' and self_threshold > 0:
+        if axis == "self" and self_threshold > 0:
             if scores[0] > self_threshold:
                 pred = cands[0]
             else:
                 pred = gend_utils.UNKNOWN
-        elif axis == 'partner' and partner_threshold > 0:
-            if cands[0] == 'neutral':
+        elif axis == "partner" and partner_threshold > 0:
+            if cands[0] == "neutral":
                 pred = cands[0]
             else:  # male or female
                 if scores[0] > partner_threshold:
@@ -46,8 +46,8 @@ def get_threshold_preds(
                     pred = gend_utils.UNKNOWN
 
         if prettify:
-            strs = [f'{cand} ({score})' for cand, score in zip(cands, scores)]
-            pred += '\n\t' + '[ ' + '\t'.join(strs) + ']'
+            strs = [f"{cand} ({score})" for cand, score in zip(cands, scores)]
+            pred += "\n\t" + "[ " + "\t".join(strs) + "]"
 
     return pred
 
@@ -56,19 +56,19 @@ def get_axis_predictions(
     act_label, model_agent, self_threshold, partner_threshold, return_acts=False
 ):
     act = deepcopy(act_label)
-    if 'labels' in act:
-        del act['labels']
-    if 'eval_labels' in act:
-        del act['eval_labels']
+    if "labels" in act:
+        del act["labels"]
+    if "eval_labels" in act:
+        del act["eval_labels"]
 
     # SELF (as) pred
-    act.force_set('label_candidates', gend_utils.SELF_CANDS)
+    act.force_set("label_candidates", gend_utils.SELF_CANDS)
     model_agent.observe(validate(act))
     self_act = model_agent.act()
     if not return_acts:
         self_pred = get_threshold_preds(
             self_act,
-            axis='self',
+            axis="self",
             self_threshold=self_threshold,
             partner_threshold=partner_threshold,
         )
@@ -76,13 +76,13 @@ def get_axis_predictions(
         self_pred = self_act
 
     # PARTNER (to) pred
-    act.force_set('label_candidates', gend_utils.PARTNER_CANDS)
+    act.force_set("label_candidates", gend_utils.PARTNER_CANDS)
     model_agent.observe(validate(act))
     partner_act = model_agent.act()
     if not return_acts:
         partner_pred = get_threshold_preds(
             partner_act,
-            axis='partner',
+            axis="partner",
             self_threshold=self_threshold,
             partner_threshold=partner_threshold,
         )
@@ -90,13 +90,13 @@ def get_axis_predictions(
         partner_pred = partner_act
 
     # ABOUT pred
-    act.force_set('label_candidates', gend_utils.ABOUT_CANDS)
+    act.force_set("label_candidates", gend_utils.ABOUT_CANDS)
     model_agent.observe(validate(act))
     about_act = model_agent.act()
     if not return_acts:
         about_pred = get_threshold_preds(
             about_act,
-            axis='about',
+            axis="about",
             self_threshold=self_threshold,
             partner_threshold=partner_threshold,
         )
@@ -116,22 +116,22 @@ class InteractiveWorld(DialogPartnerWorld):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        group = parser.add_argument_group('Gender Multiclass Interactive World')
+        group = parser.add_argument_group("Gender Multiclass Interactive World")
         group.add_argument(
-            '--self-threshold',
+            "--self-threshold",
             type=float,
             default=0.52,
-            help='Threshold for choosing unknown for self',
+            help="Threshold for choosing unknown for self",
         )
         group.add_argument(
-            '--partner-threshold',
+            "--partner-threshold",
             type=float,
             default=0.52,
-            help='Threshold for choosing unknown for self',
+            help="Threshold for choosing unknown for self",
         )
         parser.set_params(
             single_turn=True,  # this is a single turn task currently
-            eval_candidates='inline',
+            eval_candidates="inline",
             return_cand_scores=True,
         )
         return parser
@@ -154,12 +154,12 @@ class InteractiveWorld(DialogPartnerWorld):
         self_pred, partner_pred, about_pred = get_axis_predictions(
             act,
             model_agent,
-            self_threshold=self.opt['self_threshold'],
-            partner_threshold=self.opt['partner_threshold'],
+            self_threshold=self.opt["self_threshold"],
+            partner_threshold=self.opt["partner_threshold"],
         )
 
-        pred_text = f'SELF: {self_pred}\nPARTNER: {partner_pred}\nABOUT: {about_pred}'
-        acts[1] = {'id': 'MDGender Classifier', 'text': pred_text, 'episode_done': True}
+        pred_text = f"SELF: {self_pred}\nPARTNER: {partner_pred}\nABOUT: {about_pred}"
+        acts[1] = {"id": "MDGender Classifier", "text": pred_text, "episode_done": True}
 
         human_agent.observe(validate(acts[1]))
         self.update_counters()

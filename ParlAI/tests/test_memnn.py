@@ -21,9 +21,9 @@ class TestMemnn(unittest.TestCase):
 
         valid, test = testing_utils.train_model(
             dict(
-                task='integration_tests:overfit',
-                model='memnn',
-                optimizer='sgd',
+                task="integration_tests:overfit",
+                model="memnn",
+                optimizer="sgd",
                 lr=1,
                 momentum=0.9,
                 batchsize=4,
@@ -39,8 +39,8 @@ class TestMemnn(unittest.TestCase):
             )
         )
 
-        self.assertGreater(valid['hits@1'], 0.95)
-        self.assertGreater(test['hits@1'], 0.95)
+        self.assertGreater(valid["hits@1"], 0.95)
+        self.assertGreater(test["hits@1"], 0.95)
 
     def test_backcomp(self):
         """
@@ -48,19 +48,19 @@ class TestMemnn(unittest.TestCase):
         """
         valid, test = testing_utils.eval_model(
             dict(
-                task='integration_tests',
-                model='memnn',
-                model_file='zoo:unittest/memnn/model',
-                dict_file='zoo:unittest/memnn/model.dict',
+                task="integration_tests",
+                model="memnn",
+                model_file="zoo:unittest/memnn/model",
+                dict_file="zoo:unittest/memnn/model.dict",
                 batchsize=16,
             )
         )
 
-        self.assertGreaterEqual(valid['accuracy'], 0.88)
-        self.assertGreaterEqual(valid['f1'], 0.999)
-        self.assertGreaterEqual(test['accuracy'], 0.84)
-        self.assertGreaterEqual(test['f1'], 0.999)
+        self.assertGreaterEqual(valid["accuracy"], 0.88)
+        self.assertGreaterEqual(valid["f1"], 0.999)
+        self.assertGreaterEqual(test["accuracy"], 0.84)
+        self.assertGreaterEqual(test["f1"], 0.999)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

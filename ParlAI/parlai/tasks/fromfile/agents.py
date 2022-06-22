@@ -28,15 +28,15 @@ class FbformatTeacher(FbDeprecatedDialogTeacher):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        agent = parser.add_argument_group('FromFile Task Arguments')
-        agent.add_argument('-dp', '--fromfile-datapath', type=str, help="Data file")
+        agent = parser.add_argument_group("FromFile Task Arguments")
+        agent.add_argument("-dp", "--fromfile-datapath", type=str, help="Data file")
         return parser
 
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        if not opt.get('fromfile_datapath'):
-            raise RuntimeError('fromfile_datapath not specified')
-        opt['datafile'] = opt['fromfile_datapath']
+        if not opt.get("fromfile_datapath"):
+            raise RuntimeError("fromfile_datapath not specified")
+        opt["datafile"] = opt["fromfile_datapath"]
         super().__init__(opt, shared)
 
 
@@ -53,15 +53,15 @@ class Fbformat2Teacher(FbDeprecatedDialogTeacher):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        agent = parser.add_argument_group('FromFile Task Arguments')
-        agent.add_argument('-dp', '--fromfile-datapath2', type=str, help="Data file")
+        agent = parser.add_argument_group("FromFile Task Arguments")
+        agent.add_argument("-dp", "--fromfile-datapath2", type=str, help="Data file")
         return parser
 
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        if not opt.get('fromfile_datapath2'):
-            raise RuntimeError('-dp', 'fromfile_datapath2 not specified')
-        opt['datafile'] = opt['fromfile_datapath2']
+        if not opt.get("fromfile_datapath2"):
+            raise RuntimeError("-dp", "fromfile_datapath2 not specified")
+        opt["datafile"] = opt["fromfile_datapath2"]
         super().__init__(opt, shared)
 
 
@@ -77,12 +77,12 @@ class ParlaiformatTeacher(ParlAIDialogTeacher):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        agent = parser.add_argument_group('FromFile Task Arguments')
-        agent.add_argument('-ffdp', '--fromfile-datapath', type=str, help="Data file")
+        agent = parser.add_argument_group("FromFile Task Arguments")
+        agent.add_argument("-ffdp", "--fromfile-datapath", type=str, help="Data file")
         agent.add_argument(
-            '-ffdt',
-            '--fromfile-datatype-extension',
-            type='bool',
+            "-ffdt",
+            "--fromfile-datatype-extension",
+            type="bool",
             default=False,
             help="If true, use _train.txt, _valid.txt, _test.txt file extensions",
         )
@@ -91,17 +91,17 @@ class ParlaiformatTeacher(ParlAIDialogTeacher):
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
         opt = copy.deepcopy(opt)
-        if not opt.get('fromfile_datapath'):
-            raise RuntimeError('fromfile_datapath not specified')
-        datafile = opt['fromfile_datapath']
-        if self.opt['fromfile_datatype_extension']:
-            datafile += "_" + self.opt['datatype'].split(':')[0] + '.txt'
+        if not opt.get("fromfile_datapath"):
+            raise RuntimeError("fromfile_datapath not specified")
+        datafile = opt["fromfile_datapath"]
+        if self.opt["fromfile_datatype_extension"]:
+            datafile += "_" + self.opt["datatype"].split(":")[0] + ".txt"
         else:
             if shared is None and (
-                'valid' in self.opt['datatype'] or 'test' in self.opt['datatype']
+                "valid" in self.opt["datatype"] or "test" in self.opt["datatype"]
             ):
                 logging.warning(
-                    'You are using this fromfile data as a valid or test set without setting fromfile_datatype_extension to true. Please be aware this uses directly the file you indicated, make sure this is not the same as your training file.'
+                    "You are using this fromfile data as a valid or test set without setting fromfile_datatype_extension to true. Please be aware this uses directly the file you indicated, make sure this is not the same as your training file."
                 )
         if shared is None:
             self._setup_data(datafile)
@@ -117,16 +117,16 @@ class Parlaiformat2Teacher(ParlAIDialogTeacher):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        agent = parser.add_argument_group('FromFile Task Arguments')
-        agent.add_argument('--fromfile-datapath2', type=str, help="Data file")
+        agent = parser.add_argument_group("FromFile Task Arguments")
+        agent.add_argument("--fromfile-datapath2", type=str, help="Data file")
         return parser
 
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
         opt = copy.deepcopy(opt)
-        if not opt.get('fromfile_datapath2'):
-            raise RuntimeError('fromfile_datapath2 not specified')
-        datafile = opt['fromfile_datapath2']
+        if not opt.get("fromfile_datapath2"):
+            raise RuntimeError("fromfile_datapath2 not specified")
+        datafile = opt["fromfile_datapath2"]
         if shared is None:
             self._setup_data(datafile)
         self.id = datafile

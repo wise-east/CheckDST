@@ -17,7 +17,7 @@ try:
     import torch
     import torch.nn.functional as F
 except ImportError:
-    raise ImportError('Parlai requires pytorch. Go to http://pytorch.org to install.')
+    raise ImportError("Parlai requires pytorch. Go to http://pytorch.org to install.")
 
 
 ###################################################
@@ -36,12 +36,12 @@ class FP16SafeCrossEntropy(torch.nn.Module):
         self,
         weight: Optional[torch.Tensor] = None,
         ignore_index: int = -100,
-        reduction: str = 'none',
+        reduction: str = "none",
     ):
         # default ignore_index=-100 mimics pytorch's default in
         # torch.nn.functional.nll_loss
         super().__init__()
-        self.register_buffer('weight', weight)  # type: ignore
+        self.register_buffer("weight", weight)  # type: ignore
         self.ignore_index = ignore_index
         self.reduction = reduction
 
@@ -103,7 +103,7 @@ def has_overflow(grad_norm):
     """
     Detect inf and NaN in grad_norm.
     """
-    if grad_norm == float('inf') or grad_norm != grad_norm:
+    if grad_norm == float("inf") or grad_norm != grad_norm:
         return True
     return False
 
@@ -120,17 +120,17 @@ class SafeFP16Optimizer(torch.optim.Optimizer):
             # iterating through the param groups and keeping track of the pointer
             # through the fp32_params
             raise NotImplementedError("Need to implement the parameter group transfer.")
-        optimizer.param_groups[0]['params'] = self.fp32_params
+        optimizer.param_groups[0]["params"] = self.fp32_params
 
-        self.scaler = DynamicLossScaler(2.0 ** 15)
-        self.min_loss_scale = 2 ** -5
+        self.scaler = DynamicLossScaler(2.0**15)
+        self.min_loss_scale = 2**-5
         self._aggregate_gnorms = aggregate_gnorms
 
     @classmethod
     def _get_parameters(cls, optimizer):
         params = []
         for pg in optimizer.param_groups:
-            params += list(pg['params'])
+            params += list(pg["params"])
         return params
 
     @classmethod
@@ -163,7 +163,7 @@ class SafeFP16Optimizer(torch.optim.Optimizer):
         """
         state_dict = self.optimizer.state_dict()
         if self.scaler is not None:
-            state_dict['loss_scaler'] = self.scaler.loss_scale
+            state_dict["loss_scaler"] = self.scaler.loss_scale
         return state_dict
 
     def load_state_dict(self, state_dict):
@@ -175,11 +175,11 @@ class SafeFP16Optimizer(torch.optim.Optimizer):
         resume training from a checkpoint using a new set of optimizer args.
         """
         if (
-            'loss_scaler' in state_dict
+            "loss_scaler" in state_dict
             and self.scaler is not None
-            and isinstance(state_dict['loss_scaler'], float)
+            and isinstance(state_dict["loss_scaler"], float)
         ):
-            self.scaler.loss_scale = state_dict['loss_scaler']
+            self.scaler.loss_scale = state_dict["loss_scaler"]
         self.optimizer.load_state_dict(state_dict)
 
     def backward(self, loss, update_main_grads=False):
@@ -249,13 +249,13 @@ class SafeFP16Optimizer(torch.optim.Optimizer):
                     self.scaler.loss_scale = prev_scale
                     raise FloatingPointError(
                         (
-                            'Minimum loss scale reached ({}). Your loss is probably exploding. '
-                            'Try lowering the learning rate, using gradient clipping or '
-                            'increasing the batch size.'
+                            "Minimum loss scale reached ({}). Your loss is probably exploding. "
+                            "Try lowering the learning rate, using gradient clipping or "
+                            "increasing the batch size."
                         ).format(self.min_loss_scale)
                     )
                     logging.info(
-                        f'Overflow: setting loss scale to {self.scaler.loss_scale}'
+                        f"Overflow: setting loss scale to {self.scaler.loss_scale}"
                     )
 
         return grad_norm
@@ -318,7 +318,7 @@ class DynamicLossScaler(object):
 
     def __init__(
         self,
-        init_scale: float = 2.0 ** 15,
+        init_scale: float = 2.0**15,
         scale_factor: float = 2.0,
         scale_window: int = 2000,
         tolerance: float = 0.00,
@@ -415,7 +415,7 @@ class MemoryEfficientFP16Optimizer(torch.optim.Optimizer):
         self,
         init_optimizer: torch.optim.Optimizer,  # type: ignore
         aggregate_gnorms: bool = False,
-        loss_initial_scale: float = 2.0 ** 17,
+        loss_initial_scale: float = 2.0**17,
         min_loss_scale: float = 1e-4,
     ):
         self.optimizer = init_optimizer
@@ -430,7 +430,7 @@ class MemoryEfficientFP16Optimizer(torch.optim.Optimizer):
         """
         List of compatible optimizers.
         """
-        return ['adam', 'mem_eff_adam', 'adafactor']
+        return ["adam", "mem_eff_adam", "adafactor"]
 
     @property
     def params(self):
@@ -438,7 +438,7 @@ class MemoryEfficientFP16Optimizer(torch.optim.Optimizer):
         Return an iterable of the parameters held by the optimizer.
         """
         for param_group in self.optimizer.param_groups:
-            for p in param_group['params']:
+            for p in param_group["params"]:
                 yield p
 
     @property
@@ -485,12 +485,12 @@ class MemoryEfficientFP16Optimizer(torch.optim.Optimizer):
                 # functions can safely catch to stop training.
                 raise FloatingPointError(
                     (
-                        'Minimum loss scale reached ({}). Your loss is probably exploding. '
-                        'Try lowering the learning rate, using gradient clipping or '
-                        'increasing the batch size.'
+                        "Minimum loss scale reached ({}). Your loss is probably exploding. "
+                        "Try lowering the learning rate, using gradient clipping or "
+                        "increasing the batch size."
                     ).format(self.min_loss_scale)
                 )
-            logging.info(f'Overflow: setting loss scale to {self.scaler.loss_scale}')
+            logging.info(f"Overflow: setting loss scale to {self.scaler.loss_scale}")
             self.zero_grad()
             return -1
 
@@ -534,7 +534,7 @@ class MemoryEfficientFP16Optimizer(torch.optim.Optimizer):
         Return the optimizer's state dict.
         """
         state_dict = self.optimizer.state_dict()
-        state_dict['loss_scaler'] = self.scaler.loss_scale
+        state_dict["loss_scaler"] = self.scaler.loss_scale
         return state_dict
 
     def load_state_dict(self, state_dict):
@@ -543,14 +543,14 @@ class MemoryEfficientFP16Optimizer(torch.optim.Optimizer):
 
         Override from PyTorch implementation to avoid casting to FP32.
         """
-        if 'loss_scaler' in state_dict:
+        if "loss_scaler" in state_dict:
             # init from the state dict
-            if isinstance(state_dict['loss_scaler'], float):
+            if isinstance(state_dict["loss_scaler"], float):
                 # new method, restore the float
-                self.scaler.loss_scale = state_dict['loss_scaler']
+                self.scaler.loss_scale = state_dict["loss_scaler"]
             else:
                 # old method, we stored the entire loss scaler
-                self.scaler.loss_scale = state_dict['loss_scaler'].loss_scale
+                self.scaler.loss_scale = state_dict["loss_scaler"].loss_scale
 
         self.optimizer.load_state_dict(state_dict)
 
@@ -560,15 +560,15 @@ class MemoryEfficientFP16Optimizer(torch.optim.Optimizer):
         # to cast. A workaround is to manually copy back the original state
         # after the optimizer has been loaded.
         groups = self.optimizer.param_groups
-        saved_groups = state_dict['param_groups']
+        saved_groups = state_dict["param_groups"]
         id_map = {
             old_id: p
             for old_id, p in zip(
-                chain(*(g['params'] for g in saved_groups)),
-                chain(*(g['params'] for g in groups)),
+                chain(*(g["params"] for g in saved_groups)),
+                chain(*(g["params"] for g in groups)),
             )
         }
-        for k, v in state_dict['state'].items():
+        for k, v in state_dict["state"].items():
             if k in id_map:
                 # make sure when we copy the original state back, we make sure
                 # that original state is on the correct device
@@ -610,16 +610,16 @@ class MemoryEfficientFP16Adam(torch.optim.Adam):
             loss = closure()
 
         for group in self.param_groups:
-            for p in group['params']:
+            for p in group["params"]:
                 if p.grad is None:
                     continue
                 grad = p.grad.data.float()  # NOTE: cast to FP32 here
                 if grad.is_sparse:
                     raise RuntimeError(
-                        'Adam does not support sparse gradients, '
-                        'please consider SparseAdam instead'
+                        "Adam does not support sparse gradients, "
+                        "please consider SparseAdam instead"
                     )
-                amsgrad = group['amsgrad']
+                amsgrad = group["amsgrad"]
 
                 p_data_fp32 = p.data.float()  # NOTE: cast to FP32 here
 
@@ -627,24 +627,24 @@ class MemoryEfficientFP16Adam(torch.optim.Adam):
 
                 # State initialization
                 if len(state) == 0:
-                    state['step'] = 0
+                    state["step"] = 0
                     # Exponential moving average of gradient values
-                    state['exp_avg'] = torch.zeros_like(p_data_fp32)
+                    state["exp_avg"] = torch.zeros_like(p_data_fp32)
                     # Exponential moving average of squared gradient values
-                    state['exp_avg_sq'] = torch.zeros_like(p_data_fp32)
+                    state["exp_avg_sq"] = torch.zeros_like(p_data_fp32)
                     if amsgrad:
                         # Maintains max of all exp. moving avg. of sq. grad. values
-                        state['max_exp_avg_sq'] = torch.zeros_like(p_data_fp32)
+                        state["max_exp_avg_sq"] = torch.zeros_like(p_data_fp32)
 
-                exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']
+                exp_avg, exp_avg_sq = state["exp_avg"], state["exp_avg_sq"]
                 if amsgrad:
-                    max_exp_avg_sq = state['max_exp_avg_sq']
-                beta1, beta2 = group['betas']
+                    max_exp_avg_sq = state["max_exp_avg_sq"]
+                beta1, beta2 = group["betas"]
 
-                state['step'] += 1
+                state["step"] += 1
 
-                if group['weight_decay'] != 0:
-                    grad.add_(p_data_fp32, alpha=group['weight_decay'])
+                if group["weight_decay"] != 0:
+                    grad.add_(p_data_fp32, alpha=group["weight_decay"])
 
                 # Decay the first and second moment running average coefficient
                 exp_avg.mul_(beta1).add_(grad, alpha=(1 - beta1))
@@ -653,13 +653,13 @@ class MemoryEfficientFP16Adam(torch.optim.Adam):
                     # Maintains the maximum of all 2nd moment running avg. till now
                     torch.max(max_exp_avg_sq, exp_avg_sq, out=max_exp_avg_sq)
                     # Use the max. for normalizing running avg. of gradient
-                    denom = max_exp_avg_sq.sqrt().add_(group['eps'])
+                    denom = max_exp_avg_sq.sqrt().add_(group["eps"])
                 else:
-                    denom = exp_avg_sq.sqrt().add_(group['eps'])
+                    denom = exp_avg_sq.sqrt().add_(group["eps"])
 
-                bias_correction1 = 1 - beta1 ** state['step']
-                bias_correction2 = 1 - beta2 ** state['step']
-                step_size = group['lr'] * math.sqrt(bias_correction2) / bias_correction1
+                bias_correction1 = 1 - beta1 ** state["step"]
+                bias_correction2 = 1 - beta2 ** state["step"]
+                step_size = group["lr"] * math.sqrt(bias_correction2) / bias_correction1
 
                 p_data_fp32.addcdiv_(exp_avg, denom, value=-step_size)
 
@@ -737,18 +737,18 @@ class Adafactor(torch.optim.Optimizer):
         super(Adafactor, self).__init__(params, defaults)
 
     def _get_lr(self, param_group, param_state):
-        rel_step_sz = param_group['lr']
+        rel_step_sz = param_group["lr"]
         # TODO: enable it back. This leads lr decay to 0.
         # Since for some schdulers, they only update lr per validation step.
         # In such cases lr will keep decay every update.
-        if param_group['relative_step']:
+        if param_group["relative_step"]:
             min_step = (
-                1e-6 * param_state['step'] if param_group['warmup_init'] else 1e-2
+                1e-6 * param_state["step"] if param_group["warmup_init"] else 1e-2
             )
-            rel_step_sz = min(min_step, 1.0 / math.sqrt(param_state['step']))
+            rel_step_sz = min(min_step, 1.0 / math.sqrt(param_state["step"]))
         param_scale = 1.0
-        if param_group['scale_parameter']:
-            param_scale = max(param_group['eps'][1], param_state['RMS'])
+        if param_group["scale_parameter"]:
+            param_scale = max(param_group["eps"][1], param_state["RMS"])
         return param_scale * rel_step_sz
 
     def _get_options(self, param_group, param_shape):
@@ -756,7 +756,7 @@ class Adafactor(torch.optim.Optimizer):
         Return factored and whether to use first moment (beta1).
         """
         factored = len(param_shape) >= 2
-        use_first_moment = param_group['beta1'] is not None
+        use_first_moment = param_group["beta1"] is not None
         return factored, use_first_moment
 
     def _rms(self, tensor):
@@ -787,12 +787,12 @@ class Adafactor(torch.optim.Optimizer):
             loss = closure()
 
         for group in self.param_groups:
-            for p in group['params']:
+            for p in group["params"]:
                 if p.grad is None:
                     continue
                 grad = p.grad.data.float()  # NOTE: cast to FP32
                 if grad.is_sparse:
-                    raise RuntimeError('Adafactor does not support sparse gradients.')
+                    raise RuntimeError("Adafactor does not support sparse gradients.")
 
                 state = self.state[p]
                 grad_shape = grad.shape
@@ -800,42 +800,42 @@ class Adafactor(torch.optim.Optimizer):
                 factored, use_first_moment = self._get_options(group, grad_shape)
                 # State Initialization
                 if len(state) == 0:
-                    state['step'] = 0
+                    state["step"] = 0
 
                     if use_first_moment:
                         # Exponential moving average of gradient values
-                        state['exp_avg'] = torch.zeros_like(grad)
+                        state["exp_avg"] = torch.zeros_like(grad)
                     if factored:
-                        state['exp_avg_sq_row'] = torch.zeros(grad_shape[:-1]).type_as(
+                        state["exp_avg_sq_row"] = torch.zeros(grad_shape[:-1]).type_as(
                             grad
                         )
-                        state['exp_avg_sq_col'] = torch.zeros(
+                        state["exp_avg_sq_col"] = torch.zeros(
                             grad_shape[:-2] + grad_shape[-1:]
                         ).type_as(grad)
                     else:
-                        state['exp_avg_sq'] = torch.zeros_like(grad)
+                        state["exp_avg_sq"] = torch.zeros_like(grad)
 
-                    state['RMS'] = 0
+                    state["RMS"] = 0
                 else:
                     if use_first_moment:
-                        state['exp_avg'] = state['exp_avg'].type_as(grad)
+                        state["exp_avg"] = state["exp_avg"].type_as(grad)
                     if factored:
-                        state['exp_avg_sq_row'] = state['exp_avg_sq_row'].type_as(grad)
-                        state['exp_avg_sq_col'] = state['exp_avg_sq_col'].type_as(grad)
+                        state["exp_avg_sq_row"] = state["exp_avg_sq_row"].type_as(grad)
+                        state["exp_avg_sq_col"] = state["exp_avg_sq_col"].type_as(grad)
                     else:
-                        state['exp_avg_sq'] = state['exp_avg_sq'].type_as(grad)
+                        state["exp_avg_sq"] = state["exp_avg_sq"].type_as(grad)
 
                 p_data_fp32 = p.data.float()  # NOTE: cast to FP32
 
-                state['step'] += 1
-                state['RMS'] = self._rms(p_data_fp32)
-                group['lr'] = self._get_lr(group, state)
+                state["step"] += 1
+                state["RMS"] = self._rms(p_data_fp32)
+                group["lr"] = self._get_lr(group, state)
 
-                beta2t = 1.0 - math.pow(state['step'], group['decay_rate'])
-                update = (grad ** 2) + group['eps'][0]
+                beta2t = 1.0 - math.pow(state["step"], group["decay_rate"])
+                update = (grad**2) + group["eps"][0]
                 if factored:
-                    exp_avg_sq_row = state['exp_avg_sq_row']
-                    exp_avg_sq_col = state['exp_avg_sq_col']
+                    exp_avg_sq_row = state["exp_avg_sq_row"]
+                    exp_avg_sq_col = state["exp_avg_sq_col"]
 
                     exp_avg_sq_row.mul_(beta2t).add_(
                         update.mean(dim=-1), alpha=(1.0 - beta2t)
@@ -848,24 +848,24 @@ class Adafactor(torch.optim.Optimizer):
                     self._approx_sq_grad(exp_avg_sq_row, exp_avg_sq_col, update)
                     update.mul_(grad)
                 else:
-                    exp_avg_sq = state['exp_avg_sq']
+                    exp_avg_sq = state["exp_avg_sq"]
 
                     exp_avg_sq.mul_(beta2t).add_(update, alpha=(1.0 - beta2t))
                     torch.rsqrt(exp_avg_sq, out=update).mul_(grad)
 
-                update.div_(max(1.0, self._rms(update) / group['clip_threshold']))
-                update.mul_(group['lr'])
+                update.div_(max(1.0, self._rms(update) / group["clip_threshold"]))
+                update.mul_(group["lr"])
 
                 if use_first_moment:
-                    exp_avg = state['exp_avg']
-                    exp_avg.mul_(group['beta1']).add_(
-                        update, alpha=(1 - group['beta1'])
+                    exp_avg = state["exp_avg"]
+                    exp_avg.mul_(group["beta1"]).add_(
+                        update, alpha=(1 - group["beta1"])
                     )
                     update = exp_avg
 
-                if group['weight_decay'] != 0:
+                if group["weight_decay"] != 0:
                     p_data_fp32.add_(
-                        p_data_fp32, alpha=(-group['weight_decay'] * group['lr'])
+                        p_data_fp32, alpha=(-group["weight_decay"] * group["lr"])
                     )
 
                 p_data_fp32.add_(-update)

@@ -16,7 +16,7 @@ class QADataCollectionWorld(CrowdTaskWorld):
     etc.
     """
 
-    collector_agent_id = 'QA Collector'
+    collector_agent_id = "QA Collector"
 
     def __init__(self, opt, agent):
         self.teacher = opt["teacher"]
@@ -30,8 +30,8 @@ class QADataCollectionWorld(CrowdTaskWorld):
 
     def parley(self):
 
-        act = {'episode_done': False}
-        act['id'] = self.__class__.collector_agent_id
+        act = {"episode_done": False}
+        act["id"] = self.__class__.collector_agent_id
 
         if not self.question:
             """
@@ -41,11 +41,11 @@ class QADataCollectionWorld(CrowdTaskWorld):
 
             # Get context from dataloader
             passage = self.teacher.act()
-            self.context = passage['text']
-            act['passage'] = passage['text']
+            self.context = passage["text"]
+            act["passage"] = passage["text"]
 
             # Add a prompt telling the turker what to do next
-            act['text'] = 'Please provide a question given the passage.'
+            act["text"] = "Please provide a question given the passage."
             self.agent.observe(validate(act))
             self.question = self.agent.act(timeout=self.opt["turn_timeout"])
             # Can log the turker's question here
@@ -58,7 +58,7 @@ class QADataCollectionWorld(CrowdTaskWorld):
             """
 
             # A prompt telling the turker what to do next
-            act['text'] = 'Thanks. And what is the answer to your question?'
+            act["text"] = "Thanks. And what is the answer to your question?"
 
             self.agent.observe(validate(act))
             self.answer = self.agent.act(timeout=self.opt["turn_timeout"])

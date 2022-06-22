@@ -23,11 +23,11 @@ class TestTGA(unittest.TestCase):
         """
         Test --inference with simple options.
         """
-        upgraded = TorchGeneratorAgent.upgrade_opt({'beam_size': 1})
-        self.assertEqual(upgraded['inference'], 'greedy')
+        upgraded = TorchGeneratorAgent.upgrade_opt({"beam_size": 1})
+        self.assertEqual(upgraded["inference"], "greedy")
 
-        upgraded = TorchGeneratorAgent.upgrade_opt({'beam_size': 5})
-        self.assertEqual(upgraded['inference'], 'beam')
+        upgraded = TorchGeneratorAgent.upgrade_opt({"beam_size": 5})
+        self.assertEqual(upgraded["inference"], "beam")
 
     def test_no_greedy_largebeam(self):
         """
@@ -37,20 +37,20 @@ class TestTGA(unittest.TestCase):
         with self.assertRaises(ValueError):
             testing_utils.display_model(
                 dict(
-                    task='integration_tests:multiturn_nocandidate',
-                    model_file='zoo:unittest/transformer_generator2/model',
+                    task="integration_tests:multiturn_nocandidate",
+                    model_file="zoo:unittest/transformer_generator2/model",
                     beam_size=5,
-                    inference='greedy',
+                    inference="greedy",
                 )
             )
 
         # and we shouldn't if we have inference beam
         testing_utils.display_model(
             dict(
-                task='integration_tests:multiturn_nocandidate',
-                model_file='zoo:unittest/transformer_generator2/model',
+                task="integration_tests:multiturn_nocandidate",
+                model_file="zoo:unittest/transformer_generator2/model",
                 beam_size=5,
-                inference='beam',
+                inference="beam",
             )
         )
 
@@ -60,22 +60,22 @@ class TestTGA(unittest.TestCase):
         """
         pp = ParlaiParser(True, True)
         opt = pp.parse_args(
-            ['--model-file', 'zoo:unittest/transformer_generator2/model']
+            ["--model-file", "zoo:unittest/transformer_generator2/model"]
         )
         agent = create_agent(opt, True)
-        self.assertEqual(agent.opt['inference'], 'greedy')
+        self.assertEqual(agent.opt["inference"], "greedy")
 
         pp = ParlaiParser(True, True)
         opt = pp.parse_args(
             [
-                '--model-file',
-                'zoo:unittest/transformer_generator2/model',
-                '--beam-size',
-                '5',
+                "--model-file",
+                "zoo:unittest/transformer_generator2/model",
+                "--beam-size",
+                "5",
             ]
         )
         agent = create_agent(opt, True)
-        self.assertEqual(agent.opt['inference'], 'beam')
+        self.assertEqual(agent.opt["inference"], "beam")
 
     def test_block_full_context(self):
         """
@@ -84,17 +84,17 @@ class TestTGA(unittest.TestCase):
         # old model file == beam block full context false
         pp = ParlaiParser(True, True)
         opt = pp.parse_args(
-            ['--model-file', 'zoo:unittest/transformer_generator2/model']
+            ["--model-file", "zoo:unittest/transformer_generator2/model"]
         )
         agent = create_agent(opt, True)
-        self.assertEqual(agent.opt['beam_block_full_context'], False)
+        self.assertEqual(agent.opt["beam_block_full_context"], False)
         self.assertEqual(agent.beam_block_full_context, False)
 
         # brand new model == beam block full context true
         pp = ParlaiParser(True, True)
-        opt = pp.parse_args(['--model', 'transformer/generator'])
+        opt = pp.parse_args(["--model", "transformer/generator"])
         agent = create_agent(opt, True)
-        self.assertEqual(agent.opt['beam_block_full_context'], True)
+        self.assertEqual(agent.opt["beam_block_full_context"], True)
         self.assertEqual(agent.beam_block_full_context, True)
 
 
@@ -107,18 +107,18 @@ class TestGeneration(unittest.TestCase):
 
     def test_full_context_block(self):
         args = [
-            '--model-file',
-            'zoo:unittest/transformer_generator2/model',
-            '--inference',
-            'beam',
-            '--truncate',
-            '1024',
-            '--beam-context-block-ngram',
-            '1',
+            "--model-file",
+            "zoo:unittest/transformer_generator2/model",
+            "--inference",
+            "beam",
+            "--truncate",
+            "1024",
+            "--beam-context-block-ngram",
+            "1",
         ]
         pp = ParlaiParser(True, True)
         agent = create_agent(pp.parse_args(args), True)
-        obs = {'text': '1 2 3 4 ' * 256, 'episode_done': False}
+        obs = {"text": "1 2 3 4 " * 256, "episode_done": False}
         agent.observe(obs)
         batch = agent.batchify([agent.observation])
         self.assertEqual(agent._get_context(batch, 0).tolist(), [5, 4, 6, 7] * 256)
@@ -129,7 +129,7 @@ class TestGeneration(unittest.TestCase):
         self.assertEqual(agent._get_context(batch, 0).tolist(), [5, 4, 6, 7] * 256)
 
         # Now, set agent's beam_block_full_context
-        args += ['--beam-block-full-context', 'true']
+        args += ["--beam-block-full-context", "true"]
         agent2 = create_agent(pp.parse_args(args), True)
         agent2.observe(obs)
         batch = agent2.batchify([agent2.observation])
@@ -148,23 +148,23 @@ class TestGeneration(unittest.TestCase):
         Test functionality of `get_prefix_tokens`.
         """
         args = [
-            '--model-file',
-            'zoo:unittest/transformer_generator2/model',
-            '--model',
-            'test_agents/transformer_generator_prefix',
-            '--inference',
-            'beam',
-            '--truncate',
-            '1024',
-            '--beam-size',
-            '2',
+            "--model-file",
+            "zoo:unittest/transformer_generator2/model",
+            "--model",
+            "test_agents/transformer_generator_prefix",
+            "--inference",
+            "beam",
+            "--truncate",
+            "1024",
+            "--beam-size",
+            "2",
         ]
         pp = ParlaiParser(True, True)
         agent = create_agent(pp.parse_args(args), True)
-        obs = {'text': '1 2 3 4 ' * 256, 'episode_done': False}
+        obs = {"text": "1 2 3 4 " * 256, "episode_done": False}
         agent.observe(obs)
         act = agent.act()
-        beam_texts = [x[0] for x in act['beam_texts']]
+        beam_texts = [x[0] for x in act["beam_texts"]]
         for beam in beam_texts:
             # check that all beams start with the prefix text
             assert beam.startswith(
@@ -172,5 +172,5 @@ class TestGeneration(unittest.TestCase):
             ), f"[{beam}] does not start with [{PREFIX_TEXT}]"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

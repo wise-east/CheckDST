@@ -12,10 +12,10 @@ import os.path
 
 
 def download(datapath):
-    ddir = os.path.join(get_model_dir(datapath), 'sea')
-    model_type = 'bart_sq_gen'
-    version = 'v1.0'
+    ddir = os.path.join(get_model_dir(datapath), "sea")
+    model_type = "bart_sq_gen"
+    version = "v1.0"
     if not built(os.path.join(ddir, model_type), version):
-        opt = {'datapath': datapath, 'model_type': model_type}
-        fnames = [f'model_{version}.tgz']
-        download_models(opt, fnames, 'sea', version=version, use_model_type=True)
+        opt = {"datapath": datapath, "model_type": model_type}
+        fnames = [f"model_{version}.tgz"]
+        download_models(opt, fnames, "sea", version=version, use_model_type=True)

@@ -11,26 +11,26 @@ from parlai.tasks.dialog_babi_plus.build import build
 
 tasks = {}
 
-tasks[1] = 'dialog-babi-plus-task1-API-calls'
+tasks[1] = "dialog-babi-plus-task1-API-calls"
 
 
 def _path(task, opt):
     # Build the data if it doesn't exist.
     build(opt)
-    prefix = os.path.join(opt['datapath'], 'dialog-bAbI-plus', 'dialog-bAbI-plus-tasks')
-    suffix = ''
-    dt = opt['datatype'].split(':')[0]
-    if dt == 'train':
-        suffix = 'trn'
-    elif dt == 'test':
-        suffix = 'tst'
-    elif dt == 'valid':
-        suffix = 'dev'
+    prefix = os.path.join(opt["datapath"], "dialog-bAbI-plus", "dialog-bAbI-plus-tasks")
+    suffix = ""
+    dt = opt["datatype"].split(":")[0]
+    if dt == "train":
+        suffix = "trn"
+    elif dt == "test":
+        suffix = "tst"
+    elif dt == "valid":
+        suffix = "dev"
     datafile = os.path.join(
-        prefix, '{tsk}-{type}.txt'.format(tsk=tasks[int(task)], type=suffix)
+        prefix, "{tsk}-{type}.txt".format(tsk=tasks[int(task)], type=suffix)
     )
 
-    cands_datafile = os.path.join(prefix, 'dialog-babi-candidates.txt')
+    cands_datafile = os.path.join(prefix, "dialog-babi-candidates.txt")
 
     return datafile, cands_datafile
 
@@ -39,11 +39,11 @@ def _path(task, opt):
 class KBTeacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
         build(opt)
-        opt['datafile'] = os.path.join(
-            opt['datapath'],
-            'dialog-bAbI-plus',
-            'dialog-bAbI-plus-tasks',
-            'dialog-babi-kb-all.txt',
+        opt["datafile"] = os.path.join(
+            opt["datapath"],
+            "dialog-bAbI-plus",
+            "dialog-bAbI-plus-tasks",
+            "dialog-babi-kb-all.txt",
         )
         super().__init__(opt, shared)
 
@@ -53,5 +53,5 @@ class DefaultTeacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
         default_task_id = 1
         paths = _path(default_task_id, opt)
-        opt['datafile'], opt['cands_datafile'] = paths
+        opt["datafile"], opt["cands_datafile"] = paths
         super().__init__(opt, shared)

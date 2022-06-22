@@ -163,9 +163,9 @@ def all_gather_list(data):
             result.append(pickle.loads(bytes(out_buffer.tolist())))
         except pickle.UnpicklingError:
             raise RuntimeError(
-                'There was an unpickling error in all_gather_list. This likely '
-                'means your workers got out of synchronization (e.g. one is '
-                'expecting to sync and another is not.)'
+                "There was an unpickling error in all_gather_list. This likely "
+                "means your workers got out of synchronization (e.g. one is "
+                "expecting to sync and another is not.)"
             )
 
     return result
@@ -212,7 +212,7 @@ def sync_parameters(model: torch.nn.Module) -> bool:
             dist.all_reduce(p.data, dist.ReduceOp.SUM)
 
     # double check everything synced correctly
-    norm2 = sum((p.data ** 2).sum().float().item() for p in model.parameters())
+    norm2 = sum((p.data**2).sum().float().item() for p in model.parameters())
     all_versions = all_gather_list(norm2)
     if not all(n == norm2 for n in all_versions):
         raise AssertionError(
@@ -254,31 +254,31 @@ def distributed_context(
     # we need to manually adjust the rank differently in multiprocessing
     # and distributed train
     rank = rank + rank_offset
-    opt['rank'] = rank
+    opt["rank"] = rank
     if gpu is None:
         # default assumption is local GPUs
         gpu = rank % torch.cuda.device_count()
-    opt['gpu'] = gpu
+    opt["gpu"] = gpu
     # make sure we don't just use whatever GPU was saved in the model file
-    if 'override' not in opt:
-        opt['override'] = {}
-    opt['override']['gpu'] = gpu
+    if "override" not in opt:
+        opt["override"] = {}
+    opt["override"]["gpu"] = gpu
 
     # Suppress output of workers except the main host.
-    if opt.get('verbose') or rank != 0:
-        print_prefix = 'rank:{:3d} |'.format(rank)
+    if opt.get("verbose") or rank != 0:
+        print_prefix = "rank:{:3d} |".format(rank)
     else:
         print_prefix = None
-    suppress_output = not opt.get('verbose') and rank != 0
+    suppress_output = not opt.get("verbose") and rank != 0
 
     with override_print(suppress_output, print_prefix):
         # perform distributed setup, ensuring all hosts are ready
-        if opt['gpu'] != -1:
-            torch.cuda.set_device(opt['gpu'])
+        if opt["gpu"] != -1:
+            torch.cuda.set_device(opt["gpu"])
         dist.init_process_group(
             backend="nccl",
             init_method=init_method,
-            world_size=opt['distributed_world_size'],
+            world_size=opt["distributed_world_size"],
             rank=rank,
         )
         logging.info("Distributed group initialized")
@@ -322,31 +322,31 @@ def slurm_distributed_context(opt):
     """
     # We can determine the init method automatically for Slurm.
     # double check we're using SLURM
-    node_list = os.environ.get('SLURM_JOB_NODELIST')
+    node_list = os.environ.get("SLURM_JOB_NODELIST")
     if node_list is None:
         raise RuntimeError(
-            'Does not appear to be in a SLURM environment. '
-            'You should not call this script directly; see launch_distributed.py'
+            "Does not appear to be in a SLURM environment. "
+            "You should not call this script directly; see launch_distributed.py"
         )
 
     try:
         # Figure out the main host, and which rank we are.
         hostnames = subprocess.check_output(
-            ['scontrol', 'show', 'hostnames', node_list]
+            ["scontrol", "show", "hostnames", node_list]
         )
-        main_host = hostnames.split()[0].decode('utf-8')
-        distributed_rank = int(os.environ['SLURM_PROCID'])
-        if opt.get('model_parallel'):
+        main_host = hostnames.split()[0].decode("utf-8")
+        distributed_rank = int(os.environ["SLURM_PROCID"])
+        if opt.get("model_parallel"):
             # -1 signals to multiprocessing_train to use all GPUs available.
             # (A value of None signals to multiprocessing_train to use the GPU
             # corresponding to the rank.
             device_id = -1
         else:
-            device_id = int(os.environ['SLURM_LOCALID'])
-        port = opt['port']
+            device_id = int(os.environ["SLURM_LOCALID"])
+        port = opt["port"]
         logging.info(
-            f'Initializing host {socket.gethostname()} as rank {distributed_rank}, '
-            f'main is {main_host}'
+            f"Initializing host {socket.gethostname()} as rank {distributed_rank}, "
+            f"main is {main_host}"
         )
         # Begin distributed training
         with distributed_context(
@@ -359,7 +359,7 @@ def slurm_distributed_context(opt):
     except FileNotFoundError as e:
         # Slurm is not installed
         raise RuntimeError(
-            'SLURM does not appear to be installed. Missing file: ' + e.filename
+            "SLURM does not appear to be installed. Missing file: " + e.filename
         )
 
 
@@ -370,6 +370,6 @@ def find_free_port() -> int:
     Credit: https://stackoverflow.com/questions/1365265/on-localhost-how-do-i-pick-a-free-port-number
     """
     with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        s.bind(('', 0))
+        s.bind(("", 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]

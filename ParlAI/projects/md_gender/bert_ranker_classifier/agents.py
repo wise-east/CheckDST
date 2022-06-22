@@ -19,7 +19,7 @@ class BertRankerClassifierAgent(ClassificationMixin, BiEncoderRankerAgent):
 
     def train_step(self, batch):
         output = super().train_step(batch)
-        preds = output['text']
+        preds = output["text"]
         self._update_confusion_matrix(preds, batch.labels)
         return output
 
@@ -27,7 +27,7 @@ class BertRankerClassifierAgent(ClassificationMixin, BiEncoderRankerAgent):
         if batch.text_vec is None:
             return
         output = super().eval_step(batch)
-        preds = output['text']
+        preds = output["text"]
         labels = batch.labels
         if preds is not None and labels is not None:
             self._update_confusion_matrix(preds, labels)

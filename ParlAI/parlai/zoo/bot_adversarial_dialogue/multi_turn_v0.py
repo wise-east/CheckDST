@@ -13,14 +13,14 @@ from parlai.core.build_data import download_models
 
 
 def download(datapath):
-    version = 'v1'
-    model_type = 'multi_turn_v0'
-    opt = {'datapath': datapath, 'model_type': model_type}
-    fnames = [f'models_{version}.tar.gz']
+    version = "v1"
+    model_type = "multi_turn_v0"
+    opt = {"datapath": datapath, "model_type": model_type}
+    fnames = [f"models_{version}.tar.gz"]
     download_models(
         opt=opt,
         fnames=fnames,
-        model_folder='bot_adversarial_dialogue',
+        model_folder="bot_adversarial_dialogue",
         version=version,
         use_model_type=True,
     )

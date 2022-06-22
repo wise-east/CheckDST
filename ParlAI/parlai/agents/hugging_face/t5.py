@@ -33,7 +33,7 @@ def build_t5(opt: Opt) -> T5ForConditionalGeneration:
     # if not HF_VERSION >= 4.3:
     # raise RuntimeError('Must use transformers package >= 4.3 to use t5')
     return T5ForConditionalGeneration.from_pretrained(
-        opt['t5_model_arch'], dropout_rate=opt['t5_dropout']
+        opt["t5_model_arch"], dropout_rate=opt["t5_dropout"]
     )
 
 
@@ -47,10 +47,10 @@ def set_device(func):
 
     def wrap(*args, **kwargs):
         if torch.cuda.is_available():
-            torch.cuda.set_device('cuda:0')
+            torch.cuda.set_device("cuda:0")
         ret = func(*args, **kwargs)
         if torch.cuda.is_available():
-            torch.cuda.set_device('cuda:0')
+            torch.cuda.set_device("cuda:0")
         return ret
 
     return wrap
@@ -68,42 +68,42 @@ class T5Agent(TorchGeneratorAgent):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt=partial_opt)
-        group = parser.add_argument_group('T5 Args')
+        group = parser.add_argument_group("T5 Args")
         group.add_argument(
-            '--t5-model-arch',
+            "--t5-model-arch",
             type=str,
-            default='t5-base',
+            default="t5-base",
             choices=["t5-small", "t5-base", "t5-large", "t5-3b", "t5-11b"],
         )
         group.add_argument(
-            '--t5-model-parallel',
-            type='bool',
+            "--t5-model-parallel",
+            type="bool",
             default=False,
-            help='use HF model parallel',
+            help="use HF model parallel",
         )
         group.add_argument(
-            '--t5-dropout', type=float, default=0.0, help='Dropout for T5'
+            "--t5-dropout", type=float, default=0.0, help="Dropout for T5"
         )
         group.add_argument(
-            '--t5-generation-config',
+            "--t5-generation-config",
             type=str,
             default=None,
             choices=[
-                'summarization',
-                'translation_en_to_de',
-                'translation_en_to_fr',
-                'translation_en_to_ro',
+                "summarization",
+                "translation_en_to_de",
+                "translation_en_to_fr",
+                "translation_en_to_ro",
             ],
-            help='Task specific generation config for T5',
+            help="Task specific generation config for T5",
         )
         return parser
 
-    def build_model(self) -> 'ParlaiT5Model':
+    def build_model(self) -> "ParlaiT5Model":
         """
         Build and return model.
         """
         model = ParlaiT5Model(self.opt, self.dict)
-        if self.opt['t5_model_parallel']:
+        if self.opt["t5_model_parallel"]:
             model.t5.parallelize()
         return model
 
@@ -119,20 +119,20 @@ class T5Agent(TorchGeneratorAgent):
 
         T5 dict already adds the end token.
         """
-        kwargs['add_start'] = False  # model does this in module code
-        kwargs['add_end'] = False  # T5 tokenizer takes care of this
+        kwargs["add_start"] = False  # model does this in module code
+        kwargs["add_end"] = False  # T5 tokenizer takes care of this
         return TorchAgent.vectorize(self, *args, **kwargs)
 
     def observe(self, observation):
         """
         Override to include prefix, if necessary.
         """
-        if self.opt['t5_generation_config'] is not None and 'text' in observation:
-            config = TASK_CONFIGS[self.opt['t5_generation_config']]
+        if self.opt["t5_generation_config"] is not None and "text" in observation:
+            config = TASK_CONFIGS[self.opt["t5_generation_config"]]
             try:
-                observation.force_set('text', config['prefix'] + observation['text'])
+                observation.force_set("text", config["prefix"] + observation["text"])
             except AttributeError:
-                observation['text'] = config['prefix'] + observation['text']
+                observation["text"] = config["prefix"] + observation["text"]
 
         return super().observe(observation)
 
@@ -155,33 +155,33 @@ class T5Agent(TorchGeneratorAgent):
                 gram for _, ngram in self.beam_block_list.items() for gram in ngram
             ]
 
-        method = self.opt.get('inference', 'greedy')
+        method = self.opt.get("inference", "greedy")
 
         generation_params = {
-            'input_ids': batch.text_vec,
-            'max_length': max_ts,
-            'min_length': self.beam_min_length,
-            'do_sample': self.opt['inference'] in ['topk', 'topp'],
-            'early_stopping': None,
-            'num_beams': beam_size,
-            'temperature': self.temperature,
-            'top_k': self.opt['topk'] if method in ['topk', 'delayedbeam'] else None,
-            'top_p': self.opt['topp'] if method == 'nucleus' else None,
-            'repetition_penalty': None,
-            'bad_words_ids': bad_words_ids if bad_words_ids else None,
-            'bos_token_id': self.START_IDX,
-            'pad_token_id': self.NULL_IDX,
-            'eos_token_id': self.END_IDX,
-            'length_penalty': self.opt['beam_length_penalty'],
-            'no_repeat_ngram_size': self.beam_block_ngram,
-            'num_return_sequences': None,
-            'attention_mask': batch.text_vec != self.NULL_IDX,
-            'decoder_start_token_id': self.NULL_IDX,
+            "input_ids": batch.text_vec,
+            "max_length": max_ts,
+            "min_length": self.beam_min_length,
+            "do_sample": self.opt["inference"] in ["topk", "topp"],
+            "early_stopping": None,
+            "num_beams": beam_size,
+            "temperature": self.temperature,
+            "top_k": self.opt["topk"] if method in ["topk", "delayedbeam"] else None,
+            "top_p": self.opt["topp"] if method == "nucleus" else None,
+            "repetition_penalty": None,
+            "bad_words_ids": bad_words_ids if bad_words_ids else None,
+            "bos_token_id": self.START_IDX,
+            "pad_token_id": self.NULL_IDX,
+            "eos_token_id": self.END_IDX,
+            "length_penalty": self.opt["beam_length_penalty"],
+            "no_repeat_ngram_size": self.beam_block_ngram,
+            "num_return_sequences": None,
+            "attention_mask": batch.text_vec != self.NULL_IDX,
+            "decoder_start_token_id": self.NULL_IDX,
         }
 
-        if self.opt['t5_generation_config']:
-            config = TASK_CONFIGS[self.opt['t5_generation_config']]
-            config.pop('prefix', None)
+        if self.opt["t5_generation_config"]:
+            config = TASK_CONFIGS[self.opt["t5_generation_config"]]
+            config.pop("prefix", None)
             generation_params.update(config)
         if overrides:
             generation_params.update(overrides)
@@ -202,7 +202,7 @@ class ParlaiT5Encoder(torch.nn.Module):
         self.stack = encoder
         self.padding_idx = padding_idx
         self.paralleled = not opt[
-            't5_model_parallel'
+            "t5_model_parallel"
         ]  # need to parallel in forward; bug in HF
 
     @set_device
@@ -238,7 +238,7 @@ class ParlaiT5Decoder(torch.nn.Module):
         self.stack = decoder
         self.padding_idx = padding_idx
         self.paralleled = not opt[
-            't5_model_parallel'
+            "t5_model_parallel"
         ]  # need to parallel in forward; bug in HF
 
     @set_device
@@ -332,7 +332,7 @@ class ParlaiT5Model(TorchGeneratorModel):
         # Taken directly from HuggingFace
         # Rescale output before projecting on vocab
         # See https://github.com/tensorflow/mesh/blob/fa19d69eafc9a482aff0b59ddd96b025c0cb207d/mesh_tensorflow/transformer/transformer.py#L586
-        tensor = tensor * (self.t5.model_dim ** -0.5)
+        tensor = tensor * (self.t5.model_dim**-0.5)
         lm_logits = self.t5.lm_head(tensor)
         return lm_logits
 

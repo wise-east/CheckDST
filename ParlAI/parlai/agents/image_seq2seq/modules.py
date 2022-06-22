@@ -26,8 +26,8 @@ class FusionType(Enum):
     Encoder fusion type.
     """
 
-    EARLY = 'early'
-    LATE = 'late'
+    EARLY = "early"
+    LATE = "late"
 
 
 class ImageSeq2seqModel(TransformerGeneratorModel):
@@ -44,11 +44,11 @@ class ImageSeq2seqModel(TransformerGeneratorModel):
             vocabulary_size=len(dictionary),
             embedding=self.embeddings,
             padding_idx=self.pad_idx,
-            image_encoder_num_layers=opt['image_encoder_num_layers'],
-            image_features_dim=opt['image_features_dim'],
-            fusion=opt['image_fusion_type'],
-            n_image_tokens=opt.get('n_image_tokens', 1),
-            n_image_channels=opt.get('n_image_channels', 1),
+            image_encoder_num_layers=opt["image_encoder_num_layers"],
+            image_features_dim=opt["image_features_dim"],
+            fusion=opt["image_fusion_type"],
+            n_image_tokens=opt.get("n_image_tokens", 1),
+            n_image_channels=opt.get("n_image_channels", 1),
         )
 
 
@@ -65,14 +65,14 @@ class ContextWithImageEncoder(TransformerEncoder):
         vocabulary_size: int,
         embedding=None,
         padding_idx=0,
-        reduction_type='mean',
+        reduction_type="mean",
         n_segments=None,
         embeddings_scale=None,
         image_encoder_num_layers=1,
         image_features_dim=2048,
-        image_combination_mode='append',
+        image_combination_mode="append",
         n_image_tokens=1,
-        fusion='late',
+        fusion="late",
         n_image_channels=1,
     ):
         """
@@ -89,13 +89,13 @@ class ContextWithImageEncoder(TransformerEncoder):
         self.n_image_tokens = n_image_tokens
         self.fusion = FusionType(fusion)
         self.n_image_channels = n_image_channels
-        if self.image_combination_mode == 'add' and self.n_image_tokens > 1:
+        if self.image_combination_mode == "add" and self.n_image_tokens > 1:
             raise ValueError(
-                'Image encoding cannot be added to context encoding if there is more than one image token!'
+                "Image encoding cannot be added to context encoding if there is more than one image token!"
             )
         if self.fusion is FusionType.EARLY:
             assert (
-                opt['n_segments'] == 2
+                opt["n_segments"] == 2
             ), "must use segment embeddings for early fusion"
         reduction_type = None  # Must pass back unreduced encoding and mask
         super().__init__(
@@ -112,9 +112,9 @@ class ContextWithImageEncoder(TransformerEncoder):
         # into however many tokens are needed
         self._build_image_encoder()
         dummy_image_size = (n_image_channels, self.full_embedding_size)
-        self.register_buffer('dummy_image_enc', torch.zeros(dummy_image_size))
+        self.register_buffer("dummy_image_enc", torch.zeros(dummy_image_size))
         self.register_buffer(
-            'ones_mask', torch.ones(self.n_image_tokens * self.n_image_channels).bool()
+            "ones_mask", torch.ones(self.n_image_tokens * self.n_image_channels).bool()
         )
 
     def _build_image_encoder(self):
@@ -238,7 +238,7 @@ class ContextWithImageEncoder(TransformerEncoder):
         elif self.fusion is FusionType.EARLY:
             return self._forward_early_fusion(src_tokens, image_features)
         else:
-            raise RuntimeError(f'Unsupported fusion type: {self.fusion}')
+            raise RuntimeError(f"Unsupported fusion type: {self.fusion}")
 
     def _forward_early_fusion(
         self,
@@ -280,14 +280,14 @@ class ContextWithImageEncoder(TransformerEncoder):
         mask: torch.BoolTensor = self._cat([context_mask, image_mask])  # type: ignore
 
         # WARNING: Below follows the rest of TransformerEncoder.forward
-        if self.variant == 'xlm':
+        if self.variant == "xlm":
             tensor = self.norm_embeddings(tensor)
         # --dropout on the embeddings
         tensor = self.dropout(tensor)
         tensor *= mask.unsqueeze(-1).type_as(tensor)
         # apply transformer layers
         tensor = self.forward_layers(tensor, mask)
-        if self.variant == 'prelayernorm':
+        if self.variant == "prelayernorm":
             tensor = self.norm_embeddings(tensor)
         # reduce output
         tensor, out_mask = self.reduce_output(tensor, mask)
@@ -315,25 +315,25 @@ class ContextWithImageEncoder(TransformerEncoder):
 
         if all(enc is None for enc in [context_encoded, image_encoded]):
             raise RuntimeError(
-                'You are providing Image+Seq2Seq with no input.\n'
-                'If you are using a text-based task, make sure the first turn '
-                'has text (e.g. a __SILENCE__ token if the model starts the convo).\n'
-                'If you are using an image-based task, make sure --image-mode is '
-                'set correctly.'
+                "You are providing Image+Seq2Seq with no input.\n"
+                "If you are using a text-based task, make sure the first turn "
+                "has text (e.g. a __SILENCE__ token if the model starts the convo).\n"
+                "If you are using an image-based task, make sure --image-mode is "
+                "set correctly."
             )
 
-        if self.image_combination_mode == 'add':
+        if self.image_combination_mode == "add":
             full_enc = self._add([context_encoded, image_encoded])
             # image_encoded broadcasted along dim=1
             full_mask = context_mask
-        elif self.image_combination_mode == 'append':
+        elif self.image_combination_mode == "append":
             full_enc = self._cat([context_encoded, image_encoded])
             full_mask = self._cat([context_mask, extra_masks])
-        elif self.image_combination_mode == 'prepend':
+        elif self.image_combination_mode == "prepend":
             full_enc = self._cat([image_encoded, context_encoded])
             full_mask = self._cat([extra_masks, context_mask])
         else:
-            raise ValueError('Image combination mode not recognized!')
+            raise ValueError("Image combination mode not recognized!")
 
         if full_enc.dtype == torch.half:
             full_enc, full_mask = self._fix_for_fp16(

@@ -16,4 +16,4 @@ for key in keys:
     if key == "test":
         assert laug == v21
     elif key == "val":
-        assert laug == (v21 - {'PMUL4707'})
+        assert laug == (v21 - {"PMUL4707"})

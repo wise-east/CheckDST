@@ -21,25 +21,25 @@ class TestSeq2Seq(unittest.TestCase):
     def test_ranking(self):
         valid, test = testing_utils.train_model(
             dict(
-                task='integration_tests:overfit',
-                model='seq2seq',
+                task="integration_tests:overfit",
+                model="seq2seq",
                 learningrate=LR,
                 batchsize=BATCH_SIZE,
                 validation_every_n_epochs=10,
-                validation_metric='ppl',
+                validation_metric="ppl",
                 num_epochs=100,
                 embeddingsize=16,
                 hiddensize=16,
-                rnn_class='gru',
-                attention='general',
+                rnn_class="gru",
+                attention="general",
                 gradient_clip=1.0,
                 dropout=0.0,
-                lookuptable='all',
+                lookuptable="all",
                 skip_generation=True,
                 rank_candidates=True,
             )
         )
-        assert valid['hits@1'] >= 0.95
+        assert valid["hits@1"] >= 0.95
 
     def test_generation(self):
         """
@@ -47,19 +47,19 @@ class TestSeq2Seq(unittest.TestCase):
         """
         valid, test = testing_utils.eval_model(
             dict(
-                task='integration_tests:multiturn_nocandidate',
-                model='seq2seq',
-                model_file='zoo:unittest/seq2seq/model',
-                dict_file='zoo:unittest/seq2seq/model.dict',
+                task="integration_tests:multiturn_nocandidate",
+                model="seq2seq",
+                model_file="zoo:unittest/seq2seq/model",
+                dict_file="zoo:unittest/seq2seq/model.dict",
                 skip_generation=False,
-                inference='greedy',
+                inference="greedy",
                 batchsize=8,
                 num_examples=32,
             )
         )
 
-        self.assertLess(valid['ppl'], 1.2)
-        self.assertLess(test['ppl'], 1.2)
+        self.assertLess(valid["ppl"], 1.2)
+        self.assertLess(test["ppl"], 1.2)
 
     def test_beamsearch(self):
         """
@@ -67,18 +67,18 @@ class TestSeq2Seq(unittest.TestCase):
         """
         valid, test = testing_utils.eval_model(
             dict(
-                task='integration_tests:multiturn_nocandidate',
-                model='seq2seq',
-                model_file='zoo:unittest/seq2seq/model',
-                dict_file='zoo:unittest/seq2seq/model.dict',
+                task="integration_tests:multiturn_nocandidate",
+                model="seq2seq",
+                model_file="zoo:unittest/seq2seq/model",
+                dict_file="zoo:unittest/seq2seq/model.dict",
                 skip_generation=False,
-                inference='beam',
+                inference="beam",
                 beam_size=5,
                 num_examples=16,
             )
         )
-        self.assertGreater(valid['accuracy'], 0.95)
-        self.assertGreater(test['accuracy'], 0.95)
+        self.assertGreater(valid["accuracy"], 0.95)
+        self.assertGreater(test["accuracy"], 0.95)
 
 
 class TestBackwardsCompatibility(unittest.TestCase):
@@ -89,20 +89,20 @@ class TestBackwardsCompatibility(unittest.TestCase):
     def test_backwards_compatibility(self):
         valid, test = testing_utils.eval_model(
             dict(
-                task='integration_tests:multiturn_candidate',
-                model='seq2seq',
-                model_file='zoo:unittest/seq2seq/model',
-                dict_file='zoo:unittest/seq2seq/model.dict',
+                task="integration_tests:multiturn_candidate",
+                model="seq2seq",
+                model_file="zoo:unittest/seq2seq/model",
+                dict_file="zoo:unittest/seq2seq/model.dict",
             )
         )
 
-        self.assertLessEqual(valid['ppl'], 1.01)
-        self.assertGreaterEqual(valid['accuracy'], 0.999)
-        self.assertGreaterEqual(valid['f1'], 0.999)
-        self.assertLessEqual(test['ppl'], 1.01)
-        self.assertGreaterEqual(test['accuracy'], 0.999)
-        self.assertGreaterEqual(test['f1'], 0.999)
+        self.assertLessEqual(valid["ppl"], 1.01)
+        self.assertGreaterEqual(valid["accuracy"], 0.999)
+        self.assertGreaterEqual(valid["f1"], 0.999)
+        self.assertLessEqual(test["ppl"], 1.01)
+        self.assertGreaterEqual(test["accuracy"], 0.999)
+        self.assertGreaterEqual(test["f1"], 0.999)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

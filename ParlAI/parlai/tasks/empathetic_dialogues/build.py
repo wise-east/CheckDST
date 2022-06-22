@@ -12,19 +12,19 @@ import os
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/empatheticdialogues/empatheticdialogues.tar.gz',
-        'empatheticdialogues.tar.gz',
-        '56f234d77b7dd1f005fd365bb17769cfe346c3c84295b69bc069c8ccb83be03d',
+        "http://parl.ai/downloads/empatheticdialogues/empatheticdialogues.tar.gz",
+        "empatheticdialogues.tar.gz",
+        "56f234d77b7dd1f005fd365bb17769cfe346c3c84295b69bc069c8ccb83be03d",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'empatheticdialogues')
-    version = '1.0'
+    dpath = os.path.join(opt["datapath"], "empatheticdialogues")
+    version = "1.0"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

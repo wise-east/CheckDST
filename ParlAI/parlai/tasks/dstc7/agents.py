@@ -24,28 +24,28 @@ class DSTC7Teacher(FixedDialogTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        self.split = 'train'
-        if 'valid' in opt['datatype']:
-            self.split = 'dev'
-        if 'test' in opt['datatype']:
-            self.split = 'test'
+        self.split = "train"
+        if "valid" in opt["datatype"]:
+            self.split = "dev"
+        if "test" in opt["datatype"]:
+            self.split = "test"
         build(opt)
 
-        basedir = os.path.join(opt['datapath'], 'dstc7')
+        basedir = os.path.join(opt["datapath"], "dstc7")
         filepath = os.path.join(
-            basedir, 'ubuntu_%s_subtask_1%s.json' % (self.split, self.get_suffix())
+            basedir, "ubuntu_%s_subtask_1%s.json" % (self.split, self.get_suffix())
         )
         if shared is not None:
-            self.data = shared['data']
+            self.data = shared["data"]
         else:
-            with PathManager.open(filepath, 'r') as f:
+            with PathManager.open(filepath, "r") as f:
                 self.data = json.loads(f.read())
 
             # special case of test set
             if self.split == "test":
                 id_to_res = {}
                 with PathManager.open(
-                    os.path.join(basedir, "ubuntu_responses_subtask_1.tsv"), 'r'
+                    os.path.join(basedir, "ubuntu_responses_subtask_1.tsv"), "r"
                 ) as f:
                     for line in f:
                         splited = line[0:-1].split("\t")
@@ -96,7 +96,7 @@ class DSTC7Teacher(FixedDialogTeacher):
 
     def share(self):
         shared = super().share()
-        shared['data'] = self.data
+        shared["data"] = self.data
         return shared
 
 
@@ -149,15 +149,15 @@ class DSTC7TeacherAugmentedSampled(DSTC7Teacher):
 
     def get(self, episode_idx, entry_idx=0):
         sample = super().get(episode_idx, entry_idx)
-        if self.split != 'train':
+        if self.split != "train":
             return sample
-        new_cands = [sample['labels'][0]]
+        new_cands = [sample["labels"][0]]
         counter = 0
         while len(new_cands) < self.get_nb_cands():
-            if sample['label_candidates'][counter] not in sample['labels']:
-                new_cands.append(sample['label_candidates'][counter])
+            if sample["label_candidates"][counter] not in sample["labels"]:
+                new_cands.append(sample["label_candidates"][counter])
             counter += 1
-        sample['label_candidates'] = new_cands
+        sample["label_candidates"] = new_cands
         return sample
 
 

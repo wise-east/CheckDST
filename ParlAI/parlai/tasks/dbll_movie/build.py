@@ -12,9 +12,9 @@ import parlai.tasks.wikimovies.build as wikimovies_build
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/dbll/dbll.tgz',
-        'dbll.tgz',
-        'd8c727dac498b652c7f5de6f72155dce711ff46c88401a303399d3fad4db1e68',
+        "http://parl.ai/downloads/dbll/dbll.tgz",
+        "dbll.tgz",
+        "d8c727dac498b652c7f5de6f72155dce711ff46c88401a303399d3fad4db1e68",
     )
 ]
 

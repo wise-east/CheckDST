@@ -11,34 +11,34 @@ import os
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/COCO-IMG/train2014.zip',
-        'train2014.zip',
-        'f9f102e5336ede4060bb06e1aca438b85f9be18c21960837079c1a88530d498c',
+        "http://parl.ai/downloads/COCO-IMG/train2014.zip",
+        "train2014.zip",
+        "f9f102e5336ede4060bb06e1aca438b85f9be18c21960837079c1a88530d498c",
     ),
     DownloadableFile(
-        'http://parl.ai/downloads/COCO-IMG/val2014.zip',
-        'val2014.zip',
-        'e3cb2caf99e37157c48a99883cc8c57eed8ea3942a501c1abf6f7d9c040ddea8',
+        "http://parl.ai/downloads/COCO-IMG/val2014.zip",
+        "val2014.zip",
+        "e3cb2caf99e37157c48a99883cc8c57eed8ea3942a501c1abf6f7d9c040ddea8",
     ),
     DownloadableFile(
-        'http://parl.ai/downloads/COCO-IMG/test2014.zip',
-        'test2014.zip',
-        'ead40c62230cb2cf70ff4c8b4c70abdc260a7556e77b3282621d06d8e2e35bdf',
+        "http://parl.ai/downloads/COCO-IMG/test2014.zip",
+        "test2014.zip",
+        "ead40c62230cb2cf70ff4c8b4c70abdc260a7556e77b3282621d06d8e2e35bdf",
     ),
     DownloadableFile(
-        'http://parl.ai/downloads/coco_caption/dataset_coco.tgz',
-        'dataset_coco.tgz',
-        '85fac3c266af928bfec5bbd35f24e2371417f8977350e1de86276455643b09d0',
+        "http://parl.ai/downloads/coco_caption/dataset_coco.tgz",
+        "dataset_coco.tgz",
+        "85fac3c266af928bfec5bbd35f24e2371417f8977350e1de86276455643b09d0",
     ),
 ]
 
 
 def buildImage(opt):
-    dpath = os.path.join(opt['datapath'], 'COCO-IMG-2014')
-    version = '1'
+    dpath = os.path.join(opt["datapath"], "COCO-IMG-2014")
+    version = "1"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building image data: ' + dpath + ']')
+        print("[building image data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)
@@ -53,12 +53,12 @@ def buildImage(opt):
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'COCO_2014_Caption')
-    version = '1.0'
+    dpath = os.path.join(opt["datapath"], "COCO_2014_Caption")
+    version = "1.0"
 
     # check if data had been previously built
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
 
         # make a clean directory if needed
         if build_data.built(dpath):

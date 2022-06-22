@@ -32,19 +32,19 @@ class ModelChatWorld(BaseModelChatWorld):
         super().__init__(opt, agent=agent, bot=bot)
 
         self.context_info = context_info
-        self.bot_persona_strings = self.context_info['your_persona_strings']
-        self.human_persona_strings = self.context_info['their_persona_strings']
-        self.context_for_bot_prompt = self.context_info['context_for_bot_prompt']
-        self.time_num = self.context_info['time_num']
-        self.time_unit = self.context_info['time_unit']
+        self.bot_persona_strings = self.context_info["your_persona_strings"]
+        self.human_persona_strings = self.context_info["their_persona_strings"]
+        self.context_for_bot_prompt = self.context_info["context_for_bot_prompt"]
+        self.time_num = self.context_info["time_num"]
+        self.time_unit = self.context_info["time_unit"]
         self.task_data = {
-            'personas': [
+            "personas": [
                 " ".join(self.bot_persona_strings),
                 " ".join(self.human_persona_strings),
             ],
-            'agent_name': 'Speaker 1',
-            'time_num': self.time_num,
-            'time_unit': self.time_unit,
+            "agent_name": "Speaker 1",
+            "time_num": self.time_num,
+            "time_unit": self.time_unit,
         }
         self.bot.agent_id = "THEY"
         self.model_name = model_name
@@ -63,22 +63,22 @@ class ModelChatWorld(BaseModelChatWorld):
 
         time.sleep(2)
         coordinator_first_msg = {
-            'episode_done': False,
-            'id': 'Coordinator',
-            'text': 'Please chitchat with another worker for 6 turns as if you were catching up since last time you two spoke.',
-            'fake_start': True,
-            'agent_idx': 2,
-            'task_data': self.task_data,
+            "episode_done": False,
+            "id": "Coordinator",
+            "text": "Please chitchat with another worker for 6 turns as if you were catching up since last time you two spoke.",
+            "fake_start": True,
+            "agent_idx": 2,
+            "task_data": self.task_data,
         }
         self.agent.observe(validate(coordinator_first_msg))
         time.sleep(2)
         human_first_msg = {
-            'episode_done': False,
-            'id': self.agent.id,
-            'text': self.context_for_bot_prompt,
-            'fake_start': True,
-            'agent_idx': 0,
-            'task_data': self.task_data,
+            "episode_done": False,
+            "id": self.agent.id,
+            "text": self.context_for_bot_prompt,
+            "fake_start": True,
+            "agent_idx": 0,
+            "task_data": self.task_data,
         }
         for k, v in control_msg.items():
             human_first_msg[k] = v
@@ -90,13 +90,13 @@ class ModelChatWorld(BaseModelChatWorld):
 
         first_bot_act = self.bot.act()
         first_bot_act = Compatibility.maybe_fix_act(first_bot_act)
-        first_bot_act['id'] = 'THEY'
+        first_bot_act["id"] = "THEY"
         self.agent.observe(validate(first_bot_act))
 
         bot_utterance_data = {
-            'agent_idx': 1,
-            'text': first_bot_act['text'],
-            'id': 'THEY',
+            "agent_idx": 1,
+            "text": first_bot_act["text"],
+            "id": "THEY",
         }
         self.dialog.append(bot_utterance_data)
 
@@ -106,11 +106,11 @@ class ModelChatWorld(BaseModelChatWorld):
         """
         data = super().get_final_chat_data()
         context_data = {
-            'model_name': self.model_name,
-            'context_info': self.context_info,
-            'bot_persona_strings': self.bot_persona_strings,
-            'human_persona_strings': self.human_persona_strings,
-            'initial_task_data': self.task_data,
+            "model_name": self.model_name,
+            "context_info": self.context_info,
+            "bot_persona_strings": self.bot_persona_strings,
+            "human_persona_strings": self.human_persona_strings,
+            "initial_task_data": self.task_data,
         }
         data.update(context_data)
         return data
@@ -124,11 +124,11 @@ class ModelChatWorld(BaseModelChatWorld):
         utterances, so it shouldn't get checked.
         """
         human_messages = [
-            message['text'] for message in self.dialog if message['id'] == 'YOU'
+            message["text"] for message in self.dialog if message["id"] == "YOU"
         ]
-        violation_types = ['min_words', 'all_caps', 'exact_match']
-        if self.opt['conversation_start_mode'] == 'blended_skill_talk':
-            violation_types.append('penalize_greetings')
+        violation_types = ["min_words", "all_caps", "exact_match"]
+        if self.opt["conversation_start_mode"] == "blended_skill_talk":
+            violation_types.append("penalize_greetings")
             # human_messages = human_messages[1:]
         return human_messages, violation_types
 
@@ -136,20 +136,20 @@ class ModelChatWorld(BaseModelChatWorld):
 def make_world(opt, agents, initialization_data):
     # TODO: merge this function in with the make_world in in parlai/crowdsourcing/tasks/model_chat/worlds.py
     # Extract important components from opt
-    statistics_condition = opt['statistics_condition']
-    context_generator = opt['context_generator']
+    statistics_condition = opt["statistics_condition"]
+    context_generator = opt["context_generator"]
 
     agents[0].agent_id = "YOU"
 
     # Decide on a bot to use
-    run_statistics = opt['run_statistics']
+    run_statistics = opt["run_statistics"]
     with statistics_condition:
         remaining_counts_needed = [
-            (m, c - run_statistics[m]) for (m, c) in opt['conversations_needed'].items()
+            (m, c - run_statistics[m]) for (m, c) in opt["conversations_needed"].items()
         ]
         remaining_counts_needed.sort(reverse=True, key=lambda x: x[1])
         model_name = remaining_counts_needed[0][0]
-        print(f'Remaining conversation counts needed: {remaining_counts_needed}')
+        print(f"Remaining conversation counts needed: {remaining_counts_needed}")
         print(f'Choosing the "{model_name}" model for the bot.')
 
     # Get context: personas, previous utterances, etc.

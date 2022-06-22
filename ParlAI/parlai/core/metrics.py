@@ -33,14 +33,14 @@ from parlai.core.message import Message
 from parlai.utils.misc import warn_once
 from parlai.utils.typing import TScalar, TVector
 
-DEFAULT_METRICS = {'bleu-4', 'accuracy', 'f1'}
-ROUGE_METRICS = {'rouge-1', 'rouge-2', 'rouge-L'}
-BLEU_METRICS = {'bleu-1', 'bleu-2', 'bleu-3', 'bleu-4'}
+DEFAULT_METRICS = {"bleu-4", "accuracy", "f1"}
+ROUGE_METRICS = {"rouge-1", "rouge-2", "rouge-L"}
+BLEU_METRICS = {"bleu-1", "bleu-2", "bleu-3", "bleu-4"}
 DISTINCT_METRICS = {
-    'interdistinct-1',
-    'interdistinct-2',
-    'intradistinct-1',
-    'intradistinct-2',
+    "interdistinct-1",
+    "interdistinct-2",
+    "intradistinct-1",
+    "intradistinct-2",
 }
 ALL_METRICS = DEFAULT_METRICS | ROUGE_METRICS | BLEU_METRICS | DISTINCT_METRICS
 
@@ -52,8 +52,8 @@ class MetricDisplayData(NamedTuple):
 
 METRICS_DISPLAY_DATA = {
     "accuracy": MetricDisplayData("Accuracy", "Exact match text accuracy"),
-    'auc': MetricDisplayData(
-        'AUC',
+    "auc": MetricDisplayData(
+        "AUC",
         "Area Under the Receiver Operating Characteristic Curve (true positive rate vs false positive rate curve)",
     ),
     "bleu-4": MetricDisplayData(
@@ -151,7 +151,7 @@ def get_metric_display_data(metric: str) -> MetricDisplayData:
     )
 
 
-re_art = re.compile(r'\b(a|an|the)\b')
+re_art = re.compile(r"\b(a|an|the)\b")
 re_punc = re.compile(r'[!"#$%&()*+,-./:;<=>?@\[\]\\^`{|}~_\']')
 
 
@@ -197,10 +197,10 @@ class Metric(ABC):
         return self.__add__(other)
 
     def __str__(self) -> str:
-        return f'{self.value():.4g}'
+        return f"{self.value():.4g}"
 
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}({self.value():.4g})'
+        return f"{self.__class__.__name__}({self.value():.4g})"
 
     def __float__(self) -> float:
         return float(self.value())
@@ -225,7 +225,7 @@ class Metric(ABC):
         Used heavily for assertAlmostEqual.
         """
         if not isinstance(other, float):
-            raise TypeError('Metrics.__sub__ is intentionally limited to floats.')
+            raise TypeError("Metrics.__sub__ is intentionally limited to floats.")
         return self.value() - other
 
     def __rsub__(self, other: Any) -> float:
@@ -235,7 +235,7 @@ class Metric(ABC):
         NOTE: This is not necessary in python 3.7+.
         """
         if not isinstance(other, float):
-            raise TypeError('Metrics.__rsub__ is intentionally limited to floats.')
+            raise TypeError("Metrics.__rsub__ is intentionally limited to floats.")
         return other - self.value()
 
     @classmethod
@@ -271,7 +271,7 @@ class Metric(ABC):
                 # comprehension
                 objs[i] = o.tolist()
         if len(set(lengths)) != 1:
-            raise IndexError(f'Uneven {cls.__name__} constructions: {lengths}')
+            raise IndexError(f"Uneven {cls.__name__} constructions: {lengths}")
         return [cls(*items) for items in zip(*objs)]
 
 
@@ -283,7 +283,7 @@ class FixedMetric(Metric):
     combined across different multitasks or different workers.
     """
 
-    __slots__ = ('_value',)
+    __slots__ = ("_value",)
 
     def __init__(self, value: TScalar):
         self._value = self.as_number(value)
@@ -307,7 +307,7 @@ class SumMetric(Metric):
     the last report, which depends exactly on a teacher.
     """
 
-    __slots__ = ('_sum',)
+    __slots__ = ("_sum",)
 
     def __init__(self, sum_: TScalar = 0):
         if isinstance(sum_, torch.Tensor):
@@ -337,7 +337,7 @@ class AverageMetric(Metric):
     per-example values that can be directly mapped back to a teacher.
     """
 
-    __slots__ = ('_numer', '_denom')
+    __slots__ = ("_numer", "_denom")
 
     @property
     def macro_average(self) -> bool:
@@ -365,7 +365,7 @@ class AverageMetric(Metric):
             # don't nan out if we haven't counted anything
             return 0.0
         if self._denom == 0:
-            return float('nan')
+            return float("nan")
         return self._numer / self._denom
 
 
@@ -377,7 +377,7 @@ class MacroAverageMetric(Metric):
     AverageMetrics already.
     """
 
-    __slots__ = '_values'
+    __slots__ = "_values"
 
     def __init__(self, metrics: Dict[str, Metric]) -> None:
         self._values = metrics
@@ -401,7 +401,7 @@ class TimerMetric(Metric):
     A timer metric keep tracks of the first/last times it was used.
     """
 
-    __slots__ = ('_value', '_start', '_end')
+    __slots__ = ("_value", "_start", "_end")
 
     @classmethod
     def _now(cls) -> float:
@@ -724,7 +724,7 @@ class RougeMetric(AverageMetric):
 
         if RougeMetric._evaluator is None:
             RougeMetric._evaluator = rouge.Rouge(
-                metrics=['rouge-n', 'rouge-l'], max_n=2
+                metrics=["rouge-n", "rouge-l"], max_n=2
             )
         try:
             scores = [
@@ -735,14 +735,14 @@ class RougeMetric(AverageMetric):
             ]
         except LookupError:
             warn_once(
-                'ROUGE requires nltk punkt tokenizer. Please run '
-                '`python -c "import nltk; nltk.download(\'punkt\')`'
+                "ROUGE requires nltk punkt tokenizer. Please run "
+                "`python -c \"import nltk; nltk.download('punkt')`"
             )
             return None, None, None
 
-        scores_rouge1 = max(score['rouge-1']['r'] for score in scores)
-        scores_rouge2 = max(score['rouge-2']['r'] for score in scores)
-        scores_rougeL = max(score['rouge-l']['r'] for score in scores)
+        scores_rouge1 = max(score["rouge-1"]["r"] for score in scores)
+        scores_rouge2 = max(score["rouge-2"]["r"] for score in scores)
+        scores_rougeL = max(score["rouge-l"]["r"] for score in scores)
         return (
             RougeMetric(scores_rouge1),
             RougeMetric(scores_rouge2),
@@ -810,10 +810,10 @@ def normalize_answer(s):
     """
 
     s = s.lower()
-    s = re_punc.sub(' ', s)
-    s = re_art.sub(' ', s)
+    s = re_punc.sub(" ", s)
+    s = re_art.sub(" ", s)
     # TODO: this could almost certainly be faster with a regex \s+ -> ' '
-    s = ' '.join(s.split())
+    s = " ".join(s.split())
     return s
 
 
@@ -847,7 +847,7 @@ def aggregate_named_reports(
                 if each_metric not in m:
                     m[each_metric] = value
             else:
-                task_metric = f'{task_id}/{each_metric}'
+                task_metric = f"{task_id}/{each_metric}"
                 m[task_metric] = m.get(task_metric) + value
                 if micro_average or not value.macro_average:
                     # none + a => a from implementation of Metric.__add__
@@ -883,9 +883,9 @@ class Metrics(object):
     """
 
     def __init__(self, threadsafe=False, shared=None):
-        if shared and 'data' in shared:
+        if shared and "data" in shared:
             # This is a clone
-            self._data = shared['data']
+            self._data = shared["data"]
         else:
             # The original
             self._data = {}
@@ -898,7 +898,7 @@ class Metrics(object):
         return str(self._data)
 
     def __repr__(self):
-        return f'Metrics({repr(self._data)})'
+        return f"Metrics({repr(self._data)})"
 
     def add(self, key: str, value: Optional[Metric]) -> None:
         """
@@ -933,7 +933,7 @@ class Metrics(object):
         self._recent_data.clear()
 
     def share(self):
-        return {'data': self._data}
+        return {"data": self._data}
 
     def add_metrics(self, other: "Metrics") -> None:
         """
@@ -966,22 +966,22 @@ class TeacherMetrics(Metrics):
         col: Set[str] = set()
         names = cli_arg.split(",")
         for n in names:
-            if n == 'default':
+            if n == "default":
                 col |= DEFAULT_METRICS
-            elif n == 'rouge':
+            elif n == "rouge":
                 col |= ROUGE_METRICS
-            elif n == 'bleu':
+            elif n == "bleu":
                 col |= BLEU_METRICS
-            elif n == 'distinct':
+            elif n == "distinct":
                 col |= DISTINCT_METRICS
-            elif n == 'all':
+            elif n == "all":
                 col |= ALL_METRICS
             else:
                 col.add(n)
         return col
 
     def _update_ranking_metrics(self, observation, labels):
-        text_cands = observation.get('text_candidates', None)
+        text_cands = observation.get("text_candidates", None)
         if text_cands is None:
             return
 
@@ -1001,41 +1001,41 @@ class TeacherMetrics(Metrics):
         # (other metrics such as p@k and r@k take
         # the value of cnt into account.)
         for k in self.eval_pr:
-            self.add(f'hits@{k}', AverageMetric(cnts[k] > 0))
+            self.add(f"hits@{k}", AverageMetric(cnts[k] > 0))
 
     def evaluate_response(self, observation: Message, labels: List[str]) -> None:
         """
         Compute all required text-based metrics based on an observation and labels.
         """
-        prediction = observation.get('text', None)
+        prediction = observation.get("text", None)
 
-        self.add('exs', SumMetric(1))
+        self.add("exs", SumMetric(1))
 
         if prediction is not None:
-            self.add('accuracy', ExactMatchMetric.compute(prediction, labels))
-            self.add('f1', F1Metric.compute(prediction, labels))
+            self.add("accuracy", ExactMatchMetric.compute(prediction, labels))
+            self.add("f1", F1Metric.compute(prediction, labels))
 
             for k in range(1, 5):  # 1..4
-                if f'bleu-{k}' in self._metrics_list:
-                    self.add(f'bleu-{k}', BleuMetric.compute(prediction, labels, k))
+                if f"bleu-{k}" in self._metrics_list:
+                    self.add(f"bleu-{k}", BleuMetric.compute(prediction, labels, k))
             # if any of the rouges are in the list
             if self._metrics_list & ROUGE_METRICS:
                 r1, r2, rL = RougeMetric.compute_many(prediction, labels)
-                if 'rouge-1' in self._metrics_list and r1:
-                    self.add('rouge_1', r1)
-                if 'rouge-2' in self._metrics_list and r2:
-                    self.add('rouge_2', r2)
-                if 'rouge-L' in self._metrics_list and rL:
-                    self.add('rouge_L', rL)
+                if "rouge-1" in self._metrics_list and r1:
+                    self.add("rouge_1", r1)
+                if "rouge-2" in self._metrics_list and r2:
+                    self.add("rouge_2", r2)
+                if "rouge-L" in self._metrics_list and rL:
+                    self.add("rouge_L", rL)
             # compute distinct-k
             for k in [1, 2]:
-                if f'interdistinct-{k}' in self._metrics_list:
+                if f"interdistinct-{k}" in self._metrics_list:
                     self.add(
-                        f'interdistinct-{k}', InterDistinctMetric.compute(prediction, k)
+                        f"interdistinct-{k}", InterDistinctMetric.compute(prediction, k)
                     )
-                if f'intradistinct-{k}' in self._metrics_list:
+                if f"intradistinct-{k}" in self._metrics_list:
                     self.add(
-                        f'intradistinct-{k}', IntraDistinctMetric.compute(prediction, k)
+                        f"intradistinct-{k}", IntraDistinctMetric.compute(prediction, k)
                     )
 
         # Ranking metrics.
@@ -1045,14 +1045,14 @@ class TeacherMetrics(Metrics):
 
     def _consume_user_metrics(self, observation):
         # User-reported metrics
-        if 'metrics' in observation:
-            for uk, v in observation['metrics'].items():
+        if "metrics" in observation:
+            for uk, v in observation["metrics"].items():
                 if uk in ALL_METRICS:
                     # don't let the user override our metrics
-                    uk = f'USER_{uk}'
-                assert isinstance(uk, str), f'{type(uk)} is not a str'
+                    uk = f"USER_{uk}"
+                assert isinstance(uk, str), f"{type(uk)} is not a str"
                 if not isinstance(v, Metric):
-                    warn_once(f'Metric {uk} is assumed to be averaged per example.')
+                    warn_once(f"Metric {uk} is assumed to be averaged per example.")
                     v = AverageMetric(v)
                 assert isinstance(v, Metric)
                 self.add(uk, v)

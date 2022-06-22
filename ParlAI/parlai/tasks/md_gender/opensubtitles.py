@@ -11,4 +11,4 @@ from parlai.tasks.md_gender.build import build  # noqa: F401
 
 class OpensubtitlesTeacher(FixedDialogTeacher):
     def __init__(self, opt, shared):
-        raise RuntimeError('Data coming soon!')
+        raise RuntimeError("Data coming soon!")

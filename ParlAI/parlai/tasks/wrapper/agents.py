@@ -47,34 +47,34 @@ class AbstractWrapperTeacher(Teacher, ABC):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        agent = parser.add_argument_group('AbstractWrapper args')
+        agent = parser.add_argument_group("AbstractWrapper args")
         agent.add_argument(
-            '-wt',
-            '--wrapper-task',
+            "-wt",
+            "--wrapper-task",
             type=str,
-            help='The task whose fields will be manipulated.',
+            help="The task whose fields will be manipulated.",
         )
         try:
-            parser.add_task_args(partial_opt['wrapper_task'], partial_opt)
+            parser.add_task_args(partial_opt["wrapper_task"], partial_opt)
         except KeyError:
             warn_once(
-                'The task name cannot be parsed from command-line arguments! '
-                'Task-specific flags will not be added.'
+                "The task name cannot be parsed from command-line arguments! "
+                "Task-specific flags will not be added."
             )
         return parser
 
     def __init__(self, opt: Opt, shared=None):
-        if ',' in opt['task']:
+        if "," in opt["task"]:
             raise ValueError(
-                'AbstractWrapperTeacher cannot be used with multiple tasks!'
+                "AbstractWrapperTeacher cannot be used with multiple tasks!"
             )
-        self.id = opt['task']
+        self.id = opt["task"]
         self.opt = opt
         if shared:
-            self.task = create_agent_from_shared(shared['task'])
+            self.task = create_agent_from_shared(shared["task"])
         else:
             opt_singletask = copy.deepcopy(opt)
-            opt_singletask['task'] = opt['wrapper_task']
+            opt_singletask["task"] = opt["wrapper_task"]
             self.task = create_task_agent_from_taskname(opt_singletask)[0]
         assert isinstance(self.task, FixedDialogTeacher)
 
@@ -100,7 +100,7 @@ class AbstractWrapperTeacher(Teacher, ABC):
         method.
         """
         raise NotImplementedError(
-            'Abstract class: user must implement the _edit_action() method'
+            "Abstract class: user must implement the _edit_action() method"
         )
 
     def num_examples(self):
@@ -158,9 +158,9 @@ class AbstractWrapperTeacher(Teacher, ABC):
         Share the subtask.
         """
         shared = {}
-        shared['class'] = type(self)
-        shared['opt'] = self.opt
-        shared['task'] = self.task.share()
+        shared["class"] = type(self)
+        shared["opt"] = self.opt
+        shared["task"] = self.task.share()
         return shared
 
 
@@ -180,15 +180,15 @@ class LabelToTextTeacher(AbstractWrapperTeacher):
         """
         Edit the fields of the action manually.
         """
-        if 'labels' in act:
-            labels = act['labels']
+        if "labels" in act:
+            labels = act["labels"]
             if len(labels) != 1:
                 raise ValueError(
-                    f'{type(self).__name__} can only be used with one label!'
+                    f"{type(self).__name__} can only be used with one label!"
                 )
-            act.force_set('text', labels[0])
-            act.force_set('labels', [''])
+            act.force_set("text", labels[0])
+            act.force_set("labels", [""])
         else:
-            assert 'text' not in act and act['episode_done'] is True
-        act.force_set('episode_done', True)  # Clear the dialogue history
+            assert "text" not in act and act["episode_done"] is True
+        act.force_set("episode_done", True)  # Clear the dialogue history
         return act

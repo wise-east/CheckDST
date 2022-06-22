@@ -24,80 +24,80 @@ class TestConversations(unittest.TestCase):
         act_list = [
             [
                 [
-                    {'id': 'Emily', 'text': 'Hello, do you like this test?'},
-                    {'id': 'Stephen', 'text': 'Why yes! I love this test!'},
+                    {"id": "Emily", "text": "Hello, do you like this test?"},
+                    {"id": "Stephen", "text": "Why yes! I love this test!"},
                 ],
                 [
-                    {'id': 'Emily', 'text': 'So will you stamp this diff?'},
-                    {'id': 'Stephen', 'text': 'Yes, I will do it right now!'},
+                    {"id": "Emily", "text": "So will you stamp this diff?"},
+                    {"id": "Stephen", "text": "Yes, I will do it right now!"},
                 ],
             ],
             [
                 [
                     {
-                        'id': 'A',
-                        'text': 'Somebody once told me the world is gonna roll me',
+                        "id": "A",
+                        "text": "Somebody once told me the world is gonna roll me",
                     },
-                    {'id': 'B', 'text': 'I aint the sharpest tool in the shed'},
+                    {"id": "B", "text": "I aint the sharpest tool in the shed"},
                 ],
                 [
                     {
-                        'id': 'A',
-                        'text': 'She was looking kind of dumb with her finger and her thumb',
+                        "id": "A",
+                        "text": "She was looking kind of dumb with her finger and her thumb",
                     },
-                    {'id': 'B', 'text': 'In the shape of an L on her forehead'},
+                    {"id": "B", "text": "In the shape of an L on her forehead"},
                 ],
             ],
         ]
-        self.opt = {'A': 'B', 'C': 'D', 'E': 'F'}
+        self.opt = {"A": "B", "C": "D", "E": "F"}
 
-        self.convo_datapath = os.path.join(self.datapath, 'convo1')
+        self.convo_datapath = os.path.join(self.datapath, "convo1")
         Conversations.save_conversations(
             act_list,
             self.convo_datapath,
             self.opt,
             self_chat=False,
-            other_info='Blah blah blah',
+            other_info="Blah blah blah",
         )
-        assert os.path.exists(self.convo_datapath + '.jsonl')
-        assert os.path.exists(self.convo_datapath + '.metadata')
+        assert os.path.exists(self.convo_datapath + ".jsonl")
+        assert os.path.exists(self.convo_datapath + ".metadata")
 
-        convos = Conversations(self.convo_datapath + '.jsonl')
+        convos = Conversations(self.convo_datapath + ".jsonl")
 
         # test conversations loaded
         self.assertEqual(len(convos), 2)
 
         # test speakers saved
-        speakers = {'Stephen', 'Emily', 'A', 'B'}
+        speakers = {"Stephen", "Emily", "A", "B"}
         self.assertEqual(set(convos.metadata.speakers), speakers)
 
         # test opt saved
-        for x in ['A', 'C', 'E']:
+        for x in ["A", "C", "E"]:
             self.assertEqual(self.opt[x], convos.metadata.opt[x])
 
         # test kwargs
-        self.assertEqual({'other_info': 'Blah blah blah'}, convos.metadata.extra_data)
+        self.assertEqual({"other_info": "Blah blah blah"}, convos.metadata.extra_data)
 
         # test reading conversations
-        with self.assertLogs(logger=logging.logger, level='DEBUG') as cm:
+        with self.assertLogs(logger=logging.logger, level="DEBUG") as cm:
             convos.read_conv_idx(0)
             str_version = (
-                'Emily: Hello, do you like this test?\n'
-                'Stephen: Why yes! I love this test!\n'
-                'Emily: So will you stamp this diff?\n'
-                'Stephen: Yes, I will do it right now!\n'
+                "Emily: Hello, do you like this test?\n"
+                "Stephen: Why yes! I love this test!\n"
+                "Emily: So will you stamp this diff?\n"
+                "Stephen: Yes, I will do it right now!\n"
             )
             self.assertIn(str_version, "\n".join(cm.output))
 
         # test getting a specific turn
         first = convos[0]  # Conversation
-        self.assertEqual(first[0].id, 'Emily')
-        self.assertEqual(first[3].text, 'Yes, I will do it right now!')
+        self.assertEqual(first[0].id, "Emily")
+        self.assertEqual(first[3].text, "Yes, I will do it right now!")
 
     def tearDown(self):
         # remove conversations
         shutil.rmtree(self.datapath)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -36,10 +36,10 @@ class ConfusionMatrixMetric(Metric):
     """
 
     __slots__ = (
-        '_true_positives',
-        '_true_negatives',
-        '_false_positives',
-        '_false_negatives',
+        "_true_positives",
+        "_true_negatives",
+        "_false_positives",
+        "_false_negatives",
     )
 
     @property
@@ -62,8 +62,8 @@ class ConfusionMatrixMetric(Metric):
         self._false_negatives = self.as_number(false_negatives)
 
     def __add__(
-        self, other: Optional['ConfusionMatrixMetric']
-    ) -> 'ConfusionMatrixMetric':
+        self, other: Optional["ConfusionMatrixMetric"]
+    ) -> "ConfusionMatrixMetric":
         # NOTE: hinting can be cleaned up with "from __future__ import annotations" when
         # we drop Python 3.6
         if other is None:
@@ -88,7 +88,7 @@ class ConfusionMatrixMetric(Metric):
         true_negatives: TScalar = 0,
         false_positives: TScalar = 0,
         false_negatives: TScalar = 0,
-    ) -> Tuple['PrecisionMetric', 'RecallMetric', 'ClassificationF1Metric']:
+    ) -> Tuple["PrecisionMetric", "RecallMetric", "ClassificationF1Metric"]:
         return (
             PrecisionMetric(
                 true_positives, true_negatives, false_positives, false_negatives
@@ -105,7 +105,7 @@ class ConfusionMatrixMetric(Metric):
     def compute_metrics(
         predictions: List[str], gold_labels: List[str], positive_class: str
     ) -> Tuple[
-        List['PrecisionMetric'], List['RecallMetric'], List['ClassificationF1Metric']
+        List["PrecisionMetric"], List["RecallMetric"], List["ClassificationF1Metric"]
     ]:
         precisions = []
         recalls = []
@@ -231,7 +231,7 @@ class AUCMetrics(Metric):
         assert self._class_name == class_name
         assert len(true_labels) == len(pos_probs)
 
-        TO_INT_FACTOR = 10 ** self._max_bucket_dec_places
+        TO_INT_FACTOR = 10**self._max_bucket_dec_places
         # add the upper and lower bound of the values
         for label, prob in zip(true_labels, pos_probs):
             # calculate the upper and lower bound of the values
@@ -245,7 +245,7 @@ class AUCMetrics(Metric):
             else:
                 interested_dict[prob_down] = 1
 
-    def __add__(self, other: Optional['AUCMetrics']) -> 'AUCMetrics':
+    def __add__(self, other: Optional["AUCMetrics"]) -> "AUCMetrics":
         if other is None:
             return self
         assert isinstance(other, AUCMetrics)
@@ -327,7 +327,7 @@ class WeightedF1Metric(Metric):
     Class that represents the weighted f1 from ClassificationF1Metric.
     """
 
-    __slots__ = '_values'
+    __slots__ = "_values"
 
     @property
     def macro_average(self) -> bool:
@@ -339,7 +339,7 @@ class WeightedF1Metric(Metric):
     def __init__(self, metrics: Dict[str, ClassificationF1Metric]) -> None:
         self._values: Dict[str, ClassificationF1Metric] = metrics
 
-    def __add__(self, other: Optional['WeightedF1Metric']) -> 'WeightedF1Metric':
+    def __add__(self, other: Optional["WeightedF1Metric"]) -> "WeightedF1Metric":
         if other is None:
             return self
         assert isinstance(other, WeightedF1Metric)
@@ -364,7 +364,7 @@ class WeightedF1Metric(Metric):
     @staticmethod
     def compute_many(
         metrics: Dict[str, List[ClassificationF1Metric]]
-    ) -> List['WeightedF1Metric']:
+    ) -> List["WeightedF1Metric"]:
         weighted_f1s = [dict(zip(metrics, t)) for t in zip(*metrics.values())]
         return [WeightedF1Metric(metrics) for metrics in weighted_f1s]
 
@@ -385,72 +385,72 @@ class TorchClassifierAgent(TorchAgent):
         Add CLI args.
         """
         super().add_cmdline_args(parser, partial_opt=partial_opt)
-        parser = parser.add_argument_group('Torch Classifier Arguments')
+        parser = parser.add_argument_group("Torch Classifier Arguments")
         # class arguments
         parser.add_argument(
-            '--classes',
+            "--classes",
             type=str,
-            nargs='*',
+            nargs="*",
             default=None,
-            help='the name of the classes.',
+            help="the name of the classes.",
         )
         parser.add_argument(
-            '--class-weights',
+            "--class-weights",
             type=float,
-            nargs='*',
+            nargs="*",
             default=None,
-            help='weight of each of the classes for the softmax',
+            help="weight of each of the classes for the softmax",
         )
         parser.add_argument(
-            '--ref-class',
+            "--ref-class",
             type=str,
             default=None,
             hidden=True,
-            help='the class that will be used to compute '
-            'precision and recall. By default the first '
-            'class.',
+            help="the class that will be used to compute "
+            "precision and recall. By default the first "
+            "class.",
         )
         parser.add_argument(
-            '--threshold',
+            "--threshold",
             type=float,
             default=0.5,
-            help='during evaluation, threshold for choosing '
-            'ref class; only applies to binary '
-            'classification',
+            help="during evaluation, threshold for choosing "
+            "ref class; only applies to binary "
+            "classification",
         )
         # interactive mode
         parser.add_argument(
-            '--print-scores',
-            type='bool',
+            "--print-scores",
+            type="bool",
             default=False,
-            help='print probability of chosen class during ' 'interactive mode',
+            help="print probability of chosen class during " "interactive mode",
         )
         # miscellaneous arguments
         parser.add_argument(
-            '--data-parallel',
-            type='bool',
+            "--data-parallel",
+            type="bool",
             default=False,
-            help='uses nn.DataParallel for multi GPU',
+            help="uses nn.DataParallel for multi GPU",
         )
         parser.add_argument(
-            '--classes-from-file',
+            "--classes-from-file",
             type=str,
             default=None,
-            help='loads the list of classes from a file',
+            help="loads the list of classes from a file",
         )
         parser.add_argument(
-            '--ignore-labels',
-            type='bool',
+            "--ignore-labels",
+            type="bool",
             default=None,
-            help='Ignore labels provided to model',
+            help="Ignore labels provided to model",
         )
         parser.add_argument(
-            '--update-classifier-head-only',
-            type='bool',
+            "--update-classifier-head-only",
+            type="bool",
             default=False,
-            help='Freeze the encoder and update the classifier head only',
+            help="Freeze the encoder and update the classifier head only",
         )
-        parser.set_defaults(use_reply='none')
+        parser.set_defaults(use_reply="none")
         return parser
 
     def __init__(self, opt: Opt, shared=None):
@@ -458,82 +458,82 @@ class TorchClassifierAgent(TorchAgent):
         super().__init__(opt, shared)
 
         # set up classes
-        if opt.get('classes') is None and opt.get('classes_from_file') is None:
+        if opt.get("classes") is None and opt.get("classes_from_file") is None:
             raise RuntimeError(
-                'Must specify --classes or --classes-from-file argument.'
+                "Must specify --classes or --classes-from-file argument."
             )
         if not shared:
-            if opt['classes_from_file'] is not None:
-                with PathManager.open(opt['classes_from_file']) as f:
+            if opt["classes_from_file"] is not None:
+                with PathManager.open(opt["classes_from_file"]) as f:
                     self.class_list = f.read().splitlines()
             else:
-                self.class_list = opt['classes']
+                self.class_list = opt["classes"]
             self.class_dict = {val: i for i, val in enumerate(self.class_list)}
-            if opt.get('class_weights', None) is not None:
-                self.class_weights = opt['class_weights']
+            if opt.get("class_weights", None) is not None:
+                self.class_weights = opt["class_weights"]
             else:
                 self.class_weights = [1.0 for c in self.class_list]
             self.reset_metrics()
         else:
-            self.class_list = shared['class_list']
-            self.class_dict = shared['class_dict']
-            self.class_weights = shared['class_weights']
+            self.class_list = shared["class_list"]
+            self.class_dict = shared["class_dict"]
+            self.class_weights = shared["class_weights"]
 
         # in binary classfication, opt['threshold'] applies to ref class
-        if opt['ref_class'] is None or opt['ref_class'] not in self.class_dict:
+        if opt["ref_class"] is None or opt["ref_class"] not in self.class_dict:
             self.ref_class = self.class_list[0]
         else:
-            self.ref_class = opt['ref_class']
+            self.ref_class = opt["ref_class"]
             ref_class_id = self.class_list.index(self.ref_class)
             if ref_class_id != 0:
                 # move to the front of the class list
                 self.class_list.insert(0, self.class_list.pop(ref_class_id))
 
         # set up threshold, only used in binary classification
-        if len(self.class_list) == 2 and opt.get('threshold', 0.5) != 0.5:
-            self.threshold = opt['threshold']
+        if len(self.class_list) == 2 and opt.get("threshold", 0.5) != 0.5:
+            self.threshold = opt["threshold"]
         else:
             self.threshold = None
 
         # set up calculating auc
-        self.calc_auc = opt.get('area_under_curve_digits', -1) > 0
+        self.calc_auc = opt.get("area_under_curve_digits", -1) > 0
 
         if self.calc_auc:
-            self.auc_bucket_decimal_size = opt.get('area_under_curve_digits')
-            if opt.get('area_under_curve_class') is None:
+            self.auc_bucket_decimal_size = opt.get("area_under_curve_digits")
+            if opt.get("area_under_curve_class") is None:
                 # self.auc_class_ind
                 interested_classes = self.class_list
             else:
-                interested_classes = opt.get('area_under_curve_class')
+                interested_classes = opt.get("area_under_curve_class")
             try:
                 self.auc_class_indices = [
                     self.class_dict[class_name] for class_name in interested_classes
                 ]
             except Exception:
                 raise RuntimeError(
-                    f'The inputted classes for auc were probably invalid.\n Current class names: {self.class_list} \n Names of AUC classes passed in: {interested_classes}'
+                    f"The inputted classes for auc were probably invalid.\n Current class names: {self.class_list} \n Names of AUC classes passed in: {interested_classes}"
                 )
             self.reset_auc()
 
         # set up model and optimizers
         states = {}
         if shared:
-            self.model = shared['model']
+            self.model = shared["model"]
         else:
             self.model = self.build_model()
             # freeze the encoder and update the classifier only
             if opt.get("update_classifier_head_only", False):
                 for _param_name, _param_value in self.model.named_parameters():
-                    if not _param_name.startswith('additional_linear_layer'):
+                    if not _param_name.startswith("additional_linear_layer"):
                         _param_value.requires_grad = False
 
             self.criterion = self.build_criterion()
             if self.model is None or self.criterion is None:
                 raise AttributeError(
-                    'build_model() and build_criterion() need to return the model or criterion'
+                    "build_model() and build_criterion() need to return the model or criterion"
                 )
             if init_model:
-                logging.info(f'Loading existing model parameters from {init_model}')
+                logging.info(f"Loading existing model parameters from {init_model}")
                 states = self.load(init_model)
             if self.use_cuda:
                 if self.model_parallel:
@@ -554,8 +554,8 @@ class TorchClassifierAgent(TorchAgent):
 
         if shared:
             # We don't use get here because hasattr is used on optimizer later.
-            if 'optimizer' in shared:
-                self.optimizer = shared['optimizer']
+            if "optimizer" in shared:
+                self.optimizer = shared["optimizer"]
         elif self._should_initialize_optimizer():
             optim_params = [p for p in self.model.parameters() if p.requires_grad]
             self.init_optim(optim_params)
@@ -563,19 +563,19 @@ class TorchClassifierAgent(TorchAgent):
 
     def build_criterion(self):
         weight_tensor = torch.FloatTensor(self.class_weights)
-        return torch.nn.CrossEntropyLoss(weight=weight_tensor, reduction='none')
+        return torch.nn.CrossEntropyLoss(weight=weight_tensor, reduction="none")
 
     def share(self):
         """
         Share model parameters.
         """
         shared = super().share()
-        shared['class_dict'] = self.class_dict
-        shared['class_list'] = self.class_list
-        shared['class_weights'] = self.class_weights
-        shared['model'] = self.model
-        if hasattr(self, 'optimizer'):
-            shared['optimizer'] = self.optimizer
+        shared["class_dict"] = self.class_dict
+        shared["class_list"] = self.class_list
+        shared["class_weights"] = self.class_weights
+        shared["model"] = self.model
+        if hasattr(self, "optimizer"):
+            shared["optimizer"] = self.optimizer
         return shared
 
     def _get_labels(self, batch):
@@ -587,7 +587,7 @@ class TorchClassifierAgent(TorchAgent):
         try:
             labels_indices_list = [self.class_dict[label] for label in batch.labels]
         except KeyError as e:
-            warn_once('One of your labels is not in the class list.')
+            warn_once("One of your labels is not in the class list.")
             raise e
 
         labels_tensor = torch.LongTensor(labels_indices_list)
@@ -607,9 +607,9 @@ class TorchClassifierAgent(TorchAgent):
         """
         f1_dict = {}
         for class_name in self.class_list:
-            prec_str = f'class_{class_name}_prec'
-            recall_str = f'class_{class_name}_recall'
-            f1_str = f'class_{class_name}_f1'
+            prec_str = f"class_{class_name}_prec"
+            recall_str = f"class_{class_name}_recall"
+            f1_str = f"class_{class_name}_f1"
             precision, recall, f1 = ConfusionMatrixMetric.compute_metrics(
                 predictions, batch.labels, class_name
             )
@@ -617,7 +617,7 @@ class TorchClassifierAgent(TorchAgent):
             self.record_local_metric(prec_str, precision)
             self.record_local_metric(recall_str, recall)
             self.record_local_metric(f1_str, f1)
-        self.record_local_metric('weighted_f1', WeightedF1Metric.compute_many(f1_dict))
+        self.record_local_metric("weighted_f1", WeightedF1Metric.compute_many(f1_dict))
 
     def _format_interactive_output(self, probs, prediction_id):
         """
@@ -627,7 +627,7 @@ class TorchClassifierAgent(TorchAgent):
         for i, pred_id in enumerate(prediction_id.tolist()):
             prob = round_sigfigs(probs[i][pred_id], 4)
             preds.append(
-                'Predicted class: {}\nwith probability: {}'.format(
+                "Predicted class: {}\nwith probability: {}".format(
                     self.class_list[pred_id], prob
                 )
             )
@@ -652,7 +652,7 @@ class TorchClassifierAgent(TorchAgent):
         labels = self._get_labels(batch)
         scores = self.score(batch)
         loss = self.criterion(scores, labels)
-        self.record_local_metric('loss', AverageMetric.many(loss))
+        self.record_local_metric("loss", AverageMetric.many(loss))
         loss = loss.mean()
         loss.backward()
         self.update_params()
@@ -685,18 +685,18 @@ class TorchClassifierAgent(TorchAgent):
             # choose ref class if Prob(ref class) > threshold
             prediction_id = (ref_prob <= self.threshold).to(torch.int64)
         preds = [self.class_list[idx] for idx in prediction_id]
-        if batch.labels is None or self.opt['ignore_labels']:
+        if batch.labels is None or self.opt["ignore_labels"]:
             # interactive mode
-            if self.opt.get('print_scores', False):
+            if self.opt.get("print_scores", False):
                 preds = self._format_interactive_output(probs, prediction_id)
         else:
             labels = self._get_labels(batch)
             loss = self.criterion(scores, labels)
-            self.record_local_metric('loss', AverageMetric.many(loss))
+            self.record_local_metric("loss", AverageMetric.many(loss))
             loss = loss.mean()
             self._update_confusion_matrix(batch, preds)
 
-        if self.opt.get('print_scores', False):
+        if self.opt.get("print_scores", False):
             return Output(preds, class_list=[self.class_list], probs=probs.cpu())
         else:
             return Output(preds)
@@ -711,7 +711,7 @@ class TorchClassifierAgent(TorchAgent):
             a [bsz, num_classes] FloatTensor containing the score of each
             class.
         """
-        raise NotImplementedError('Abstract class: user must implement score()')
+        raise NotImplementedError("Abstract class: user must implement score()")
 
     def reset_auc(self):
         if self.calc_auc:

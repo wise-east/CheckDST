@@ -11,19 +11,19 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/wikimovies/wikimovies.tar.gz',
-        'wikimovies.tar.gz',
-        'ed062b49922b602ebee6073f58951bf38c4772a8b53d46682f3ff80ed57de948',
+        "http://parl.ai/downloads/wikimovies/wikimovies.tar.gz",
+        "wikimovies.tar.gz",
+        "ed062b49922b602ebee6073f58951bf38c4772a8b53d46682f3ff80ed57de948",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'WikiMovies')
+    dpath = os.path.join(opt["datapath"], "WikiMovies")
     version = None
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

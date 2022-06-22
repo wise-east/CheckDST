@@ -62,8 +62,8 @@ def truncate(data, row, col):
         over = len(data) - MAX_SZ
         pct = over / len(data)
         logging.info(
-            'Data size is too large for scipy to index all of it. '
-            'Throwing out {} entries ({}%% of data).'.format(over, pct)
+            "Data size is too large for scipy to index all of it. "
+            "Throwing out {} entries ({}%% of data).".format(over, pct)
         )
         data = data[:MAX_SZ]
         row = row[:MAX_SZ]
@@ -119,13 +119,13 @@ def get_count_matrix(args, db_opts):
         )
 
     # Compute the count matrix in steps (to keep in memory)
-    logging.info('Mapping...')
+    logging.info("Mapping...")
     row, col, data = [], [], []
     step = max(int(len(doc_ids) / 10), 1)
     batches = [doc_ids[i : i + step] for i in range(0, len(doc_ids), step)]
     _count = partial(count, args.ngram, args.hash_size)
     for i, batch in enumerate(batches):
-        logging.info('-' * 25 + 'Batch %d/%d' % (i + 1, len(batches)) + '-' * 25)
+        logging.info("-" * 25 + "Batch %d/%d" % (i + 1, len(batches)) + "-" * 25)
         if args.num_workers is not None and args.num_workers <= 1:
             seq = map(_count, batch)
         else:
@@ -137,10 +137,10 @@ def get_count_matrix(args, db_opts):
             if len(data) > MAX_SZ:
                 break
         if len(data) > MAX_SZ:
-            logging.info('Reached max indexable size, breaking.')
+            logging.info("Reached max indexable size, breaking.")
             break
 
-    logging.info('Creating sparse matrix...')
+    logging.info("Creating sparse matrix...")
     data, row, col = truncate(data, row, col)
 
     count_matrix = sp.csr_matrix(
@@ -190,23 +190,23 @@ def get_doc_freqs(cnts):
 
 def run(args):
     # ParlAI version of run method, modified slightly
-    logging.info('Counting words...')
-    count_matrix = get_count_matrix(args, {'db_path': args.db_path})
+    logging.info("Counting words...")
+    count_matrix = get_count_matrix(args, {"db_path": args.db_path})
 
-    logging.info('Making tfidf vectors...')
+    logging.info("Making tfidf vectors...")
     tfidf = get_tfidf_matrix(count_matrix)
 
-    logging.info('Getting word-doc frequencies...')
+    logging.info("Getting word-doc frequencies...")
     freqs = get_doc_freqs(count_matrix)
 
     filename = args.out_dir
 
-    logging.info('Saving to %s' % filename)
+    logging.info("Saving to %s" % filename)
     metadata = {
-        'doc_freqs': freqs,
-        'tokenizer': args.tokenizer,
-        'hash_size': args.hash_size,
-        'ngram': args.ngram,
+        "doc_freqs": freqs,
+        "tokenizer": args.tokenizer,
+        "hash_size": args.hash_size,
+        "ngram": args.ngram,
     }
 
     utils.save_sparse_csr(filename, tfidf, metadata)

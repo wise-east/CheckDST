@@ -30,12 +30,12 @@ class ScriptConfig(MTurkRunScriptConfig):
     monitoring_log_rate: int = field(
         default=30,
         metadata={
-            'help': 'Frequency in seconds of logging the monitoring of the crowdsourcing task'
+            "help": "Frequency in seconds of logging the monitoring of the crowdsourcing task"
         },
     )
 
 
-register_script_config(name='scriptconfig', module=ScriptConfig)
+register_script_config(name="scriptconfig", module=ScriptConfig)
 
 
 @hydra.main(config_path="hydra_configs", config_name="scriptconfig")

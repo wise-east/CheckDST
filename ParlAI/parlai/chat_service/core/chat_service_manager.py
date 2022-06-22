@@ -141,7 +141,7 @@ class ChatServiceManager(ABC):
             """
             pass
 
-    EXIT_STR = 'EXIT'
+    EXIT_STR = "EXIT"
 
     def __init__(self, opt: Opt):
         """
@@ -158,7 +158,7 @@ class ChatServiceManager(ABC):
         self.running = True
         self.conversation_index = 0
         self.shutting_down = False
-        self.bypass_server_setup = self.opt.get('bypass_server_setup')
+        self.bypass_server_setup = self.opt.get("bypass_server_setup")
 
         # Messaging interaction functions that determine what to do when
         # messages are confirmed as delivered, marked as read by a user, and
@@ -168,8 +168,8 @@ class ChatServiceManager(ABC):
         self.handle_bot_read = self._handle_bot_read
 
     def _log_debug(self, text: str):
-        time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        log_utils.print_and_log(logging.DEBUG, f'{time}: {text}', should_print=True)
+        time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log_utils.print_and_log(logging.DEBUG, f"{time}: {text}", should_print=True)
 
     def _parse_config(self, opt: Opt):
         """
@@ -178,18 +178,18 @@ class ChatServiceManager(ABC):
         Use this to parse all options and settings necessary to set the variables for
         the conversation
         """
-        self.debug = opt['is_debug']
-        self.config = opt['config']
-        self.overworld = self.config['overworld']
-        self.world_path = self.config['world_path']
+        self.debug = opt["is_debug"]
+        self.config = opt["config"]
+        self.overworld = self.config["overworld"]
+        self.world_path = self.config["world_path"]
         self.world_module = utils.get_world_module(self.world_path)
-        self.task_configs = self.config['configs']
-        self.max_workers = self.config['max_workers']
-        self.opt['task'] = self.config['task_name']
+        self.task_configs = self.config["configs"]
+        self.max_workers = self.config["max_workers"]
+        self.opt["task"] = self.config["task_name"]
         # Deepcopy the opts so the manager opts aren't changed by the world runner
         self.runner_opt = copy.deepcopy(opt)
         self.world_runner = ChatServiceWorldRunner(
-            self.runner_opt, self.world_path, self.max_workers, self, opt['is_debug']
+            self.runner_opt, self.world_path, self.max_workers, self, opt["is_debug"]
         )  # Replace with base runner
         self.max_agents_for = {
             task: cfg.agents_required for task, cfg in self.task_configs.items()
@@ -247,8 +247,8 @@ class ChatServiceManager(ABC):
         for agent_id, overworld_fut in self.agent_id_to_overworld_future.items():
             self.observe_message(
                 agent_id,
-                'System: The conversation bot going to go offline soon, '
-                'finish any active conversations in the next 5 minutes.',
+                "System: The conversation bot going to go offline soon, "
+                "finish any active conversations in the next 5 minutes.",
             )
             overworld_fut.cancel()
 
@@ -314,7 +314,7 @@ class ChatServiceManager(ABC):
     def _handle_message_read(self, event: Dict[str, Any]):
         # If the message was sent by another user (as in during a conversation)
         # then we need to propogate the read back to that user.
-        reader = event['sender']['id']
+        reader = event["sender"]["id"]
         agent_state = self.get_agent_state(reader)
         if agent_state is None:
             return
@@ -330,7 +330,7 @@ class ChatServiceManager(ABC):
         Remove an agent from the system (after they disconnect or leave in some other
         way)
         """
-        self.observe_message(agent_id, 'See you later!')
+        self.observe_message(agent_id, "See you later!")
         for world_type in self.agent_pool:
             agent_state = self.get_agent_state(agent_id)
             if agent_state in self.agent_pool[world_type]:
@@ -346,7 +346,7 @@ class ChatServiceManager(ABC):
         it exists already.
         """
         agent_state = self.get_agent_state(agent_id)
-        task_id = 'overworld-{}-{}'.format(agent_id, time.time())
+        task_id = "overworld-{}-{}".format(agent_id, time.time())
         if agent_state is None:
             # new agent
             agent = self._create_agent(task_id, agent_id)
@@ -367,7 +367,7 @@ class ChatServiceManager(ABC):
             if e is not None:
                 log_utils.print_and_log(
                     logging.ERROR,
-                    'World {} had error {}'.format(task_id, repr(e)),
+                    "World {} had error {}".format(task_id, repr(e)),
                     should_print=True,
                 )
                 traceback.print_exc(file=sys.stdout)
@@ -388,15 +388,15 @@ class ChatServiceManager(ABC):
             message sent from agent
         """
         if self.service_reference_id is None:
-            self.service_reference_id = message['recipient']['id']
+            self.service_reference_id = message["recipient"]["id"]
 
-        agent_id = message['sender']['id']
-        if self.opt['password'] is not None:
-            if message['text'] != self.opt['password']:
+        agent_id = message["sender"]["id"]
+        if self.opt["password"] is not None:
+            if message["text"] != self.opt["password"]:
                 self.observe_message(
                     agent_id,
-                    'Sorry, this conversation bot is password-protected. If '
-                    'you have the password, please send it now.',
+                    "Sorry, this conversation bot is password-protected. If "
+                    "you have the password, please send it now.",
                 )
                 return
 
@@ -410,10 +410,10 @@ class ChatServiceManager(ABC):
             message to put on queue
         """
         message = self.restructure_message(message)
-        agent_id = message['sender']['id']
+        agent_id = message["sender"]["id"]
         if not self.world_runner.is_initialized():
             self.observe_message(
-                agent_id, 'Please wait while the worlds are initializing...'
+                agent_id, "Please wait while the worlds are initializing..."
             )
             self.world_runner.init_fut.result()
 
@@ -425,7 +425,7 @@ class ChatServiceManager(ABC):
         assert agent_state is not None
         if agent_state.get_active_agent() is None:
             # return agent to overworld
-            if message.get("text", "") and message['text'].upper() == 'EXIT':
+            if message.get("text", "") and message["text"].upper() == "EXIT":
                 # remove agent from agent_pool
                 to_remove = []
                 for world_type, _time in agent_state.time_in_pool.items():
@@ -439,8 +439,8 @@ class ChatServiceManager(ABC):
             else:
                 self.observe_message(
                     agent_id,
-                    'Please wait while we pair you with another person. '
-                    'If you wish to exit, type *EXIT*.',
+                    "Please wait while we pair you with another person. "
+                    "If you wish to exit, type *EXIT*.",
                 )
                 self.sender.typing_on(agent_id)  # type: ignore
         else:
@@ -451,7 +451,7 @@ class ChatServiceManager(ABC):
                 self.handle_bot_read(agent.id)  # type: ignore
             agent.put_data(message)
 
-    def add_agent_to_pool(self, agent: AgentState, world_type: str = 'default'):
+    def add_agent_to_pool(self, agent: AgentState, world_type: str = "default"):
         """
         Add the agent to pool.
 
@@ -461,14 +461,14 @@ class ChatServiceManager(ABC):
             Name of world whose pool should now contain agent
         """
         with self.agent_pool_change_condition:
-            self._log_debug('Adding agent {} to pool...'.format(agent.service_id))
+            self._log_debug("Adding agent {} to pool...".format(agent.service_id))
             # time agent entered agent_pool
             agent.time_in_pool.setdefault(world_type, time.time())
             # add agent to pool
             self.agent_pool.setdefault(world_type, []).append(agent)
 
     def remove_agent_from_pool(
-        self, agent: AgentState, world_type: str = 'default', mark_removed: bool = True
+        self, agent: AgentState, world_type: str = "default", mark_removed: bool = True
     ):
         """
         Remove agent from the pool.
@@ -481,7 +481,7 @@ class ChatServiceManager(ABC):
             whether to mark an agent as removed from the pool
         """
         with self.agent_pool_change_condition:
-            self._log_debug('Removing agent {} from pool...'.format(agent.service_id))
+            self._log_debug("Removing agent {} from pool...".format(agent.service_id))
             if world_type in self.agent_pool and agent in self.agent_pool[world_type]:
                 self.agent_pool[world_type].remove(agent)
                 # reset agent's time_in_pool
@@ -489,7 +489,7 @@ class ChatServiceManager(ABC):
                     del agent.time_in_pool[world_type]
                 # maybe mark agent as removed
                 if mark_removed:
-                    agent.stored_data['removed_from_pool'] = True
+                    agent.stored_data["removed_from_pool"] = True
                     if self.service_reference_id is not None:
                         self.mark_removed(agent.service_id, self.service_reference_id)
 
@@ -569,7 +569,7 @@ class ChatServiceManager(ABC):
         Begin new run.
         """
         self.run_id = str(int(time.time()))
-        self.task_group_id = '{}_{}'.format(self.opt['task'], self.run_id)
+        self.task_group_id = "{}_{}".format(self.opt["task"], self.run_id)
 
     def check_timeout_in_pool(
         self,
@@ -598,29 +598,29 @@ class ChatServiceManager(ABC):
                 # put agent back in overworld
                 agent_state.set_active_agent(agent_state.get_overworld_agent())
 
-                agent_state.stored_data['removed_after_timeout'] = True
+                agent_state.stored_data["removed_after_timeout"] = True
                 self.after_agent_removed(agent_state.service_id)
 
                 if backup_task is not None:
                     self.add_agent_to_pool(agent_state, backup_task)
 
                 # reset wait message state
-                agent_state.stored_data['seen_wait_message'] = False
+                agent_state.stored_data["seen_wait_message"] = False
 
             elif time_in_pool and time.time() - time_in_pool > 30:
                 # tell agent that a match is taking longer than
                 # expected
                 if (
-                    not agent_state.stored_data.get('seen_wait_message')
-                    or not agent_state.stored_data['seen_wait_message']
+                    not agent_state.stored_data.get("seen_wait_message")
+                    or not agent_state.stored_data["seen_wait_message"]
                 ):
                     self.observe_message(
                         agent_state.service_id,
-                        'Pairing is taking longer than expected. '
-                        'If you wish to exit, type *EXIT*.',
+                        "Pairing is taking longer than expected. "
+                        "If you wish to exit, type *EXIT*.",
                     )
                     self.sender.typing_on(agent_state.service_id)  # type: ignore
-                    agent_state.stored_data['seen_wait_message'] = True
+                    agent_state.stored_data["seen_wait_message"] = True
 
     def _get_done_callback_for_agents(
         self, task_id: str, world_type: str, agents: List[ChatServiceAgent]
@@ -650,18 +650,18 @@ class ChatServiceManager(ABC):
             if e is not None:
                 log_utils.print_and_log(
                     logging.ERROR,
-                    'World {} had error {}'.format(world_type, repr(e)),
+                    "World {} had error {}".format(world_type, repr(e)),
                     should_print=True,
                 )
                 traceback.print_exc(file=sys.stdout)
                 for agent in agents:
                     self.observe_message(
-                        agent.id, 'Sorry, this world closed. Returning to overworld.'
+                        agent.id, "Sorry, this world closed. Returning to overworld."
                     )
             else:
                 log_utils.print_and_log(
                     logging.INFO,
-                    'World {} had no error'.format(world_type),
+                    "World {} had no error".format(world_type),
                     should_print=True,
                 )
             self.active_worlds[task_id] = None
@@ -711,11 +711,11 @@ class ChatServiceManager(ABC):
                     needed_agents = self.max_agents_for[world_type]
                     if len(agent_pool) >= needed_agents:
                         log_utils.print_and_log(
-                            logging.INFO, 'starting pool', should_print=True
+                            logging.INFO, "starting pool", should_print=True
                         )
                         # enough agents in pool to start new conversation
                         self.conversation_index += 1
-                        task_id = 't_{}'.format(self.conversation_index)
+                        task_id = "t_{}".format(self.conversation_index)
 
                         # Add the required number of valid agents to the conv
                         agent_states = [w for w in agent_pool[:needed_agents]]
@@ -728,7 +728,7 @@ class ChatServiceManager(ABC):
                             state.set_active_agent(agent)
                             agents.append(agent)
                             # reset wait message state
-                            state.stored_data['seen_wait_message'] = False
+                            state.stored_data["seen_wait_message"] = False
                         assign_role_function = utils.get_assign_roles_fn(
                             self.world_module, self.taskworld_map[world_type]
                         )
@@ -774,11 +774,11 @@ class ChatServiceManager(ABC):
                 self.socket.keep_running = False
             self._expire_all_conversations()
         except BaseException as e:
-            log_utils.print_and_log(logging.ERROR, f'world ended in error: {e}')
+            log_utils.print_and_log(logging.ERROR, f"world ended in error: {e}")
 
         finally:
             if not self.bypass_server_setup:
-                server_utils.delete_server(self.server_task_name, self.opt['local'])
+                server_utils.delete_server(self.server_task_name, self.opt["local"])
 
     @abstractmethod
     def observe_message(

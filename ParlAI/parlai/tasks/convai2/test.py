@@ -8,20 +8,20 @@ from parlai.utils.testing import AutoTeacherTest  # noqa: F401
 
 
 class TestDefaultTeacher(AutoTeacherTest):
-    task = 'convai2'
+    task = "convai2"
 
 
 class TestNormalizedTeacher(AutoTeacherTest):
-    task = 'convai2:normalized'
+    task = "convai2:normalized"
 
 
 class TestBothTeacher(AutoTeacherTest):
-    task = 'convai2:both'
+    task = "convai2:both"
 
 
 class TestNoneTeacher(AutoTeacherTest):
-    task = 'convai2:none'
+    task = "convai2:none"
 
 
 class TestSelfRevisedTeacher(AutoTeacherTest):
-    task = 'convai2:self_revised'
+    task = "convai2:self_revised"

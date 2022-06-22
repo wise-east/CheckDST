@@ -22,8 +22,8 @@ class TestNoApex(unittest.TestCase):
             # we should crash if the user tries not giving --opt adam
             testing_utils.train_model(
                 dict(
-                    model_file='zoo:unittest/apex_fused_adam/model',
-                    task='integration_tests:nocandidate',
+                    model_file="zoo:unittest/apex_fused_adam/model",
+                    task="integration_tests:nocandidate",
                 )
             )
         # no problem if we give the option
@@ -31,14 +31,14 @@ class TestNoApex(unittest.TestCase):
         pp = ParlaiParser(True, True)
         opt = pp.parse_args(
             [
-                '--model-file',
-                'zoo:unittest/apex_fused_adam/model',
-                '--dict-file',
-                'zoo:unittest/apex_fused_adam/model.dict',
-                '--task',
-                'integration_tests:nocandidate',
-                '--optimizer',
-                'adam',
+                "--model-file",
+                "zoo:unittest/apex_fused_adam/model",
+                "--dict-file",
+                "zoo:unittest/apex_fused_adam/model.dict",
+                "--task",
+                "integration_tests:nocandidate",
+                "--optimizer",
+                "adam",
             ]
         )
         create_agent(opt, requireModelExists=True)
@@ -47,25 +47,25 @@ class TestNoApex(unittest.TestCase):
         # nice clean fallback if no fp16
         valid, test = testing_utils.eval_model(
             dict(
-                model_file='zoo:unittest/apex_fp16/model',
-                task='integration_tests:nocandidate',
+                model_file="zoo:unittest/apex_fp16/model",
+                task="integration_tests:nocandidate",
                 num_examples=4,
             )
         )
-        assert valid['accuracy'] == 1.0
-        assert test['accuracy'] == 1.0
+        assert valid["accuracy"] == 1.0
+        assert test["accuracy"] == 1.0
 
         # also no problem if we explicitly turn it on
         valid, test = testing_utils.eval_model(
             dict(
-                model_file='zoo:unittest/apex_fp16/model',
-                task='integration_tests:nocandidate',
+                model_file="zoo:unittest/apex_fp16/model",
+                task="integration_tests:nocandidate",
                 num_examples=4,
                 fp16=True,
             )
         )
-        assert valid['accuracy'] == 1.0
-        assert test['accuracy'] == 1.0
+        assert valid["accuracy"] == 1.0
+        assert test["accuracy"] == 1.0
 
         with self.assertRaises(RuntimeError):
             # we will have some fp16 tokens missing if we turn of fp16
@@ -73,8 +73,8 @@ class TestNoApex(unittest.TestCase):
             # the fp16 logic
             valid, test = testing_utils.eval_model(
                 dict(
-                    model_file='zoo:unittest/apex_fp16/model',
-                    task='integration_tests:nocandidate',
+                    model_file="zoo:unittest/apex_fp16/model",
+                    task="integration_tests:nocandidate",
                     num_examples=4,
                     fp16=False,
                 )
@@ -82,11 +82,11 @@ class TestNoApex(unittest.TestCase):
 
         valid, test = testing_utils.eval_model(
             dict(
-                model_file='zoo:unittest/apex_fp16/model',
-                task='integration_tests:nocandidate',
+                model_file="zoo:unittest/apex_fp16/model",
+                task="integration_tests:nocandidate",
                 num_examples=4,
                 force_fp16_tokens=False,
             )
         )
-        assert valid['accuracy'] == 1.0
-        assert test['accuracy'] == 1.0
+        assert valid["accuracy"] == 1.0
+        assert test["accuracy"] == 1.0

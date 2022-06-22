@@ -18,7 +18,7 @@ from parlai.core.message import Message
 
 
 class _CounterMetric(Metric):
-    __slots__ = ('_counter',)
+    __slots__ = ("_counter",)
 
     def __init__(self, counter: Counter):
         self._counter = counter
@@ -74,13 +74,13 @@ class CounterAgent(TorchAgent):
             self._counter = Counter()
             self._padding_counter = Counter()
         else:
-            self._counter = shared['counter']
-            self._padding_counter = shared['padding']
+            self._counter = shared["counter"]
+            self._padding_counter = shared["padding"]
 
     def share(self):
         shared = super().share()
-        shared['counter'] = self._counter
-        shared['padding'] = self._padding_counter
+        shared["counter"] = self._counter
+        shared["padding"] = self._padding_counter
         return shared
 
     def save(self, path=None):
@@ -113,11 +113,11 @@ class CounterAgent(TorchAgent):
 
     def _to_tuple(self, msg: Message) -> Tuple:
         # turned into an indexable object
-        keys = ['text', 'labels', 'eval_labels']
+        keys = ["text", "labels", "eval_labels"]
         return tuple(self._val(msg.get(k)) for k in keys)
 
     def batch_act(self, observations):
-        self._padding_counter.update(['val' for o in observations if o.is_padding()])
+        self._padding_counter.update(["val" for o in observations if o.is_padding()])
         self._counter.update(
             [self._to_tuple(o) for o in observations if not o.is_padding()]
         )
@@ -128,7 +128,7 @@ class CounterAgent(TorchAgent):
 
     def report(self):
         report = {}
-        report['num_pad'] = SumMetric(self._padding_counter.get('val', 0))
-        report['unique'] = UniqueMetric(self._counter)
-        report['times_seen'] = TimesSeenMetric(self._counter)
+        report["num_pad"] = SumMetric(self._padding_counter.get("val", 0))
+        report["unique"] = UniqueMetric(self._counter)
+        report["times_seen"] = TimesSeenMetric(self._counter)
         return report

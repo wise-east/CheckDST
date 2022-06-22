@@ -11,9 +11,9 @@ import parlai.core.build_data as build_data
 
 RESOURCES = [
     DownloadableFile(
-        '1WtbXCv3vPB5ql6w0FVDmAEMmWadbrCuG',
-        'dialogue_nli.zip',
-        '1164b0d9a0a1a6006891a6d4435a6a813464bc9b1e2f1ec5ce28c47267ad5e42',
+        "1WtbXCv3vPB5ql6w0FVDmAEMmWadbrCuG",
+        "dialogue_nli.zip",
+        "1164b0d9a0a1a6006891a6d4435a6a813464bc9b1e2f1ec5ce28c47267ad5e42",
         from_google=True,
     )
 ]
@@ -21,13 +21,13 @@ RESOURCES = [
 
 def build(opt):
     # get path to data directory
-    dpath = os.path.join(opt['datapath'], 'dialogue_nli')
+    dpath = os.path.join(opt["datapath"], "dialogue_nli")
     # define version if any
-    version = '1.0'
+    version = "1.0"
 
     # check if data had been previously built
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
 
         # make a clean directory if needed
         if build_data.built(dpath):

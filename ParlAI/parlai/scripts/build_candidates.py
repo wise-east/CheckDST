@@ -27,24 +27,24 @@ def setup_args(parser=None) -> ParlaiParser:
     # Get command line arguments
     if not parser:
         parser = ParlaiParser(
-            description='Build the candidate responses for a retrieval model'
+            description="Build the candidate responses for a retrieval model"
         )
     parser.add_argument(
-        '-n',
-        '--num-examples',
+        "-n",
+        "--num-examples",
         default=-1,
         type=int,
-        help='Total number of exs to convert, -1 to convert all examples',
+        help="Total number of exs to convert, -1 to convert all examples",
     )
     parser.add_argument(
-        '-of',
-        '--outfile',
+        "-of",
+        "--outfile",
         default=None,
         type=str,
-        help='Output file where to save, by default will be created in /tmp',
+        help="Output file where to save, by default will be created in /tmp",
     )
-    parser.add_argument('-ltim', '--log-every-n-secs', type=float, default=2)
-    parser.set_defaults(datatype='train:evalmode')
+    parser.add_argument("-ltim", "--log-every-n-secs", type=float, default=2)
+    parser.set_defaults(datatype="train:evalmode")
     return parser
 
 
@@ -53,21 +53,21 @@ def build_cands(opt):
     # create repeat label agent and assign it to the specified task
     agent = RepeatLabelAgent(opt)
     world = create_task(opt, agent)
-    if opt['outfile'] is None:
+    if opt["outfile"] is None:
         outfile = tempfile.mkstemp(
-            prefix='{}_{}_'.format(opt['task'], opt['datatype']), suffix='.txt'
+            prefix="{}_{}_".format(opt["task"], opt["datatype"]), suffix=".txt"
         )[1]
     else:
-        outfile = opt['outfile']
+        outfile = opt["outfile"]
 
-    if opt.get('num_examples', -1) == -1:
+    if opt.get("num_examples", -1) == -1:
         num_examples = world.num_examples()
     else:
-        num_examples = opt['num_examples']
+        num_examples = opt["num_examples"]
     log_timer = TimeLogger()
 
-    logging.info(f'Starting to build candidates from task.. (ex: {num_examples})')
-    logging.info(f'Saving output to {outfile}')
+    logging.info(f"Starting to build candidates from task.. (ex: {num_examples})")
+    logging.info(f"Saving output to {outfile}")
     cands = set()
     for _ in range(num_examples):
         world.parley()
@@ -77,22 +77,22 @@ def build_cands(opt):
             # We turn into a batch of 1 example, in case batching is being used.
             acts = [acts]
         for a in acts:
-            candidate = a.get('labels', a.get('eval_labels', None))
+            candidate = a.get("labels", a.get("eval_labels", None))
             if candidate is not None:
                 candidate = candidate[0]
                 cands.add(candidate)
-        if log_timer.time() > opt['log_every_n_secs']:
+        if log_timer.time() > opt["log_every_n_secs"]:
             text, _log = log_timer.log(world.total_parleys, world.num_examples())
             logging.info(text)
         if world.epoch_done():
-            logging.info('epoch done')
+            logging.info("epoch done")
             break
-    fw = open(outfile, 'w')
-    fw.write('\n'.join(cands))
+    fw = open(outfile, "w")
+    fw.write("\n".join(cands))
     fw.close()
 
 
-@register_script('build_candidates', hidden=True)
+@register_script("build_candidates", hidden=True)
 class BuildCandidates(ParlaiScript):
     @classmethod
     def setup_args(cls):
@@ -102,6 +102,6 @@ class BuildCandidates(ParlaiScript):
         return build_cands(self.opt)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     random.seed(42)
     BuildCandidates.main()

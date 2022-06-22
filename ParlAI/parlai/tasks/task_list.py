@@ -891,7 +891,7 @@ task_list = [
     {
         "id": "Wikipedia",
         "display_name": "Wikipedia",
-        "task": 'wikipedia',
+        "task": "wikipedia",
         "tags": [],
         "description": ("Dump of Wikipedia articles from 2/3/18"),
         "notes": (

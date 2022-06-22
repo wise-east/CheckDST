@@ -10,7 +10,7 @@ from typing import List, Dict
 from collections import defaultdict
 from tqdm import tqdm
 from loguru import logger
-import regex as re 
+import regex as re
 
 DOMAINS = {"hotel", "attraction", "restaurant", "hospital", "police", "train", "taxi"}
 
@@ -20,7 +20,7 @@ def normalize_text(text: str):
     remove arbitrary spaces in front of punctuation
     """
 
-    text = text.replace('\t', ' ').replace('\n', ' ')
+    text = text.replace("\t", " ").replace("\n", " ")
     for c in [" '", " ?", " ,", " .", " !", " n't"]:
         # remove spaces in front of punctuation and n't
         text = text.replace(c, c[1:])
@@ -33,39 +33,42 @@ def my_strip(context):
     return context.strip().lower()
 
 
-def normalize_dialogue_ids(mwoz_dict): 
+def normalize_dialogue_ids(mwoz_dict):
 
-    new_dict = {} 
-    for k, v in mwoz_dict.items(): 
-        if ".json" not in k: 
+    new_dict = {}
+    for k, v in mwoz_dict.items():
+        if ".json" not in k:
             new_key = k + ".json"
-        else: 
-            new_key = k 
-        new_dict[new_key] = v 
+        else:
+            new_key = k
+        new_dict[new_key] = v
 
-    return new_dict 
+    return new_dict
 
-def test_match(orig_data, aug_data): 
-    """ make sure that tp/sd testsets are the same as the original except for the new text"""
+
+def test_match(orig_data, aug_data):
+    """make sure that tp/sd testsets are the same as the original except for the new text"""
     orig_data = normalize_dialogue_ids(orig_data)
     aug_data = normalize_dialogue_ids(aug_data)
     assert orig_data.keys() == aug_data.keys(), "no match"
     print("Keys match")
-    return 
+    return
 
-def replace_dict_values_str(obj, orig_slot, new_slot): 
+
+def replace_dict_values_str(obj, orig_slot, new_slot):
     # obj['attraction']['semi']['area'] = "hi"
-    # return 
+    # return
     # print(obj)
-    if isinstance(obj, dict): 
-        for k, v in obj.items(): 
+    if isinstance(obj, dict):
+        for k, v in obj.items():
             obj[k] = replace_dict_values_str(v, orig_slot, new_slot)
-    elif isinstance(obj, str): 
+    elif isinstance(obj, str):
         obj = obj.replace(orig_slot, new_slot)
-    elif isinstance(obj, list): 
-        for idx in range(len(obj)): 
-            obj[idx] = replace_dict_values_str(obj[idx], orig_slot, new_slot)    
-    return obj 
+    elif isinstance(obj, list):
+        for idx in range(len(obj)):
+            obj[idx] = replace_dict_values_str(obj[idx], orig_slot, new_slot)
+    return obj
+
 
 def normalize_slot_key(slot_key):
 
@@ -106,9 +109,9 @@ def normalize_slot_value(slot_value):
 
 def seq2dict(slot_str: str):
     """
-    convert sequences to dictionary. 
-    Mainly for comparing DSTs from LAUG data (which uses MultiWOZ2.3) and with MultiWOZ22 data 
-    input: domain slot-key slot-value, ... 
+    convert sequences to dictionary.
+    Mainly for comparing DSTs from LAUG data (which uses MultiWOZ2.3) and with MultiWOZ22 data
+    input: domain slot-key slot-value, ...
     output: [domain: {slot-key: slot-value}]
     """
     slot_str = slot_str.strip().replace("\n", "")
@@ -165,26 +168,26 @@ def proper_dst_format(slot_str):
 
 
 def read_zipped_json(filepath, filename):
-    """Load zipped json file directly 
+    """Load zipped json file directly
 
     Args:
-        filepath (str): path of zipped file 
-        filename (str): file within zipped file that is to be loaded 
+        filepath (str): path of zipped file
+        filename (str): file within zipped file that is to be loaded
             (usually the file name only with out the .zip suffix)
 
     Returns:
-        Dict: returns json file within the zipped file 
+        Dict: returns json file within the zipped file
     """
     print("zip file path = ", filepath)
-    archive = zipfile.ZipFile(filepath, 'r')
+    archive = zipfile.ZipFile(filepath, "r")
     return json.load(archive.open(filename))
 
 
 def seq2dict(slot_str: str):
     """
-    convert sequences to dictionary. 
-    Mainly for comparing DSTs from LAUG data (which uses MultiWOZ2.3) and with MultiWOZ22 data 
-    input: domain slot-key slot-value, ... 
+    convert sequences to dictionary.
+    Mainly for comparing DSTs from LAUG data (which uses MultiWOZ2.3) and with MultiWOZ22 data
+    input: domain slot-key slot-value, ...
     output: [domain: {slot-key: slot-value}]
     """
     if slot_str == "":
@@ -211,7 +214,7 @@ def format_dst_slots(dialog_act: Dict):
     """
     Format turn-level dialog acts from LAUG data into slots
     input:  {domain: {slot key: slot value}}}
-    output: domain slot_key slot_value, ... 
+    output: domain slot_key slot_value, ...
     """
 
     slot_str = []
@@ -226,9 +229,9 @@ def multiwoz_v23_span_info_to_dict(spans: List, coreference=False):
     """
     Format turn-level span annotations from MultiWOZ2.3 data into slots
     input:  [[domain_intent, slot, value, span_start, span_end]]
-    output: dict 
+    output: dict
 
-    e.g. 
+    e.g.
         input: 'span_info': [['Taxi-Inform', 'Dest', 'pizza hut fen ditton', 11, 14]
         output: {'taxi': {dest: pizza hut fen ditton'}}
     """
@@ -254,10 +257,10 @@ def multiwoz_v23_span_info_to_dict(spans: List, coreference=False):
 
 def multiwoz_v23_diag_act_to_dict(diag_act, coreference=False):
     """
-    Transform 'dialog_act': {'Taxi-Inform': [['Depart', 'saint johns college']]} into 
+    Transform 'dialog_act': {'Taxi-Inform': [['Depart', 'saint johns college']]} into
     {taxi: {depart: saint johns college}}
 
-    set coreference = True if coreference item is passed as diag_act 
+    set coreference = True if coreference item is passed as diag_act
     'coreference': {'Train-Inform': [['Day', 'same day', 'saturday', 2, '10-10']]}
     """
 
@@ -321,12 +324,12 @@ def test_dialog_act():
         }
     }
 
-    slots_str = format_dst_slots(sample['dialog_act'])
+    slots_str = format_dst_slots(sample["dialog_act"])
     print(slots_str)
     dict_slots = seq2dict(slots_str)
     print(dict_slots)
 
-    slots_str2 = format_dst_slots(sample2['dialog_act'])
+    slots_str2 = format_dst_slots(sample2["dialog_act"])
     print(slots_str2)
     dict_slots2 = seq2dict(slots_str2)
     print(dict_slots2)
@@ -335,7 +338,7 @@ def test_dialog_act():
     assert dict_slots == dict_slots2
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # test_dialog_act()
 
@@ -354,18 +357,18 @@ if __name__ == '__main__':
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     data_dir = cur_dir
 
-    keys = ['train', 'val', 'test']
+    keys = ["train", "val", "test"]
     data = {}
     for key in keys:
         data_key = read_zipped_json(
-            os.path.join(data_dir, sub_dir, key + '.json.zip'), key + '.json'
+            os.path.join(data_dir, sub_dir, key + ".json.zip"), key + ".json"
         )
-        print('load {}, size {}'.format(key, len(data_key)))
+        print("load {}, size {}".format(key, len(data_key)))
         data = dict(data, **data_key)
 
-    with open(os.path.join(data_dir, 'valListFile'), 'r') as f:
+    with open(os.path.join(data_dir, "valListFile"), "r") as f:
         val_list = f.read().splitlines()
-    with open(os.path.join(data_dir, 'testListFile'), 'r') as f:
+    with open(os.path.join(data_dir, "testListFile"), "r") as f:
         test_list = f.read().splitlines()
 
     results = {}
@@ -373,7 +376,7 @@ if __name__ == '__main__':
     results_test = {}
 
     # load original data to test whether we have the same results
-    keys = ['train', 'valid', 'test']
+    keys = ["train", "valid", "test"]
     orig_multiwoz = {}
     for key in keys:
         multiwoz_path = f"/data/home/justincho/project/ParlAI/data/multiwoz_dst/MULTIWOZ2.2+/data_reformat_{key}.json"
@@ -385,7 +388,7 @@ if __name__ == '__main__':
     no_match = 0
     skipped = 0
     for title, sess in tqdm(data.items()):
-        logs = sess['log']
+        logs = sess["log"]
         context = ""
 
         # decide which list to become a part of
@@ -399,25 +402,25 @@ if __name__ == '__main__':
         slots = ""
         for i, diag in enumerate(logs):
             # format utterance
-            text = diag['text'].replace('\t', ' ').replace('\n', ' ')
+            text = diag["text"].replace("\t", " ").replace("\n", " ")
             for c in [" '", " ?", " ,", " .", " !", " n't"]:
                 # remove spaces in front of punctuation and n't
                 text = text.replace(c, c[1:])
 
             # odd turns are user turns. add DST example
             if i % 2 == 0:
-                text = diag['originalText'].replace('\t', ' ').replace('\n', ' ')
+                text = diag["originalText"].replace("\t", " ").replace("\n", " ")
 
                 slots += format_dst_slots(diag["dialog_act"])
                 context += "<user> " + text + " "
                 turn_num = int(i / 2)
                 turn = {
-                    'turn_num': turn_num,
-                    'dial_id': title.lower() + ".json",
-                    'slots_inf': slots,
+                    "turn_num": turn_num,
+                    "dial_id": title.lower() + ".json",
+                    "slots_inf": slots,
                     "context": context.strip(),
                 }
-                sample_name = turn['dial_id'] + f"-{turn_num}"
+                sample_name = turn["dial_id"] + f"-{turn_num}"
                 current[sample_name] = turn
 
                 slot_dict = seq2dict(slots)

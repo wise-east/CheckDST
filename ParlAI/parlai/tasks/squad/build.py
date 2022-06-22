@@ -11,31 +11,31 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        'https://rajpurkar.github.io/SQuAD-explorer/dataset/train-v1.1.json',
-        'train-v1.1.json',
-        '3527663986b8295af4f7fcdff1ba1ff3f72d07d61a20f487cb238a6ef92fd955',
+        "https://rajpurkar.github.io/SQuAD-explorer/dataset/train-v1.1.json",
+        "train-v1.1.json",
+        "3527663986b8295af4f7fcdff1ba1ff3f72d07d61a20f487cb238a6ef92fd955",
         zipped=False,
     ),
     DownloadableFile(
-        'https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json',
-        'dev-v1.1.json',
-        '95aa6a52d5d6a735563366753ca50492a658031da74f301ac5238b03966972c9',
+        "https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json",
+        "dev-v1.1.json",
+        "95aa6a52d5d6a735563366753ca50492a658031da74f301ac5238b03966972c9",
         zipped=False,
     ),
     DownloadableFile(
-        'http://parl.ai/downloads/squad-fulldocs/squad_fulldocs.tgz',
-        'squad_fulldocs.tgz',
-        '199fbe66524270bc8423e5d788267ef6ac5029e12443428430e080f3c057b534',
+        "http://parl.ai/downloads/squad-fulldocs/squad_fulldocs.tgz",
+        "squad_fulldocs.tgz",
+        "199fbe66524270bc8423e5d788267ef6ac5029e12443428430e080f3c057b534",
     ),
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'SQuAD')
+    dpath = os.path.join(opt["datapath"], "SQuAD")
     version = None
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)
@@ -48,10 +48,10 @@ def build(opt):
         # Mark the data as built.
         build_data.mark_done(dpath, version_string=version)
 
-    if 'fulldoc' in opt['task']:
-        dpath += '-fulldoc'
+    if "fulldoc" in opt["task"]:
+        dpath += "-fulldoc"
         if not build_data.built(dpath, version_string=version):
-            print('[building data: ' + dpath + ']')
+            print("[building data: " + dpath + "]")
             if build_data.built(dpath):
                 # An older version exists, so remove these outdated files.
                 build_data.remove_dir(dpath)

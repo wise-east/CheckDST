@@ -17,7 +17,6 @@ try:
     class MockUnit(Unit):
         pass
 
-
 except ModuleNotFoundError:
     # In case Mephisto is not installed we use a simpler mock object.
     class MockUnit:
@@ -32,7 +31,7 @@ except ModuleNotFoundError:
 ######################################################################
 
 
-DUMMY_OPT = {'task_name': 'mock_task_name', 'output_folder': '/dummy/tmp'}
+DUMMY_OPT = {"task_name": "mock_task_name", "output_folder": "/dummy/tmp"}
 LEN_MOCK_DATA = 5
 
 
@@ -44,7 +43,7 @@ class MockMephistoDB:
         pass
 
     def get_worker_name(self, worker_id: str):
-        return {'worker_name': f'UNITTEST_MOCK_{worker_id}'}
+        return {"worker_name": f"UNITTEST_MOCK_{worker_id}"}
 
 
 class MockMephistoBrowser:
@@ -54,12 +53,12 @@ class MockMephistoBrowser:
         for idx in range(LEN_MOCK_DATA):
             unit = MockUnit(db, "mock_db", defaultdict(int))
             self._data[unit] = {
-                'unit_id': idx * 10,
-                'worker_id': idx,
-                'worker_name': db.get_worker_name(idx),
-                'data': {
-                    'dialogue': [
-                        f'mock dialogue round {i} for unit {idx}' for i in range(4)
+                "unit_id": idx * 10,
+                "worker_id": idx,
+                "worker_name": db.get_worker_name(idx),
+                "data": {
+                    "dialogue": [
+                        f"mock dialogue round {i} for unit {idx}" for i in range(4)
                     ]
                 },
             }
@@ -92,7 +91,7 @@ class MockResultsCompiler(AbstractResultsCompiler):
     def compile_results(self):
         compiled_results = dict()
         for tdata in self.get_task_data():
-            tdata_id = tdata['unit_id']
+            tdata_id = tdata["unit_id"]
             compiled_results[tdata_id] = tdata
         return compiled_results
 
@@ -104,7 +103,7 @@ class MockResultsCompilerWithFilter(MockResultsCompiler):
 
     def is_unit_acceptable(self, unit_data):
         REJECTED_WORKER_ID = 2
-        return unit_data['worker_id'] != REJECTED_WORKER_ID
+        return unit_data["worker_id"] != REJECTED_WORKER_ID
 
 
 class TestResultsCompiler(unittest.TestCase):

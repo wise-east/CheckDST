@@ -11,19 +11,19 @@ import os
 
 RESOURCES = [
     DownloadableFile(
-        'http://people.ict.usc.edu/~gordon/downloads/COPA-resources.tgz',
-        'COPA-resources.tgz',
-        '5145348834d2081ad90da0397d1db3d70fa044e506bd8ce224194d24b04cdbbe',
+        "http://people.ict.usc.edu/~gordon/downloads/COPA-resources.tgz",
+        "COPA-resources.tgz",
+        "5145348834d2081ad90da0397d1db3d70fa044e506bd8ce224194d24b04cdbbe",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'COPA')
+    dpath = os.path.join(opt["datapath"], "COPA")
     version = None
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
 
         if build_data.built(dpath):
             # an older version exists, so remove these outdated files.

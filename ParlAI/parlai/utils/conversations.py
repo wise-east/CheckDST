@@ -16,8 +16,8 @@ from parlai.core.metrics import dict_report
 from parlai.utils.misc import AttrDict
 import parlai.utils.logging as logging
 
-BAR = '=' * 60
-SMALL_BAR = '-' * 60
+BAR = "=" * 60
+SMALL_BAR = "-" * 60
 
 
 class Metadata:
@@ -34,47 +34,47 @@ class Metadata:
         self.metadata_path = self._get_path(datapath)
         if not PathManager.exists(self.metadata_path):
             raise RuntimeError(
-                f'Metadata at path {self.metadata_path} not found. '
-                'Double check your path.'
+                f"Metadata at path {self.metadata_path} not found. "
+                "Double check your path."
             )
 
-        with PathManager.open(self.metadata_path, 'rb') as f:
+        with PathManager.open(self.metadata_path, "rb") as f:
             metadata = json.load(f)
 
-        self.datetime = metadata['date']
-        self.opt = metadata['opt']
-        self.self_chat = metadata['self_chat']
-        self.speakers = metadata['speakers']
-        self.version_num = metadata['version']
+        self.datetime = metadata["date"]
+        self.opt = metadata["opt"]
+        self.self_chat = metadata["self_chat"]
+        self.speakers = metadata["speakers"]
+        self.version_num = metadata["version"]
         self.extra_data = {}
         for k, v in metadata.items():
-            if k not in ['date', 'opt', 'speakers', 'self_chat', 'version']:
+            if k not in ["date", "opt", "speakers", "self_chat", "version"]:
                 self.extra_data[k] = v
 
     def read(self):
         """
         Read the relevant metadata.
         """
-        string = f'Metadata version {self.version_num}\n'
-        string += f'Saved at: {self.datetime}\n'
-        string += f'Self chat: {self.self_chat}\n'
-        string += f'Speakers: {self.speakers}\n'
-        string += 'Opt:\n'
+        string = f"Metadata version {self.version_num}\n"
+        string += f"Saved at: {self.datetime}\n"
+        string += f"Self chat: {self.self_chat}\n"
+        string += f"Speakers: {self.speakers}\n"
+        string += "Opt:\n"
         for k, v in self.opt.items():
-            string += f'\t{k}: {v}\n'
+            string += f"\t{k}: {v}\n"
         for k, v in self.extra_data.items():
-            string += f'{k}: {v}\n'
+            string += f"{k}: {v}\n"
 
         return string
 
     @staticmethod
     def _get_path(datapath):
         fle, _ = os.path.splitext(datapath)
-        return fle + '.metadata'
+        return fle + ".metadata"
 
     @staticmethod
     def version():
-        return '0.1'
+        return "0.1"
 
     @classmethod
     def save_metadata(cls, datapath, opt, self_chat=False, speakers=None, **kwargs):
@@ -82,18 +82,18 @@ class Metadata:
         Dump conversation metadata to file.
         """
         metadata = {}
-        metadata['date'] = str(datetime.datetime.now())
-        metadata['opt'] = opt
-        metadata['self_chat'] = self_chat
-        metadata['speakers'] = speakers
-        metadata['version'] = cls.version()
+        metadata["date"] = str(datetime.datetime.now())
+        metadata["opt"] = opt
+        metadata["self_chat"] = self_chat
+        metadata["speakers"] = speakers
+        metadata["version"] = cls.version()
 
         for k, v in kwargs.items():
             metadata[k] = v
 
         metadata_path = cls._get_path(datapath)
-        logging.info(f'Writing metadata to file {metadata_path}')
-        with PathManager.open(metadata_path, 'w') as f:
+        logging.info(f"Writing metadata to file {metadata_path}")
+        with PathManager.open(metadata_path, "w") as f:
             f.write(json.dumps(metadata))
 
 
@@ -115,29 +115,29 @@ class Conversation:
 
     def __init__(self, episode):
         self.episode = episode
-        self.context = episode.get('context')
-        self.metadata_path = episode.get('metadata_path')
+        self.context = episode.get("context")
+        self.metadata_path = episode.get("metadata_path")
         self.turns = self._build_turns(episode)
 
     def _build_turns(self, episode):
         turns = []
-        for act_pair in episode['dialog']:
+        for act_pair in episode["dialog"]:
             for act in act_pair:
                 turns.append(Turn(**act))
         return turns
 
     def __str__(self):
-        string = BAR + '\n'
-        high_level = [k for k in self.episode.keys() if k != 'dialog']
+        string = BAR + "\n"
+        high_level = [k for k in self.episode.keys() if k != "dialog"]
         if high_level:
             for key in high_level:
-                string += f'{key}: {self.episode[key]}\n'
-            string += SMALL_BAR + '\n'
+                string += f"{key}: {self.episode[key]}\n"
+            string += SMALL_BAR + "\n"
 
         for turn in self.turns:
-            string += f'{turn.id}: {turn.text}\n'
+            string += f"{turn.id}: {turn.text}\n"
 
-        string += BAR + '\n'
+        string += BAR + "\n"
         return string
 
     def __len__(self):
@@ -205,12 +205,12 @@ class Conversations:
     def _load_conversations(self, datapath):
         if not PathManager.exists(datapath):
             raise RuntimeError(
-                f'Conversations at path {datapath} not found. '
-                'Double check your path.'
+                f"Conversations at path {datapath} not found. "
+                "Double check your path."
             )
 
         conversations = []
-        with PathManager.open(datapath, 'r') as f:
+        with PathManager.open(datapath, "r") as f:
             lines = f.read().splitlines()
             for line in lines:
                 conversations.append(Conversation(json.loads(line)))
@@ -235,14 +235,14 @@ class Conversations:
             metadata = Metadata(datapath)
             return metadata
         except RuntimeError:
-            logging.error('Metadata does not exist. Please double check your datapath.')
+            logging.error("Metadata does not exist. Please double check your datapath.")
             return None
 
     def read_metadata(self):
         if self.metadata is not None:
             logging.info(self.metadata)
         else:
-            logging.warning('No metadata available.')
+            logging.warning("No metadata available.")
 
     def __getitem__(self, index):
         return self.conversations[index]
@@ -274,7 +274,7 @@ class Conversations:
     @staticmethod
     def _get_path(datapath):
         fle, _ = os.path.splitext(datapath)
-        return fle + '.jsonl'
+        return fle + ".jsonl"
 
     @classmethod
     def save_conversations(
@@ -282,8 +282,8 @@ class Conversations:
         act_list,
         datapath,
         opt,
-        save_keys='all',
-        context_ids='context',
+        save_keys="all",
+        context_ids="context",
         self_chat=False,
         **kwargs,
     ):
@@ -296,22 +296,22 @@ class Conversations:
         """
         to_save = cls._get_path(datapath)
 
-        context_ids = context_ids.strip().split(',')
+        context_ids = context_ids.strip().split(",")
         # save conversations
         speakers = []
-        with PathManager.open(to_save, 'w') as f:
+        with PathManager.open(to_save, "w") as f:
             for ep in act_list:
                 if not ep:
                     continue
                 convo = {
-                    'dialog': [],
-                    'context': [],
-                    'metadata_path': Metadata._get_path(to_save),
+                    "dialog": [],
+                    "context": [],
+                    "metadata_path": Metadata._get_path(to_save),
                 }
                 for act_pair in ep:
                     new_pair = []
                     for ex in act_pair:
-                        ex_id = ex.get('id')
+                        ex_id = ex.get("id")
                         if ex_id in context_ids:
                             context = True
                         else:
@@ -321,24 +321,24 @@ class Conversations:
 
                         # set turn
                         turn = {}
-                        if save_keys != 'all':
-                            save_keys_lst = save_keys.split(',')
+                        if save_keys != "all":
+                            save_keys_lst = save_keys.split(",")
                         else:
                             save_keys_lst = ex.keys()
                         for key in save_keys_lst:
-                            turn[key] = ex.get(key, '')
-                            if key == 'metrics':
+                            turn[key] = ex.get(key, "")
+                            if key == "metrics":
                                 turn[key] = dict_report(turn[key])
-                        turn['id'] = ex_id
+                        turn["id"] = ex_id
                         if not context:
                             new_pair.append(turn)
                         else:
-                            convo['context'].append(turn)
+                            convo["context"].append(turn)
                     if new_pair:
-                        convo['dialog'].append(new_pair)
-                json_convo = json.dumps(convo, default=lambda v: '<not serializable>')
-                f.write(json_convo + '\n')
-        logging.info(f'Conversations saved to file: {to_save}')
+                        convo["dialog"].append(new_pair)
+                json_convo = json.dumps(convo, default=lambda v: "<not serializable>")
+                f.write(json_convo + "\n")
+        logging.info(f"Conversations saved to file: {to_save}")
 
         # save metadata
         Metadata.save_metadata(

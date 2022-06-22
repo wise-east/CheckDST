@@ -44,28 +44,28 @@ class TransresnetAgent(Agent):
         """
         Add command line args.
         """
-        arg_group = parser.add_argument_group('Transresnet Arguments')
+        arg_group = parser.add_argument_group("Transresnet Arguments")
         TransresnetModel.add_cmdline_args(parser, partial_opt=partial_opt)
         parser.add_argument(
-            '--freeze-patience',
+            "--freeze-patience",
             type=int,
             default=-1,
-            help='How long to freeze text encoders',
+            help="How long to freeze text encoders",
         )
         parser.add_argument(
-            '--one-cand-set',
-            type='bool',
+            "--one-cand-set",
+            type="bool",
             default=False,
-            help='True if each example has one set of shared ' 'label candidates',
+            help="True if each example has one set of shared " "label candidates",
         )
         parser.add_argument(
-            '--fixed-cands-path',
+            "--fixed-cands-path",
             type=str,
             default=None,
-            help='path to text file with candidates',
+            help="path to text file with candidates",
         )
         parser.add_argument(
-            '--pretrained', type='bool', default=False, help='True if pretrained model'
+            "--pretrained", type="bool", default=False, help="True if pretrained model"
         )
         cls.dictionary_class().add_cmdline_args(parser, partial_opt=partial_opt)
         return arg_group
@@ -76,22 +76,22 @@ class TransresnetAgent(Agent):
 
     def __init__(self, opt, shared=None):
         self.metrics = {
-            'hits@1/100': 0.0,
-            'loss': 0.0,
-            'num_samples': 0,
-            'med_rank': [],
+            "hits@1/100": 0.0,
+            "loss": 0.0,
+            "num_samples": 0,
+            "med_rank": [],
         }
         self.blank_image_features = torch.FloatTensor(
-            opt.get('image_features_dim')
+            opt.get("image_features_dim")
         ).fill_(0)
         self.opt = opt
-        self.model_file = opt['model_file']
-        self.id = 'TransresnetAgent'
-        self.one_cand_set = opt.get('one_cand_set', False)
-        self.use_cuda = not opt['no_cuda'] and torch.cuda.is_available()
+        self.model_file = opt["model_file"]
+        self.id = "TransresnetAgent"
+        self.one_cand_set = opt.get("one_cand_set", False)
+        self.use_cuda = not opt["no_cuda"] and torch.cuda.is_available()
         self.fcp = None
-        if opt.get('fixed_cands_path') is not None:
-            self.fcp = opt['fixed_cands_path']
+        if opt.get("fixed_cands_path") is not None:
+            self.fcp = opt["fixed_cands_path"]
         self.episode_done = True
 
         if not shared:
@@ -103,7 +103,7 @@ class TransresnetAgent(Agent):
             self._build_model()
             # load candidates if specified
             self._setup_cands()
-            self.freeze_patience = self.opt['freeze_patience']
+            self.freeze_patience = self.opt["freeze_patience"]
             if self.freeze_patience != -1:
                 # For fine-tuning
                 self.model.freeze_text_encoder()
@@ -111,11 +111,11 @@ class TransresnetAgent(Agent):
                 self.freeze_best_metric = 0
                 self.is_frozen = True
         else:
-            self.dict = shared['dict']
-            self.model = shared['model']
-            self.personalities_list = shared['personalities_list']
-            self.fixed_cands = shared['fixed_cands']
-            self.fixed_cands_enc = shared['fixed_cands_enc']
+            self.dict = shared["dict"]
+            self.model = shared["model"]
+            self.personalities_list = shared["personalities_list"]
+            self.fixed_cands = shared["fixed_cands"]
+            self.fixed_cands_enc = shared["fixed_cands_enc"]
 
         super().__init__(opt, shared)
 
@@ -124,22 +124,22 @@ class TransresnetAgent(Agent):
         Share appropriate attributes.
         """
         shared = super().share()
-        shared['dict'] = self.dict
-        shared['model'] = self.model
-        shared['personalities_list'] = self.personalities_list
-        shared['fixed_cands'] = self.fixed_cands
-        shared['fixed_cands_enc'] = self.fixed_cands_enc
+        shared["dict"] = self.dict
+        shared["model"] = self.model
+        shared["personalities_list"] = self.personalities_list
+        shared["fixed_cands"] = self.fixed_cands
+        shared["fixed_cands_enc"] = self.fixed_cands_enc
         return shared
 
     def _build_model(self, path=None):
         init_model_path = None
-        if self.opt.get('init_model') and PathManager.exists(self.opt['init_model']):
-            init_model_path = self.opt['init_model']
-        elif self.opt.get('model_file') and PathManager.exists(self.opt['model_file']):
-            init_model_path = self.opt['model_file']
+        if self.opt.get("init_model") and PathManager.exists(self.opt["init_model"]):
+            init_model_path = self.opt["init_model"]
+        elif self.opt.get("model_file") and PathManager.exists(self.opt["model_file"]):
+            init_model_path = self.opt["model_file"]
         elif path is not None:
             init_model_path = path
-        print('Creating or loading model')
+        print("Creating or loading model")
         self.model = TransresnetModel(self.opt, self.personalities_list, self.dict)
         if init_model_path is not None:
             self.load(init_model_path)
@@ -151,22 +151,22 @@ class TransresnetAgent(Agent):
         self.fixed_cands_enc = None
         if self.fcp is not None:
             with PathManager.open(self.fcp) as f:
-                self.fixed_cands = [c.replace('\n', '') for c in f.readlines()]
-            cands_enc_file = '{}.cands_enc'.format(self.fcp)
-            print('loading saved cand encodings')
+                self.fixed_cands = [c.replace("\n", "") for c in f.readlines()]
+            cands_enc_file = "{}.cands_enc".format(self.fcp)
+            print("loading saved cand encodings")
             if PathManager.exists(cands_enc_file):
-                with PathManager.open(cands_enc_file, 'rb') as f:
+                with PathManager.open(cands_enc_file, "rb") as f:
                     self.fixed_cands_enc = torch.load(
                         f, map_location=lambda cpu, _: cpu
                     )
             else:
-                print('Extracting cand encodings')
+                print("Extracting cand encodings")
                 self.model.eval()
                 pbar = tqdm.tqdm(
                     total=len(self.fixed_cands),
-                    unit='cand',
+                    unit="cand",
                     unit_scale=True,
-                    desc='Extracting candidate encodings',
+                    desc="Extracting candidate encodings",
                 )
                 fixed_cands_enc = []
                 for _, batch in enumerate(
@@ -186,16 +186,16 @@ class TransresnetAgent(Agent):
         Load and return the list of personalities.
         """
         personality_path = os.path.join(
-            self.opt['datapath'], 'personality_captions/personalities.txt'
+            self.opt["datapath"], "personality_captions/personalities.txt"
         )
-        if 'yfcc_path' not in self.opt:
-            self.opt['yfcc_path'] = 'temp_path'
+        if "yfcc_path" not in self.opt:
+            self.opt["yfcc_path"] = "temp_path"
         build(self.opt)
-        del self.opt['yfcc_path']
+        del self.opt["yfcc_path"]
         perss = []
         with PathManager.open(personality_path) as f:
             for line in f:
-                if 'Trait' not in line:
+                if "Trait" not in line:
                     perss.append(line[0:-1])
         return perss
 
@@ -229,7 +229,7 @@ class TransresnetAgent(Agent):
             the total loss, number of correct examples, and total number of
             examples evaluated
         """
-        comments = [random.choice(v['labels']) for v in valid_obs]
+        comments = [random.choice(v["labels"]) for v in valid_obs]
         loss, num_correct, num_examples = self.model.train_batch(
             image_feats, personalities, comments
         )
@@ -255,14 +255,14 @@ class TransresnetAgent(Agent):
         """
         med_rank = None
         chosen_captions = None
-        if 'label_candidates' in valid_obs[0] or self.fixed_cands is not None:
+        if "label_candidates" in valid_obs[0] or self.fixed_cands is not None:
             # User provides candidates, used as negatives for evaluation
             candidates_encoded = None
             if self.fixed_cands is not None:
                 candidates_encoded = self.fixed_cands_enc
                 candidates = self.fixed_cands
             else:
-                candidates = [v['label_candidates'] for v in valid_obs]
+                candidates = [v["label_candidates"] for v in valid_obs]
                 if self.one_cand_set:
                     candidates_encoded = self.model(None, None, candidates[0])[
                         1
@@ -280,7 +280,7 @@ class TransresnetAgent(Agent):
             if self.fixed_cands is not None:
                 num_correct = 0
             else:
-                comments = [v['eval_labels'] for v in valid_obs]
+                comments = [v["eval_labels"] for v in valid_obs]
                 med_rank = []
                 for i, c_list in enumerate(chosen_captions):
                     lowest_rank = len(c_list) + 1
@@ -294,7 +294,7 @@ class TransresnetAgent(Agent):
                     ]
                 )
         else:
-            comments = [random.choice(v['eval_labels']) for v in valid_obs]
+            comments = [random.choice(v["eval_labels"]) for v in valid_obs]
             loss, num_correct, num_examples = self.model.eval_batch(
                 image_feats, personalities, comments
             )
@@ -311,10 +311,10 @@ class TransresnetAgent(Agent):
         :return:
             A list of acts, one for each observation
         """
-        is_training = any(['labels' in obs for obs in observations])
+        is_training = any(["labels" in obs for obs in observations])
         valid_obs, valid_indexes = self.filter_valid_obs(observations, is_training)
         image_feats = self.extract_image_feats(valid_obs)
-        personalities = [v.get('text', '') for v in valid_obs]
+        personalities = [v.get("text", "") for v in valid_obs]
 
         chosen_captions = None
         med_rank = None
@@ -329,12 +329,12 @@ class TransresnetAgent(Agent):
 
         self.update_metrics(loss, num_correct, num_examples, med_rank)
         result = [
-            {'text': 'No Response During Training'} for _ in range(len(observations))
+            {"text": "No Response During Training"} for _ in range(len(observations))
         ]
         if chosen_captions is not None:
             for i, index_obs in enumerate(valid_indexes):
-                result[index_obs]['text'] = chosen_captions[i][0]
-                result[index_obs]['text_candidates'] = chosen_captions[i]
+                result[index_obs]["text"] = chosen_captions[i][0]
+                result[index_obs]["text_candidates"] = chosen_captions[i]
         return result
 
     def extract_image_feats(self, obs):
@@ -347,7 +347,7 @@ class TransresnetAgent(Agent):
         :return:
             list of image features
         """
-        tmp_image_feats = [v.get('image') for v in obs]
+        tmp_image_feats = [v.get("image") for v in obs]
         for i, im in enumerate(tmp_image_feats):
             try:
                 # Check if given img features of form [1, <dim>, 1, 1]
@@ -364,12 +364,12 @@ class TransresnetAgent(Agent):
         """
         Filter out invalid observations.
         """
-        label_key = 'labels' if is_training else 'eval_labels'
+        label_key = "labels" if is_training else "eval_labels"
         valid_obs = []
         valid_indexes = []
         seen_texts = set()
         for i in range(len(observations)):
-            if 'image' in observations[i]:
+            if "image" in observations[i]:
                 if self.fixed_cands is not None:
                     valid_obs.append(observations[i])
                     valid_indexes.append(i)
@@ -394,11 +394,11 @@ class TransresnetAgent(Agent):
         :param med_rank:
             rank of correct caption for each example
         """
-        self.metrics['hits@1/100'] += num_correct
-        self.metrics['loss'] += loss
-        self.metrics['num_samples'] += num_samples
+        self.metrics["hits@1/100"] += num_correct
+        self.metrics["loss"] += loss
+        self.metrics["num_samples"] += num_samples
         if med_rank:
-            self.metrics['med_rank'] += med_rank
+            self.metrics["med_rank"] += med_rank
 
     def _setup_dict(self):
         """
@@ -407,7 +407,7 @@ class TransresnetAgent(Agent):
         The pretrained model used a separate dictionary from the standard ParlAI one.
         """
         self.dict = DictionaryAgent(self.opt)
-        if self.opt.get('pretrained', False):
+        if self.opt.get("pretrained", False):
             new_tok2ind = {}
             new_ind2tok = {}
             for key in self.dict.tok2ind:
@@ -415,8 +415,8 @@ class TransresnetAgent(Agent):
                 if val - 4 >= 0:
                     new_tok2ind[key] = val - 4
                     new_ind2tok[val - 4] = key
-            self.dict.null_token = '<PAD>'
-            self.dict.unk_token = '<UNK>'
+            self.dict.null_token = "<PAD>"
+            self.dict.unk_token = "<UNK>"
             self.dict.tok2ind = new_tok2ind
             self.dict.ind2tok = new_ind2tok
 
@@ -429,29 +429,29 @@ class TransresnetAgent(Agent):
         :param metrics_dict:
             the metrics dictionary
         """
-        if 'tasks' in metrics_dict:
-            metrics_dict = metrics_dict['tasks']['personality_captions']
+        if "tasks" in metrics_dict:
+            metrics_dict = metrics_dict["tasks"]["personality_captions"]
         if self.freeze_patience != -1 and self.is_frozen:
-            m = metrics_dict['hits@1/100']
+            m = metrics_dict["hits@1/100"]
             if m > self.freeze_best_metric:
                 self.freeze_impatience = 0
                 self.freeze_best_metric = m
-                print('performance not good enough to unfreeze the model.')
+                print("performance not good enough to unfreeze the model.")
             else:
                 self.freeze_impatience += 1
-                print('Growing impatience for unfreezing')
+                print("Growing impatience for unfreezing")
                 if self.freeze_impatience >= self.freeze_patience:
                     self.is_frozen = False
                     print(
-                        'Reached impatience for fine tuning. '
-                        'Reloading the best model so far.'
+                        "Reached impatience for fine tuning. "
+                        "Reloading the best model so far."
                     )
                     self._build_model(self.model_file)
                     if self.use_cuda:
                         self.model = self.model.cuda()
-                    print('Unfreezing.')
+                    print("Unfreezing.")
                     self.model.unfreeze_text_encoder()
-                    print('Done')
+                    print("Done")
 
     def reset(self):
         """
@@ -464,11 +464,11 @@ class TransresnetAgent(Agent):
         """
         Reset the metrics.
         """
-        self.metrics['hits@1/100'] = 0.0
-        self.metrics['loss'] = 0.0
-        self.metrics['num_samples'] = 0.0
-        if 'med_rank' in self.metrics:
-            self.metrics['med_rank'] = []
+        self.metrics["hits@1/100"] = 0.0
+        self.metrics["loss"] = 0.0
+        self.metrics["num_samples"] = 0.0
+        if "med_rank" in self.metrics:
+            self.metrics["med_rank"] = []
 
     def report(self):
         """
@@ -478,15 +478,15 @@ class TransresnetAgent(Agent):
             a metrics dict
         """
         m = {}
-        if self.metrics['num_samples'] > 0:
-            m['hits@1/100'] = round_sigfigs(
-                self.metrics['hits@1/100'] / self.metrics['num_samples'], 4
+        if self.metrics["num_samples"] > 0:
+            m["hits@1/100"] = round_sigfigs(
+                self.metrics["hits@1/100"] / self.metrics["num_samples"], 4
             )
-            m['loss'] = round_sigfigs(
-                self.metrics['loss'] / self.metrics['num_samples'], 4
+            m["loss"] = round_sigfigs(
+                self.metrics["loss"] / self.metrics["num_samples"], 4
             )
-            if 'med_rank' in self.metrics:
-                m['med_rank'] = np.median(self.metrics['med_rank'])
+            if "med_rank" in self.metrics:
+                m["med_rank"] = np.median(self.metrics["med_rank"])
         return m
 
     def save(self, path=None):
@@ -496,16 +496,16 @@ class TransresnetAgent(Agent):
         :param path:
             path for saving model
         """
-        path = self.opt.get('model_file', None) if path is None else path
-        self.dict.save(path + '.dict', sort=False)
-        print('Saving best model')
+        path = self.opt.get("model_file", None) if path is None else path
+        self.dict.save(path + ".dict", sort=False)
+        print("Saving best model")
         states = {}
-        states['model'] = self.model.state_dict()
+        states["model"] = self.model.state_dict()
         torch_utils.atomic_save(states, path)
 
-        with PathManager.open(path + '.opt', 'w') as handle:
+        with PathManager.open(path + ".opt", "w") as handle:
             json.dump(self.opt, handle)
-            handle.write('\n')
+            handle.write("\n")
 
     def load(self, path):
         """
@@ -514,7 +514,7 @@ class TransresnetAgent(Agent):
         :param path:
             path from which to load model
         """
-        with PathManager.open(path, 'rb') as f:
+        with PathManager.open(path, "rb") as f:
             states = torch.load(f, map_location=lambda cpu, _: cpu)
-        if 'model' in states:
-            self.model.load_state_dict(states['model'])
+        if "model" in states:
+            self.model.load_state_dict(states["model"])

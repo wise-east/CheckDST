@@ -47,7 +47,7 @@ class InteractiveWorld(DialogPartnerWorld):
 
         This function will be called before the first turn of every episode.
         """
-        return ['', '']
+        return ["", ""]
 
     def finalize_episode(self):
         print("CHAT DONE ")
@@ -65,10 +65,10 @@ class InteractiveWorld(DialogPartnerWorld):
 
         acts = self.acts
         agents = self.agents
-        if self.turn_cnt == 0 and self.p1 != '':
+        if self.turn_cnt == 0 and self.p1 != "":
             # add the context on to the first message to agent 0
             context_act = Message(
-                {'id': 'context', 'text': self.p1, 'episode_done': False}
+                {"id": "context", "text": self.p1, "episode_done": False}
             )
             agents[0].observe(validate(context_act))
         try:
@@ -79,10 +79,10 @@ class InteractiveWorld(DialogPartnerWorld):
             self.turn_cnt = 0
             return
         acts[0] = act
-        if self.turn_cnt == 0 and self.p2 != '':
+        if self.turn_cnt == 0 and self.p2 != "":
             # add the context on to the first message to agent 1
             context_act = Message(
-                {'id': 'context', 'text': self.p2, 'episode_done': False}
+                {"id": "context", "text": self.p2, "episode_done": False}
             )
             agents[1].observe(validate(context_act))
         agents[1].observe(validate(act))
@@ -91,6 +91,6 @@ class InteractiveWorld(DialogPartnerWorld):
         self.update_counters()
         self.turn_cnt += 1
 
-        if act['episode_done']:
+        if act["episode_done"]:
             self.finalize_episode()
             self.turn_cnt = 0

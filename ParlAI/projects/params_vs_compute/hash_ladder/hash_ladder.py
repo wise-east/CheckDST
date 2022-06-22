@@ -44,19 +44,19 @@ class HashLadderAgent(TransformerGeneratorAgent):
         TransformerGeneratorAgent.add_cmdline_args(parser, partial_opt=partial_opt)
         # Add transformer args.
         parser.add_argument(
-            '--ladder-size',
+            "--ladder-size",
             type=int,
             default=1,
-            help='Number of ladder steps, default is not to use ladder.',
+            help="Number of ladder steps, default is not to use ladder.",
         )
         parser.add_argument(
-            '--hash-size', type=int, default=32, help='Number of hash bins.'
+            "--hash-size", type=int, default=32, help="Number of hash bins."
         )
         parser.add_argument(
-            '--hash-layer',
+            "--hash-layer",
             type=int,
             default=7,
-            help='Layer number the Hash Layer appears on.',
+            help="Layer number the Hash Layer appears on.",
         )
         return parser
 
@@ -68,10 +68,10 @@ class HashLadderAgent(TransformerGeneratorAgent):
         """
         Hack from Guillaume to fix adaptive weights with distributed code.
         """
-        if hasattr(self.model, 'module'):
-            ffn = self.model.module.decoder.layers[self.opt['hash_layer']].ffn
+        if hasattr(self.model, "module"):
+            ffn = self.model.module.decoder.layers[self.opt["hash_layer"]].ffn
         else:
-            ffn = self.model.decoder.layers[self.opt['hash_layer']].ffn
+            ffn = self.model.decoder.layers[self.opt["hash_layer"]].ffn
         dummy_loss = 0 * (
             sum(x.weight[0, 0] for x in ffn.linears1)
             + sum(x.weight[0, 0] for x in ffn.linears2)
@@ -89,7 +89,7 @@ class HashLadderAgent(TransformerGeneratorAgent):
         else:
             loss = super().compute_loss(batch, return_output)
 
-        if self.opt['hash_layer'] != -1:
+        if self.opt["hash_layer"] != -1:
             loss = loss + self.dummy_loss()
 
         if return_output:
@@ -105,18 +105,18 @@ class Decoder(TransformerDecoder):
 
     def build_layers(self) -> nn.ModuleList:
         # HACK: Adding vocab size to opt for use in HashLayerFFN
-        self.opt['dict_size'] = self.embeddings.weight.size(0)
+        self.opt["dict_size"] = self.embeddings.weight.size(0)
         layers = nn.ModuleList()
         for i in range(self.n_layers):
             layer_class = self.swappables.layer
-            if self.opt['hash_layer'] == i:
+            if self.opt["hash_layer"] == i:
                 layer_class = layer_class.with_components(feedforward=HashLayerFFN)
             layers.append(
                 layer_class(
                     self.opt,
-                    attention_dropout=self.opt.get('attention_dropout', 0.0),
-                    relu_dropout=self.opt.get('relu_dropout', 0.0),
-                    dropout=self.opt.get('dropout', 0.0),
+                    attention_dropout=self.opt.get("attention_dropout", 0.0),
+                    relu_dropout=self.opt.get("relu_dropout", 0.0),
+                    dropout=self.opt.get("dropout", 0.0),
                     activation=self.activation,
                     variant=self.variant,
                 )  # type: ignore
@@ -135,7 +135,7 @@ class Decoder(TransformerDecoder):
         Override of forward_layers of TransformerDecoder.
         """
         new_incr_state = {}
-        for _s in range(0, self.opt['ladder_size']):
+        for _s in range(0, self.opt["ladder_size"]):
             tensor, new_incr_state = super().forward_layers(
                 tensor=tensor,
                 encoder_output=encoder_output,
@@ -165,14 +165,14 @@ class HashLayerFFN(nn.Module):
     Implements the Hash Layer FFN.
     """
 
-    def __init__(self, opt, dim, dim_hidden, relu_dropout=0, activation='relu'):
+    def __init__(self, opt, dim, dim_hidden, relu_dropout=0, activation="relu"):
         super(HashLayerFFN, self).__init__()
         self.relu_dropout = nn.Dropout(p=relu_dropout)
         self.nonlinear = F.relu
         self.opt = opt
         self.dim = dim
         self.dim_hidden = dim_hidden
-        self.hashsize = opt['hash_size']
+        self.hashsize = opt["hash_size"]
 
         linears1 = []
         linears2 = []
@@ -190,9 +190,9 @@ class HashLayerFFN(nn.Module):
     def hash(self, xi):
         # Insert your choice of hash function here.
         # In this code we simply randomly hash based on the given token IDs for simplicity.
-        if not hasattr(self, 'hash_bin_map'):
+        if not hasattr(self, "hash_bin_map"):
             # create random mapping.
-            sz = self.opt['dict_size']
+            sz = self.opt["dict_size"]
             self.hash_bin_map = torch.LongTensor(sz).fill_(0)
             import random
 

@@ -12,19 +12,19 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        'https://nlp.stanford.edu/projects/snli/snli_1.0.zip',
-        'snli_1.0.zip',
-        'afb3d70a5af5d8de0d9d81e2637e0fb8c22d1235c2749d83125ca43dab0dbd3e',
+        "https://nlp.stanford.edu/projects/snli/snli_1.0.zip",
+        "snli_1.0.zip",
+        "afb3d70a5af5d8de0d9d81e2637e0fb8c22d1235c2749d83125ca43dab0dbd3e",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'SNLI')
-    version = '1.0'
+    dpath = os.path.join(opt["datapath"], "SNLI")
+    version = "1.0"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
 
         if build_data.built(dpath):
             # an older version exists, so remove these outdated files.

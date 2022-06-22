@@ -24,9 +24,9 @@ class ContextShuffleMutator(MessageMutator):
         self.rng = random.Random(42)
 
     def message_mutation(self, message: Message) -> Message:
-        texts = message.pop('text').split('\n')
+        texts = message.pop("text").split("\n")
         context, text = texts[:-1], texts[-1]
         self.rng.shuffle(context)
         output = context + [text]
-        message['text'] = '\n'.join(output)
+        message["text"] = "\n".join(output)
         return message

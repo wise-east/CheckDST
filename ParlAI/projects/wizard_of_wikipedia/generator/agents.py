@@ -24,7 +24,7 @@ from parlai.agents.transformer.transformer import TransformerGeneratorAgent
 from .modules import EndToEndModel
 from parlai.tasks.wizard_of_wikipedia.agents import TOKEN_KNOWLEDGE
 
-TOKEN_DIALOG = '__dialog__'
+TOKEN_DIALOG = "__dialog__"
 
 
 DEFAULT_OPTS = {
@@ -60,12 +60,12 @@ class _GenericWizardAgent(TransformerGeneratorAgent):
 
         checked_sentences = []
         for obs in reordered_observations:
-            checked_sentence = '{} {} {}'.format(
-                obs.get('title', ''), TOKEN_KNOWLEDGE, obs.get('checked_sentence', '')
+            checked_sentence = "{} {} {}".format(
+                obs.get("title", ""), TOKEN_KNOWLEDGE, obs.get("checked_sentence", "")
             )
             checked_sentences.append(checked_sentence)
 
-        batch['checked_sentence'] = checked_sentences
+        batch["checked_sentence"] = checked_sentences
 
         return batch
 
@@ -78,25 +78,25 @@ class TwoStageAgent(_GenericWizardAgent):
             self.dict[TOKEN_DIALOG] = 9999999
 
     def _set_text_vec(self, obs, history, truncate):
-        if 'text' not in obs:
+        if "text" not in obs:
             return obs
 
-        if 'text_vec' not in obs:
+        if "text_vec" not in obs:
             fields = []
             dialogue_history = history.get_history_str()
-            if 'chosen_topic' in obs:
-                fields += [obs['title']]
-            if 'checked_sentence' in obs:
-                fields += [TOKEN_KNOWLEDGE, obs['checked_sentence']]
+            if "chosen_topic" in obs:
+                fields += [obs["title"]]
+            if "checked_sentence" in obs:
+                fields += [TOKEN_KNOWLEDGE, obs["checked_sentence"]]
             if dialogue_history:
                 fields += [TOKEN_DIALOG, dialogue_history]
-            obs['text'] = ' '.join(fields)
-            obs['text_vec'] = self.dict.txt2vec(obs['text'])
+            obs["text"] = " ".join(fields)
+            obs["text_vec"] = self.dict.txt2vec(obs["text"])
 
         # check truncation
-        if 'text_vec' in obs:
-            obs['text_vec'] = th.LongTensor(
-                self._check_truncate(obs['text_vec'], truncate, True)
+        if "text_vec" in obs:
+            obs["text_vec"] = th.LongTensor(
+                self._check_truncate(obs["text_vec"], truncate, True)
             )
 
         return obs
@@ -105,14 +105,14 @@ class TwoStageAgent(_GenericWizardAgent):
 class EndToEndAgent(_GenericWizardAgent):
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
-        self._vectorize_text = lru_cache(int(2 ** 20))(self._vectorize_text)
+        self._vectorize_text = lru_cache(int(2**20))(self._vectorize_text)
 
         # knowledge truncate defaults to the same as --truncate
-        self.knowledge_truncate = opt.get('knowledge_truncate')
+        self.knowledge_truncate = opt.get("knowledge_truncate")
         if not self.knowledge_truncate:
-            self.knowledge_truncate = opt['truncate']
-        self.max_knowledge = opt.get('max_knowledge')
-        self.knowledge_alpha = opt['knowledge_alpha']
+            self.knowledge_truncate = opt["truncate"]
+        self.max_knowledge = opt.get("max_knowledge")
+        self.knowledge_alpha = opt["knowledge_alpha"]
 
     def compute_loss(self, batch, return_output=False):
         # first compute our regular forced decoding loss
@@ -129,13 +129,13 @@ class EndToEndAgent(_GenericWizardAgent):
             _, know_pred = ctx_know_attn.max(1)
             know_acc = (know_pred == batch.cs_ids).float().sum().item()
             know_chance = batch.ck_mask.sum(1).float().reciprocal().sum().item()
-            self.metrics['know_chance'] += know_chance
-            self.metrics['bsz'] += batch.text_vec.size(0)
-            self.metrics['know_acc'] += know_acc
+            self.metrics["know_chance"] += know_chance
+            self.metrics["bsz"] += batch.text_vec.size(0)
+            self.metrics["know_acc"] += know_acc
             know_loss = th.nn.functional.cross_entropy(
-                ctx_know_attn, batch.cs_ids, reduction='mean'
+                ctx_know_attn, batch.cs_ids, reduction="mean"
             )
-            self.metrics['know_loss'] += know_loss.item() * batch.text_vec.size(0)
+            self.metrics["know_loss"] += know_loss.item() * batch.text_vec.size(0)
             # in the original paper the loss was scaled by num_tokens for both
             # know_loss and token_loss
             know_loss /= num_tokens
@@ -149,40 +149,40 @@ class EndToEndAgent(_GenericWizardAgent):
 
     def reset_metrics(self):
         super().reset_metrics()
-        self.metrics['bsz'] = 0.0
-        self.metrics['know_acc'] = 0.0
-        self.metrics['know_loss'] = 0.0
-        self.metrics['know_chance'] = 0.0
+        self.metrics["bsz"] = 0.0
+        self.metrics["know_acc"] = 0.0
+        self.metrics["know_loss"] = 0.0
+        self.metrics["know_chance"] = 0.0
 
     def report(self):
         r = super().report()
-        bsz = max(self.metrics['bsz'], 1)
-        for k in ['know_loss', 'know_acc', 'know_chance']:
+        bsz = max(self.metrics["bsz"], 1)
+        for k in ["know_loss", "know_acc", "know_chance"]:
             # round and average across all items since last report
             r[k] = round_sigfigs(self.metrics[k] / bsz, 4)
         return r
 
     def _parse_knowledge(self, obs):
-        if 'knowledge_parsed' in obs:
+        if "knowledge_parsed" in obs:
             # make a copy of the list to prevent the future padding step from
             # being destructive
-            return list(obs['knowledge_parsed'])
+            return list(obs["knowledge_parsed"])
 
-        if 'checked_sentence' not in obs:
+        if "checked_sentence" not in obs:
             # interactive time. we're totally on our own
             obs_know = [
-                k.strip() for k in obs.get('knowledge', 'no_passages_used').split('\n')
+                k.strip() for k in obs.get("knowledge", "no_passages_used").split("\n")
             ]
             obs_know = [k for k in obs_know if k]
-            obs['knowledge_parsed'] = obs_know
-            return obs['knowledge_parsed']
+            obs["knowledge_parsed"] = obs_know
+            return obs["knowledge_parsed"]
 
-        checked_sentence = '{} {} {}'.format(
-            obs['title'], TOKEN_KNOWLEDGE, obs['checked_sentence']
+        checked_sentence = "{} {} {}".format(
+            obs["title"], TOKEN_KNOWLEDGE, obs["checked_sentence"]
         )
         # grab all the nonempty knowledge
         obs_know = [
-            k.strip() for k in obs.get('knowledge', 'no_passages_used').split('\n')
+            k.strip() for k in obs.get("knowledge", "no_passages_used").split("\n")
         ]
         obs_know = [k for k in obs_know if k]
 
@@ -197,9 +197,9 @@ class EndToEndAgent(_GenericWizardAgent):
             obs_know[0] = checked_sentence
         obs_know[0], obs_know[i] = obs_know[i], obs_know[0]
 
-        obs['knowledge_parsed'] = obs_know
-        obs['checked_sentence_parsed'] = checked_sentence
-        return obs['knowledge_parsed']
+        obs["knowledge_parsed"] = obs_know
+        obs["checked_sentence_parsed"] = checked_sentence
+        return obs["knowledge_parsed"]
 
     def batchify(self, obs_batch):
         """
@@ -213,7 +213,7 @@ class EndToEndAgent(_GenericWizardAgent):
         """
         batch = super().batchify(obs_batch)
         reordered_observations = [obs_batch[i] for i in batch.valid_indices]
-        is_training = 'labels' in reordered_observations[0]
+        is_training = "labels" in reordered_observations[0]
 
         # first parse and compile all the knowledge together
         all_knowledges = []  # list-of-lists knowledge items for each observation
@@ -241,7 +241,7 @@ class EndToEndAgent(_GenericWizardAgent):
         K = max(knowledge_counts)
         # round out the array so everything is equally sized
         for i in range(N):
-            all_knowledges[i] += [''] * (K - knowledge_counts[i])
+            all_knowledges[i] += [""] * (K - knowledge_counts[i])
         flattened_knowledge = list(chain(*all_knowledges))
 
         knowledge_vec = [
@@ -276,11 +276,11 @@ class EndToEndAgent(_GenericWizardAgent):
             ck_mask = ck_mask.cuda()
             cs_ids = cs_ids.cuda()
 
-        batch['know_vec'] = knowledge_vec
-        batch['ck_mask'] = ck_mask
-        batch['cs_ids'] = cs_ids
-        batch['use_cs_ids'] = is_training
-        batch['knowledge'] = np.array(flattened_knowledge).reshape(N, K)
+        batch["know_vec"] = knowledge_vec
+        batch["ck_mask"] = ck_mask
+        batch["cs_ids"] = cs_ids
+        batch["use_cs_ids"] = is_training
+        batch["knowledge"] = np.array(flattened_knowledge).reshape(N, K)
         return batch
 
     @classmethod
@@ -290,27 +290,27 @@ class EndToEndAgent(_GenericWizardAgent):
         super().add_cmdline_args(parser, partial_opt=partial_opt)
         group = parser.add_argument_group("EndToEnd Agent")
         group.add_argument(
-            '--knowledge-alpha',
+            "--knowledge-alpha",
             type=float,
             default=0.95,
-            help='Weight on the knowledge-attn loss',
+            help="Weight on the knowledge-attn loss",
         )
         group.add_argument(
-            '--knowledge-truncate',
+            "--knowledge-truncate",
             type=int,
             default=32,
-            help='Knowledge truncation field. Defaults to same as --truncate.',
+            help="Knowledge truncation field. Defaults to same as --truncate.",
         )
         group.add_argument(
-            '--max-knowledge',
+            "--max-knowledge",
             type=int,
-            help='Reduce the amount of negative knowledge at train time.',
+            help="Reduce the amount of negative knowledge at train time.",
         )
         parser.add_argument(
-            '--knowledge-alpha',
+            "--knowledge-alpha",
             type=float,
             default=0.95,
-            help='Weight on the knowledge-attn loss',
+            help="Weight on the knowledge-attn loss",
         )
         return parser
 
@@ -325,9 +325,9 @@ class EndToEndAgent(_GenericWizardAgent):
 
     def build_model(self):
         self.model = EndToEndModel(self.opt, self.dict)
-        if self.opt['embedding_type'] != 'random':
+        if self.opt["embedding_type"] != "random":
             self._copy_embeddings(
-                self.model.embeddings.weight, self.opt['embedding_type']
+                self.model.embeddings.weight, self.opt["embedding_type"]
             )
         if self.use_cuda:
             self.model = self.model.cuda()

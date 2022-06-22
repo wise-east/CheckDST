@@ -18,7 +18,7 @@ def _path(opt):
     build(opt)
 
     # set up path to data (specific to each dataset)
-    data_path = os.path.join(opt['datapath'], 'redial')
+    data_path = os.path.join(opt["datapath"], "redial")
     return data_path
 
 
@@ -34,7 +34,7 @@ def remove_year_from_title(title):
 
 
 def replace_movie_ids(id_string, id_map):
-    pattern = r'@\d+'
+    pattern = r"@\d+"
     return re.sub(pattern, lambda s: id_map[s.group()], id_string)
 
 
@@ -49,30 +49,30 @@ class ReDialTeacher(FixedDialogTeacher):
         self.title_id_map = {}
         self.get_title_dict(data_path)
         if shared is not None:
-            self.episodes = shared['episodes']
+            self.episodes = shared["episodes"]
         else:
             self.episodes = []
             self._setup_data(data_path)
-        self.id = 'redial'
+        self.id = "redial"
 
         self.reset()
 
     def get_title_dict(self, path):
-        csv_path = os.path.join(path, 'movies_with_mentions.csv')
-        with PathManager.open(csv_path, mode='r') as f:
+        csv_path = os.path.join(path, "movies_with_mentions.csv")
+        with PathManager.open(csv_path, mode="r") as f:
             reader = csv.reader(f)
             for row in reader:
-                self.title_id_map['@' + row[0]] = remove_year_from_title(row[1])
+                self.title_id_map["@" + row[0]] = remove_year_from_title(row[1])
 
     def _setup_data(self, data_path):
-        train_path = os.path.join(data_path, 'train_data.jsonl')
-        test_path = os.path.join(data_path, 'test_data.jsonl')
+        train_path = os.path.join(data_path, "train_data.jsonl")
+        test_path = os.path.join(data_path, "test_data.jsonl")
         # The test data has 1341 episodes. Making valid this size gives
         # about 80/10/10 train/test/valid split
         test_set_episodes = 1341
-        if self.datatype.startswith('test'):
+        if self.datatype.startswith("test"):
             unmerged_episodes = self.get_data_from_file(test_path)
-        elif self.datatype.startswith('valid'):
+        elif self.datatype.startswith("valid"):
             unmerged_episodes = self.get_data_from_file(train_path)
             unmerged_episodes = unmerged_episodes[:test_set_episodes]
         else:
@@ -83,9 +83,9 @@ class ReDialTeacher(FixedDialogTeacher):
         for unmerged_episode in unmerged_episodes:
             episode = []
             prev_speaker = None
-            for message in unmerged_episode['messages']:
-                curr_speaker = message['senderWorkerId']
-                text = replace_movie_ids(message['text'], self.title_id_map)
+            for message in unmerged_episode["messages"]:
+                curr_speaker = message["senderWorkerId"]
+                text = replace_movie_ids(message["text"], self.title_id_map)
                 if curr_speaker == prev_speaker:
                     episode[-1] = episode[-1] + " " + text
                 else:
@@ -102,7 +102,7 @@ class ReDialTeacher(FixedDialogTeacher):
 
     def share(self):
         shared = super().share()
-        shared['episodes'] = self.episodes
+        shared["episodes"] = self.episodes
         return shared
 
     def num_examples(self):
@@ -124,10 +124,10 @@ class ReDialTeacher(FixedDialogTeacher):
         labels = [self.episodes[episode_idx][text_idx + 1]]
         episode_done = text_idx >= final_speaker_idx
         action = {
-            'id': self.id,
-            'text': entry,
-            'episode_done': episode_done,
-            'labels': labels,
+            "id": self.id,
+            "text": entry,
+            "episode_done": episode_done,
+            "labels": labels,
         }
         return action
 

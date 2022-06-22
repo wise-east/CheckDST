@@ -23,14 +23,14 @@ class TestInit(unittest.TestCase):
     """
 
     def test_init_everywhere(self):
-        for folder_path in testing_utils.git_ls_dirs('parlai'):
+        for folder_path in testing_utils.git_ls_dirs("parlai"):
             excluded_folders = [
-                'conf',
-                'frontend',
-                'mturk',
-                'task_config',
-                'webapp',
-                'opt_presets',
+                "conf",
+                "frontend",
+                "mturk",
+                "task_config",
+                "webapp",
+                "opt_presets",
             ]
             # conf: contains YAML files for Hydra
             # frontend, mturk, webapp: contains frontend code for crowdsourcing tasks
@@ -41,9 +41,9 @@ class TestInit(unittest.TestCase):
                 # yml regression files in parlai/tasks/X/test/
                 continue
             self.assertIn(
-                '__init__.py',
+                "__init__.py",
                 os.listdir(folder_path),
-                '{} does not contain __init__.py'.format(folder_path),
+                "{} does not contain __init__.py".format(folder_path),
             )
 
 
@@ -57,7 +57,7 @@ class TestOptPresets(unittest.TestCase):
         from parlai.opt_presets.docs import PRESET_DESCRIPTIONS
 
         folder = os.path.dirname(opt_presets.__file__)
-        has_file = set(x[len(folder) + 1 : -4] for x in glob.glob(f'{folder}/*/*.opt'))
+        has_file = set(x[len(folder) + 1 : -4] for x in glob.glob(f"{folder}/*/*.opt"))
         has_docs = set(PRESET_DESCRIPTIONS.keys())
 
         file_no_docs = has_file - has_docs
@@ -74,5 +74,5 @@ class TestOptPresets(unittest.TestCase):
             )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

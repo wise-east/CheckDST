@@ -25,7 +25,7 @@ class TransformerFFN(nn.Module):
         dim: int = None,
         dim_hidden: int = None,
         relu_dropout: float = 0,
-        activation: str = 'relu',
+        activation: str = "relu",
         **kwargs,
     ):
         super(TransformerFFN, self).__init__(**kwargs)
@@ -36,14 +36,14 @@ class TransformerFFN(nn.Module):
             """
             return val if val is not None else default
 
-        dim = _default(dim, opt['embedding_size'])
-        dim_hidden = _default(dim_hidden, opt['ffn_size'])
+        dim = _default(dim, opt["embedding_size"])
+        dim_hidden = _default(dim_hidden, opt["ffn_size"])
 
         self.opt = opt
         self.relu_dropout = nn.Dropout(p=relu_dropout)
-        if activation == 'relu':
+        if activation == "relu":
             self.nonlinear = F.relu
-        elif activation == 'gelu':
+        elif activation == "gelu":
             self.nonlinear = F.gelu
         else:
             raise ValueError(

@@ -16,16 +16,16 @@ try:
     from pytorch_pretrained_bert import BertModel  # NOQA
 except ImportError:
     raise ImportError(
-        'This model requires that huggingface\'s transformers is '
-        'installed. Install with:\n `pip install transformers`.'
+        "This model requires that huggingface's transformers is "
+        "installed. Install with:\n `pip install transformers`."
     )
 
 
 import torch
 
 
-MODEL_PATH = 'bert-base-uncased.tar.gz'
-VOCAB_PATH = 'bert-base-uncased-vocab.txt'
+MODEL_PATH = "bert-base-uncased.tar.gz"
+VOCAB_PATH = "bert-base-uncased-vocab.txt"
 
 
 def add_common_args(parser):
@@ -33,63 +33,63 @@ def add_common_args(parser):
     Add command line arguments for this agent.
     """
     TorchRankerAgent.add_cmdline_args(parser, partial_opt=None)
-    parser = parser.add_argument_group('Bert Ranker Arguments')
+    parser = parser.add_argument_group("Bert Ranker Arguments")
     parser.add_argument(
-        '--add-transformer-layer',
-        type='bool',
+        "--add-transformer-layer",
+        type="bool",
         default=False,
-        help='Also add a transformer layer on top of Bert',
+        help="Also add a transformer layer on top of Bert",
     )
     parser.add_argument(
-        '--pull-from-layer',
+        "--pull-from-layer",
         type=int,
         default=-1,
-        help='Which layer of Bert do we use? Default=-1=last one.',
+        help="Which layer of Bert do we use? Default=-1=last one.",
     )
     parser.add_argument(
-        '--out-dim', type=int, default=768, help='For biencoder, output dimension'
+        "--out-dim", type=int, default=768, help="For biencoder, output dimension"
     )
     parser.add_argument(
-        '--topn',
+        "--topn",
         type=int,
         default=10,
-        help='For the biencoder: select how many elements to return',
+        help="For the biencoder: select how many elements to return",
     )
     parser.add_argument(
-        '--data-parallel',
-        type='bool',
+        "--data-parallel",
+        type="bool",
         default=False,
-        help='use model in data parallel, requires '
-        'multiple gpus. NOTE This is incompatible'
-        ' with distributed training',
+        help="use model in data parallel, requires "
+        "multiple gpus. NOTE This is incompatible"
+        " with distributed training",
     )
     parser.add_argument(
-        '--type-optimization',
+        "--type-optimization",
         type=str,
-        default='all_encoder_layers',
+        default="all_encoder_layers",
         choices=[
-            'additional_layers',
-            'top_layer',
-            'top4_layers',
-            'all_encoder_layers',
-            'all',
+            "additional_layers",
+            "top_layer",
+            "top4_layers",
+            "all_encoder_layers",
+            "all",
         ],
-        help='Which part of the encoders do we optimize. '
-        '(Default: all_encoder_layers.)',
+        help="Which part of the encoders do we optimize. "
+        "(Default: all_encoder_layers.)",
     )
     parser.add_argument(
-        '--bert-aggregation',
+        "--bert-aggregation",
         type=str,
-        default='first',
-        choices=['first', 'max', 'mean'],
-        help='How do we transform a list of output into one',
+        default="first",
+        choices=["first", "max", "mean"],
+        help="How do we transform a list of output into one",
     )
     parser.set_defaults(
         label_truncate=300,
         text_truncate=300,
         learningrate=0.00005,
-        eval_candidates='inline',
-        candidates='batch',
+        eval_candidates="inline",
+        candidates="batch",
         dict_maxexs=0,  # skip building dictionary
     )
 
@@ -120,7 +120,7 @@ class BertWrapper(torch.nn.Module):
                 hidden_size=bert_output_dim,
                 num_attention_heads=int(bert_output_dim / 64),
                 intermediate_size=3072,
-                hidden_act='gelu',
+                hidden_act="gelu",
             )
             self.additional_transformer_layer = BertLayer(config_for_one_layer)
         self.additional_linear_layer = torch.nn.Linear(bert_output_dim, output_dim)

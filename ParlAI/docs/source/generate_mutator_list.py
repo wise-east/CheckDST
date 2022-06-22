@@ -12,7 +12,7 @@ import parlai.utils.logging as logging
 
 from parlai.scripts.display_data import DisplayData
 
-TASK = 'convai2:sample'
+TASK = "convai2:sample"
 
 
 def _make_argparse_table(class_):
@@ -27,12 +27,12 @@ def _make_argparse_table(class_):
         actions = []
         # get options defined within only this group
         for action in ag._group_actions:
-            if hasattr(action, 'hidden') and action.hidden:
+            if hasattr(action, "hidden") and action.hidden:
                 # some options are marked hidden
                 continue
-            if action.dest == argparse.SUPPRESS or action.dest == 'help':
+            if action.dest == argparse.SUPPRESS or action.dest == "help":
                 continue
-            action_strings = ",  ".join(f'`{a}`' for a in action.option_strings)
+            action_strings = ",  ".join(f"`{a}`" for a in action.option_strings)
             description = []
             if action.help:
                 h = action.help
@@ -43,13 +43,13 @@ def _make_argparse_table(class_):
             # list choices if there are any
             if action.choices:
                 description += [
-                    "Choices: " + ", ".join(f'`{c}`' for c in action.choices) + "."
+                    "Choices: " + ", ".join(f"`{c}`" for c in action.choices) + "."
                 ]
             # list default and recommended values.
             default_value = ""
             if action.default is not None and action.default is not argparse.SUPPRESS:
                 default_value += f"Default: ``{action.default}``.  "
-            if hasattr(action, 'recommended') and action.recommended:
+            if hasattr(action, "recommended") and action.recommended:
                 default_value += f"Recommended: ``{action.recommended}``. "
 
             # special escape for a few args which use a literal newline as their default
@@ -65,7 +65,7 @@ def _make_argparse_table(class_):
         if not actions:
             continue
 
-        readme.append(f'__{ag.title.title()}__\n\n')
+        readme.append(f"__{ag.title.title()}__\n\n")
         readme.append("| Argument | Description |\n")
         readme.append("|----------|----------|\n")
         for row in actions:
@@ -87,7 +87,7 @@ def _display_data(**kwargs):
     return output.getvalue()
 
 
-with open('mutators_list.inc', 'w') as fout:
+with open("mutators_list.inc", "w") as fout:
     output = _display_data(task=TASK)
     fout.write("## Original output\n\n")
     fout.write("We show the unmutated output of the examples for reference:\n\n")
@@ -98,12 +98,12 @@ with open('mutators_list.inc', 'w') as fout:
         options = _make_argparse_table(mutator)
         if not mutator.__doc__:
             continue
-        fout.write('\n------------\n\n')
-        fout.write(f'## {mutator_name}\n\n')
-        fout.write(textwrap.dedent(mutator.__doc__).strip() + '\n\n')
+        fout.write("\n------------\n\n")
+        fout.write(f"## {mutator_name}\n\n")
+        fout.write(textwrap.dedent(mutator.__doc__).strip() + "\n\n")
         fout.write(
-            f'**Example usage**:\n\n`parlai display_data -t {TASK} '
-            f'--mutators {mutator_name}`\n\n'
+            f"**Example usage**:\n\n`parlai display_data -t {TASK} "
+            f"--mutators {mutator_name}`\n\n"
         )
         fout.write("**Example output**:\n\n")
         fout.write("```\n")
@@ -111,4 +111,4 @@ with open('mutators_list.inc', 'w') as fout:
         fout.write(output)
         fout.write("\n```\n")
         if options:
-            fout.write("".join(options) + '\n\n')
+            fout.write("".join(options) + "\n\n")

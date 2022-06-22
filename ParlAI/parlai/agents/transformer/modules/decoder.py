@@ -53,8 +53,8 @@ class TransformerDecoderLayer(nn.Module):
         attention_dropout: float = 0.0,
         relu_dropout: float = 0.0,
         dropout: float = 0.0,
-        activation: str = 'relu',
-        variant: str = 'aiayn',
+        activation: str = "relu",
+        variant: str = "aiayn",
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -65,9 +65,9 @@ class TransformerDecoderLayer(nn.Module):
             """
             return val if val is not None else default
 
-        n_heads = _default(n_heads, opt['n_heads'])
-        embedding_size = _default(embedding_size, opt['embedding_size'])
-        ffn_size = _default(ffn_size, opt['ffn_size'])
+        n_heads = _default(n_heads, opt["n_heads"])
+        embedding_size = _default(embedding_size, opt["embedding_size"])
+        ffn_size = _default(ffn_size, opt["ffn_size"])
 
         self.opt = opt
         self.dim = embedding_size
@@ -116,53 +116,53 @@ class TransformerDecoderLayer(nn.Module):
         decoder_mask = self._create_selfattn_mask(x)
         # first self attn
         residual = x
-        if self.variant == 'prelayernorm':
+        if self.variant == "prelayernorm":
             x = self.norm1(x)
 
         # don't peak into the future!
         x, final_self_attn_incr_state = self.self_attention(
             query=x,
             mask=decoder_mask,
-            incr_state=incr_state.get('self_attn'),
+            incr_state=incr_state.get("self_attn"),
             static_kv=False,
             **kwargs,
         )[:2]
         x = self.dropout(x)  # --dropout
         x = x + residual
-        if self.variant == 'aiayn' or self.variant == 'xlm' or self.variant == 'bart':
+        if self.variant == "aiayn" or self.variant == "xlm" or self.variant == "bart":
             x = self.norm1(x)
 
         residual = x
         # encoder_attn_layer_norm norm 2
-        if self.variant == 'prelayernorm':
+        if self.variant == "prelayernorm":
             x = self.norm2(x)
         x, final_encoder_attn_incr_state = self.encoder_attention(
             query=x,
             key=encoder_output,
             value=encoder_output,
             mask=encoder_mask,
-            incr_state=incr_state.get('encoder_attn'),
+            incr_state=incr_state.get("encoder_attn"),
             static_kv=True,
             **kwargs,
         )[:2]
         x = self.dropout(x)  # --dropout
         x = residual + x
-        if self.variant == 'aiayn' or self.variant == 'xlm' or self.variant == 'bart':
+        if self.variant == "aiayn" or self.variant == "xlm" or self.variant == "bart":
             x = self.norm2(x)
 
         # finally the ffn
         residual = x
-        if self.variant == 'prelayernorm':
+        if self.variant == "prelayernorm":
             x = self.norm3(x)
         x = self.ffn(x, **kwargs)
         x = self.dropout(x)  # --dropout
         x = residual + x
-        if self.variant == 'aiayn' or self.variant == 'xlm' or self.variant == 'bart':
+        if self.variant == "aiayn" or self.variant == "xlm" or self.variant == "bart":
             x = self.norm3(x)
 
         new_incr_state = {
-            'self_attn': final_self_attn_incr_state,
-            'encoder_attn': final_encoder_attn_incr_state,
+            "self_attn": final_self_attn_incr_state,
+            "encoder_attn": final_encoder_attn_incr_state,
         }
         return x, new_incr_state
 
@@ -183,8 +183,8 @@ class TransformerDecoderLayer(nn.Module):
         Reorder all incremental-state tensors for this layer.
         """
         attn_types = {
-            'self_attn': self.self_attention,
-            'encoder_attn': self.encoder_attention,
+            "self_attn": self.self_attention,
+            "encoder_attn": self.encoder_attention,
         }
         return {
             attn_type: attn.reorder_incremental_state(
@@ -221,48 +221,48 @@ class TransformerDecoder(nn.Module):
         def _default(val, default):
             return val if val is not None else default
 
-        self.embedding_size = opt['embedding_size']
-        self.ffn_size = opt['ffn_size']
+        self.embedding_size = opt["embedding_size"]
+        self.ffn_size = opt["ffn_size"]
         self.n_layers = (
-            opt['n_decoder_layers']
-            if opt.get('n_decoder_layers', -1) > 0
-            else opt['n_layers']
+            opt["n_decoder_layers"]
+            if opt.get("n_decoder_layers", -1) > 0
+            else opt["n_layers"]
         )
-        self.n_heads = opt['n_heads']
+        self.n_heads = opt["n_heads"]
         self.dim = self.embedding_size
-        self.activation = opt.get('activation', 'relu')
-        self.variant = opt.get('variant', 'aiayn')
+        self.activation = opt.get("activation", "relu")
+        self.variant = opt.get("variant", "aiayn")
 
-        self.embeddings_scale = opt.get('embeddings_scale', True)
-        self.dropout = nn.Dropout(p=opt.get('dropout', 0.0))  # --dropout
+        self.embeddings_scale = opt.get("embeddings_scale", True)
+        self.dropout = nn.Dropout(p=opt.get("dropout", 0.0))  # --dropout
 
         self.n_positions = _default(n_positions, get_n_positions_from_options(opt))
         self.out_dim = self.embedding_size
         assert (
             self.embedding_size % self.n_heads == 0
-        ), 'Transformer embedding size must be a multiple of n_heads'
+        ), "Transformer embedding size must be a multiple of n_heads"
 
         self.embeddings = embedding
 
         if (
-            self.variant == 'xlm'
-            or self.variant == 'prelayernorm'
-            or self.variant == 'bart'
+            self.variant == "xlm"
+            or self.variant == "prelayernorm"
+            or self.variant == "bart"
         ):
             self.norm_embeddings = torch.nn.LayerNorm(self.dim, eps=LAYER_NORM_EPS)
-            if self.variant == 'xlm':
+            if self.variant == "xlm":
                 warn_once(
-                    'DEPRECATED: XLM should only be used for backwards compatibility, '
-                    'as it involves a less-stable layernorm operation.'
+                    "DEPRECATED: XLM should only be used for backwards compatibility, "
+                    "as it involves a less-stable layernorm operation."
                 )
-        elif self.variant == 'aiayn':
+        elif self.variant == "aiayn":
             pass
         else:
             raise ValueError("Can't handle --variant {}".format(self.variant))
 
         # create the positional embeddings
         self.position_embeddings = nn.Embedding(self.n_positions, self.embedding_size)
-        if not opt.get('learn_positional_embeddings', False):
+        if not opt.get("learn_positional_embeddings", False):
             create_position_codes(
                 self.n_positions,
                 self.embedding_size,
@@ -270,7 +270,7 @@ class TransformerDecoder(nn.Module):
             )
         else:
             nn.init.normal_(
-                self.position_embeddings.weight, 0, self.embedding_size ** -0.5
+                self.position_embeddings.weight, 0, self.embedding_size**-0.5
             )
 
         # build the model
@@ -281,13 +281,13 @@ class TransformerDecoder(nn.Module):
         for _ in range(self.n_layers):
             layer = self.swappables.layer(
                 self.opt,
-                attention_dropout=self.opt.get('attention_dropout', 0.0),
-                relu_dropout=self.opt.get('relu_dropout', 0.0),
-                dropout=self.opt.get('dropout', 0.0),
+                attention_dropout=self.opt.get("attention_dropout", 0.0),
+                relu_dropout=self.opt.get("relu_dropout", 0.0),
+                dropout=self.opt.get("dropout", 0.0),
                 activation=self.activation,
                 variant=self.variant,
             )
-            if self.opt.get('checkpoint_activations'):
+            if self.opt.get("checkpoint_activations"):
                 layer = checkpoint_wrapper(layer)
             layers.append(fsdp_wrap(layer))  # type: ignore
         return layers
@@ -315,17 +315,17 @@ class TransformerDecoder(nn.Module):
         tensor = self.embeddings(input)
         if self.embeddings_scale:
             tensor = tensor * np.sqrt(self.dim)
-        if self.variant == 'xlm':
+        if self.variant == "xlm":
             tensor = self.norm_embeddings(tensor)
         if positions.max().item() > self.n_positions:
             warn_once(
-                'You are inputting a sequence of {x} length, but only have '
-                '--n-positions {y}. Set --truncate or increase --n-positions'.format(
+                "You are inputting a sequence of {x} length, but only have "
+                "--n-positions {y}. Set --truncate or increase --n-positions".format(
                     x=positions.max().item(), y=self.n_positions
                 )
             )
         tensor = tensor + self.position_embeddings(positions).expand_as(tensor)
-        if self.variant == 'bart':
+        if self.variant == "bart":
             tensor = self.norm_embeddings(tensor)
 
         return tensor
@@ -355,7 +355,7 @@ class TransformerDecoder(nn.Module):
             as new incremental decoding state.
         """
         new_incr_state = {}
-        if getattr(self.layers, 'is_model_parallel', False):
+        if getattr(self.layers, "is_model_parallel", False):
             tensor, new_incr_state = self._apply_model_parallel(
                 tensor, encoder_output, encoder_mask, incr_state
             )
@@ -412,7 +412,7 @@ class TransformerDecoder(nn.Module):
             tensor, encoder_output, encoder_mask, incr_state, **kwargs
         )
 
-        if self.variant == 'prelayernorm':
+        if self.variant == "prelayernorm":
             tensor = self.norm_embeddings(tensor)
 
         return tensor, new_incr_state

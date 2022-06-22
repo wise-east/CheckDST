@@ -32,20 +32,20 @@ class TestGenderationBiasTeacher(unittest.TestCase):
             "ok, have a good day",
             "bye bye! tell mom I say hello",
         ]
-        tokens = ['f0m1', 'f1m1', 'f0m0', 'f1m0']
+        tokens = ["f0m1", "f1m1", "f0m0", "f1m0"]
         episode = [
             Message(
                 {
-                    'text': utterances[i],
-                    'labels': [utterances[i + 1]],
-                    'episode_done': False,
+                    "text": utterances[i],
+                    "labels": [utterances[i + 1]],
+                    "episode_done": False,
                 }
             )
             for i in range(0, len(utterances) - 1, 2)
         ]
-        episode[-1].force_set('episode_done', True)
+        episode[-1].force_set("episode_done", True)
         new_episode = flatten_and_classify(episode, -1, word_lists)
         assert len(new_episode) == 4
         assert all(
-            ex['text'].endswith(tok) for ex, tok in zip(new_episode, tokens)
+            ex["text"].endswith(tok) for ex, tok in zip(new_episode, tokens)
         ), f"new episode: {new_episode}"

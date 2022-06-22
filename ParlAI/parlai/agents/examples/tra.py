@@ -26,7 +26,7 @@ class ExampleBagOfWordsModel(nn.Module):
 
     def __init__(self, opt, dictionary):
         super().__init__()
-        self.hidden_dim = opt.get('hidden_dim', 512)
+        self.hidden_dim = opt.get("hidden_dim", 512)
         self.dict = dictionary
         self.encoder = nn.EmbeddingBag(len(self.dict), self.hidden_dim)
 
@@ -73,8 +73,8 @@ class TraAgent(TorchRankerAgent):
         Add CLI args.
         """
         super().add_cmdline_args(parser, partial_opt=partial_opt)
-        arg_group = parser.add_argument_group('ExampleBagOfWordsModel Arguments')
-        arg_group.add_argument('--hidden-dim', type=int, default=512)
+        arg_group = parser.add_argument_group("ExampleBagOfWordsModel Arguments")
+        arg_group.add_argument("--hidden-dim", type=int, default=512)
         return parser
 
     def score_candidates(self, batch, cand_vecs, cand_encs=None):

@@ -54,15 +54,15 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
 
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
-        self.id = 'multiwoz_checkdst'
+        self.id = "multiwoz_checkdst"
 
         # # # reading args
-        self.just_test = opt.get('just_test', False)
-        self.seed = opt.get('rand_seed', 0)
+        self.just_test = opt.get("just_test", False)
+        self.seed = opt.get("rand_seed", 0)
         self.rng = np.random.RandomState(self.seed)
-        self.data_aug = opt.get('augmentation_method', "orig")
+        self.data_aug = opt.get("augmentation_method", "orig")
         self.keep_original = opt.get("keep_original", False)
-        self.version = opt.get('version', '2.3')
+        self.version = opt.get("version", "2.3")
         self.val_reduced = opt.get("val_reduced", False)
         self.test_reduced = opt.get("test_reduced", False)
         self.flag_compute = 1
@@ -77,15 +77,15 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
         random.seed(self.seed)
         np.random.RandomState(self.seed)
 
-        opt['datafile'], data_dir = self._path(opt)
+        opt["datafile"], data_dir = self._path(opt)
         self.data_dir = data_dir
-        self.datafile = opt['datafile']
+        self.datafile = opt["datafile"]
 
         if self.data_aug.lower() == "NED":
             "Setting up entity banks for named entity invariance"
             self.ner_inv_init()
 
-        self._setup_data(opt['datafile'], data_dir)
+        self._setup_data(opt["datafile"], data_dir)
 
         self.reset()
 
@@ -118,16 +118,16 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
             with open(filename, "r") as f:
                 for line in f:
                     line = line.strip()
-                    entity_name_search_result = re.search("\"(.*)_name\":", line)
+                    entity_name_search_result = re.search('"(.*)_name":', line)
                     if entity_name_search_result and not re.search(
-                        "\"(.*)_name\": \[", line
+                        '"(.*)_name": \[', line
                     ):
                         domain = entity_name_search_result[1]
-                        word = line.split("\": \"")[1][:-2]
+                        word = line.split('": "')[1][:-2]
                         # restaurant_names[fold].add(word.lower())
-                        if f'{domain}-name' not in names:
-                            names[f'{domain}-name'] = defaultdict(set)
-                        names[f'{domain}-name'][fold].add(word.lower())
+                        if f"{domain}-name" not in names:
+                            names[f"{domain}-name"] = defaultdict(set)
+                        names[f"{domain}-name"][fold].add(word.lower())
                     # if "\"hotel_name\":" in line and not "\"hotel_name\": [" in line:
                     #     word = line.split("\": \"")[1][:-2]
                     #     hotel_names[fold].add(word.lower())
@@ -178,7 +178,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
             with open(filename, "r") as f:
                 lines = f.readlines()
                 for i in range(len(lines)):
-                    entity_name_search_result = re.search("\"(.*)-name\": \[", lines[i])
+                    entity_name_search_result = re.search('"(.*)-name": \[', lines[i])
                     if entity_name_search_result:
                         domain = entity_name_search_result[1]
                         word = self._my_strip(lines[i + 1].strip()[1:-1])
@@ -222,70 +222,70 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
     @classmethod
     # def add_cmdline_args(cls, argparser):
     def add_cmdline_args(cls, argparser, partial_opt):
-        agent = argparser.add_argument_group('MultiWozDST CheckDST Teacher Args')
+        agent = argparser.add_argument_group("MultiWozDST CheckDST Teacher Args")
         agent.add_argument(
-            '--version',
+            "--version",
             type=str,
-            default='2.3',
+            default="2.3",
             help="specify to use multiwoz 2.1, 2.2, or 2.3. Defaults to 2.3",
         )
         agent.add_argument(
-            '-aug',
-            '--augmentation_method',
+            "-aug",
+            "--augmentation_method",
             type=str,
             default="orig",
             help="one of ['orig', 'PI', 'SDI', 'NED', 'all'] where PI: paraphrase invariance, SDI: speech disfluencies invariance, NED: named entity directional invariance",
         )
         agent.add_argument(
-            '--keep_original',
-            type='bool',
+            "--keep_original",
+            type="bool",
             default=False,
             help="Keep both the original + augmented samples in task data. This is for examination purposes via display_data",
         )
 
         agent.add_argument(
-            '-up',
-            '--use_prompts',
+            "-up",
+            "--use_prompts",
             type=bool,
             default=True,
             help="add natural text instructions for the DST task.",
         )
         agent.add_argument(
-            '-swap',
-            '--swap_entity',
+            "-swap",
+            "--swap_entity",
             type=str,
             default="scramble",
             help="one of ['g_sgd', 'scramble', 'gibberish'] ",
         )
         agent.add_argument(
-            '--just_test',
-            type='bool',
+            "--just_test",
+            type="bool",
             default=False,
             help="True if one would like to test agents with small amount of data (default: False).",
         )
         agent.add_argument(
-            '-fs',
-            '--few_shot',
+            "-fs",
+            "--few_shot",
             type=bool,
             default=False,
             help="Whether to simulate few shot setting by limiting trainig to 50 conversaions per domain",
         )
         agent.add_argument(
-            '--rand_seed',
+            "--rand_seed",
             type=int,
             default=0,
             help="specify to set random seed (default: 0).",
         )
 
         agent.add_argument(
-            '--val_reduced',
-            type='bool',
+            "--val_reduced",
+            type="bool",
             default=False,
             help="use smaller evaluation set.",
         )
 
         agent.add_argument(
-            '--test_reduced', type='bool', default=False, help="use smaller test set."
+            "--test_reduced", type="bool", default=False, help="use smaller test set."
         )
 
         return argparser
@@ -297,20 +297,20 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
 
     def _path(self, opt):
         # set up path to data (specific to each dataset)
-        datapath = opt['datapath']
+        datapath = opt["datapath"]
         # load from environment if available
         env_datapath = os.environ.get("DATAPATH", "")
         datapath = env_datapath if env_datapath else datapath
-        data_dir = os.path.join(datapath, 'checkdst', opt['augmentation_method'])
+        data_dir = os.path.join(datapath, "checkdst", opt["augmentation_method"])
 
         # for NER invariance, load from original data and augment it dynamically
-        if opt['augmentation_method'].lower() == "ned":
-            data_dir = os.path.join(datapath, 'checkdst', opt['augmentation_method'])
-        if opt['augmentation_method'].lower() == "orig":
-            data_dir = os.path.join(datapath, 'checkdst', 'NED')
+        if opt["augmentation_method"].lower() == "ned":
+            data_dir = os.path.join(datapath, "checkdst", opt["augmentation_method"])
+        if opt["augmentation_method"].lower() == "orig":
+            data_dir = os.path.join(datapath, "checkdst", "NED")
 
         data_path = os.path.join(
-            data_dir, f'data_reformat_official_v{self.version}_slots.json'
+            data_dir, f"data_reformat_official_v{self.version}_slots.json"
         )
 
         return data_path, data_dir
@@ -330,7 +330,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
         # keep only the examples for which the entities are swapped
         for episode_idx, msg in enumerate(messages):
             new_msg = msg.copy()
-            orig_context = new_msg['context']
+            orig_context = new_msg["context"]
             new_context = orig_context
             orig_belief_state = new_msg["slots_inf"]
 
@@ -361,7 +361,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
                             new_slot_value = random.choice(
                                 self.entity_bank[self.opt["swap_entity"]][
                                     domain_slot_key
-                                ][self.opt['datatype']]
+                                ][self.opt["datatype"]]
                             )
 
                     # replace with gibberish/scrambled entities
@@ -386,7 +386,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
                     )
 
             new_msg["slots_inf"] = ", ".join(new_belief_states).strip()
-            new_msg['context'] = new_context
+            new_msg["context"] = new_context
 
             # only add examples that have entities swapped.
             if new_context != orig_context:
@@ -420,7 +420,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
 
     def _setup_data(self, data_path, jsons_path):
         # # # loading directly from test file or val file
-        if self.datatype.startswith('test'):
+        if self.datatype.startswith("test"):
             test_path = data_path.replace(".json", "_test.json")
             if self.few_shot:
                 test_path = test_path.replace(".json", "_fewshot.json")
@@ -428,7 +428,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
             self.messages = list(test_data.values())
             if self.test_reduced:
                 self.messages = self.messages[:100]
-        elif self.datatype.startswith('valid'):
+        elif self.datatype.startswith("valid"):
             valid_path = data_path.replace(".json", "_valid.json")
             if self.few_shot:
                 valid_path = valid_path.replace(".json", "_fewshot.json")
@@ -451,20 +451,20 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
         if self.use_prompts:
             for episode_idx, msg in enumerate(self.messages):
                 context, label = format_context_and_label(
-                    self.messages[episode_idx]['context'],
-                    self.messages[episode_idx]['slots_inf'],
+                    self.messages[episode_idx]["context"],
+                    self.messages[episode_idx]["slots_inf"],
                     seed=episode_idx,
                 )
-                if 'orig_context' in self.messages[episode_idx]:
+                if "orig_context" in self.messages[episode_idx]:
                     orig_context, _ = format_context_and_label(
-                        self.messages[episode_idx]['orig_context'],
-                        self.messages[episode_idx]['slots_inf'],
+                        self.messages[episode_idx]["orig_context"],
+                        self.messages[episode_idx]["slots_inf"],
                         seed=episode_idx,
                     )
-                    self.messages[episode_idx]['orig_context'] = orig_context
+                    self.messages[episode_idx]["orig_context"] = orig_context
 
-                self.messages[episode_idx]['context'] = context
-                self.messages[episode_idx]['slots_inf'] = label
+                self.messages[episode_idx]["context"] = context
+                self.messages[episode_idx]["slots_inf"] = label
 
         if self.data_aug.lower() not in {"ned", "orig"}:
             # create separate samples for the original examples and the perturbed ones
@@ -485,8 +485,8 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
                     if self.keep_original:
                         unfolded_messages.append(item)
                     item_ = item.copy()
-                    item_['context'] = msg["context"]
-                    item_['aug_type'] = self.data_aug
+                    item_["context"] = msg["context"]
+                    item_["aug_type"] = self.data_aug
                     unfolded_messages.append(item_)
 
             self.messages = unfolded_messages
@@ -506,7 +506,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
         # for original data, there is nothing to do
 
         # shuffle for training only: it's important that validation and test sets are not shuffled for proper invariance scoring
-        if self.datatype.startswith('train'):
+        if self.datatype.startswith("train"):
             random.shuffle(self.messages)
 
     def _extract_slot_from_string(self, slots_string):
@@ -590,7 +590,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
         if self.keep_original:
             self.flag_compute = 1 - self.flag_compute
 
-        resp = model_response.get('text', "")
+        resp = model_response.get("text", "")
         # if not resp:
         #     return
         # import pdb; pdb.set_trace()
@@ -668,7 +668,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
                 )
 
         def add_jga(type: str):
-            self.metrics.add(f'jga_{type}', AverageMetric(jga_curr))
+            self.metrics.add(f"jga_{type}", AverageMetric(jga_curr))
             # self.metrics.add(
             #     f"named_entities/jga_{type}",
             #     AverageMetric(
@@ -711,7 +711,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
             if self.flag_compute:
                 self.metrics.add("ct_augment", SumMetric(1))
                 self.metrics.add(
-                    f'consistency', AverageMetric(slots_pred == self.slots_pred_prev)
+                    f"consistency", AverageMetric(slots_pred == self.slots_pred_prev)
                 )
                 # the slots should be the same
                 # assert slots_truth == self.slots_truth_prev, (slots_truth, self.slots_truth_prev)
@@ -747,11 +747,11 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
 
         # for reference to verify for external calculation
         # keep track of coreference JGA
-        if teacher_action.get('need_coref', False):
+        if teacher_action.get("need_coref", False):
             self.metrics.add(
-                'coref_jga', AverageMetric(set(slots_truth) == set(slots_pred))
+                "coref_jga", AverageMetric(set(slots_truth) == set(slots_pred))
             )
-            self.metrics.add('coref_ct', SumMetric(1))
+            self.metrics.add("coref_ct", SumMetric(1))
 
     def num_examples(self):
         # each turn be seen as a individual dialog
@@ -762,16 +762,16 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
 
     def get(self, episode_idx, entry_idx=0):
         # log_idx = entry_idx
-        entry = self.messages[episode_idx]['context']
+        entry = self.messages[episode_idx]["context"]
 
         episode_done = True
         action = {
-            'id': self.id,
-            'text': entry,
-            'episode_done': episode_done,
-            'labels': [self.messages[episode_idx]['slots_inf']],
-            'dial_id': self.messages[episode_idx]['dial_id'],
-            'turn_num': self.messages[episode_idx]['turn_num'],
+            "id": self.id,
+            "text": entry,
+            "episode_done": episode_done,
+            "labels": [self.messages[episode_idx]["slots_inf"]],
+            "dial_id": self.messages[episode_idx]["dial_id"],
+            "turn_num": self.messages[episode_idx]["turn_num"],
         }
 
         return action

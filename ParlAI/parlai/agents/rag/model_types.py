@@ -85,7 +85,7 @@ def get_forced_decoder_inputs(
 
     They merely correspond to the appropriate seq2seq_decoder input.
     """
-    if generation_model == 'bart':
+    if generation_model == "bart":
         tens = torch.LongTensor([end_idx, start_idx]).to(inputs).detach().expand(bsz, 2)
     elif start_param is not None:
         tens = start_param.detach().expand(bsz, 1).to(inputs)
@@ -102,9 +102,9 @@ class RagModelInterface(ABC):
 
     def __init__(self, opt: Opt, null_idx: int):
         self.opt = opt
-        self.generation_model = opt['generation_model']
-        self.thorough = opt['thorough']
-        self.n_docs = opt['n_docs']
+        self.generation_model = opt["generation_model"]
+        self.thorough = opt["thorough"]
+        self.n_docs = opt["n_docs"]
         self.null_idx = null_idx
 
     ##############################
@@ -592,7 +592,7 @@ class RagSequence(RagModelInterface):
             target_tokens: the ground truth tokens.
         """
         if scores.size(2) != label_vec.size(1):
-            assert self.generation_model == 'bart'
+            assert self.generation_model == "bart"
             # ignore start
             scores = scores[:, :, 1:, :]
             preds = preds[:, 1:]  # type: ignore
@@ -643,7 +643,7 @@ class RagSequence(RagModelInterface):
         """
         doc_probs = doc_probs.unsqueeze(-1).unsqueeze(-1)
         first_token_scores = out_probs[:, :, :1, :]
-        if self.generation_model == 'bart':
+        if self.generation_model == "bart":
             # bypass first token in BART
             second_token_scores = out_probs[:, :, 1:2, :]
             remainder = out_probs[:, :, 2:, :]
@@ -817,7 +817,7 @@ class RagToken(RagModelInterface):
             target_tokens: the ground truth tokens.
         """
         if scores.size(1) != label_vec.size(1):
-            assert self.generation_model == 'bart'
+            assert self.generation_model == "bart"
             # ignore start
             scores = scores[:, 1:, :]
             preds = preds[:, 1:]  # type: ignore
@@ -879,37 +879,37 @@ class RagTurn(RagModelInterface):
 
     def __init__(self, opt: Opt, null_idx: int):
         super().__init__(opt, null_idx)
-        self.turn_marginalize = opt['rag_turn_marginalize']
-        self.n_turns = opt['rag_turn_n_turns']
-        assert 0 < opt['rag_turn_discount_factor'] <= 1.0
-        self.discount_factor = opt['rag_turn_discount_factor']
+        self.turn_marginalize = opt["rag_turn_marginalize"]
+        self.n_turns = opt["rag_turn_n_turns"]
+        assert 0 < opt["rag_turn_discount_factor"] <= 1.0
+        self.discount_factor = opt["rag_turn_discount_factor"]
 
     @classmethod
     def add_cmdline_args(
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
-        rag_turn_group = parser.add_argument_group('RAG-Turn Args')
+        rag_turn_group = parser.add_argument_group("RAG-Turn Args")
         rag_turn_group.add_argument(
-            '--rag-turn-n-turns',
+            "--rag-turn-n-turns",
             type=int,
             default=2,
-            help='how many turns to split up retrieval into. '
-            'The most recent text is split by delimiter; all turns after (n-1)th turn '
-            'are combined.',
+            help="how many turns to split up retrieval into. "
+            "The most recent text is split by delimiter; all turns after (n-1)th turn "
+            "are combined.",
         )
         rag_turn_group.add_argument(
-            '--rag-turn-marginalize',
+            "--rag-turn-marginalize",
             type=str,
-            default='doc_then_turn',
-            choices=['doc_only', 'doc_then_turn'],
-            help='how to marginalize rag-turn. ',
+            default="doc_then_turn",
+            choices=["doc_only", "doc_then_turn"],
+            help="how to marginalize rag-turn. ",
         )
         rag_turn_group.add_argument(
-            '--rag-turn-discount-factor',
+            "--rag-turn-discount-factor",
             type=float,
             default=1.0,
-            help='discount factor for turns beyond most recent one. We employ exponential discounting. '
-            'Only considered if 0 < factor < 1.0. ',
+            help="discount factor for turns beyond most recent one. We employ exponential discounting. "
+            "Only considered if 0 < factor < 1.0. ",
         )
         return parser
 
@@ -1009,8 +1009,8 @@ class RagTurn(RagModelInterface):
         :return new_batch_idx:
             return mapped batch idx
         """
-        if self.turn_marginalize == 'doc_only':
-            assert hasattr(batch, 'input_turns_cnt')
+        if self.turn_marginalize == "doc_only":
+            assert hasattr(batch, "input_turns_cnt")
             offset = 0
             mapping = {}
             for i, it in enumerate(batch.input_turns_cnt):
@@ -1036,7 +1036,7 @@ class RagTurn(RagModelInterface):
         """
         enc, mask, input_turns_cnt, docs, doc_probs = encoder_states
 
-        if self.turn_marginalize == 'doc_then_turn':
+        if self.turn_marginalize == "doc_then_turn":
             n_inputs = input_turns_cnt.size(0)
             old_inds = indices.clone()
             indices = (
@@ -1072,7 +1072,7 @@ class RagTurn(RagModelInterface):
         Thorough decoding is identical RAG Sequence.
         """
         new_n_best: List[List[Tuple[torch.LongTensor, torch.Tensor]]] = []
-        if self.turn_marginalize == 'doc_only' and not self.thorough:
+        if self.turn_marginalize == "doc_only" and not self.thorough:
             # no doc log probs here; just re-sorting beams
             input_turns_cnt = batch.input_turns_cnt
             offset = 0
@@ -1089,7 +1089,7 @@ class RagTurn(RagModelInterface):
                         n_best_i.append(new_beam)
                 new_n_best.append(sorted(n_best_i, key=lambda x: -x[1]))
                 offset += it
-        elif self.turn_marginalize == 'doc_only' and self.thorough:
+        elif self.turn_marginalize == "doc_only" and self.thorough:
             hyps = [hyp[0] for h in n_best_beam_preds_scores for hyp in h]
             sorted_by_score = RagSequence.thorough_generation(
                 hyps, batch.src_text_vec[0:1], self.null_idx, model
@@ -1097,7 +1097,7 @@ class RagTurn(RagModelInterface):
             new_n_best.append(sorted_by_score)
         elif batch.batchsize > 1:
             raise RuntimeError(
-                'Please set batchsize to 1 when evaluating RAG Turn Doc-Then-Turn Models'
+                "Please set batchsize to 1 when evaluating RAG Turn Doc-Then-Turn Models"
             )
         else:
             new_n_best = n_best_beam_preds_scores
@@ -1119,7 +1119,7 @@ class RagTurn(RagModelInterface):
         :return batch:
             return batch with appropriate augmentations.
         """
-        if self.turn_marginalize == 'doc_only':
+        if self.turn_marginalize == "doc_only":
             input_turns_cnt = batch.input_turn_cnt_vec
             batch.batchsize = input_turns_cnt.sum().item()
             batch.src_text_vec = batch.text_vec
@@ -1156,8 +1156,8 @@ class RagTurn(RagModelInterface):
         input_turns_cnt = torch.LongTensor([len(split_text)])
         query_vecs = [model.tokenize_query(q) for q in split_text]
         # Override query vec
-        observation.force_set('query_vec', query_vecs)
-        observation['input_turn_cnt_vec'] = input_turns_cnt
+        observation.force_set("query_vec", query_vecs)
+        observation["input_turn_cnt_vec"] = input_turns_cnt
         return observation
 
     def compute_loss(
@@ -1204,7 +1204,7 @@ class RagTurn(RagModelInterface):
         real_bsz = label_vec.size(0)
         resize_label = real_bsz != scores.size(0)
         if resize_label:
-            assert self.turn_marginalize == 'doc_only'
+            assert self.turn_marginalize == "doc_only"
             label_vec = label_vec.repeat_interleave(
                 input_turns_cnt, dim=0
             )  # type: ignore
@@ -1216,7 +1216,7 @@ class RagTurn(RagModelInterface):
         metric_loss = loss.tolist()
 
         if resize_label:
-            assert self.turn_marginalize == 'doc_only'
+            assert self.turn_marginalize == "doc_only"
             loss = sum_across_turns(
                 loss, input_turns_cnt, discount=self.discount_factor
             )
@@ -1259,7 +1259,7 @@ class RagTurn(RagModelInterface):
         :return tensor:
             return decoder output with docs marginalized.
         """
-        if self.turn_marginalize == 'doc_then_turn' and out_probs.size(
+        if self.turn_marginalize == "doc_then_turn" and out_probs.size(
             0
         ) != doc_probs.size(0):
             # Need to adjust out probs during generation
@@ -1268,7 +1268,7 @@ class RagTurn(RagModelInterface):
             )  # type: ignore
 
         log_prob_sum = out_probs + doc_probs.unsqueeze(-1).unsqueeze(-1)
-        if self.turn_marginalize == 'doc_only':
+        if self.turn_marginalize == "doc_only":
             output = torch.logsumexp(log_prob_sum, dim=1)  # sum across documents only
         else:
             turns = []

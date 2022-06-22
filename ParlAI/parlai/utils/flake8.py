@@ -16,8 +16,8 @@ Includes:
 import docformatter
 import difflib
 
-PYTHON_SHEBANG = '#!/usr/bin/env python3'
-ALLOWLIST_PHRASES = ['Moscow Institute of Physics and Technology.']
+PYTHON_SHEBANG = "#!/usr/bin/env python3"
+ALLOWLIST_PHRASES = ["Moscow Institute of Physics and Technology."]
 ALLOWLIST_FNS = ["mlb_vqa"]
 COPYRIGHT = [
     "Copyright (c) Facebook, Inc. and its affiliates.",
@@ -31,8 +31,8 @@ class ParlAIChecker:
     Custom flake8 checker for some special ParlAI requirements.
     """
 
-    name = 'flake8-parlai'
-    version = '0.1'
+    name = "flake8-parlai"
+    version = "0.1"
 
     def __init__(self, tree=None, filename=None, lines=None):
         self.filename = filename
@@ -47,8 +47,8 @@ class ParlAIChecker:
             yield (
                 1,
                 0,
-                'PAI100 Missing python3 shebang. (`#!/usr/bin/env python3`)',
-                '',
+                "PAI100 Missing python3 shebang. (`#!/usr/bin/env python3`)",
+                "",
             )
 
         # check doc formatting
@@ -63,15 +63,15 @@ class ParlAIChecker:
         )
         if source != formatted_source:
             diff = difflib.unified_diff(
-                source.split('\n'),  # have to strip newlines
-                formatted_source.split('\n'),
-                f'before/{self.filename}',
-                f'after/{self.filename}',
+                source.split("\n"),  # have to strip newlines
+                formatted_source.split("\n"),
+                f"before/{self.filename}",
+                f"after/{self.filename}",
                 n=0,
-                lineterm='',
+                lineterm="",
             )
             for line in diff:
-                if line.startswith('@@'):
+                if line.startswith("@@"):
                     fields = line.split()
                     # find out the beginning line of the docstring reformat. Example:
                     # --- /path/to/original  timestamp
@@ -80,13 +80,13 @@ class ParlAIChecker:
                     # that -1 says the first line changed, and 3 lines were removed
                     # with a new offset belonging at the first line, and 9
                     # inserted lines.
-                    line_no, *_ = fields[1].split(',')
+                    line_no, *_ = fields[1].split(",")
                     line_no = -int(line_no)
                     yield (
                         line_no,
                         1,
-                        'PAI101 autoformat.sh would reformat the docstring',
-                        '',
+                        "PAI101 autoformat.sh would reformat the docstring",
+                        "",
                     )
 
         # the rest is checking copyright, but there are some exceptions
@@ -99,4 +99,4 @@ class ParlAIChecker:
             if any(wl in self.filename for wl in ALLOWLIST_FNS) and i < 3:
                 continue
             if source and msg not in source:
-                yield (i, 0, f'PAI20{i} Missing copyright `{msg}`', '')
+                yield (i, 0, f"PAI20{i} Missing copyright `{msg}`", "")

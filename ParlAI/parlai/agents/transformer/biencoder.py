@@ -23,7 +23,7 @@ class AddLabelFixedCandsTRA(TorchRankerAgent):
 
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
-        self.add_label_to_fixed_cands = opt.get('add_label_to_fixed_cands')
+        self.add_label_to_fixed_cands = opt.get("add_label_to_fixed_cands")
         if self.add_label_to_fixed_cands:
             self.ignore_bad_candidates = True
 
@@ -35,14 +35,14 @@ class AddLabelFixedCandsTRA(TorchRankerAgent):
         Override to include new arg.
         """
         super().add_cmdline_args(parser, partial_opt=partial_opt)
-        agent = parser.add_argument_group('AddLabelFixedCandsTRA')
+        agent = parser.add_argument_group("AddLabelFixedCandsTRA")
         agent.add_argument(
-            '--add-label-to-fixed-cands',
-            type='bool',
+            "--add-label-to-fixed-cands",
+            type="bool",
             default=True,
             hidden=True,
-            help='When true, adds an example label to the fixed candidate set '
-            'if not already present',
+            help="When true, adds an example label to the fixed candidate set "
+            "if not already present",
         )
         return parser
 
@@ -55,7 +55,7 @@ class AddLabelFixedCandsTRA(TorchRankerAgent):
             else batch.image.size(0)
         )
 
-        if source == 'fixed' and label_inds is None and self.add_label_to_fixed_cands:
+        if source == "fixed" and label_inds is None and self.add_label_to_fixed_cands:
             # Add label to fixed cands
             if label_vecs is not None:
                 label_inds = label_vecs.new_empty((batchsize))
@@ -78,7 +78,7 @@ class AddLabelFixedCandsTRA(TorchRankerAgent):
         Override to clean up candidates.
         """
         output = super().train_step(batch)
-        if self.candidates == 'fixed':
+        if self.candidates == "fixed":
             self.fixed_candidates = self.fixed_candidates[: self.num_fixed_candidates]
         return output
 
@@ -87,7 +87,7 @@ class AddLabelFixedCandsTRA(TorchRankerAgent):
         Override to clean up candidates.
         """
         output = super().eval_step(batch)
-        if self.eval_candidates == 'fixed':
+        if self.eval_candidates == "fixed":
             self.fixed_candidates = self.fixed_candidates[: self.num_fixed_candidates]
         return output
 
@@ -104,8 +104,8 @@ class BiencoderAgent(TransformerRankerAgent):
         """
         Add the start and end token to the text.
         """
-        kwargs['add_start'] = True
-        kwargs['add_end'] = True
+        kwargs["add_start"] = True
+        kwargs["add_end"] = True
         obs = TorchRankerAgent.vectorize(self, *args, **kwargs)
         return obs
 
@@ -115,9 +115,9 @@ class BiencoderAgent(TransformerRankerAgent):
 
         necessary for fixed cands.
         """
-        if 'add_start' in kwargs:
-            kwargs['add_start'] = True
-            kwargs['add_end'] = True
+        if "add_start" in kwargs:
+            kwargs["add_start"] = True
+            kwargs["add_end"] = True
         return super()._vectorize_text(*args, **kwargs)
 
     def _set_text_vec(self, *args, **kwargs):
@@ -125,11 +125,11 @@ class BiencoderAgent(TransformerRankerAgent):
         Add the start and end token to the text.
         """
         obs = super()._set_text_vec(*args, **kwargs)
-        if 'text_vec' in obs and 'added_start_end_tokens' not in obs:
+        if "text_vec" in obs and "added_start_end_tokens" not in obs:
             obs.force_set(
-                'text_vec', self._add_start_end_tokens(obs['text_vec'], True, True)
+                "text_vec", self._add_start_end_tokens(obs["text_vec"], True, True)
             )
-            obs['added_start_end_tokens'] = True
+            obs["added_start_end_tokens"] = True
         return obs
 
 

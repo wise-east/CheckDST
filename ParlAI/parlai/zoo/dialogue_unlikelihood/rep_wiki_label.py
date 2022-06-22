@@ -12,10 +12,10 @@ Label repetition unlikelihood on Wizard of Wikipedia: please see.
 
 from .build import build
 
-VERSION = 'v1.0'
+VERSION = "v1.0"
 
 
 def download(datapath):
     build(
-        datapath, 'rep_wiki_label_v1.tgz', model_type='rep_wiki_label', version=VERSION
+        datapath, "rep_wiki_label_v1.tgz", model_type="rep_wiki_label", version=VERSION
     )

@@ -12,33 +12,33 @@ import json
 
 class SensitiveTopicsEvaluationTeacher(DialogTeacher):
     def __init__(self, opt, shared=None):
-        self.datatype = opt['datatype']
-        if 'valid' not in self.datatype:
+        self.datatype = opt["datatype"]
+        if "valid" not in self.datatype:
             raise RuntimeError(
-                f'Datatype: {self.datatype} not supported. '
-                'This teacher only supports valid.'
+                f"Datatype: {self.datatype} not supported. "
+                "This teacher only supports valid."
             )
 
         if not shared:
             self.datafile = build(opt)
         else:
-            self.datafile = shared['datafile']
+            self.datafile = shared["datafile"]
 
-        opt['datafile'] = self.datafile
+        opt["datafile"] = self.datafile
         super().__init__(opt, shared)
-        self.id = 'Sensitive Topics Evaluation Topics Valid Teacher'
+        self.id = "Sensitive Topics Evaluation Topics Valid Teacher"
 
     def setup_data(self, path):
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             lines = f.read().splitlines()
             for line in lines:
                 example = json.loads(line)
-                del example['episode_done']
+                del example["episode_done"]
                 yield example, True
 
     def share(self):
         shared = super().share()
-        shared['datafile'] = self.datafile
+        shared["datafile"] = self.datafile
         return shared
 
 

@@ -57,15 +57,15 @@ class ParlAILRScheduler(object):
         self.hard_reset = hard_reset
 
     def _init_warmup_scheduler(self, optimizer, states):
-        updates_so_far = states.get('number_training_updates', 0)
+        updates_so_far = states.get("number_training_updates", 0)
         if self.warmup_updates > 0 and (
             updates_so_far < self.warmup_updates or self.hard_reset
         ):
             self.warmup_scheduler = optim.lr_scheduler.LambdaLR(
                 optimizer, self._warmup_lr
             )
-            if states.get('warmup_scheduler'):
-                self.warmup_scheduler.load_state_dict(states['warmup_scheduler'])
+            if states.get("warmup_scheduler"):
+                self.warmup_scheduler.load_state_dict(states["warmup_scheduler"])
         else:
             self.warmup_scheduler = None
 
@@ -77,14 +77,14 @@ class ParlAILRScheduler(object):
         except AttributeError:
             # TODO: upon getting rid of pytorch 1.4, kill this
             # pytorch 1.4 or older
-            return s.optimizer.param_groups[0]['lr']
+            return s.optimizer.param_groups[0]["lr"]
 
     def _is_lr_warming_up(self):
         """
         Check if we're warming up the learning rate.
         """
         return (
-            hasattr(self, 'warmup_scheduler')
+            hasattr(self, "warmup_scheduler")
             and self.warmup_scheduler is not None
             and self._number_training_updates < self.warmup_updates
         )
@@ -103,11 +103,11 @@ class ParlAILRScheduler(object):
         """
         Load state of scheduler from states.
         """
-        if states.get('warmup_scheduler') and getattr(self, 'warmup_scheduler', None):
-            self.warmup_scheduler.load_state_dict(states['warmup_scheduler'])
-        if self.scheduler and 'lr_scheduler' in states:
-            self.scheduler.load_state_dict(states['lr_scheduler'])
-        self._number_training_updates = states.get('number_training_updates', 0)
+        if states.get("warmup_scheduler") and getattr(self, "warmup_scheduler", None):
+            self.warmup_scheduler.load_state_dict(states["warmup_scheduler"])
+        if self.scheduler and "lr_scheduler" in states:
+            self.scheduler.load_state_dict(states["lr_scheduler"])
+        self._number_training_updates = states.get("number_training_updates", 0)
 
         try:
             if self._is_lr_warming_up():
@@ -139,58 +139,58 @@ class ParlAILRScheduler(object):
     def add_cmdline_args(
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
-        lr_group = parser.add_argument_group('Learning Rate Scheduler')
+        lr_group = parser.add_argument_group("Learning Rate Scheduler")
         lr_group.add_argument(
-            '--lr-scheduler',
+            "--lr-scheduler",
             type=str,
-            default='reduceonplateau',
-            choices=['reduceonplateau', 'none', 'fixed', 'invsqrt', 'cosine', 'linear'],
-            help='Learning rate scheduler.',
+            default="reduceonplateau",
+            choices=["reduceonplateau", "none", "fixed", "invsqrt", "cosine", "linear"],
+            help="Learning rate scheduler.",
         )
         lr_group.add_argument(
-            '--lr-scheduler-patience',
+            "--lr-scheduler-patience",
             type=int,
             default=3,
-            help='LR scheduler patience. In number of validation runs. If using '
-            'fixed scheduler, LR is decayed every <patience> validations.',
+            help="LR scheduler patience. In number of validation runs. If using "
+            "fixed scheduler, LR is decayed every <patience> validations.",
         )
         lr_group.add_argument(
-            '--lr-scheduler-decay',
+            "--lr-scheduler-decay",
             type=float,
             default=0.5,
-            help='Decay factor for LR scheduler, or how much LR is multiplied by '
-            'when it is lowered.',
+            help="Decay factor for LR scheduler, or how much LR is multiplied by "
+            "when it is lowered.",
         )
         lr_group.add_argument(
-            '--invsqrt-lr-decay-gamma',
+            "--invsqrt-lr-decay-gamma",
             type=int,
             default=-1,
-            help='Constant used only to find the lr multiplier for the invsqrt '
-            'scheduler. Must be set for --lr-scheduler invsqrt',
+            help="Constant used only to find the lr multiplier for the invsqrt "
+            "scheduler. Must be set for --lr-scheduler invsqrt",
         )
         lr_group.add_argument(
-            '--warmup-updates',
+            "--warmup-updates",
             type=int,
             default=-1,
             hidden=True,
-            help='Learning rate warmup period, in number of SGD updates. '
-            'Linearly scales up LR over period. Only enabled if > 0.',
+            help="Learning rate warmup period, in number of SGD updates. "
+            "Linearly scales up LR over period. Only enabled if > 0.",
         )
         lr_group.add_argument(
-            '--warmup-rate',
+            "--warmup-rate",
             type=float,
             default=1e-4,
             hidden=True,
-            help='Warmup learning rate *multiplier*. Initial LR is multiplied by '
-            'this value. Linearly adjusted up to 1.0 across --warmup-updates '
-            'steps.',
+            help="Warmup learning rate *multiplier*. Initial LR is multiplied by "
+            "this value. Linearly adjusted up to 1.0 across --warmup-updates "
+            "steps.",
         )
         lr_group.add_argument(
-            '--update-freq',
+            "--update-freq",
             type=int,
             default=1,
             hidden=True,
-            help='Accumulate gradients N times before performing an optimizer.step().',
+            help="Accumulate gradients N times before performing an optimizer.step().",
         )
         return parser
 
@@ -214,18 +214,18 @@ class ParlAILRScheduler(object):
         :return: ParlAILRScheduler object
         """
 
-        patience = opt.get('lr_scheduler_patience', 3)
-        decay = opt.get('lr_scheduler_decay', 0.5)
-        warmup_updates = opt.get('warmup_updates', -1)
-        warmup_rate = opt.get('warmup_rate', 1e-4)
-        max_lr_steps = opt.get('max_train_steps', -1)
-        if opt.get('max_lr_steps', -1) > 0:
+        patience = opt.get("lr_scheduler_patience", 3)
+        decay = opt.get("lr_scheduler_decay", 0.5)
+        warmup_updates = opt.get("warmup_updates", -1)
+        warmup_rate = opt.get("warmup_rate", 1e-4)
+        max_lr_steps = opt.get("max_train_steps", -1)
+        if opt.get("max_lr_steps", -1) > 0:
             raise ValueError(
-                '--max-lr-steps is **DEPRECATED**; please set --max-train-steps directly'
+                "--max-lr-steps is **DEPRECATED**; please set --max-train-steps directly"
             )
-        invsqrt_lr_decay_gamma = opt.get('invsqrt_lr_decay_gamma', -1)
+        invsqrt_lr_decay_gamma = opt.get("invsqrt_lr_decay_gamma", -1)
 
-        if opt.get('lr_scheduler') == 'none':
+        if opt.get("lr_scheduler") == "none":
             return None
         elif decay == 1.0:
             warn_once(
@@ -234,15 +234,15 @@ class ParlAILRScheduler(object):
                 "if this is not correct."
             )
             return None
-        elif opt.get('lr_scheduler') == 'reduceonplateau':
+        elif opt.get("lr_scheduler") == "reduceonplateau":
             scheduler = ReduceOnPlateauLRScheduler(
                 optimizer, hard_reset, patience, decay, warmup_updates, warmup_rate
             )
-        elif opt.get('lr_scheduler') == 'fixed':
+        elif opt.get("lr_scheduler") == "fixed":
             scheduler = FixedLRScheduler(
                 optimizer, hard_reset, patience, decay, warmup_updates, warmup_rate
             )
-        elif opt.get('lr_scheduler') == 'invsqrt':
+        elif opt.get("lr_scheduler") == "invsqrt":
             scheduler = InvSqrtLRScheduler(
                 optimizer,
                 hard_reset,
@@ -253,7 +253,7 @@ class ParlAILRScheduler(object):
                 invsqrt_lr_decay_gamma,
                 max_lr_steps,
             )
-        elif opt.get('lr_scheduler') == 'cosine':
+        elif opt.get("lr_scheduler") == "cosine":
             scheduler = CosineLRScheduler(
                 optimizer,
                 hard_reset,
@@ -263,7 +263,7 @@ class ParlAILRScheduler(object):
                 warmup_rate,
                 max_lr_steps,
             )
-        elif opt.get('lr_scheduler') == 'linear':
+        elif opt.get("lr_scheduler") == "linear":
             scheduler = LinearLRScheduler(
                 optimizer,
                 hard_reset,
@@ -276,7 +276,7 @@ class ParlAILRScheduler(object):
         else:
             raise ValueError(
                 "Don't know what to do with --lr-scheduler '{}'".format(
-                    opt.get('lr_scheduler')
+                    opt.get("lr_scheduler")
                 )
             )
 
@@ -285,9 +285,9 @@ class ParlAILRScheduler(object):
             # there is already an old LR scheduler saved on disk
             states
             # and there was a scheduler in the dump
-            and 'lr_scheduler_type' in states
+            and "lr_scheduler_type" in states
             # and the old LR scheduler is different
-            and states.get('lr_scheduler_type') != opt['lr_scheduler']
+            and states.get("lr_scheduler_type") != opt["lr_scheduler"]
             # and we're not already using a fresh scheduler
             and not hard_reset
         ):
@@ -354,7 +354,7 @@ class ReduceOnPlateauLRScheduler(ParlAILRScheduler):
     ):
         super().__init__(hard_reset, warmup_updates, warmup_rate)
         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer, 'min', factor=decay, patience=patience, verbose=True
+            optimizer, "min", factor=decay, patience=patience, verbose=True
         )
 
     def train_step(self, scheduler_steps):
@@ -365,11 +365,11 @@ class ReduceOnPlateauLRScheduler(ParlAILRScheduler):
             # we're not done warming up, so don't start using validation
             # metrics to adjust schedule
             return
-        if 'loss' not in metrics_dict:
+        if "loss" not in metrics_dict:
             # nothing to step on, just skip
             warn_once("LR scheduler expected to see loss metric, but didn't.")
             return
-        self.scheduler.step(metrics_dict['loss'])
+        self.scheduler.step(metrics_dict["loss"])
 
 
 class FixedLRScheduler(ParlAILRScheduler):
@@ -422,9 +422,9 @@ class InvSqrtLRScheduler(ParlAILRScheduler):
         self.invsqrt_lr_decay_gamma = invsqrt_lr_decay_gamma
         if invsqrt_lr_decay_gamma <= 0:
             warn_once(
-                '--lr-scheduler invsqrt requires a value for '
-                '--invsqrt-lr-decay-gamma. Defaulting to set gamma to '
-                '--warmup-updates value for backwards compatibility.'
+                "--lr-scheduler invsqrt requires a value for "
+                "--invsqrt-lr-decay-gamma. Defaulting to set gamma to "
+                "--warmup-updates value for backwards compatibility."
             )
             self.invsqrt_lr_decay_gamma = self.warmup_updates
 
@@ -436,7 +436,7 @@ class InvSqrtLRScheduler(ParlAILRScheduler):
 
     def train_step(self, scheduler_steps):
         if self.max_lr_steps > 0 and scheduler_steps >= self.max_lr_steps:
-            raise StopTrainException('Maximum LR steps')
+            raise StopTrainException("Maximum LR steps")
         self.scheduler.step()
 
     def valid_step(self, metrics_dict):
@@ -467,7 +467,7 @@ class CosineLRScheduler(ParlAILRScheduler):
         """
         super().__init__(hard_reset, warmup_updates, warmup_rate)
         if max_lr_steps <= 0:
-            raise ValueError('--lr-scheduler cosine requires setting --max-train-steps')
+            raise ValueError("--lr-scheduler cosine requires setting --max-train-steps")
         assert self.warmup_updates >= 0
         self.max_lr_steps = max_lr_steps - self.warmup_updates
         self.scheduler = optim.lr_scheduler.LambdaLR(optimizer, self._cosine_lr)
@@ -477,7 +477,7 @@ class CosineLRScheduler(ParlAILRScheduler):
 
     def train_step(self, scheduler_steps):
         if scheduler_steps >= self.max_lr_steps:
-            raise StopTrainException('End of Cosine LR Schedule')
+            raise StopTrainException("End of Cosine LR Schedule")
         self.scheduler.step()
 
     def valid_step(self, metrics_dict):
@@ -506,7 +506,7 @@ class LinearLRScheduler(ParlAILRScheduler):
         """
         super().__init__(hard_reset, warmup_updates, warmup_rate)
         if max_lr_steps <= 0:
-            raise ValueError('--lr-scheduler linear requires setting --max-train-steps')
+            raise ValueError("--lr-scheduler linear requires setting --max-train-steps")
         assert self.warmup_updates >= 0
         self.max_lr_steps = max_lr_steps - self.warmup_updates
         self.scheduler = optim.lr_scheduler.LambdaLR(optimizer, self._linear_lr)
@@ -518,7 +518,7 @@ class LinearLRScheduler(ParlAILRScheduler):
 
     def train_step(self, scheduler_steps):
         if scheduler_steps >= self.max_lr_steps:
-            raise StopTrainException('End of Linear LR Schedule')
+            raise StopTrainException("End of Linear LR Schedule")
         self.scheduler.step()
 
     def valid_step(self, metrics_dict):

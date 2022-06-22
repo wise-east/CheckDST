@@ -1,8 +1,7 @@
 # sumamrize comparison results with two prediction files
 
-import json 
-from pathlib import Path 
+import json
+from pathlib import Path
 
-pred_file1 ="" 
-pred_file2 = "" 
-
+pred_file1 = ""
+pred_file2 = ""

@@ -145,8 +145,8 @@ class VerboseTransformerAgent(TransformerGeneratorAgent):
 
 
 class DecoderFeedForwardVariant(Enum):
-    ONE = 'one'
-    TWO = 'two'
+    ONE = "one"
+    TWO = "two"
 
 
 class DecoderFFNOne(TransformerFFN):
@@ -173,24 +173,24 @@ class ConfigurableTransformerAgent(TransformerGeneratorAgent):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt=partial_opt)
-        agent = parser.add_argument_group('MyCustom Transformer Arguments')
+        agent = parser.add_argument_group("MyCustom Transformer Arguments")
         parser.add_argument(
-            '--decoder-ffn-variants',
+            "--decoder-ffn-variants",
             type=DecoderFeedForwardVariant,
             default=DecoderFeedForwardVariant.ONE,
-            help='Some variants in the decoder FFN implementation',
+            help="Some variants in the decoder FFN implementation",
         )
         return agent  # type: ignore
 
     def build_model(self, states=None):
-        decoder_variant: DecoderFeedForwardVariant = self.opt['decoder_ffn_variants']
+        decoder_variant: DecoderFeedForwardVariant = self.opt["decoder_ffn_variants"]
         if decoder_variant == DecoderFeedForwardVariant.ONE:
             decoder_ffn_class = DecoderFFNOne
         elif decoder_variant == DecoderFeedForwardVariant.TWO:
             decoder_ffn_class = DecoderFFNTwo
         else:
             logging.error(
-                'Invalid --decoder-ffn-variants option, defaulting to original ffn implementation.'
+                "Invalid --decoder-ffn-variants option, defaulting to original ffn implementation."
             )
             decoder_ffn_class = TransformerFFN
 

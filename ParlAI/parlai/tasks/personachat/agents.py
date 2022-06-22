@@ -32,21 +32,21 @@ import os
 def _path(opt, persona):
     # Build the data if it doesn't exist.
     build(opt)
-    dt = opt['datatype'].split(':')[0] + '_' + persona
-    return os.path.join(opt['datapath'], 'Persona-Chat', 'personachat', dt + '.txt')
+    dt = opt["datatype"].split(":")[0] + "_" + persona
+    return os.path.join(opt["datapath"], "Persona-Chat", "personachat", dt + ".txt")
 
 
 class NoneTeacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        opt['datafile'] = _path(opt, 'none_original')
+        opt["datafile"] = _path(opt, "none_original")
         super().__init__(opt, shared)
 
 
 class SelfOriginalTeacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        opt['datafile'] = _path(opt, 'self_original')
+        opt["datafile"] = _path(opt, "self_original")
         super().__init__(opt, shared)
 
 
@@ -57,14 +57,14 @@ class SelfTeacher(SelfOriginalTeacher):
 class SelfRevisedTeacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        opt['datafile'] = _path(opt, 'self_revised')
+        opt["datafile"] = _path(opt, "self_revised")
         super().__init__(opt, shared)
 
 
 class OtherOriginalTeacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        opt['datafile'] = _path(opt, 'other_original')
+        opt["datafile"] = _path(opt, "other_original")
         super().__init__(opt, shared)
 
 
@@ -75,14 +75,14 @@ class OtherTeacher(OtherOriginalTeacher):
 class OtherRevisedTeacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        opt['datafile'] = _path(opt, 'other_revised')
+        opt["datafile"] = _path(opt, "other_revised")
         super().__init__(opt, shared)
 
 
 class BothOriginalTeacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        opt['datafile'] = _path(opt, 'both_original')
+        opt["datafile"] = _path(opt, "both_original")
         super().__init__(opt, shared)
 
 
@@ -93,7 +93,7 @@ class BothTeacher(BothOriginalTeacher):
 class BothRevisedTeacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        opt['datafile'] = _path(opt, 'both_revised')
+        opt["datafile"] = _path(opt, "both_revised")
         super().__init__(opt, shared)
 
 

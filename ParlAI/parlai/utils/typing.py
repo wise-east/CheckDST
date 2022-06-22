@@ -23,7 +23,7 @@ class _Shared(Dict[str, Any]):
     """
 
 
-TShared = TypeVar('TShared', bound=_Shared)
+TShared = TypeVar("TShared", bound=_Shared)
 
 TScalar = Union[int, float, torch.Tensor]
 """

@@ -21,7 +21,7 @@ from parlai.core.message import Message
 import copy
 from tqdm import tqdm
 
-KEEP_ALL = 'all'
+KEEP_ALL = "all"
 
 
 class WorldLogger:
@@ -33,12 +33,12 @@ class WorldLogger:
     def add_cmdline_args(
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
-        agent = parser.add_argument_group('World Logging')
+        agent = parser.add_argument_group("World Logging")
         agent.add_argument(
-            '--log-keep-fields',
+            "--log-keep-fields",
             type=str,
             default=KEEP_ALL,
-            help='Fields to keep when logging. Should be a comma separated list',
+            help="Fields to keep when logging. Should be a comma separated list",
         )
         return parser
 
@@ -52,7 +52,7 @@ class WorldLogger:
         self.reset()
 
     def _set_keep_fields(self, opt):
-        self.keep_fields = opt['log_keep_fields'].split(',')
+        self.keep_fields = opt["log_keep_fields"].split(",")
         self.keep_all = KEEP_ALL in self.keep_fields
 
     def reset(self):
@@ -102,7 +102,7 @@ class WorldLogger:
         Check whether an episode is done for a given parley.
         """
         if parley[0]:
-            return parley[0].get('episode_done', False)
+            return parley[0].get("episode_done", False)
         return False
 
     def _is_batch_world(self, world):
@@ -117,7 +117,7 @@ class WorldLogger:
             # in dynamic batching, we only return `batchsize` acts, but the
             # 'dyn_batch_idx' key in the task act corresponds the episode index
             # in the buffer
-            idx = parley[0]['dyn_batch_idx'] if 'dyn_batch_idx' in parley[0] else i
+            idx = parley[0]["dyn_batch_idx"] if "dyn_batch_idx" in parley[0] else i
             self._add_msgs(parley, idx=idx)
             if self._check_episode_done(parley):
                 self.reset_world(idx=idx)
@@ -143,44 +143,44 @@ class WorldLogger:
         text_lst = []
         for parley in episode:
             first_act, second_act = parley
-            if 'text' in first_act:
-                text_lst.append(first_act['text'])
-            if second_act.get('id') != 'context':
-                label = second_act.get('text')
+            if "text" in first_act:
+                text_lst.append(first_act["text"])
+            if second_act.get("id") != "context":
+                label = second_act.get("text")
                 out.append(
                     {
-                        'id': first_act.get('id', ''),
-                        'text': '\n'.join(text_lst),
-                        'labels': [label],
-                        'episode_done': False,
+                        "id": first_act.get("id", ""),
+                        "text": "\n".join(text_lst),
+                        "labels": [label],
+                        "episode_done": False,
                     }
                 )
                 text_lst = []
         if len(out) > 0:
-            out[-1]['episode_done'] = True
+            out[-1]["episode_done"] = True
         return out
 
     def write_parlai_format(self, outfile):
-        logging.info(f'Saving log to {outfile} in ParlAI format')
-        with PathManager.open(outfile, 'w') as fw:
+        logging.info(f"Saving log to {outfile} in ParlAI format")
+        with PathManager.open(outfile, "w") as fw:
             for episode in tqdm(self._logs):
                 ep = self.convert_to_labeled_data(episode)
                 for act in ep:
                     txt = msg_to_str(act)
-                    fw.write(txt + '\n')
-                fw.write('\n')
+                    fw.write(txt + "\n")
+                fw.write("\n")
 
     def write_conversations_format(self, outfile, world):
-        logging.info(f'Saving log to {outfile} in Conversations format')
+        logging.info(f"Saving log to {outfile} in Conversations format")
         Conversations.save_conversations(
             self._logs,
             outfile,
             world.opt,
-            self_chat=world.opt.get('selfchat_task', False),
+            self_chat=world.opt.get("selfchat_task", False),
         )
 
-    def write(self, outfile, world, file_format='conversations', indent=4):
-        if file_format == 'conversations':
+    def write(self, outfile, world, file_format="conversations", indent=4):
+        if file_format == "conversations":
             self.write_conversations_format(outfile, world)
         else:
             # ParlAI text format

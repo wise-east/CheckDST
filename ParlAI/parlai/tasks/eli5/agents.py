@@ -22,7 +22,7 @@ class ELI5Teacher(FixedDialogTeacher):
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
         build(opt)
-        self.id = 'eli5'
+        self.id = "eli5"
         self.messages = self.load_eli5(opt)
         self.reset()
 
@@ -31,12 +31,12 @@ class ELI5Teacher(FixedDialogTeacher):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        group = parser.add_argument_group('ELI5 Knowledge arguments')
+        group = parser.add_argument_group("ELI5 Knowledge arguments")
         group.add_argument(
-            '--knowledge',
-            type='bool',
+            "--knowledge",
+            type="bool",
             default=True,
-            help='Whether to include supporting document knowledge',
+            help="Whether to include supporting document knowledge",
         )
         return parser
 
@@ -44,8 +44,8 @@ class ELI5Teacher(FixedDialogTeacher):
         """
         Load data based on data split.
         """
-        dp = opt['datapath']
-        dt = opt['datatype'].split(':')[0]
+        dp = opt["datapath"]
+        dt = opt["datatype"].split(":")[0]
         eli_path = "eli5/processed_data/selected_15_1/explainlikeimfive_"
         fname = os.path.join(dp, eli_path + dt + ".json")
         if not PathManager.exists(fname):
@@ -54,20 +54,20 @@ class ELI5Teacher(FixedDialogTeacher):
                 "https://github.com/facebookresearch/ParlAI/tree/main/parlai/tasks/eli5/README.md"
                 " to construct the dataset."
             )
-        opt['datafile'] = fname
+        opt["datafile"] = fname
         with PathManager.open(fname) as json_file:
             data = json.load(json_file)
         ds = []
         for d in data:
-            if self.opt['knowledge']:
-                text = d['document'] + "\n" + d['question']
+            if self.opt["knowledge"]:
+                text = d["document"] + "\n" + d["question"]
             else:
-                text = d['question']
+                text = d["question"]
             act = {
-                'id': 'eli5',
-                'text': text,
-                'labels': [d['answer']],
-                'episode_done': True,
+                "id": "eli5",
+                "text": text,
+                "labels": [d["answer"]],
+                "episode_done": True,
             }
             ds.append(act)
         return ds

@@ -13,13 +13,13 @@ from .full_dialogue_retrieval_model import download as retrieval_download
 
 
 def download(datapath):
-    opt = {'datapath': datapath}
+    opt = {"datapath": datapath}
 
     # download all relevant wizard of wikipedia models
     generator_download(datapath)
     retrieval_download(datapath)
 
     # now download knowledge retriever
-    fnames = ['knowledge_retriever.tgz']
-    opt['model_type'] = 'knowledge_retriever'
-    download_models(opt, fnames, 'wizard_of_wikipedia', version='v3.0')
+    fnames = ["knowledge_retriever.tgz"]
+    opt["model_type"] = "knowledge_retriever"
+    download_models(opt, fnames, "wizard_of_wikipedia", version="v3.0")

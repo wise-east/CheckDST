@@ -26,12 +26,12 @@ class BasicAttention(nn.Module):
     def __init__(
         self,
         dim: int = 1,
-        attn: str = 'cosine',
+        attn: str = "cosine",
         residual: bool = False,
         get_weights: bool = True,
     ):
         super().__init__()
-        if attn == 'cosine':
+        if attn == "cosine":
             self.cosine = nn.CosineSimilarity(dim=dim)
         self.attn = attn
         self.dim = dim
@@ -60,11 +60,11 @@ class BasicAttention(nn.Module):
         bsz = xs.size(0)
         y_len = ys.size(1)
         x_len = xs.size(1)
-        if self.attn == 'cosine':
+        if self.attn == "cosine":
             l1 = self.cosine(xs, ys).unsqueeze(self.dim - 1)
         else:
             l1 = torch.bmm(xs, ys.transpose(1, 2))
-            if self.attn == 'sqrt':
+            if self.attn == "sqrt":
                 d_k = ys.size(-1)
                 l1 = l1 / math.sqrt(d_k)
         if mask_ys is not None:
@@ -104,8 +104,8 @@ class MultiHeadAttention(nn.Module):
             """
             return val if val is not None else default
 
-        n_heads = _default(n_heads, opt['n_heads'])
-        dim = _default(dim, opt['embedding_size'])
+        n_heads = _default(n_heads, opt["n_heads"])
+        dim = _default(dim, opt["embedding_size"])
 
         self.n_heads = n_heads
         self.dim = dim
@@ -160,8 +160,8 @@ class MultiHeadAttention(nn.Module):
         batch_size, query_len, dim = query.size()
         assert (
             dim == self.dim
-        ), 'Dimensions do not match: {} query vs {} configured'.format(dim, self.dim)
-        assert mask is not None, 'Mask is None, please specify a mask'
+        ), "Dimensions do not match: {} query vs {} configured".format(dim, self.dim)
+        assert mask is not None, "Mask is None, please specify a mask"
         n_heads = self.n_heads
         dim_per_head = dim // n_heads
         scale = math.sqrt(dim_per_head)
@@ -200,8 +200,8 @@ class MultiHeadAttention(nn.Module):
         # these three states are unchanging, so just re-use the cached states.)
         if incr_state is None:
             incr_state = {}
-        if 'prev_key' in incr_state:
-            prev_key = incr_state['prev_key'].view(
+        if "prev_key" in incr_state:
+            prev_key = incr_state["prev_key"].view(
                 batch_size * n_heads, -1, dim_per_head
             )
             if static_kv:
@@ -210,8 +210,8 @@ class MultiHeadAttention(nn.Module):
                 k = torch.cat([prev_key, prepare_head(self.k_lin(key))], dim=1)
         else:
             k = prepare_head(self.k_lin(key))
-        if 'prev_value' in incr_state:
-            prev_value = incr_state['prev_value'].view(
+        if "prev_value" in incr_state:
+            prev_value = incr_state["prev_value"].view(
                 batch_size * n_heads, -1, dim_per_head
             )
             if static_kv:
@@ -220,20 +220,20 @@ class MultiHeadAttention(nn.Module):
                 v = torch.cat([prev_value, prepare_head(self.v_lin(value))], dim=1)
         else:
             v = prepare_head(self.v_lin(value))
-        if 'prev_mask' in incr_state:
+        if "prev_mask" in incr_state:
             if static_kv:
-                mask = incr_state['prev_mask']
+                mask = incr_state["prev_mask"]
             else:
-                mask = torch.cat([incr_state['prev_mask'], mask], dim=2)
+                mask = torch.cat([incr_state["prev_mask"], mask], dim=2)
                 # Prepend along the key_len dimension (analogous to
                 # incr_state['prev_key'])
 
         # Save new incremental states. We reshape to allow for reordering along batch
         # dimension.
         new_incr_state = {
-            'prev_key': k.view(batch_size, n_heads, -1, dim_per_head),
-            'prev_value': v.view(batch_size, n_heads, -1, dim_per_head),
-            'prev_mask': mask,
+            "prev_key": k.view(batch_size, n_heads, -1, dim_per_head),
+            "prev_value": v.view(batch_size, n_heads, -1, dim_per_head),
+            "prev_mask": mask,
         }
 
         full_key_len = k.size(1)

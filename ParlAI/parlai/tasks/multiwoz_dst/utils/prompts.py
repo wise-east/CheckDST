@@ -3,7 +3,7 @@ import random
 
 def format_context_and_label(context, label, seed=None):
     """
-    Transform task to include an instruction with custom labels that are all in natural text 
+    Transform task to include an instruction with custom labels that are all in natural text
     Seed is for getting back the same templates if needed. Useful for invariant metrics
     """
 

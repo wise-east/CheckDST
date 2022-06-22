@@ -8,16 +8,16 @@ from parlai.utils.testing import AutoTeacherTest  # noqa: F401
 
 
 class TestMscTeacher(AutoTeacherTest):
-    task = 'msc'
+    task = "msc"
 
 
 class TestMscAllTeacher(AutoTeacherTest):
-    task = 'msc:include_last_session=True'
+    task = "msc:include_last_session=True"
 
 
 class TestPersonaSummaryTeacher(AutoTeacherTest):
-    task = 'msc:PersonaSummaryTeacher'
+    task = "msc:PersonaSummaryTeacher"
 
 
 class TestPersonaSummaryAllTeacher(AutoTeacherTest):
-    task = 'msc:PersonaSummaryTeacher:include_last_session=True'
+    task = "msc:PersonaSummaryTeacher:include_last_session=True"

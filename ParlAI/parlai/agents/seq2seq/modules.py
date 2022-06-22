@@ -41,17 +41,17 @@ def opt_to_kwargs(opt):
     """
     kwargs = {}
     for k in [
-        'numlayers',
-        'dropout',
-        'bidirectional',
-        'rnn_class',
-        'lookuptable',
-        'decoder',
-        'numsoftmax',
-        'attention',
-        'attention_length',
-        'attention_time',
-        'input_dropout',
+        "numlayers",
+        "dropout",
+        "bidirectional",
+        "rnn_class",
+        "lookuptable",
+        "decoder",
+        "numsoftmax",
+        "attention",
+        "attention_length",
+        "attention_time",
+        "input_dropout",
     ]:
         if k in opt:
             kwargs[k] = opt[k]
@@ -63,7 +63,7 @@ class Seq2seq(TorchGeneratorModel):
     Sequence to sequence parent module.
     """
 
-    RNN_OPTS = {'rnn': nn.RNN, 'gru': nn.GRU, 'lstm': nn.LSTM}
+    RNN_OPTS = {"rnn": nn.RNN, "gru": nn.GRU, "lstm": nn.LSTM}
 
     def __init__(
         self,
@@ -73,13 +73,13 @@ class Seq2seq(TorchGeneratorModel):
         numlayers=2,
         dropout=0,
         bidirectional=False,
-        rnn_class='lstm',
-        lookuptable='unique',
-        decoder='same',
+        rnn_class="lstm",
+        lookuptable="unique",
+        decoder="same",
         numsoftmax=1,
-        attention='none',
+        attention="none",
         attention_length=48,
-        attention_time='post',
+        attention_time="post",
         padding_idx=0,
         start_idx=1,
         end_idx=2,
@@ -119,10 +119,10 @@ class Seq2seq(TorchGeneratorModel):
 
         shared_lt = (
             self.decoder.lt  # share embeddings between rnns
-            if lookuptable in ('enc_dec', 'all')
+            if lookuptable in ("enc_dec", "all")
             else None
         )
-        shared_rnn = self.decoder.rnn if decoder == 'shared' else None
+        shared_rnn = self.decoder.rnn if decoder == "shared" else None
         self.encoder = RNNEncoder(
             num_features,
             embeddingsize,
@@ -140,7 +140,7 @@ class Seq2seq(TorchGeneratorModel):
 
         shared_weight = (
             self.decoder.lt  # use embeddings for projection
-            if lookuptable in ('dec_out', 'all')
+            if lookuptable in ("dec_out", "all")
             else None
         )
         self.output = OutputLayer(
@@ -179,7 +179,7 @@ class Seq2seq(TorchGeneratorModel):
             cell = cell.index_select(1, indices)
             hidden = (hid, cell)
 
-        if self.attn_type != 'none':
+        if self.attn_type != "none":
             enc_out = enc_out.index_select(0, indices)
             attn_mask = attn_mask.index_select(0, indices)
 
@@ -240,7 +240,7 @@ class RNNEncoder(nn.Module):
         embeddingsize,
         hiddensize,
         padding_idx=0,
-        rnn_class='lstm',
+        rnn_class="lstm",
         numlayers=2,
         dropout=0.1,
         bidirectional=False,
@@ -261,7 +261,7 @@ class RNNEncoder(nn.Module):
         self.hsz = hiddensize
 
         if input_dropout > 0 and unknown_idx is None:
-            raise RuntimeError('input_dropout > 0 but unknown_idx not set')
+            raise RuntimeError("input_dropout > 0 but unknown_idx not set")
         self.input_dropout = UnknownDropout(unknown_idx, input_dropout)
 
         if shared_lt is None:
@@ -281,7 +281,7 @@ class RNNEncoder(nn.Module):
                 bidirectional=bidirectional,
             )
         elif bidirectional:
-            raise RuntimeError('Cannot share decoder with bidir encoder.')
+            raise RuntimeError("Cannot share decoder with bidir encoder.")
         else:
             self.rnn = shared_rnn
 
@@ -345,12 +345,12 @@ class RNNDecoder(nn.Module):
         embeddingsize,
         hiddensize,
         padding_idx=0,
-        rnn_class='lstm',
+        rnn_class="lstm",
         numlayers=2,
         dropout=0.1,
         bidir_input=False,
-        attn_type='none',
-        attn_time='pre',
+        attn_type="none",
+        attn_time="pre",
         attn_length=-1,
         sparse=False,
     ):
@@ -428,7 +428,7 @@ class RNNDecoder(nn.Module):
         seqlen = xs.size(1)
         xes = self.dropout(self.lt(xs))
 
-        if self.attn_time == 'pre':
+        if self.attn_time == "pre":
             # modify input vectors with attention
             # attention module requires we do this one step at a time
             new_xes = []
@@ -437,7 +437,7 @@ class RNNDecoder(nn.Module):
                 new_xes.append(nx)
             xes = torch.cat(new_xes, 1).to(xes.device)
 
-        if self.attn_time != 'post':
+        if self.attn_time != "post":
             # no attn, we can just trust the rnn to run through
             output, new_hidden = self.rnn(xes, hidden)
         else:
@@ -587,7 +587,7 @@ class AttentionLayer(nn.Module):
         embeddingsize,
         bidirectional=False,
         attn_length=-1,
-        attn_time='pre',
+        attn_time="pre",
     ):
         """
         Initialize attention layer.
@@ -595,33 +595,33 @@ class AttentionLayer(nn.Module):
         super().__init__()
         self.attention = attn_type
 
-        if self.attention != 'none':
+        if self.attention != "none":
             hsz = hiddensize
             hszXdirs = hsz * (2 if bidirectional else 1)
-            if attn_time == 'pre':
+            if attn_time == "pre":
                 # attention happens on the input embeddings
                 input_dim = embeddingsize
-            elif attn_time == 'post':
+            elif attn_time == "post":
                 # attention happens on the output of the rnn
                 input_dim = hsz
             else:
-                raise RuntimeError('unsupported attention time')
+                raise RuntimeError("unsupported attention time")
 
             # linear layer for combining applied attention weights with input
             self.attn_combine = nn.Linear(hszXdirs + input_dim, input_dim, bias=False)
 
-            if self.attention == 'local':
+            if self.attention == "local":
                 # local attention over fixed set of output states
                 if attn_length < 0:
-                    raise RuntimeError('Set attention length to > 0.')
+                    raise RuntimeError("Set attention length to > 0.")
                 self.max_length = attn_length
                 # combines input and previous hidden output layer
                 self.attn = nn.Linear(hsz + input_dim, attn_length, bias=False)
                 # combines attention weights with encoder outputs
-            elif self.attention == 'concat':
+            elif self.attention == "concat":
                 self.attn = nn.Linear(hsz + hszXdirs, hsz, bias=False)
                 self.attn_v = nn.Linear(hsz, 1, bias=False)
-            elif self.attention == 'general':
+            elif self.attention == "general":
                 # equivalent to dot if attn is identity
                 self.attn = nn.Linear(hsz, hszXdirs, bias=False)
 
@@ -641,7 +641,7 @@ class AttentionLayer(nn.Module):
                   attn_weights are the weights given to each state in the
                   encoder outputs.
         """
-        if self.attention == 'none':
+        if self.attention == "none":
             # do nothing, no attention
             return xes, None
 
@@ -654,7 +654,7 @@ class AttentionLayer(nn.Module):
         bsz, seqlen, hszXnumdir = enc_out.size()
         numlayersXnumdir = last_hidden.size(1)
 
-        if self.attention == 'local':
+        if self.attention == "local":
             # local attention weights aren't based on encoder states
             h_merged = torch.cat((xes.squeeze(1), last_hidden), 1)
             attn_weights = F.softmax(self.attn(h_merged), dim=1)
@@ -668,21 +668,21 @@ class AttentionLayer(nn.Module):
                 attn_weights = attn_weights.narrow(1, 0, seqlen)
         else:
             hid = last_hidden.unsqueeze(1)
-            if self.attention == 'concat':
+            if self.attention == "concat":
                 # concat hidden state and encoder outputs
                 hid = hid.expand(bsz, seqlen, numlayersXnumdir)
                 h_merged = torch.cat((enc_out, hid), 2)
                 # then do linear combination of them with activation
                 active = F.tanh(self.attn(h_merged))
                 attn_w_premask = self.attn_v(active).squeeze(2)
-            elif self.attention == 'dot':
+            elif self.attention == "dot":
                 # dot product between hidden and encoder outputs
                 if numlayersXnumdir != hszXnumdir:
                     # enc_out has two directions, so double hid
                     hid = torch.cat([hid, hid], 2)
                 enc_t = enc_out.transpose(1, 2)
                 attn_w_premask = torch.bmm(hid, enc_t).squeeze(1)
-            elif self.attention == 'general':
+            elif self.attention == "general":
                 # before doing dot product, transform hidden state with linear
                 # same as dot if linear is identity
                 hid = self.attn(hid)

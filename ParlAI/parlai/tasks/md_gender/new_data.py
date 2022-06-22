@@ -16,7 +16,7 @@ import json
 import os
 import random
 
-NEW_DATAFILE = 'md_gender/data_to_release/new_data/data.jsonl'
+NEW_DATAFILE = "md_gender/data_to_release/new_data/data.jsonl"
 
 
 class MdGenderTeacher(FixedDialogTeacher):
@@ -30,37 +30,37 @@ class MdGenderTeacher(FixedDialogTeacher):
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
         parser = gend_utils.add_common_args(parser)
-        agent = parser.add_argument_group('New data gender')
+        agent = parser.add_argument_group("New data gender")
         agent.add_argument(
-            '--labels-to-use',
+            "--labels-to-use",
             type=str,
-            default='all',
-            choices=['all', 'self', 'partner', 'about'],
-            help='Which labels to use for this teacher',
+            default="all",
+            choices=["all", "self", "partner", "about"],
+            help="Which labels to use for this teacher",
         )
         return parser
 
     def __init__(self, opt, shared=None):
         self.opt = opt
-        self.labels_to_use = opt['labels_to_use']
-        self.is_train = 'train' in opt['datatype'] and 'evalmode' not in opt['datatype']
-        self.is_valid = 'valid' in opt['datatype']
+        self.labels_to_use = opt["labels_to_use"]
+        self.is_train = "train" in opt["datatype"] and "evalmode" not in opt["datatype"]
+        self.is_valid = "valid" in opt["datatype"]
         self.label_candidates = gend_utils.ALL_CANDS
 
         if shared is None:
             # set map
             self.data = self._setup_data(opt)
-            if (self.is_train and opt['balance']) or (
-                self.is_valid and opt['balance_valid']
+            if (self.is_train and opt["balance"]) or (
+                self.is_valid and opt["balance_valid"]
             ):
                 to_exclude = (
-                    ['ABOUT:non-binary'],
+                    ["ABOUT:non-binary"],
                 )  # not enough non-binary examples to balance
                 self.data = gend_utils.balance_data(
-                    self.data, key='labels', exclude_labels=to_exclude
+                    self.data, key="labels", exclude_labels=to_exclude
                 )
         else:
-            self.data = shared['data']
+            self.data = shared["data"]
         super().__init__(opt, shared)
         self.reset()
 
@@ -69,7 +69,7 @@ class MdGenderTeacher(FixedDialogTeacher):
         Get the test/train/valid split.
         """
         build(opt)
-        with open(os.path.join(opt['datapath'], NEW_DATAFILE), 'r') as f:
+        with open(os.path.join(opt["datapath"], NEW_DATAFILE), "r") as f:
             ex_jsons = f.read().splitlines()
 
         convos = [json.loads(ex) for ex in ex_jsons]
@@ -82,23 +82,23 @@ class MdGenderTeacher(FixedDialogTeacher):
         data = []
         convos = self._get_convos(opt)
         for convo in convos:
-            class_type = convo['class_type']
-            if self.labels_to_use in ['all', class_type]:
+            class_type = convo["class_type"]
+            if self.labels_to_use in ["all", class_type]:
                 data.append(convo)
 
         if self.is_train:
             random.shuffle(data)
 
-        gend_utils.get_data_stats(data, key='labels')
+        gend_utils.get_data_stats(data, key="labels")
 
         return data
 
     def get(self, episode_idx, entry_idx=0):
         ex = self.data[episode_idx]
-        class_type = ex['class_type']
-        ex['label_candidates'] = gend_utils.ALL_CANDS[class_type]
-        if 'unknown' in ex['labels'][0]:
-            ex['labels'] = gend_utils.UNKNOWN_LABELS[class_type]
+        class_type = ex["class_type"]
+        ex["label_candidates"] = gend_utils.ALL_CANDS[class_type]
+        if "unknown" in ex["labels"][0]:
+            ex["labels"] = gend_utils.UNKNOWN_LABELS[class_type]
         return Message(ex)
 
     def num_examples(self):
@@ -109,5 +109,5 @@ class MdGenderTeacher(FixedDialogTeacher):
 
     def share(self):
         shared = super().share()
-        shared['data'] = self.data
+        shared["data"] = self.data
         return shared

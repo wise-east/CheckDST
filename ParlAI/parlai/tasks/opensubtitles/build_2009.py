@@ -14,41 +14,41 @@ from parlai.utils.io import PathManager
 
 RESOURCES = [
     DownloadableFile(
-        'http://opus.lingfil.uu.se/download.php?f=OpenSubtitles/en.tar.gz',
-        'OpenSubtitles.tar.gz',
-        'aef6d57db36c221b8cff1cf2356309874c27ef6a36bb8ca714509b37d0db29bc',
+        "http://opus.lingfil.uu.se/download.php?f=OpenSubtitles/en.tar.gz",
+        "OpenSubtitles.tar.gz",
+        "aef6d57db36c221b8cff1cf2356309874c27ef6a36bb8ca714509b37d0db29bc",
     )
 ]
 
 
 def _regularize(sent):
-    sent = sent.replace('i&gt;', '').replace('&lt;', '').replace('&gt;', '')
-    sent = re.sub(r'x[0-9|a-f][0-9|a-f]', ' ', sent)
-    sent = sent.replace('\\', '').replace('-', '')
-    sent = ' '.join(re.findall(r"[\w']+|[.,!?:;]", sent))
-    sent = sent.replace('. .', '...')
-    sent = ' '.join(sent.split())
+    sent = sent.replace("i&gt;", "").replace("&lt;", "").replace("&gt;", "")
+    sent = re.sub(r"x[0-9|a-f][0-9|a-f]", " ", sent)
+    sent = sent.replace("\\", "").replace("-", "")
+    sent = " ".join(re.findall(r"[\w']+|[.,!?:;]", sent))
+    sent = sent.replace(". .", "...")
+    sent = " ".join(sent.split())
     return sent
 
 
 def create_fb_format(inpath, outpath):
-    print('[building fbformat]')
+    print("[building fbformat]")
     with PathManager.open(
-        os.path.join(outpath, 'train.txt'), 'w'
+        os.path.join(outpath, "train.txt"), "w"
     ) as ftrain, PathManager.open(
-        os.path.join(outpath, 'valid.txt'), 'w'
+        os.path.join(outpath, "valid.txt"), "w"
     ) as fvalid, PathManager.open(
-        os.path.join(outpath, 'test.txt'), 'w'
+        os.path.join(outpath, "test.txt"), "w"
     ) as ftest:
 
         conv_id = 0
         # find all the files.
         for root, _subfolder, files in os.walk(inpath):
             for f in files:
-                if f.endswith('.gz'):
+                if f.endswith(".gz"):
                     dialog = []
                     conv_id = conv_id + 1
-                    with gzip.open(os.path.join(root, f), 'r') as f1:
+                    with gzip.open(os.path.join(root, f), "r") as f1:
                         words = []
                         line_id = 1
                         turn_id = 0
@@ -57,16 +57,16 @@ def create_fb_format(inpath, outpath):
                             if line.find('<s id="') != -1:
                                 # new sentence
                                 if len(words) > 0:
-                                    curr_words = _regularize(''.join(words))
+                                    curr_words = _regularize("".join(words))
                                     if len(curr_words) > 0:
                                         if (turn_id % 2) == 0:
                                             dialog.append(str(line_id))
-                                            dialog.append(' ')
+                                            dialog.append(" ")
                                             dialog.append(curr_words)
                                         else:
-                                            dialog.append('\t')
+                                            dialog.append("\t")
                                             dialog.append(curr_words)
-                                            dialog.append('\n')
+                                            dialog.append("\n")
                                             line_id += 1
                                         turn_id += +1
                                 words.clear()
@@ -74,24 +74,24 @@ def create_fb_format(inpath, outpath):
                                 i1 = line.find('<w id="')
                                 if i1 >= 0:
                                     line = line[i1:]
-                                    word = line[line.find('>') + 1 : line.find('</w')]
-                                    words.append(' ')
-                                    words.append(word.replace('\t', ' '))
+                                    word = line[line.find(">") + 1 : line.find("</w")]
+                                    words.append(" ")
+                                    words.append(word.replace("\t", " "))
                     handle = ftrain
                     if (conv_id % 10) == 0:
                         handle = ftest
                     if (conv_id % 10) == 1:
                         handle = fvalid
-                    dialog.append('\n')
-                    handle.write(''.join(dialog))
+                    dialog.append("\n")
+                    handle.write("".join(dialog))
 
 
 def build(datapath):
-    dpath = os.path.join(datapath, 'OpenSubtitles')
-    version = '2'
+    dpath = os.path.join(datapath, "OpenSubtitles")
+    version = "2"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)
@@ -101,7 +101,7 @@ def build(datapath):
         for downloadable_file in RESOURCES:
             downloadable_file.download_file(dpath)
 
-        create_fb_format(os.path.join(dpath, 'OpenSubtitles', 'en'), dpath)
+        create_fb_format(os.path.join(dpath, "OpenSubtitles", "en"), dpath)
 
         # Mark the data as built.
         build_data.mark_done(dpath, version_string=version)

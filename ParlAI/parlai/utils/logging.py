@@ -29,27 +29,27 @@ logging.addLevelName(SPAM, "SPAM")
 logging.addLevelName(REPORT, "REPORT")
 logging.addLevelName(SUCCESS, "SUCCESS")
 
-COLORED_FORMAT = '%(asctime)s | %(message)s'
-CONSOLE_FORMAT = '%(asctime)s %(levelname).4s | %(message)s'
-CONSOLE_DATE_FORMAT = '%H:%M:%S'
-LOGFILE_FORMAT = '%(asctime)s %(levelname)-8s | %(message)s'
+COLORED_FORMAT = "%(asctime)s | %(message)s"
+CONSOLE_FORMAT = "%(asctime)s %(levelname).4s | %(message)s"
+CONSOLE_DATE_FORMAT = "%H:%M:%S"
+LOGFILE_FORMAT = "%(asctime)s %(levelname)-8s | %(message)s"
 LOGFILE_DATE_FORMAT = None
 
 COLORED_LEVEL_STYLES = {
-    'spam': {'color': 'white', 'faint': True},
-    'debug': {'color': 'green', 'faint': True},
-    'verbose': {'color': 'blue'},
-    'error': {'color': 'red'},
-    'info': {},
-    'report': {'bold': True},
-    'success': {'bold': True, 'color': 'green'},
-    'warning': {'color': 'yellow'},
-    'critical': {'bold': True, 'color': 'red'},
+    "spam": {"color": "white", "faint": True},
+    "debug": {"color": "green", "faint": True},
+    "verbose": {"color": "blue"},
+    "error": {"color": "red"},
+    "info": {},
+    "report": {"bold": True},
+    "success": {"bold": True, "color": "green"},
+    "warning": {"color": "yellow"},
+    "critical": {"bold": True, "color": "red"},
 }
 
 
 def _is_interactive():
-    if os.environ.get('PARLAI_FORCE_COLOR'):
+    if os.environ.get("PARLAI_FORCE_COLOR"):
         return True
     try:
         __IPYTHON__
@@ -80,7 +80,7 @@ class ParlaiLogger(logging.Logger):
         super().addHandler(self.streamHandler)
 
     def _build_formatter(self):
-        prefix_format = f'{self.prefix} ' if self.prefix else ''
+        prefix_format = f"{self.prefix} " if self.prefix else ""
         if COLORED_LOGS and self.interactive:
             return coloredlogs.ColoredFormatter(
                 prefix_format + COLORED_FORMAT,
@@ -190,5 +190,5 @@ def warning(*args, **kwargs):
 
 def get_all_levels():
     levels = set(logging._nameToLevel.keys())
-    levels.remove('WARNING')
+    levels.remove("WARNING")
     return [l.lower() for l in levels]

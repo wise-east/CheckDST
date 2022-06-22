@@ -30,22 +30,22 @@ from parlai.core.script import ParlaiScript, register_script
 
 def setup_args(parser=None):
     if parser is None:
-        parser = ParlaiParser(True, False, 'Load/extract image features')
+        parser = ParlaiParser(True, False, "Load/extract image features")
     return parser
 
 
 def extract_feats(opt):
     if isinstance(opt, ParlaiParser):
-        logging.error('extract_feats should be passed opt not parser')
+        logging.error("extract_feats should be passed opt not parser")
         opt = opt.parse_args()
     # Get command line arguments
     opt = copy.deepcopy(opt)
-    dt = opt['datatype'].split(':')[0] + ':ordered'
-    opt['datatype'] = dt
-    opt['no_cuda'] = False
-    opt['gpu'] = 0
-    opt['num_epochs'] = 1
-    opt['num_load_threads'] = 20
+    dt = opt["datatype"].split(":")[0] + ":ordered"
+    opt["datatype"] = dt
+    opt["no_cuda"] = False
+    opt["gpu"] = 0
+    opt["num_epochs"] = 1
+    opt["num_load_threads"] = 20
     opt.log()
     logging.info("Loading Images")
     # create repeat label agent and assign it to the specified task
@@ -53,7 +53,7 @@ def extract_feats(opt):
     world = create_task(opt, agent)
 
     total_exs = world.num_examples()
-    pbar = tqdm.tqdm(unit='ex', total=total_exs)
+    pbar = tqdm.tqdm(unit="ex", total=total_exs)
     while not world.epoch_done():
         world.parley()
         pbar.update()
@@ -62,7 +62,7 @@ def extract_feats(opt):
     logging.info("Finished extracting images")
 
 
-@register_script('extract_image_feature', hidden=True)
+@register_script("extract_image_feature", hidden=True)
 class ExtractImgFeatures(ParlaiScript):
     @classmethod
     def setup_args(cls):
@@ -72,5 +72,5 @@ class ExtractImgFeatures(ParlaiScript):
         return extract_feats(self.opt)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     ExtractImgFeatures.main()

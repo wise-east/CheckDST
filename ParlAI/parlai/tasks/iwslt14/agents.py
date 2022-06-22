@@ -13,27 +13,27 @@ import os
 
 
 def _format(line):
-    return line.strip().replace('##AT##-##AT##', '__AT__')
+    return line.strip().replace("##AT##-##AT##", "__AT__")
 
 
 def _path(opt, source, target):
     build(opt)
-    dt = opt['datatype'].split(':')[0]
-    base = os.path.join(opt['datapath'], 'iwslt14', dt + '.{}')
+    dt = opt["datatype"].split(":")[0]
+    base = os.path.join(opt["datapath"], "iwslt14", dt + ".{}")
     return base.format(source), base.format(target)
 
 
 class DefaultTeacher(DialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        task = opt.get('task', 'iwslt14:de_en')
-        if ':' not in task:
+        task = opt.get("task", "iwslt14:de_en")
+        if ":" not in task:
             # default to de_en
-            task_name = 'de_en'
+            task_name = "de_en"
         else:
-            task_name = task.split(':')[1]
-        source, target = task_name.split('_')
-        opt['datafile'] = _path(opt, source, target)
+            task_name = task.split(":")[1]
+        source, target = task_name.split("_")
+        opt["datafile"] = _path(opt, source, target)
 
         super().__init__(opt, shared)
 
@@ -48,11 +48,11 @@ class DefaultTeacher(DialogTeacher):
 
 class EnDeTeacher(DefaultTeacher):
     def __init__(self, opt, shared=None):
-        opt['task'] = 'iwslt14:en_de'
+        opt["task"] = "iwslt14:en_de"
         super().__init__(opt, shared)
 
 
 class DeEnTeacher(DefaultTeacher):
     def __init__(self, opt, shared=None):
-        opt['task'] = 'iwslt14:de_en'
+        opt["task"] = "iwslt14:de_en"
         super().__init__(opt, shared)

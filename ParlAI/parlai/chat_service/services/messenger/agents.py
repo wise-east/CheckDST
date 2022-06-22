@@ -17,39 +17,39 @@ class MessengerAgent(ChatServiceAgent):
     def __init__(self, opt, manager, task_id, receiver_id, page_id):
         super().__init__(opt, manager, receiver_id, task_id)
         self.active = True
-        self.disp_id = 'NewUser'
+        self.disp_id = "NewUser"
         self.message_partners = []
         self.page_id = page_id
-        self.data['allow_images'] = opt.get('allow_images', False)
+        self.data["allow_images"] = opt.get("allow_images", False)
 
     def observe(self, act):
         """
         Send an agent a message through the mturk manager.
         """
-        if 'payload' in act:
+        if "payload" in act:
             resp = self.manager.observe_payload(
                 self.id,
-                act['payload'],
-                act.get('quick_replies', None),
-                act.get('persona_id', None),
+                act["payload"],
+                act.get("quick_replies", None),
+                act.get("persona_id", None),
             )
         else:
-            if act['id'] != '':
-                msg = '{}: {}'.format(act['id'], act['text'])
+            if act["id"] != "":
+                msg = "{}: {}".format(act["id"], act["text"])
             else:
-                msg = act['text']
+                msg = act["text"]
             resp = self.manager.observe_message(
                 self.id,
                 msg,
-                act.get('quick_replies', None),
-                act.get('persona_id', None),
+                act.get("quick_replies", None),
+                act.get("persona_id", None),
             )
         try:
-            mid = resp[0]['message_id']
+            mid = resp[0]["message_id"]
             if mid not in self.observed_packets:
                 self.observed_packets[mid] = act
         except Exception:
-            print('{} could not be extracted to an observed message'.format(resp))
+            print("{} could not be extracted to an observed message".format(resp))
 
     def observe_typing_on(self, persona_id=None):
         """
@@ -64,9 +64,9 @@ class MessengerAgent(ChatServiceAgent):
         The API changes frequently so could be an image for a number of reasons.
         """
         img_attempt = False
-        if 'attachments' in message:
-            img_attempt = message['attachments'][0]['type'] == 'image'
-        elif 'image' in message:
+        if "attachments" in message:
+            img_attempt = message["attachments"][0]["type"] == "image"
+        elif "image" in message:
             img_attempt = True
         return img_attempt
 
@@ -74,32 +74,32 @@ class MessengerAgent(ChatServiceAgent):
         """
         Put data into the message queue if it hasn't already been seen.
         """
-        mid = messenger_data['message']['mid']
-        seq = messenger_data['message'].get('seq', None)
-        message = messenger_data['message']
-        if 'text' not in message:
-            print('Msg: {} could not be extracted to text format'.format(message))
-        text = message.get('text', None)
+        mid = messenger_data["message"]["mid"]
+        seq = messenger_data["message"].get("seq", None)
+        message = messenger_data["message"]
+        if "text" not in message:
+            print("Msg: {} could not be extracted to text format".format(message))
+        text = message.get("text", None)
         img_attempt = self._is_image_attempt(message)
         if mid not in self.acted_packets:
-            self.acted_packets[mid] = {'mid': mid, 'seq': seq, 'text': text}
+            self.acted_packets[mid] = {"mid": mid, "seq": seq, "text": text}
             # the fields 'report_sender' and 'sticker_sender' below are
             # internal features
             action = {
-                'episode_done': False,
-                'text': text,
-                'id': self.disp_id,
-                'report_sender': message.get('report_sender', None),
-                'sticker_sender': messenger_data.get('sticker_sender', None),
-                'img_attempt': img_attempt,
+                "episode_done": False,
+                "text": text,
+                "id": self.disp_id,
+                "report_sender": message.get("report_sender", None),
+                "sticker_sender": messenger_data.get("sticker_sender", None),
+                "img_attempt": img_attempt,
             }
-            if img_attempt and self.data.get('allow_images', False):
-                action['image_url'] = message.get('image_url')
-                action['attachment_url'] = message.get('attachment_url')
-                if action['image_url'] is None:
-                    payload = message['attachments'][0].get('payload', {})
-                    action['image_url'] = payload.get('url')
-                action['image'] = action['image_url'] or action['attachment_url']
+            if img_attempt and self.data.get("allow_images", False):
+                action["image_url"] = message.get("image_url")
+                action["attachment_url"] = message.get("attachment_url")
+                if action["image_url"] is None:
+                    payload = message["attachments"][0].get("payload", {})
+                    action["image_url"] = payload.get("url")
+                action["image"] = action["image_url"] or action["attachment_url"]
             self.msg_queue.put(action)
 
     def mark_inactive(self):
@@ -126,19 +126,19 @@ class MessengerAgent(ChatServiceAgent):
         # Get a new message, if it's not None reset the timeout
         msg = self.get_new_act_message()
         if msg is not None:
-            if msg.get('img_attempt') and not self.data.get('allow_images', False):
+            if msg.get("img_attempt") and not self.data.get("allow_images", False):
                 # Let agent know that they cannot send images if they
                 # attempted to send one
                 msg = None
                 act = {
-                    'id': 'SYSTEM',
-                    'text': 'Only text messages are supported at this time. '
-                    'Please try with a text-only message.',
-                    'episode_done': True,
+                    "id": "SYSTEM",
+                    "text": "Only text messages are supported at this time. "
+                    "Please try with a text-only message.",
+                    "episode_done": True,
                 }
                 self.observe(act)
-            elif not msg.get('text') and not (
-                msg.get('image_url') or msg.get('attachment_url')
+            elif not msg.get("text") and not (
+                msg.get("image_url") or msg.get("attachment_url")
             ):
                 # Do not allow agent to send empty strings
                 msg = None

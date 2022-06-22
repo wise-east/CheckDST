@@ -14,21 +14,21 @@ import os
 def _path(opt, filtered):
     # Build the data if it doesn't exist.
     build(opt)
-    dt = opt['datatype'].split(':')[0]
-    return os.path.join(opt['datapath'], 'MCTest', dt + filtered + '.txt')
+    dt = opt["datatype"].split(":")[0]
+    return os.path.join(opt["datapath"], "MCTest", dt + filtered + ".txt")
 
 
 class Task160Teacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        opt['datafile'] = _path(opt, '160')
+        opt["datafile"] = _path(opt, "160")
         super().__init__(opt, shared)
 
 
 class Task500Teacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        opt['datafile'] = _path(opt, '500')
+        opt["datafile"] = _path(opt, "500")
         super().__init__(opt, shared)
 
 

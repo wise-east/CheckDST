@@ -12,12 +12,12 @@ import os.path
 
 
 def download(datapath):
-    ddir = os.path.join(get_model_dir(datapath), 'hallucination')
-    model_type = 'wiki_index_compressed'
-    version = 'v1.0'
+    ddir = os.path.join(get_model_dir(datapath), "hallucination")
+    model_type = "wiki_index_compressed"
+    version = "v1.0"
     if not built(os.path.join(ddir, model_type), version):
-        opt = {'datapath': datapath, 'model_type': model_type}
-        fnames = ['compressed_pq.tgz']
+        opt = {"datapath": datapath, "model_type": model_type}
+        fnames = ["compressed_pq.tgz"]
         download_models(
-            opt, fnames, 'hallucination', version=version, use_model_type=True
+            opt, fnames, "hallucination", version=version, use_model_type=True
         )

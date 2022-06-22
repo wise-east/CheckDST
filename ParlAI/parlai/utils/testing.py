@@ -75,27 +75,27 @@ def is_this_circleci():
     """
     Return if we are currently running in CircleCI.
     """
-    return bool(os.environ.get('CIRCLECI'))
+    return bool(os.environ.get("CIRCLECI"))
 
 
-def skipUnlessTorch(testfn, reason='pytorch is not installed'):
+def skipUnlessTorch(testfn, reason="pytorch is not installed"):
     """
     Decorate a test to skip if torch is not installed.
     """
     return unittest.skipUnless(TORCH_AVAILABLE, reason)(testfn)
 
 
-def skipUnlessTorch17(testfn, reason='Test requires pytorch 1.7+'):
+def skipUnlessTorch17(testfn, reason="Test requires pytorch 1.7+"):
     if not TORCH_AVAILABLE:
         skip = True
     else:
         from packaging import version
 
-        skip = version.parse(torch.__version__) < version.parse('1.7.0')
+        skip = version.parse(torch.__version__) < version.parse("1.7.0")
     return unittest.skipIf(skip, reason)(testfn)
 
 
-def skipIfGPU(testfn, reason='Test is CPU-only'):
+def skipIfGPU(testfn, reason="Test is CPU-only"):
     """
     Decorate a test to skip if a GPU is available.
 
@@ -104,28 +104,28 @@ def skipIfGPU(testfn, reason='Test is CPU-only'):
     return unittest.skipIf(GPU_AVAILABLE, reason)(testfn)
 
 
-def skipUnlessGPU(testfn, reason='Test requires a GPU'):
+def skipUnlessGPU(testfn, reason="Test requires a GPU"):
     """
     Decorate a test to skip if no GPU is available.
     """
     return unittest.skipUnless(GPU_AVAILABLE, reason)(testfn)
 
 
-def skipUnlessBPE(testfn, reason='Test requires subword NMT'):
+def skipUnlessBPE(testfn, reason="Test requires subword NMT"):
     """
     Decorate a test to skip if BPE is not installed.
     """
     return unittest.skipUnless(BPE_INSTALLED, reason)(testfn)
 
 
-def skipIfCircleCI(testfn, reason='Test disabled in CircleCI'):
+def skipIfCircleCI(testfn, reason="Test disabled in CircleCI"):
     """
     Decorate a test to skip if running on CircleCI.
     """
     return unittest.skipIf(is_this_circleci(), reason)(testfn)
 
 
-def skipUnlessVision(testfn, reason='torchvision not installed'):
+def skipUnlessVision(testfn, reason="torchvision not installed"):
     """
     Decorate a test to skip unless torchvision is installed.
     """
@@ -133,7 +133,7 @@ def skipUnlessVision(testfn, reason='torchvision not installed'):
 
 
 def skipUnlessDetectron(
-    testfn, reason='maskrcnn_benchmark and/or opencv not installed'
+    testfn, reason="maskrcnn_benchmark and/or opencv not installed"
 ):
     """
     Decorate a test to skip unless maskrcnn_benchmark and opencv are installed.
@@ -141,7 +141,7 @@ def skipUnlessDetectron(
     return unittest.skipUnless(DETECTRON_AVAILABLE, reason)(testfn)
 
 
-def skipUnlessFairseq(testfn, reason='fairseq not installed'):
+def skipUnlessFairseq(testfn, reason="fairseq not installed"):
     """
     Decorate a test to skip unless fairseq is installed.
     """
@@ -193,7 +193,7 @@ def git_ls_files(root=None, skip_nonexisting=True):
     """
     List all files tracked by git.
     """
-    filenames = git_.ls_files(root).split('\n')
+    filenames = git_.ls_files(root).split("\n")
     if skip_nonexisting:
         filenames = [fn for fn in filenames if PathManager.exists(fn)]
     return filenames
@@ -217,8 +217,8 @@ def git_changed_files(skip_nonexisting=True):
         If true, ignore files that don't exist on disk. This is useful for
         disregarding files created in main, but don't exist in HEAD.
     """
-    fork_point = git_.merge_base('origin/main', 'HEAD').strip()
-    filenames = git_.diff('--name-only', fork_point).split('\n')
+    fork_point = git_.merge_base("origin/main", "HEAD").strip()
+    filenames = git_.diff("--name-only", fork_point).split("\n")
     if skip_nonexisting:
         filenames = [fn for fn in filenames if PathManager.exists(fn)]
     return filenames
@@ -228,8 +228,8 @@ def git_commit_messages():
     """
     Output each commit message between here and main.
     """
-    fork_point = git_.merge_base('origin/main', 'HEAD').strip()
-    messages = git_.log(fork_point + '..HEAD')
+    fork_point = git_.merge_base("origin/main", "HEAD").strip()
+    messages = git_.log(fork_point + "..HEAD")
     return messages
 
 
@@ -240,9 +240,9 @@ def is_new_task_filename(filename):
     Used in tests and test triggers, and only here to avoid redundancy.
     """
     return (
-        'parlai/tasks' in filename
-        and 'README' not in filename
-        and 'task_list.py' not in filename
+        "parlai/tasks" in filename
+        and "README" not in filename
+        and "task_list.py" not in filename
     )
 
 
@@ -289,7 +289,7 @@ def timeout(time: int = 30):
     :param int time:
         Time in seconds to wait for timeout. Default is 30 seconds.
     """
-    assert time >= 0, 'Time specified in timeout must be nonnegative.'
+    assert time >= 0, "Time specified in timeout must be nonnegative."
 
     def _handler(signum, frame):
         raise TimeoutError
@@ -318,10 +318,10 @@ def train_model(opt: Opt) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     import parlai.scripts.train_model as tms
 
     with tempdir() as tmpdir:
-        if 'model_file' not in opt:
-            opt['model_file'] = os.path.join(tmpdir, 'model')
-        if 'dict_file' not in opt:
-            opt['dict_file'] = os.path.join(tmpdir, 'model.dict')
+        if "model_file" not in opt:
+            opt["model_file"] = os.path.join(tmpdir, "model")
+        if "dict_file" not in opt:
+            opt["dict_file"] = os.path.join(tmpdir, "model.dict")
         # Parse verification
         valid, test = tms.TrainModel.main(**opt)
 
@@ -329,7 +329,7 @@ def train_model(opt: Opt) -> Tuple[Dict[str, Any], Dict[str, Any]]:
 
 
 def eval_model(
-    opt, skip_valid=False, skip_test=False, valid_datatype='valid', test_datatype='test'
+    opt, skip_valid=False, skip_test=False, valid_datatype="valid", test_datatype="test"
 ):
     """
     Run through an evaluation loop.
@@ -352,12 +352,12 @@ def eval_model(
     """
     import parlai.scripts.eval_model as ems
 
-    if opt.get('model_file') and not opt.get('dict_file'):
-        opt['dict_file'] = opt['model_file'] + '.dict'
+    if opt.get("model_file") and not opt.get("dict_file"):
+        opt["dict_file"] = opt["model_file"] + ".dict"
 
-    opt['datatype'] = 'valid' if valid_datatype is None else valid_datatype
+    opt["datatype"] = "valid" if valid_datatype is None else valid_datatype
     valid = None if skip_valid else ems.EvalModel.main(**opt)
-    opt['datatype'] = 'test' if test_datatype is None else test_datatype
+    opt["datatype"] = "test" if test_datatype is None else test_datatype
     test = None if skip_test else ems.EvalModel.main(**opt)
 
     return valid, test
@@ -377,13 +377,13 @@ def display_data(opt):
     popt = parser.parse_args([])
 
     with capture_output() as train_output:
-        popt['datatype'] = 'train:stream'
+        popt["datatype"] = "train:stream"
         dd.display_data(popt)
     with capture_output() as valid_output:
-        popt['datatype'] = 'valid:stream'
+        popt["datatype"] = "valid:stream"
         dd.display_data(popt)
     with capture_output() as test_output:
-        popt['datatype'] = 'test:stream'
+        popt["datatype"] = "test:stream"
         dd.display_data(popt)
 
     return (train_output.getvalue(), valid_output.getvalue(), test_output.getvalue())
@@ -402,13 +402,13 @@ def display_model(opt) -> Tuple[str, str, str]:
     popt = parser.parse_args([])
     with capture_output() as train_output:
         # evalmode so that we don't hit train_step
-        popt['datatype'] = 'train:evalmode:stream'
+        popt["datatype"] = "train:evalmode:stream"
         dm.display_model(popt)
     with capture_output() as valid_output:
-        popt['datatype'] = 'valid:stream'
+        popt["datatype"] = "valid:stream"
         dm.display_model(popt)
     with capture_output() as test_output:
-        popt['datatype'] = 'test:stream'
+        popt["datatype"] = "test:stream"
         dm.display_model(popt)
     return (train_output.getvalue(), valid_output.getvalue(), test_output.getvalue())
 
@@ -423,23 +423,23 @@ class AutoTeacherTest:
             return [self._safe(o) for o in obj]
         elif isinstance(obj, Message):
             obj = dict(obj)
-            for key in ['label_candidates', 'eval_label_candidates']:
+            for key in ["label_candidates", "eval_label_candidates"]:
                 if key not in obj:
                     continue
                 if isinstance(obj[key], set):
                     obj[key] = sorted(list(obj[key]))
                 if len(obj[key]) > 20:
                     obj[key] = list(obj[key][:10]) + list(obj[key][-10:])
-            if 'image' in obj:
+            if "image" in obj:
                 # convert the image to base64 encoding so we can store it as a string
                 import base64
                 import PIL
 
-                assert isinstance(obj['image'], PIL.Image.Image)
-                resized = obj['image'].resize((16, 16), PIL.Image.NEAREST)
-                gray = resized.convert('LA')
-                obj['image_hex'] = base64.b64encode(gray.tobytes()).decode('ascii')
-                del obj['image']
+                assert isinstance(obj["image"], PIL.Image.Image)
+                resized = obj["image"].resize((16, 16), PIL.Image.NEAREST)
+                gray = resized.convert("LA")
+                obj["image_hex"] = base64.b64encode(gray.tobytes()).decode("ascii")
+                del obj["image"]
             return obj
         else:
             return obj
@@ -452,15 +452,15 @@ class AutoTeacherTest:
         basename = f"{self.task}_{datatype}".replace(":", "_")
 
         if self.stream:
-            datatype = datatype + ':stream'
-        if datatype == 'train:stream':
-            datatype = datatype + ':ordered'
+            datatype = datatype + ":stream"
+        if datatype == "train:stream":
+            datatype = datatype + ":ordered"
 
         random.seed(42)
 
         opt = ParlaiParser(True, True).parse_kwargs(
-            model='fixed_response',
-            fixed_response='none',
+            model="fixed_response",
+            fixed_response="none",
             task=self.task,
             datatype=datatype,
             batchsize=1,
@@ -475,9 +475,9 @@ class AutoTeacherTest:
 
         teacher = world.get_task_agent()
         output = {
-            'acts': acts,
-            'num_episodes': teacher.num_episodes(),
-            'num_examples': teacher.num_examples(),
+            "acts": acts,
+            "num_episodes": teacher.num_episodes(),
+            "num_examples": teacher.num_examples(),
         }
         data_regression.check(output, basename=basename)
 
@@ -485,16 +485,16 @@ class AutoTeacherTest:
         """
         Test --datatype train:stream:ordered.
         """
-        return self._regression(data_regression, 'train')
+        return self._regression(data_regression, "train")
 
     def test_valid_stream(self, data_regression):
         """
         Test --datatype valid:stream.
         """
-        return self._regression(data_regression, 'valid')
+        return self._regression(data_regression, "valid")
 
     def test_test_stream(self, data_regression):
         """
         Test --datatype test:stream.
         """
-        return self._regression(data_regression, 'test')
+        return self._regression(data_regression, "test")

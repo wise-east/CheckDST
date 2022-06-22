@@ -11,19 +11,19 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/simplequestions/simplequestions.tar.gz',
-        'simplequestions.tar.gz',
-        'f1155f195e5c0c0392e69ef0a31e90f925b03210c13abe467ee07de0637d2c6f',
+        "http://parl.ai/downloads/simplequestions/simplequestions.tar.gz",
+        "simplequestions.tar.gz",
+        "f1155f195e5c0c0392e69ef0a31e90f925b03210c13abe467ee07de0637d2c6f",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'SimpleQuestions')
+    dpath = os.path.join(opt["datapath"], "SimpleQuestions")
     version = None
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

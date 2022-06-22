@@ -21,11 +21,11 @@ except ImportError:
 
 
 def get_class(name):
-    if name == 'spacy':
+    if name == "spacy":
         return SpacyTokenizer
-    if name == 'regexp':
+    if name == "regexp":
         return RegexpTokenizer
-    if name == 'simple':
+    if name == "simple":
         return SimpleTokenizer
 
-    raise RuntimeError('Invalid tokenizer: %s' % name)
+    raise RuntimeError("Invalid tokenizer: %s" % name)

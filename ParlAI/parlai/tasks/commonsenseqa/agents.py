@@ -21,28 +21,28 @@ class CommonSenseQATeacher(FixedDialogTeacher):
 
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
-        self.id = 'commonsenseqa'
+        self.id = "commonsenseqa"
         build(opt)
         if shared is not None:
-            self.episodes = shared['episodes']
+            self.episodes = shared["episodes"]
         else:
             self.episodes = self.setup_data()
         self.reset()
 
     def share(self):
         shared = super().share()
-        shared['episodes'] = self.episodes
+        shared["episodes"] = self.episodes
         return shared
 
     def setup_data(self):
-        jsons_path = os.path.join(self.opt['datapath'], 'CommonSenseQA')
-        dtype = self.opt['datatype']
-        if dtype.startswith('test'):
-            dpath = os.path.join(jsons_path, 'dev.jsonl')
-        elif dtype.startswith('train') or dtype.startswith('valid'):
-            dpath = os.path.join(jsons_path, 'train.jsonl')
+        jsons_path = os.path.join(self.opt["datapath"], "CommonSenseQA")
+        dtype = self.opt["datatype"]
+        if dtype.startswith("test"):
+            dpath = os.path.join(jsons_path, "dev.jsonl")
+        elif dtype.startswith("train") or dtype.startswith("valid"):
+            dpath = os.path.join(jsons_path, "train.jsonl")
         else:
-            raise ValueError('Datatype not train, test, or valid')
+            raise ValueError("Datatype not train, test, or valid")
         episodes = []
         with PathManager.open(dpath) as f:
             for line in f:
@@ -50,9 +50,9 @@ class CommonSenseQATeacher(FixedDialogTeacher):
         # There are 1221 episodes in the test set. Making the valid set this
         # large will make about an 80/10/10 split, as the paper had for splits.
         test_set_episodes = 1221
-        if dtype.startswith('valid'):
+        if dtype.startswith("valid"):
             episodes = episodes[:test_set_episodes]
-        elif dtype.startswith('train'):
+        elif dtype.startswith("train"):
             episodes = episodes[test_set_episodes:]
         return episodes
 
@@ -64,18 +64,18 @@ class CommonSenseQATeacher(FixedDialogTeacher):
 
     def get(self, episode_idx, entry_idx=0):
         episode = self.episodes[episode_idx]
-        answer = episode['answerKey']
+        answer = episode["answerKey"]
         candidates = []
-        for choice in episode['question']['choices']:
-            if choice['label'] == answer:
-                labels = [choice['text']]
-            candidates.append(choice['text'])
+        for choice in episode["question"]["choices"]:
+            if choice["label"] == answer:
+                labels = [choice["text"]]
+            candidates.append(choice["text"])
         action = {
-            'id': self.id,
-            'text': episode['question']['stem'],
-            'episode_done': True,
-            'labels': labels,
-            'label_candidates': candidates,
+            "id": self.id,
+            "text": episode["question"]["stem"],
+            "episode_done": True,
+            "labels": labels,
+            "label_candidates": candidates,
         }
         return action
 

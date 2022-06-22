@@ -26,7 +26,7 @@ from parlai.zoo.bart.build import download as download_bart
 from parlai.zoo.blender.blender_90M import download as download_blender
 
 
-FIXED_MESSAGE_TASK = 'fixed_message'
+FIXED_MESSAGE_TASK = "fixed_message"
 
 
 @register_teacher(FIXED_MESSAGE_TASK)
@@ -36,7 +36,7 @@ class FixedMessageTeacher(DialogTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        opt['datafile'] = DatatypeHelper.fold(opt['datatype'])
+        opt["datafile"] = DatatypeHelper.fold(opt["datatype"])
         self.id = FIXED_MESSAGE_TASK
         super().__init__(opt, shared)
 
@@ -47,7 +47,7 @@ class FixedMessageTeacher(DialogTeacher):
         There's only one "turn" to this conversation.
         """
         _ = path  # Unused here
-        yield {'text': 'This is a test message.', 'labels': ['(NONE)']}, True
+        yield {"text": "This is a test message.", "labels": ["(NONE)"]}, True
 
 
 class AbstractTestDistillation(ABC):
@@ -56,40 +56,40 @@ class AbstractTestDistillation(ABC):
     """
 
     BASE_OPT = {
-        'allow_missing_init_opts': True,
-        'init_model': '',
-        'model_file': '',
-        'n_encoder_layers': 1,
-        'n_decoder_layers': 1,
-        'task': FIXED_MESSAGE_TASK,
-        'num_examples': 1,
-        'skip_generation': True,
-        'hidden_loss_coeff': 1,
-        'encoder_loss_coeff': 1,
-        'pred_loss_coeff': 1,
-        'task_loss_coeff': 1,
-        'fp16': False,
+        "allow_missing_init_opts": True,
+        "init_model": "",
+        "model_file": "",
+        "n_encoder_layers": 1,
+        "n_decoder_layers": 1,
+        "task": FIXED_MESSAGE_TASK,
+        "num_examples": 1,
+        "skip_generation": True,
+        "hidden_loss_coeff": 1,
+        "encoder_loss_coeff": 1,
+        "pred_loss_coeff": 1,
+        "task_loss_coeff": 1,
+        "fp16": False,
     }
     # fp16-impl is set to apex in the bart_large model opt, but the CircleCI box doesn't
     # support APEX. As a workaround, test in fp32 mode.
-    WIDE_DISTILLATION_OPT = {'copy_teacher_weights': True}
+    WIDE_DISTILLATION_OPT = {"copy_teacher_weights": True}
     NARROW_DISTILLATION_OPT = {
-        'embedding_size': 64,
-        'ffn_size': 256,
-        'embedding_loss_coeff': 1,
-        'self_attn_loss_coeff': 1,
-        'enc_dec_attn_loss_coeff': 1,
+        "embedding_size": 64,
+        "ffn_size": 256,
+        "embedding_loss_coeff": 1,
+        "self_attn_loss_coeff": 1,
+        "enc_dec_attn_loss_coeff": 1,
     }
-    DISTILLATION_MODEL_PREFIX = 'projects.anti_scaling.distillation'
-    BASE_LOSSES = ['dec_hid_loss', 'enc_hid_loss', 'enc_loss', 'loss', 'pred_loss']
+    DISTILLATION_MODEL_PREFIX = "projects.anti_scaling.distillation"
+    BASE_LOSSES = ["dec_hid_loss", "enc_hid_loss", "enc_loss", "loss", "pred_loss"]
     ADDITIONAL_LOSSES = [
-        'dec_emb_loss',
-        'dec_self_attn_loss',
-        'enc_dec_attn_loss',
-        'enc_emb_loss',
-        'enc_self_attn_loss',
+        "dec_emb_loss",
+        "dec_self_attn_loss",
+        "enc_dec_attn_loss",
+        "enc_emb_loss",
+        "enc_self_attn_loss",
     ]
-    LOSS_TYPES = {'wide': BASE_LOSSES, 'narrow': BASE_LOSSES + ADDITIONAL_LOSSES}
+    LOSS_TYPES = {"wide": BASE_LOSSES, "narrow": BASE_LOSSES + ADDITIONAL_LOSSES}
 
     @pytest.fixture(scope="function")
     def setup(self):
@@ -102,10 +102,10 @@ class AbstractTestDistillation(ABC):
         np.random.seed(seed)
         torch.manual_seed(seed)
 
-        datapath = 'data'
+        datapath = "data"
         self._download_model(datapath)
 
-        yield 'Setup complete'
+        yield "Setup complete"
 
     @abstractmethod
     def _download_model(self, datapath: str):
@@ -125,9 +125,9 @@ class AbstractTestDistillation(ABC):
         """
         model_file = self._get_model_file()
         return {
-            'dict_file': f'{model_file}.dict',
-            'init_opt': f'{model_file}.opt',
-            'teacher_model': model_file,
+            "dict_file": f"{model_file}.dict",
+            "init_opt": f"{model_file}.opt",
+            "teacher_model": model_file,
         }
 
     @abstractmethod
@@ -150,16 +150,16 @@ class AbstractTestDistillation(ABC):
         """
         Check losses for a model with "wide" (DistilBART-style) distillation loss terms.
         """
-        model_name = self._get_agents()['wide_distillation']
+        model_name = self._get_agents()["wide_distillation"]
         opt = Opt(
             {
                 **self.BASE_OPT,
                 **self._get_model_opt(),
                 **self.WIDE_DISTILLATION_OPT,
-                'model': f'{self.DISTILLATION_MODEL_PREFIX}:{model_name}',
+                "model": f"{self.DISTILLATION_MODEL_PREFIX}:{model_name}",
             }
         )
-        self._check_losses(opt=opt, test_name='wide', data_regression=data_regression)
+        self._check_losses(opt=opt, test_name="wide", data_regression=data_regression)
 
     def test_narrow_distillation_losses(
         self, setup, data_regression: DataRegressionFixture
@@ -168,16 +168,16 @@ class AbstractTestDistillation(ABC):
         Check losses for a model with "narrow" (TinyBERT-style) distillation loss terms.
         """
 
-        model_name = self._get_agents()['narrow_distillation']
+        model_name = self._get_agents()["narrow_distillation"]
         opt = Opt(
             {
                 **self.BASE_OPT,
                 **self._get_model_opt(),
                 **self.NARROW_DISTILLATION_OPT,
-                'model': f'{self.DISTILLATION_MODEL_PREFIX}:{model_name}',
+                "model": f"{self.DISTILLATION_MODEL_PREFIX}:{model_name}",
             }
         )
-        self._check_losses(opt=opt, test_name='narrow', data_regression=data_regression)
+        self._check_losses(opt=opt, test_name="narrow", data_regression=data_regression)
 
     def _check_losses(
         self, opt: Opt, test_name: str, data_regression: DataRegressionFixture
@@ -193,7 +193,7 @@ class AbstractTestDistillation(ABC):
         loss_types = self.LOSS_TYPES[test_name]
         for loss_type in loss_types:
             losses[loss_type] = round_sig(valid[loss_type].value(), sig=6)
-        basename = self._get_model_identifier() + '_' + test_name
+        basename = self._get_model_identifier() + "_" + test_name
         data_regression.check(losses, basename=basename)
 
 
@@ -206,16 +206,16 @@ class TestTransformerDistillation(AbstractTestDistillation):
         download_blender(datapath)
 
     def _get_model_file(self) -> str:
-        return 'data/models/blender/blender_90M/model'  # BlenderBot90M
+        return "data/models/blender/blender_90M/model"  # BlenderBot90M
 
     def _get_agents(self) -> Dict[str, str]:
         return {
-            'wide_distillation': 'DistillTransformerAgent',
-            'narrow_distillation': 'DistillNarrowTransformerAgent',
+            "wide_distillation": "DistillTransformerAgent",
+            "narrow_distillation": "DistillNarrowTransformerAgent",
         }
 
     def _get_model_identifier(self) -> str:
-        return 'transformer'
+        return "transformer"
 
 
 class TestBartDistillation(AbstractTestDistillation):
@@ -227,16 +227,16 @@ class TestBartDistillation(AbstractTestDistillation):
         download_bart(datapath)
 
     def _get_model_file(self) -> str:
-        return 'data/models/bart/bart_large/model'
+        return "data/models/bart/bart_large/model"
 
     def _get_agents(self) -> Dict[str, str]:
         return {
-            'wide_distillation': 'DistillBartAgent',
-            'narrow_distillation': 'DistillNarrowBartAgent',
+            "wide_distillation": "DistillBartAgent",
+            "narrow_distillation": "DistillNarrowBartAgent",
         }
 
     def _get_model_identifier(self) -> str:
-        return 'bart'
+        return "bart"
 
 
 def round_sig(num, sig: int):

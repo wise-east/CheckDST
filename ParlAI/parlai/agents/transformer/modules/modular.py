@@ -32,7 +32,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, Generic, Optional, Type, TypeVar
 
 
-C = TypeVar('C', bound=object)
+C = TypeVar("C", bound=object)
 
 
 class ModularComponent(Generic[C]):
@@ -64,7 +64,7 @@ class ModularComponent(Generic[C]):
         super().__init__(*args, **kwargs)
 
 
-MC = TypeVar('MC', bound=ModularComponent)
+MC = TypeVar("MC", bound=ModularComponent)
 
 
 class ModularComponentBuilder(Generic[MC]):
@@ -129,7 +129,7 @@ def _make_class_swappable(cls: Type[C], **kwargs) -> Type[C]:
         """
         return {
             **new_fields,
-            '__annotations__': {**{k: type(v) for k, v in new_fields.items()}},
+            "__annotations__": {**{k: type(v) for k, v in new_fields.items()}},
         }
 
     # Create SwappableSubcomponents dataclass with components passed to @swappable

@@ -21,8 +21,8 @@ class ParseInsuranceQA(object):
 
     @classmethod
     def read_gz(cls, filename):
-        f = gzip.open(filename, 'rb')
-        return [x.decode('utf-8') for x in f.readlines()]
+        f = gzip.open(filename, "rb")
+        return [x.decode("utf-8") for x in f.readlines()]
 
     @classmethod
     def readlines(cls, path):
@@ -41,7 +41,7 @@ class ParseInsuranceQA(object):
         d_vocab = {}
         with PathManager.open(vocab_path, "r") as f:
             for line in f:
-                fields = line.rstrip('\n').split("\t")
+                fields = line.rstrip("\n").split("\t")
                 if len(fields) != 2:
                     raise ValueError(
                         "vocab file (%s) corrupted. Line (%s)"
@@ -83,7 +83,7 @@ class ParseInsuranceQA(object):
         print("building version: %s" % cls.version)
 
         # the root of dataset
-        dpext = os.path.join(dpath, 'insuranceQA-master/%s' % cls.version)
+        dpext = os.path.join(dpath, "insuranceQA-master/%s" % cls.version)
 
         # read vocab file
         vocab_path = os.path.join(dpext, "vocabulary")
@@ -119,8 +119,8 @@ class ParseInsuranceQAV1(ParseInsuranceQA):
 
     @classmethod
     def create_fb_format(cls, out_path, dtype, inpath, d_vocab, d_label_answer):
-        print('building fbformat:' + dtype)
-        fout = open(os.path.join(out_path, dtype + '.txt'), 'w')
+        print("building fbformat:" + dtype)
+        fout = open(os.path.join(out_path, dtype + ".txt"), "w")
         lines = open(inpath).readlines()
 
         for line in lines:
@@ -132,8 +132,8 @@ class ParseInsuranceQAV1(ParseInsuranceQA):
                 q = cls.wids2sent(s_q_wids.split(), d_vocab)
                 good_ans = [d_label_answer[aid_] for aid_ in s_good_aids.split()]
                 # save good answers (train only)
-                s = '1 ' + q + '\t' + "|".join(good_ans)
-                fout.write(s + '\n')
+                s = "1 " + q + "\t" + "|".join(good_ans)
+                fout.write(s + "\n")
             else:
                 assert len(fields) == 3, "data file (%s) corrupted." % inpath
                 s_good_aids, s_q_wids, s_bad_aids = fields
@@ -143,14 +143,14 @@ class ParseInsuranceQAV1(ParseInsuranceQA):
                 bad_ans = [d_label_answer[aid_] for aid_ in s_bad_aids.split()]
                 # save good answers and candidates
                 s = (
-                    '1 '
+                    "1 "
                     + q
-                    + '\t'
+                    + "\t"
                     + "|".join(good_ans)
-                    + '\t\t'
+                    + "\t\t"
                     + "|".join(good_ans + bad_ans)
                 )
-                fout.write(s + '\n')
+                fout.write(s + "\n")
         fout.close()
 
 
@@ -185,8 +185,8 @@ class ParseInsuranceQAV2(ParseInsuranceQA):
 
     @classmethod
     def create_fb_format(cls, out_path, dtype, inpath, d_vocab, d_label_answer):
-        print('building fbformat:' + dtype)
-        fout = open(os.path.join(out_path, dtype + '.txt'), 'w')
+        print("building fbformat:" + dtype)
+        fout = open(os.path.join(out_path, dtype + ".txt"), "w")
         lines = cls.readlines(inpath)
 
         for line in lines:
@@ -202,32 +202,32 @@ class ParseInsuranceQAV2(ParseInsuranceQA):
                 bad_ans = [d_label_answer[aid_] for aid_ in s_bad_aids.split()]
                 # save
                 s = (
-                    '1 '
+                    "1 "
                     + q
-                    + '\t'
+                    + "\t"
                     + "|".join(good_ans)
-                    + '\t\t'
+                    + "\t\t"
                     + "|".join(good_ans + bad_ans)
                 )
-                fout.write(s + '\n')
+                fout.write(s + "\n")
         fout.close()
 
 
 RESOURCES = [
     DownloadableFile(
-        'https://github.com/shuzi/insuranceQA/archive/master.zip',
-        'insuranceqa.zip',
-        '53e1c4a68734c6a0955dcba50d5a2a9926004d4cd4cda2e988cc7b990a250fbf',
+        "https://github.com/shuzi/insuranceQA/archive/master.zip",
+        "insuranceqa.zip",
+        "53e1c4a68734c6a0955dcba50d5a2a9926004d4cd4cda2e988cc7b990a250fbf",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'InsuranceQA')
-    version = '1'
+    dpath = os.path.join(opt["datapath"], "InsuranceQA")
+    version = "1"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

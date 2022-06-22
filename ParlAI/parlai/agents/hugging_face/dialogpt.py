@@ -14,7 +14,7 @@ from parlai.utils.misc import warn_once
 try:
     from transformers import GPT2Model
 except ImportError:
-    raise ImportError('Please run `pip install transformers`.')
+    raise ImportError("Please run `pip install transformers`.")
 
 
 ############################################
@@ -39,8 +39,8 @@ class DialoGPTDecoder(GPT2Decoder):
     def _get_special_tokens(opt, dict):
         null_idx = dict.null_idx
         if (
-            opt.get('batchsize', 1) == 1
-            and not opt['add_special_tokens']
+            opt.get("batchsize", 1) == 1
+            and not opt["add_special_tokens"]
             and null_idx == dict.end_idx
         ):
             # get around the dual usage of end_idx that would otherwise mask endtoken during forward pass.
@@ -49,8 +49,8 @@ class DialoGPTDecoder(GPT2Decoder):
 
     def _init_from_pretrained(self, opt):
         # load model
-        model_sz = opt['gpt2_size']
-        fle_key = f'microsoft/DialoGPT-{model_sz}'
+        model_sz = opt["gpt2_size"]
+        fle_key = f"microsoft/DialoGPT-{model_sz}"
         return GPT2Model.from_pretrained(fle_key)
 
 
@@ -93,23 +93,23 @@ class DialogptAgent(Gpt2Agent):
     def add_cmdline_args(
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
-        agent = parser.add_argument_group('DialoGPT Args')
+        agent = parser.add_argument_group("DialoGPT Args")
         agent.add_argument(
-            '--gpt2-size',
+            "--gpt2-size",
             type=str,
-            default='medium',
-            choices=['small', 'medium', 'large'],
-            help='Which size model to initialize.',
+            default="medium",
+            choices=["small", "medium", "large"],
+            help="Which size model to initialize.",
         )
         parser.set_defaults(
-            delimiter='<|endoftext|>',
-            history_add_global_end_token='<|endoftext|>',
+            delimiter="<|endoftext|>",
+            history_add_global_end_token="<|endoftext|>",
             text_truncate=768,
             label_truncate=256,
             dict_maxexs=0,  # skip building dictionary
         )
         super().add_cmdline_args(parser, partial_opt=partial_opt)
-        warn_once('WARNING: this model is in beta and the API is subject to change.')
+        warn_once("WARNING: this model is in beta and the API is subject to change.")
         return agent
 
     @staticmethod

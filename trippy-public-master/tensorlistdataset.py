@@ -34,11 +34,15 @@ class TensorListDataset(Dataset):
             size = data[0].size(0)
         for element in data:
             if isinstance(element, dict):
-                assert all(size == tensor.size(0) for name, tensor in element.items()) # dict of tensors
+                assert all(
+                    size == tensor.size(0) for name, tensor in element.items()
+                )  # dict of tensors
             elif isinstance(element, list):
-                assert all(size == tensor.size(0) for tensor in element) # list of tensors
+                assert all(
+                    size == tensor.size(0) for tensor in element
+                )  # list of tensors
             else:
-                assert size == element.size(0) # tensor
+                assert size == element.size(0)  # tensor
         self.size = size
         self.data = data
 

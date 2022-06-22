@@ -11,12 +11,12 @@ Fastext Common Crawl vectors, e.g. use with filename
 import os
 import torchtext.vocab as vocab
 
-URL = 'https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M.vec.zip'
+URL = "https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M.vec.zip"
 
 
 def download(datapath):
     return vocab.Vectors(
-        name='crawl-300d-2M.vec',
+        name="crawl-300d-2M.vec",
         url=URL,
-        cache=os.path.join(datapath, 'models', 'fasttext_cc_vectors'),
+        cache=os.path.join(datapath, "models", "fasttext_cc_vectors"),
     )

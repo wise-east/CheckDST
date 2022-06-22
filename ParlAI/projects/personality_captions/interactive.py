@@ -22,7 +22,7 @@ from base64 import b64decode
 import io
 import os
 
-HOST_NAME = 'localhost'
+HOST_NAME = "localhost"
 PORT = 8080
 SHARED: Dict[str, Any] = {}
 IMAGE_LOADER = None
@@ -196,13 +196,13 @@ class MyHandler(BaseHTTPRequestHandler):
             model act dictionary
         """
         reply = {}
-        reply['text'] = data['personality'][0].decode()
-        img_data = str(data['image'][0])
-        _, encoded = img_data.split(',', 1)
-        image = Image.open(io.BytesIO(b64decode(encoded))).convert('RGB')
-        reply['image'] = SHARED['image_loader'].extract(image)
-        SHARED['agent'].observe(reply)
-        model_res = SHARED['agent'].act()
+        reply["text"] = data["personality"][0].decode()
+        img_data = str(data["image"][0])
+        _, encoded = img_data.split(",", 1)
+        image = Image.open(io.BytesIO(b64decode(encoded))).convert("RGB")
+        reply["image"] = SHARED["image_loader"].extract(image)
+        SHARED["agent"].observe(reply)
+        model_res = SHARED["agent"].act()
         return model_res
 
     def do_HEAD(self):
@@ -210,54 +210,54 @@ class MyHandler(BaseHTTPRequestHandler):
         Handle headers.
         """
         self.send_response(200)
-        self.send_header('Content-type', 'text/html')
+        self.send_header("Content-type", "text/html")
         self.end_headers()
 
     def do_POST(self):
         """
         Handle POST.
         """
-        if self.path != '/interact':
-            return self.respond({'status': 500})
-        ctype, pdict = cgi.parse_header(self.headers['content-type'])
-        pdict['boundary'] = bytes(pdict['boundary'], "utf-8")
+        if self.path != "/interact":
+            return self.respond({"status": 500})
+        ctype, pdict = cgi.parse_header(self.headers["content-type"])
+        pdict["boundary"] = bytes(pdict["boundary"], "utf-8")
         postvars = cgi.parse_multipart(self.rfile, pdict)
         model_response = self.interactive_running(postvars)
 
         self.send_response(200)
-        self.send_header('Content-type', 'application/json')
+        self.send_header("Content-type", "application/json")
         self.end_headers()
         json_str = json.dumps(model_response)
-        self.wfile.write(bytes(json_str, 'utf-8'))
+        self.wfile.write(bytes(json_str, "utf-8"))
 
     def do_GET(self):
         """
         Handle GET.
         """
         paths = {
-            '/': {'status': 200},
-            '/favicon.ico': {'status': 202},  # Need for chrome
+            "/": {"status": 200},
+            "/favicon.ico": {"status": 202},  # Need for chrome
         }
         if self.path in paths:
             self.respond(paths[self.path])
         else:
-            self.respond({'status': 500})
+            self.respond({"status": 500})
 
     def handle_http(self, status_code, path, text=None):
         """
         Generate HTTP.
         """
         self.send_response(status_code)
-        self.send_header('Content-type', 'text/html')
+        self.send_header("Content-type", "text/html")
         self.end_headers()
         content = WEB_HTML.format(STYLE_SHEET, FONT_AWESOME)
-        return bytes(content, 'UTF-8')
+        return bytes(content, "UTF-8")
 
     def respond(self, opts):
         """
         Respond.
         """
-        response = self.handle_http(opts['status'], self.path)
+        response = self.handle_http(opts["status"], self.path)
         self.wfile.write(response)
 
 
@@ -267,29 +267,29 @@ def setup_interactive():
     """
     parser = setup_args()
     opt = parser.parse_args()
-    if not opt.get('model_file'):
-        raise RuntimeError('Please specify a model file')
-    if opt.get('fixed_cands_path') is None:
-        opt['fixed_cands_path'] = os.path.join(
-            '/'.join(opt.get('model_file').split('/')[:-1]), 'candidates.txt'
+    if not opt.get("model_file"):
+        raise RuntimeError("Please specify a model file")
+    if opt.get("fixed_cands_path") is None:
+        opt["fixed_cands_path"] = os.path.join(
+            "/".join(opt.get("model_file").split("/")[:-1]), "candidates.txt"
         )
-    opt['task'] = 'parlai.agents.local_human.local_human:LocalHumanAgent'
-    opt['image_mode'] = 'resnet152'
-    SHARED['opt'] = opt
-    SHARED['image_loader'] = ImageLoader(opt)
+    opt["task"] = "parlai.agents.local_human.local_human:LocalHumanAgent"
+    opt["image_mode"] = "resnet152"
+    SHARED["opt"] = opt
+    SHARED["image_loader"] = ImageLoader(opt)
 
     # Create model and assign it to the specified task
-    SHARED['agent'] = create_agent(opt, requireModelExists=True)
-    SHARED['world'] = create_task(opt, SHARED['agent'])
+    SHARED["agent"] = create_agent(opt, requireModelExists=True)
+    SHARED["world"] = create_task(opt, SHARED["agent"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     setup_interactive()
     server_class = HTTPServer
     Handler = MyHandler
-    Handler.protocol_version = 'HTTP/1.0'
+    Handler.protocol_version = "HTTP/1.0"
     httpd = server_class((HOST_NAME, PORT), Handler)
-    print('http://{}:{}/'.format(HOST_NAME, PORT))
+    print("http://{}:{}/".format(HOST_NAME, PORT))
 
     try:
         httpd.serve_forever()

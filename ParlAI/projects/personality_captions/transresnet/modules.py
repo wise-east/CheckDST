@@ -31,73 +31,73 @@ class TransresnetModel(nn.Module):
         Add command line arguments.
         """
         Transformer.add_common_cmdline_args(parser)
-        agent = parser.add_argument_group('TransresnetModel arguments')
+        agent = parser.add_argument_group("TransresnetModel arguments")
         agent.add_argument(
-            '--truncate',
+            "--truncate",
             type=int,
             default=32,
-            help='Max amount of tokens allowed in a text sequence',
+            help="Max amount of tokens allowed in a text sequence",
         )
         agent.add_argument(
-            '--image-features-dim',
+            "--image-features-dim",
             type=int,
             default=2048,
-            help='dimensionality of image features',
+            help="dimensionality of image features",
         )
         agent.add_argument(
-            '--embedding-type',
+            "--embedding-type",
             type=str,
             default=None,
-            choices=[None, 'fasttext_cc'],
-            help='Specify if using pretrained embeddings',
+            choices=[None, "fasttext_cc"],
+            help="Specify if using pretrained embeddings",
         )
         agent.add_argument(
-            '--load-encoder-from',
+            "--load-encoder-from",
             type=str,
             default=None,
-            help='Specify if using a pretrained transformer encoder',
+            help="Specify if using a pretrained transformer encoder",
         )
         agent.add_argument(
-            '--hidden-dim',
+            "--hidden-dim",
             type=int,
             default=300,
-            help='Hidden dimesionality of personality and image encoder',
+            help="Hidden dimesionality of personality and image encoder",
         )
         agent.add_argument(
-            '--num-layers-all',
+            "--num-layers-all",
             type=int,
             default=-1,
-            help='If >= 1, number of layers for both the text ' 'and image encoders.',
+            help="If >= 1, number of layers for both the text " "and image encoders.",
         )
         agent.add_argument(
-            '--num-layers-text-encoder',
+            "--num-layers-text-encoder",
             type=int,
             default=1,
-            help='Number of layers for the text encoder',
+            help="Number of layers for the text encoder",
         )
         agent.add_argument(
-            '--num-layers-image-encoder',
+            "--num-layers-image-encoder",
             type=int,
             default=1,
-            help='Number of layers for the image encoder',
+            help="Number of layers for the image encoder",
         )
         agent.add_argument(
-            '--no-cuda',
-            dest='no_cuda',
-            action='store_true',
-            help='If True, perform ops on CPU only',
+            "--no-cuda",
+            dest="no_cuda",
+            action="store_true",
+            help="If True, perform ops on CPU only",
         )
         agent.add_argument(
-            '--learningrate',
+            "--learningrate",
             type=float,
             default=0.0005,
-            help='learning rate for optimizer',
+            help="learning rate for optimizer",
         )
         agent.add_argument(
-            '--additional-layer-dropout',
+            "--additional-layer-dropout",
             type=float,
             default=0.2,
-            help='dropout for additional linear layer',
+            help="dropout for additional linear layer",
         )
         parser.set_params(
             ffn_size=1200, attention_dropout=0.2, relu_dropout=0.2, n_positions=1000
@@ -106,15 +106,15 @@ class TransresnetModel(nn.Module):
 
     def __init__(self, opt, personalities_list, dictionary):
         super().__init__()
-        self.use_cuda = not opt['no_cuda'] and torch.cuda.is_available()
+        self.use_cuda = not opt["no_cuda"] and torch.cuda.is_available()
         self.opt = opt
         self.dictionary = dictionary
-        self.truncate_length = opt['truncate']
-        if opt['num_layers_all'] != -1:
-            n_layers_text = n_layers_img = opt['num_layers_all']
+        self.truncate_length = opt["truncate"]
+        if opt["num_layers_all"] != -1:
+            n_layers_text = n_layers_img = opt["num_layers_all"]
         else:
-            n_layers_text = opt['num_layers_text_encoder']
-            n_layers_img = opt['num_layers_image_encoder']
+            n_layers_text = opt["num_layers_text_encoder"]
+            n_layers_img = opt["num_layers_image_encoder"]
         self.text_encoder_frozen = False
 
         # Initialize personalities dictionary
@@ -132,7 +132,7 @@ class TransresnetModel(nn.Module):
         # optimizer
         self.optimizer = optim.Adam(
             filter(lambda p: p.requires_grad, self.parameters()),
-            self.opt['learningrate'],
+            self.opt["learningrate"],
         )
 
     def _build_personality_dictionary(self, personalities_list):
@@ -153,13 +153,13 @@ class TransresnetModel(nn.Module):
         :param n_layers_text:
             how many layers the transformer will have
         """
-        self.embeddings = nn.Embedding(len(self.dictionary), self.opt['embedding_size'])
+        self.embeddings = nn.Embedding(len(self.dictionary), self.opt["embedding_size"])
         if (
-            self.opt.get('load_encoder_from') is None
-            and self.opt['embedding_type'] == 'fasttext_cc'
+            self.opt.get("load_encoder_from") is None
+            and self.opt["embedding_type"] == "fasttext_cc"
         ):
             self.embeddings = load_fasttext_embeddings(
-                self.dictionary, self.opt['embedding_size'], self.opt['datapath']
+                self.dictionary, self.opt["embedding_size"], self.opt["datapath"]
             )
 
         self.text_encoder = TransformerEncoder(
@@ -170,13 +170,13 @@ class TransresnetModel(nn.Module):
             embeddings_scale=False,
             output_scaling=1.0,
         )
-        if self.opt.get('load_encoder_from') is not None:
+        if self.opt.get("load_encoder_from") is not None:
             self._load_text_encoder_state()
 
         self.additional_layer = LinearWrapper(
-            self.opt['embedding_size'],
-            self.opt['hidden_dim'],
-            dropout=self.opt['additional_layer_dropout'],
+            self.opt["embedding_size"],
+            self.opt["hidden_dim"],
+            dropout=self.opt["additional_layer_dropout"],
         )
 
     def _build_image_encoder(self, n_layers_img):
@@ -187,23 +187,23 @@ class TransresnetModel(nn.Module):
             number of feed-forward layers for the image encoder
         """
         image_layers = [
-            nn.BatchNorm1d(self.opt['image_features_dim']),
-            nn.Dropout(p=self.opt['dropout']),
-            nn.Linear(self.opt['image_features_dim'], self.opt['hidden_dim']),
+            nn.BatchNorm1d(self.opt["image_features_dim"]),
+            nn.Dropout(p=self.opt["dropout"]),
+            nn.Linear(self.opt["image_features_dim"], self.opt["hidden_dim"]),
         ]
         for _ in range(n_layers_img - 1):
             image_layers += [
                 nn.ReLU(),
-                nn.Dropout(p=self.opt['dropout']),
-                nn.Linear(self.opt['hidden_dim'], self.opt['hidden_dim']),
+                nn.Dropout(p=self.opt["dropout"]),
+                nn.Linear(self.opt["hidden_dim"], self.opt["hidden_dim"]),
             ]
         self.image_encoder = nn.Sequential(*image_layers)
 
     def _build_personality_encoder(self):
         personality_layers = [
             nn.BatchNorm1d(self.num_personalities),
-            nn.Dropout(p=self.opt['dropout']),
-            nn.Linear(self.num_personalities, self.opt['hidden_dim']),
+            nn.Dropout(p=self.opt["dropout"]),
+            nn.Linear(self.num_personalities, self.opt["hidden_dim"]),
         ]
         self.personality_encoder = nn.Sequential(*personality_layers)
 
@@ -349,7 +349,7 @@ class TransresnetModel(nn.Module):
             examples trained on
         """
         if personalities is None:
-            personalities = [''] * len(image_features)
+            personalities = [""] * len(image_features)
         if len(image_features) == 0:
             return 0, 0, 1
         self.eval()
@@ -545,17 +545,17 @@ class TransresnetModel(nn.Module):
 
     def _load_text_encoder_state(self):
         try:
-            state_file = self.opt.get('load_encoder_from')
-            with PathManager.open(state_file, 'b') as f:
+            state_file = self.opt.get("load_encoder_from")
+            with PathManager.open(state_file, "b") as f:
                 model = torch.load(f)
-            states = model['model']
+            states = model["model"]
             self.text_encoder.load_state_dict(states)
         except Exception as e:
             print(
-                'WARNING: Cannot load transformer state; please make sure '
-                'specified file is a dictionary with the states in `model`. '
-                'Additionally, make sure that the appropriate options are '
-                'specified. Error: {}'.format(e)
+                "WARNING: Cannot load transformer state; please make sure "
+                "specified file is a dictionary with the states in `model`. "
+                "Additionally, make sure that the appropriate options are "
+                "specified. Error: {}".format(e)
             )
 
 
@@ -563,12 +563,12 @@ def load_fasttext_embeddings(dic, embedding_dim, datapath):
     """
     Load weights from fasttext_cc and put them in embeddings.weights.
     """
-    print('Initializing embeddings from fasttext_cc')
+    print("Initializing embeddings from fasttext_cc")
     from parlai.zoo.fasttext_cc_vectors.build import download
 
     pretrained = download(datapath)
     print(
-        'Done Loading vectors from fasttext. {} embeddings loaded.'.format(
+        "Done Loading vectors from fasttext. {} embeddings loaded.".format(
             len(pretrained)
         )
     )
@@ -579,7 +579,7 @@ def load_fasttext_embeddings(dic, embedding_dim, datapath):
         if word in pretrained and res.weight.data.shape[0] > index:
             res.weight.data[index] = pretrained[word]
             used += 1
-    print('{} have been initialized on pretrained over {} words'.format(used, len(dic)))
+    print("{} have been initialized on pretrained over {} words".format(used, len(dic)))
     return res
 
 

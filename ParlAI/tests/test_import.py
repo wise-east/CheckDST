@@ -37,5 +37,5 @@ class TestImport(unittest.TestCase):
         assert FbDeprecatedDialogTeacher
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

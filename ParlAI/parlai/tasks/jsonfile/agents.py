@@ -28,32 +28,32 @@ class JsonTeacher(ConversationTeacher):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        agent = parser.add_argument_group('JsonFile Task Arguments')
-        agent.add_argument('-jfdp', '--jsonfile-datapath', type=str, help="Data file")
+        agent = parser.add_argument_group("JsonFile Task Arguments")
+        agent.add_argument("-jfdp", "--jsonfile-datapath", type=str, help="Data file")
         agent.add_argument(
-            '-jfdt',
-            '--jsonfile-datatype-extension',
-            type='bool',
+            "-jfdt",
+            "--jsonfile-datatype-extension",
+            type="bool",
             default=False,
             help="If true, use _train.jsonl, _valid.jsonl, _test.jsonl file extensions",
         )
         agent.add_argument(
-            '--label-turns',
+            "--label-turns",
             type=str,
-            help='which speaker to use as label',
-            choices=['firstspeaker', 'secondspeaker', 'both'],
-            default='secondspeaker',
+            help="which speaker to use as label",
+            choices=["firstspeaker", "secondspeaker", "both"],
+            default="secondspeaker",
         )
         return parser
 
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
         opt = copy.deepcopy(opt)
-        if not opt.get('jsonfile_datapath'):
-            raise RuntimeError('jsonfile_datapath not specified')
-        datafile = opt['jsonfile_datapath']
-        if self.opt['jsonfile_datatype_extension']:
-            datafile += "_" + self.opt['datatype'].split(':')[0] + '.jsonl'
+        if not opt.get("jsonfile_datapath"):
+            raise RuntimeError("jsonfile_datapath not specified")
+        datafile = opt["jsonfile_datapath"]
+        if self.opt["jsonfile_datatype_extension"]:
+            datafile += "_" + self.opt["datatype"].split(":")[0] + ".jsonl"
         if shared is None:
             self._setup_data(datafile)
         # Truncate datafile to just the immediate enclosing folder name and file name

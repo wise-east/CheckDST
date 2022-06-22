@@ -22,7 +22,7 @@ class FlattenMutator(ManyEpisodeMutator):
     def many_episode_mutation(self, episode: List[Message]) -> List[List[Message]]:
         history = []
         for message in episode:
-            history.append(message.pop('text'))
-            message['text'] = '\n'.join(history)
+            history.append(message.pop("text"))
+            message["text"] = "\n".join(history)
             yield [message]
-            history.append(random.choice(message['labels']))
+            history.append(random.choice(message["labels"]))

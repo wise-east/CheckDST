@@ -25,13 +25,13 @@ def get_sentence_tokenizer():
     try:
         import nltk
     except ImportError:
-        raise ImportError('Please install nltk (e.g. pip install nltk).')
+        raise ImportError("Please install nltk (e.g. pip install nltk).")
     # nltk-specific setup
-    st_path = 'tokenizers/punkt/{0}.pickle'.format('english')
+    st_path = "tokenizers/punkt/{0}.pickle".format("english")
     try:
         sent_tok = nltk.data.load(st_path)
     except LookupError:
-        nltk.download('punkt')
+        nltk.download("punkt")
         sent_tok = nltk.data.load(st_path)
     return sent_tok
 
@@ -51,14 +51,14 @@ class IndexTeacher(FixedDialogTeacher):
         build(opt)
         super().__init__(opt, shared)
 
-        if self.datatype.startswith('train'):
-            suffix = 'train'
+        if self.datatype.startswith("train"):
+            suffix = "train"
         else:
-            suffix = 'dev'
-        datapath = os.path.join(opt['datapath'], 'SQuAD', suffix + '-v1.1.json')
+            suffix = "dev"
+        datapath = os.path.join(opt["datapath"], "SQuAD", suffix + "-v1.1.json")
         self.data = self._setup_data(datapath)
 
-        self.id = 'squad'
+        self.id = "squad"
         self.reset()
 
     def num_examples(self):
@@ -70,35 +70,35 @@ class IndexTeacher(FixedDialogTeacher):
     def get(self, episode_idx, entry_idx=None):
         article_idx, paragraph_idx, qa_idx = self.examples[episode_idx]
         article = self.squad[article_idx]
-        paragraph = article['paragraphs'][paragraph_idx]
-        qa = paragraph['qas'][qa_idx]
-        question = qa['question']
+        paragraph = article["paragraphs"][paragraph_idx]
+        qa = paragraph["qas"][qa_idx]
+        question = qa["question"]
         answers = []
         answer_starts = []
-        for a in qa['answers']:
-            answers.append(a['text'])
-            answer_starts.append(a['answer_start'])
-        context = paragraph['context']
+        for a in qa["answers"]:
+            answers.append(a["text"])
+            answer_starts.append(a["answer_start"])
+        context = paragraph["context"]
 
         action = {
-            'id': 'squad',
-            'text': context + '\n' + question,
-            'labels': answers,
-            'episode_done': True,
-            'answer_starts': answer_starts,
+            "id": "squad",
+            "text": context + "\n" + question,
+            "labels": answers,
+            "episode_done": True,
+            "answer_starts": answer_starts,
         }
         return action
 
     def _setup_data(self, path):
         with PathManager.open(path) as data_file:
-            self.squad = json.load(data_file)['data']
+            self.squad = json.load(data_file)["data"]
         self.examples = []
 
         for article_idx in range(len(self.squad)):
             article = self.squad[article_idx]
-            for paragraph_idx in range(len(article['paragraphs'])):
-                paragraph = article['paragraphs'][paragraph_idx]
-                num_questions = len(paragraph['qas'])
+            for paragraph_idx in range(len(article["paragraphs"])):
+                paragraph = article["paragraphs"][paragraph_idx]
+                num_questions = len(paragraph["qas"])
                 for qa_idx in range(num_questions):
                     self.examples.append((article_idx, paragraph_idx, qa_idx))
 
@@ -113,29 +113,29 @@ class DefaultTeacher(DialogTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        self.datatype = opt['datatype']
+        self.datatype = opt["datatype"]
         build(opt)
-        if opt['datatype'].startswith('train'):
-            suffix = 'train'
+        if opt["datatype"].startswith("train"):
+            suffix = "train"
         else:
-            suffix = 'dev'
-        opt['datafile'] = os.path.join(opt['datapath'], 'SQuAD', suffix + '-v1.1.json')
-        self.id = 'squad'
+            suffix = "dev"
+        opt["datafile"] = os.path.join(opt["datapath"], "SQuAD", suffix + "-v1.1.json")
+        self.id = "squad"
         super().__init__(opt, shared)
 
     def setup_data(self, path):
-        print('loading: ' + path)
+        print("loading: " + path)
         with PathManager.open(path) as data_file:
-            self.squad = json.load(data_file)['data']
+            self.squad = json.load(data_file)["data"]
         for article in self.squad:
             # each paragraph is a context for the attached questions
-            for paragraph in article['paragraphs']:
+            for paragraph in article["paragraphs"]:
                 # each question is an example
-                for qa in paragraph['qas']:
-                    question = qa['question']
-                    answers = tuple(a['text'] for a in qa['answers'])
-                    context = paragraph['context']
-                    yield (context + '\n' + question, answers), True
+                for qa in paragraph["qas"]:
+                    question = qa["question"]
+                    answers = tuple(a["text"] for a in qa["answers"])
+                    context = paragraph["context"]
+                    yield (context + "\n" + question, answers), True
 
 
 class OpensquadTeacher(DialogTeacher):
@@ -148,27 +148,27 @@ class OpensquadTeacher(DialogTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        self.datatype = opt['datatype']
+        self.datatype = opt["datatype"]
         build(opt)
-        if opt['datatype'].startswith('train'):
-            suffix = 'train'
+        if opt["datatype"].startswith("train"):
+            suffix = "train"
         else:
-            suffix = 'dev'
-        opt['datafile'] = os.path.join(opt['datapath'], 'SQuAD', suffix + '-v1.1.json')
-        self.id = 'squad'
+            suffix = "dev"
+        opt["datafile"] = os.path.join(opt["datapath"], "SQuAD", suffix + "-v1.1.json")
+        self.id = "squad"
         super().__init__(opt, shared)
 
     def setup_data(self, path):
-        print('loading: ' + path)
+        print("loading: " + path)
         with PathManager.open(path) as data_file:
-            self.squad = json.load(data_file)['data']
+            self.squad = json.load(data_file)["data"]
         for article in self.squad:
             # each paragraph is a context for the attached questions
-            for paragraph in article['paragraphs']:
+            for paragraph in article["paragraphs"]:
                 # each question is an example
-                for qa in paragraph['qas']:
-                    question = qa['question']
-                    answers = [a['text'] for a in qa['answers']]
+                for qa in paragraph["qas"]:
+                    question = qa["question"]
+                    answers = [a["text"] for a in qa["answers"]]
                     yield (question, answers), True
 
 
@@ -187,40 +187,40 @@ class TitleTeacher(DefaultTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        self.id = 'squad_title'
+        self.id = "squad_title"
         build(opt)
         super().__init__(opt, shared)
 
     def setup_data(self, path):
-        print('loading: ' + path)
+        print("loading: " + path)
         with PathManager.open(path) as data_file:
-            self.squad = json.load(data_file)['data']
+            self.squad = json.load(data_file)["data"]
         for article in self.squad:
-            title = article['title']
+            title = article["title"]
             # each paragraph is a context for the attached questions
-            for paragraph in article['paragraphs']:
+            for paragraph in article["paragraphs"]:
                 # each question is an example
-                for qa in paragraph['qas']:
-                    question = qa['question']
-                    answers = (a['text'] for a in qa['answers'])
-                    context = paragraph['context']
-                    yield ('\n'.join([title, context, question]), answers), True
+                for qa in paragraph["qas"]:
+                    question = qa["question"]
+                    answers = (a["text"] for a in qa["answers"])
+                    context = paragraph["context"]
+                    yield ("\n".join([title, context, question]), answers), True
 
 
 class FulldocTeacher(ParlAIDialogTeacher):
     def __init__(self, opt, shared=None):
         build(opt)
         opt = copy.deepcopy(opt)
-        if opt['datatype'].startswith('train'):
-            suffix = 'train'
+        if opt["datatype"].startswith("train"):
+            suffix = "train"
         else:
-            suffix = 'valid'
+            suffix = "valid"
         datafile = os.path.join(
-            opt['datapath'], 'SQuAD-fulldoc', "squad_fulldocs." + suffix + ":ordered"
+            opt["datapath"], "SQuAD-fulldoc", "squad_fulldocs." + suffix + ":ordered"
         )
-        opt['parlaidialogteacher_datafile'] = datafile
+        opt["parlaidialogteacher_datafile"] = datafile
         super().__init__(opt, shared)
-        self.id = 'squad-fulldoc'
+        self.id = "squad-fulldoc"
         self.reset()
 
 
@@ -248,37 +248,37 @@ class SentenceTeacher(IndexTeacher):
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
         self.sent_tok = get_sentence_tokenizer()
-        self.include_context = opt.get('include_context', False)
+        self.include_context = opt.get("include_context", False)
 
     @classmethod
     def add_cmdline_args(
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        agent = parser.add_argument_group('SQuAD Sentence Teacher Arguments')
+        agent = parser.add_argument_group("SQuAD Sentence Teacher Arguments")
         agent.add_argument(
-            '--include-context',
-            type='bool',
+            "--include-context",
+            type="bool",
             default=False,
-            help='include context within text instead of as a ' 'separate field',
+            help="include context within text instead of as a " "separate field",
         )
         return parser
 
     def get(self, episode_idx, entry_idx=None):
         article_idx, paragraph_idx, qa_idx = self.examples[episode_idx]
         article = self.squad[article_idx]
-        paragraph = article['paragraphs'][paragraph_idx]
-        qa = paragraph['qas'][qa_idx]
-        context = paragraph['context']
-        question = qa['question']
+        paragraph = article["paragraphs"][paragraph_idx]
+        qa = paragraph["qas"][qa_idx]
+        context = paragraph["context"]
+        question = qa["question"]
 
-        answers = [a['text'] for a in qa['answers']]
+        answers = [a["text"] for a in qa["answers"]]
 
         # remove '.', '?', '!' from answers for proper sentence
         # tokenization
         edited_answers = []
         for answer in answers:
-            new_answer = answer.replace('.', '').replace('?', '').replace('!', '')
+            new_answer = answer.replace(".", "").replace("?", "").replace("!", "")
             context = context.replace(answer, new_answer)
             edited_answers.append(new_answer)
 
@@ -294,17 +294,17 @@ class SentenceTeacher(IndexTeacher):
                     break
 
         action = {
-            'context': context,
-            'text': question,
-            'labels': labels,
-            'label_candidates': edited_sentences,
-            'episode_done': True,
-            'answer_starts': label_starts,
+            "context": context,
+            "text": question,
+            "labels": labels,
+            "label_candidates": edited_sentences,
+            "episode_done": True,
+            "answer_starts": label_starts,
         }
 
         if self.include_context:
-            action['text'] = action['context'] + '\n' + action['text']
-            del action['context']
+            action["text"] = action["context"] + "\n" + action["text"]
+            del action["context"]
 
         return action
 
@@ -333,33 +333,33 @@ class FulldocsentenceTeacher(FulldocTeacher):
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
         self.sent_tok = get_sentence_tokenizer()
-        self.include_context = opt.get('include_context', False)
+        self.include_context = opt.get("include_context", False)
 
     @classmethod
     def add_cmdline_args(
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        agent = parser.add_argument_group('SQuAD Fulldoc Sentence Teacher Arguments')
+        agent = parser.add_argument_group("SQuAD Fulldoc Sentence Teacher Arguments")
         agent.add_argument(
-            '--include-context',
-            type='bool',
+            "--include-context",
+            type="bool",
             default=False,
-            help='include context within text instead of as a ' 'separate field',
+            help="include context within text instead of as a " "separate field",
         )
         return parser
 
     def get(self, episode_idx, entry_idx=None):
         action = {}
         episode = self.episodes[episode_idx][entry_idx]
-        context = ' '.join(episode['text'].split('\n')[:-1]).replace(
-            '\xa0', ' '
+        context = " ".join(episode["text"].split("\n")[:-1]).replace(
+            "\xa0", " "
         )  # get rid of non breaking space characters
-        question = episode['text'].split('\n')[-1]
-        label_field = 'labels' if 'labels' in episode else 'eval_labels'
+        question = episode["text"].split("\n")[-1]
+        label_field = "labels" if "labels" in episode else "eval_labels"
         answers = []
         for answer in episode[label_field]:
-            new_answer = answer.replace('.', '').replace('?', '').replace('!', '')
+            new_answer = answer.replace(".", "").replace("?", "").replace("!", "")
             context = context.replace(answer, new_answer)
             answers.append(new_answer)
         sentences = self.sent_tok.tokenize(context)
@@ -372,17 +372,17 @@ class FulldocsentenceTeacher(FulldocTeacher):
                     label_starts.append(context.index(sentence))
 
         action = {
-            'context': context,
-            'text': question,
+            "context": context,
+            "text": question,
             label_field: labels,
-            'answer_starts': label_starts,
-            'label_candidates': sentences,
-            'episode_done': episode['episode_done'],
+            "answer_starts": label_starts,
+            "label_candidates": sentences,
+            "episode_done": episode["episode_done"],
         }
 
         if self.include_context:
-            action['text'] = action['context'] + '\n' + action['text']
-            del action['context']
+            action["text"] = action["context"] + "\n" + action["text"]
+            del action["context"]
 
         return action
 
@@ -395,7 +395,7 @@ class SquadQATeacher(AbstractWrapperTeacher):
     @classmethod
     def add_cmdline_args(cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None):
         super().add_cmdline_args(parser, partial_opt)
-        parser.set_defaults(wrapper_task='squad')
+        parser.set_defaults(wrapper_task="squad")
         return parser
 
     def __init__(self, opt: Opt, shared=None):
@@ -406,6 +406,6 @@ class SquadQATeacher(AbstractWrapperTeacher):
         """
         # SQuAD returns passage and question both, only passage required for task.
         """
-        passage = act['text'].split('\n')[0]
-        act.force_set('text', passage)
+        passage = act["text"].split("\n")[0]
+        act.force_set("text", passage)
         return act

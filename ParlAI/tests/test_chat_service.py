@@ -11,29 +11,29 @@ from parlai.chat_service.services.messenger.messenger_manager import MessengerMa
 from parlai.core.params import ParlaiParser
 
 AGENT_ID = -1
-TASK_ID = 'test_task_1'
+TASK_ID = "test_task_1"
 PAGE_ID = 0
 # config taken from `chat_service/tasks/overworld_demo`
 OPT = {
-    'is_debug': True,
-    'config': {
-        'overworld': 'MessengerOverworld',
-        'world_path': 'parlai.chat_service.tasks.overworld_demo.worlds',
-        'max_workers': 2,
-        'task_name': 'overworld_demo',
-        'configs': {
-            'echo': WorldConfig(
-                world_name='echo',
-                onboarding_name='MessengerEchoOnboardWorld',
-                task_name='MessengerEchoTaskWorld',
+    "is_debug": True,
+    "config": {
+        "overworld": "MessengerOverworld",
+        "world_path": "parlai.chat_service.tasks.overworld_demo.worlds",
+        "max_workers": 2,
+        "task_name": "overworld_demo",
+        "configs": {
+            "echo": WorldConfig(
+                world_name="echo",
+                onboarding_name="MessengerEchoOnboardWorld",
+                task_name="MessengerEchoTaskWorld",
                 max_time_in_pool=180,
                 agents_required=1,
                 backup_task=None,
             )
         },
-        'additional_args': {'page_id': PAGE_ID},
+        "additional_args": {"page_id": PAGE_ID},
     },
-    'bypass_server_setup': True,
+    "bypass_server_setup": True,
 }
 
 
@@ -58,14 +58,14 @@ class TestChatServiceAgent(unittest.TestCase):
         manager = MessengerManager(opt)
         agent = MessengerAgent(opt, manager, AGENT_ID, TASK_ID, PAGE_ID)
 
-        self.assertEqual(agent.data, {'allow_images': False})
-        agent.data = {'second_arg': False}
-        self.assertEqual(agent.data, {'allow_images': False, 'second_arg': False})
-        agent.data['allow_images'] = True
-        self.assertEqual(agent.data, {'allow_images': True, 'second_arg': False}),
-        agent.data = {'third_arg': 1, 'second_arg': True}
+        self.assertEqual(agent.data, {"allow_images": False})
+        agent.data = {"second_arg": False}
+        self.assertEqual(agent.data, {"allow_images": False, "second_arg": False})
+        agent.data["allow_images"] = True
+        self.assertEqual(agent.data, {"allow_images": True, "second_arg": False}),
+        agent.data = {"third_arg": 1, "second_arg": True}
         self.assertEqual(
-            agent.data, {'allow_images': True, 'second_arg': True, 'third_arg': 1}
+            agent.data, {"allow_images": True, "second_arg": True, "third_arg": 1}
         )
 
 

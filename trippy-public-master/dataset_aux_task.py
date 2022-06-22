@@ -19,13 +19,13 @@ import json
 
 def create_examples(path, maxlen=512):
     examples = []
-    with open(path, 'r', encoding='utf-8') as reader:
+    with open(path, "r", encoding="utf-8") as reader:
         cnt = 0
         for line in reader:
             sample = json.loads(line)
-            if len(sample['token_id']) > maxlen:
+            if len(sample["token_id"]) > maxlen:
                 continue
             cnt += 1
             examples.append(sample)
-        print('Loaded {} samples out of {}'.format(len(examples), cnt))
+        print("Loaded {} samples out of {}".format(len(examples), cnt))
     return examples

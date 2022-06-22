@@ -9,11 +9,11 @@ import os
 
 
 def build(opt):
-    version = 'v6.0'
-    dpath = os.path.join(opt['datapath'], 'rephrase_sentences')
+    version = "v6.0"
+    dpath = os.path.join(opt["datapath"], "rephrase_sentences")
 
     if not build_data.built(dpath, version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)
@@ -21,15 +21,15 @@ def build(opt):
 
         # Download the data.
         fnames = [
-            'rephrase_sentences_train_0703.txt',
-            'rephrase_sentences_valid_0703.txt',
-            'rephrase_sentences_test_0703.txt',
-            'choose_sentence_train.txt',
-            'choose_sentence_valid.txt',
-            'choose_sentence_test.txt',
+            "rephrase_sentences_train_0703.txt",
+            "rephrase_sentences_valid_0703.txt",
+            "rephrase_sentences_test_0703.txt",
+            "choose_sentence_train.txt",
+            "choose_sentence_valid.txt",
+            "choose_sentence_test.txt",
         ]
         for fname in fnames:
-            url = 'http://parl.ai/downloads/projects/rephrase_sentences/' + fname
+            url = "http://parl.ai/downloads/projects/rephrase_sentences/" + fname
             build_data.download(url, dpath, fname)
 
         # Mark the data as built.

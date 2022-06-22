@@ -15,7 +15,7 @@ from parlai.utils.io import PathManager
 
 # Constants
 END_OF_CONVO = "EOC"
-CHROME_PATH = r'/Applications/Google\ Chrome.app/Contents/MacOS//Google\ Chrome'
+CHROME_PATH = r"/Applications/Google\ Chrome.app/Contents/MacOS//Google\ Chrome"
 
 ALT_EMOJI_IMG = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/facebook/230/parrot_1f99c.png"
 HUMAN_EMOJI_IMG = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/apple/76/woman_1f469.png"
@@ -32,7 +32,7 @@ def gen_convo_ul(conversations):
     ul_str = f"\t<ul>\n"
     for speaker, speech in conversations:
         if speaker == END_OF_CONVO:
-            ul_str += f"\n\t  <li class=\"breaker\"><hr/></li>\n"
+            ul_str += f'\n\t  <li class="breaker"><hr/></li>\n'
         else:
             ul_str += f"""
     <li>
@@ -173,8 +173,8 @@ def pre_process(fname, num_ex, alt_speaker):
             data = json.loads(line)
             dialogue = data["dialog"]
             for item in dialogue:
-                speaker = item[0]['id']
-                text = item[0]['text']
+                speaker = item[0]["id"]
+                text = item[0]["text"]
                 conversation += [(speaker, text)]
             conversation += [(END_OF_CONVO, END_OF_CONVO)]
 
@@ -212,7 +212,7 @@ def setup_args():
     Creates a parser object with some pre-determined arguments.
     """
     parser = ParlaiParser(add_parlai_args=True, description="Render data as HTML")
-    conv_render = parser.add_argument_group('Conversation Rendering Arguments')
+    conv_render = parser.add_argument_group("Conversation Rendering Arguments")
     conv_render.add_argument(
         "--input", "-i", help="Input file to read conversations from"
     )
@@ -261,7 +261,7 @@ def check_icon_arg(src, default):
     """
     if src != default:
         # check if URl
-        if not src.startswith('https://') and not src.startswith('http://'):
+        if not src.startswith("https://") and not src.startswith("http://"):
             # Either a file or incorrect input
             if os.path.isabs(src):
                 src = "file://" + src
@@ -280,17 +280,17 @@ def validate_args(opt):
 
     :return: Returns extension of output file. None if no output file
     """
-    if not PathManager.exists(opt['input']):
+    if not PathManager.exists(opt["input"]):
         raise IOError("Input File does not exist")
-    if opt['output'] is None:
+    if opt["output"] is None:
         return None
-    extension = opt['output'].split(".")[-1]
+    extension = opt["output"].split(".")[-1]
     if extension not in ["html", "pdf", "png"]:
         raise Exception(
             "Extension not specified/supported. Specify one of '.html', '.pdf' or '.png' output files"
         )
-    opt['user_icon'] = check_icon_arg(opt['user_icon'], HUMAN_EMOJI_IMG)
-    opt['alt_icon'] = check_icon_arg(opt['alt_icon'], ALT_EMOJI_IMG)
+    opt["user_icon"] = check_icon_arg(opt["user_icon"], HUMAN_EMOJI_IMG)
+    opt["alt_icon"] = check_icon_arg(opt["alt_icon"], ALT_EMOJI_IMG)
     return extension
 
 
@@ -298,11 +298,11 @@ def render_convo(opt):
     # Run
     opt.log()
     extension = validate_args(opt)
-    input_file, output_file = opt['input'], opt['output']
-    height, width = opt['height'], opt['width']
-    alt_speaker = input_file.split('/')[-1][:-6]
+    input_file, output_file = opt["input"], opt["output"]
+    height, width = opt["height"], opt["width"]
+    alt_speaker = input_file.split("/")[-1][:-6]
 
-    dialogs = pre_process(input_file, opt['num_examples'], alt_speaker)
+    dialogs = pre_process(input_file, opt["num_examples"], alt_speaker)
 
     # Display on CLI
     if output_file is None:
@@ -316,8 +316,8 @@ def render_convo(opt):
             "Rendered HTML",
             alt_speaker,
             "human",
-            opt['user_icon'],
-            opt['alt_icon'],
+            opt["user_icon"],
+            opt["alt_icon"],
         )
         if extension == "html":
             # save to output
@@ -332,21 +332,21 @@ def render_convo(opt):
                     if extension == "pdf":
                         cmd = (
                             f"{CHROME_PATH} --headless --crash-dumps-dir=/tmp"
-                            f"--print-to-pdf=\"{output_file}\" {fname}"
+                            f'--print-to-pdf="{output_file}" {fname}'
                         )
                     else:
                         cmd = (
                             f"{CHROME_PATH} --headless --hide-scrollbars"
                             f"--crash-dumps-dir=/tmp --window-size"
                             f"={opt['width'] * 100},{opt['height'] * 100}"
-                            f"--screenshot=\"{output_file}\" {fname}"
+                            f'--screenshot="{output_file}" {fname}'
                         )
                     subprocess.run(
                         cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
                     )
 
 
-@register_script('convo_render', hidden=True)
+@register_script("convo_render", hidden=True)
 class RenderConversation(ParlaiScript):
     @classmethod
     def setup_args(cls):
@@ -356,5 +356,5 @@ class RenderConversation(ParlaiScript):
         return render_convo(self.opt)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     RenderConversation.main()

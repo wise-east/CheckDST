@@ -46,7 +46,7 @@ class BaseIndexer(ABC):
     """
 
     def __init__(self, opt: Opt):
-        self.buffer_size = opt['indexer_buffer_size']
+        self.buffer_size = opt["indexer_buffer_size"]
         self.index_id_to_db_id = []
         self.index = None
         try:
@@ -55,7 +55,7 @@ class BaseIndexer(ABC):
             self.faiss = faiss
         except ImportError:
             raise ImportError(
-                'Please install faiss: https://github.com/facebookresearch/faiss/blob/main/INSTALL.md'
+                "Please install faiss: https://github.com/facebookresearch/faiss/blob/main/INSTALL.md"
             )
 
     @abstractmethod
@@ -100,7 +100,7 @@ class BaseIndexer(ABC):
                 a list of reconstructed document vectors
         """
         query_vectors = self.get_search_vectors(query_vectors)
-        logging.debug(f'query_vectors {query_vectors.shape}')
+        logging.debug(f"query_vectors {query_vectors.shape}")
         _scores, indexes, vectors = self.index.search_and_reconstruct(
             query_vectors, top_docs
         )
@@ -118,14 +118,14 @@ class BaseIndexer(ABC):
         :param file:
             output file.
         """
-        logging.info(f'Serializing index to {file}')
+        logging.info(f"Serializing index to {file}")
 
         if os.path.isdir(file):
             index_file = os.path.join(file, "index")
             meta_file = os.path.join(file, "index_meta")
         else:
-            index_file = f'{file}.index'
-            meta_file = f'{file}.index_meta'
+            index_file = f"{file}.index"
+            meta_file = f"{file}.index_meta"
 
         self.faiss.write_index(self.index, index_file)
         if self.index_id_to_db_id:
@@ -140,20 +140,20 @@ class BaseIndexer(ABC):
         :param emb_path:
             optional path to embeddings
         """
-        logging.info(f'Loading index from {file}')
+        logging.info(f"Loading index from {file}")
 
         if os.path.isdir(file):
             index_file = os.path.join(file, "index")
             meta_file = os.path.join(file, "index_meta")
-        elif not file.endswith('.index'):
-            index_file = f'{file}.index'
-            meta_file = f'{file}.index_meta'
+        elif not file.endswith(".index"):
+            index_file = f"{file}.index"
+            meta_file = f"{file}.index_meta"
         else:
             index_file = file
-            meta_file = f'{index_file}_meta'
+            meta_file = f"{index_file}_meta"
 
         self.index = self.faiss.read_index(index_file)
-        logging.info(f'Loaded index of type {self.index} and size {self.index.ntotal}')
+        logging.info(f"Loaded index of type {self.index} and size {self.index.ntotal}")
 
         if os.path.exists(meta_file):
             self.index_id_to_db_id = torch.load(meta_file)
@@ -162,16 +162,16 @@ class BaseIndexer(ABC):
             if not os.path.isdir(index_dir):
                 # if emb_path has the embeddings name in there, need to split.
                 index_dir = os.path.split(index_dir)[0]
-            meta_files = [f for f in os.listdir(index_dir) if f.startswith('ids_')]
-            meta_files = sorted(meta_files, key=lambda x: int(x.split('_')[-1]))
+            meta_files = [f for f in os.listdir(index_dir) if f.startswith("ids_")]
+            meta_files = sorted(meta_files, key=lambda x: int(x.split("_")[-1]))
             for f in meta_files:
                 ids = torch.load(os.path.join(index_dir, f))
                 self.index_id_to_db_id.extend(ids)
             torch.save(self.index_id_to_db_id, meta_file)
         assert (
             len(self.index_id_to_db_id) == self.index.ntotal
-        ), 'Deserialized index_id_to_db_id should match faiss index size '
-        f'{len(self.index_id_to_db_id)} != {self.index.ntotal}'
+        ), "Deserialized index_id_to_db_id should match faiss index size "
+        f"{len(self.index_id_to_db_id)} != {self.index.ntotal}"
 
 
 class DenseHNSWFlatIndexer(BaseIndexer):
@@ -186,10 +186,10 @@ class DenseHNSWFlatIndexer(BaseIndexer):
         # IndexHNSWFlat supports L2 similarity only
         # so we have to apply DOT -> L2 similairy space conversion with the help of an extra dimension
         index = self.faiss.IndexHNSWFlat(
-            opt['retriever_embedding_size'] + 1, opt['hnsw_indexer_store_n']
+            opt["retriever_embedding_size"] + 1, opt["hnsw_indexer_store_n"]
         )
-        index.hnsw.efSearch = opt['hnsw_ef_search']
-        index.hnsw.efConstruction = opt['hnsw_ef_construction']
+        index.hnsw.efSearch = opt["hnsw_ef_search"]
+        index.hnsw.efConstruction = opt["hnsw_ef_construction"]
         self.index = index
         self.built = False
 
@@ -208,13 +208,13 @@ class DenseHNSWFlatIndexer(BaseIndexer):
         # max norm is required before putting all vectors in the index to convert inner product similarity to L2
         if self.built:
             raise RuntimeError(
-                'HNSW index needs to index all data at once, results will be unpredictable otherwise.'
+                "HNSW index needs to index all data at once, results will be unpredictable otherwise."
             )
         phi = 0
-        norms = (data ** 2).sum(dim=1)
+        norms = (data**2).sum(dim=1)
         max_norms = norms.max().item()
         phi = max(phi, max_norms)
-        logging.info(f'HNSWF DotProduct -> L2 space phi={phi}')
+        logging.info(f"HNSWF DotProduct -> L2 space phi={phi}")
         start = time.time()
 
         for i in range(0, n, self.buffer_size):
@@ -224,10 +224,10 @@ class DenseHNSWFlatIndexer(BaseIndexer):
             hnsw_vectors = torch.cat([vectors_i, aux_dims.unsqueeze(1)], dim=1)
             self.index.add(hnsw_vectors.numpy())
             logging.info(
-                f'{time.time() - start}s Elapsed: data indexed {i + len(vectors_i)}'
+                f"{time.time() - start}s Elapsed: data indexed {i + len(vectors_i)}"
             )
 
-        logging.info(f'Total data indexed {n}')
+        logging.info(f"Total data indexed {n}")
 
     def get_search_vectors(self, query_vectors: np.array) -> np.array:
         """
@@ -240,7 +240,7 @@ class DenseHNSWFlatIndexer(BaseIndexer):
         :return search_vectors:
             search vectors of dimension [n_search, q_dim + 1]
         """
-        aux_dim = np.zeros(len(query_vectors), dtype='float32')
+        aux_dim = np.zeros(len(query_vectors), dtype="float32")
         query_hnsw_vectors = np.hstack((query_vectors, aux_dim.reshape(-1, 1)))
         return query_hnsw_vectors
 
@@ -271,32 +271,32 @@ class CompressedIndexer(BaseIndexer):
         The IVFPQ Indexer is a great way to reduce memory footprint of dense embeddings.
         """
         super().__init__(opt)
-        self.dim = opt['retriever_embedding_size']
+        self.dim = opt["retriever_embedding_size"]
         self.use_gpu_train = (
-            not opt['no_cuda']
+            not opt["no_cuda"]
             and torch.cuda.is_available()
-            and opt['compressed_indexer_gpu_train']
+            and opt["compressed_indexer_gpu_train"]
         )
-        self.hnsw_ef_search = opt['hnsw_ef_search']
+        self.hnsw_ef_search = opt["hnsw_ef_search"]
 
-        self.index_factory = opt['compressed_indexer_factory']
+        self.index_factory = opt["compressed_indexer_factory"]
         if self.index_factory:
-            logging.warning(f'Creating Index from Index Factory: {self.index_factory}')
-            self.is_ivf_index = 'IVF' in self.index_factory
+            logging.warning(f"Creating Index from Index Factory: {self.index_factory}")
+            self.is_ivf_index = "IVF" in self.index_factory
             self.index = self.faiss.index_factory(
                 self.dim, self.index_factory, self.faiss.METRIC_INNER_PRODUCT
             )
         else:
             self.is_ivf_index = True
             quantizer = self.faiss.IndexHNSWFlat(
-                self.dim, opt['hnsw_indexer_store_n'], self.faiss.METRIC_INNER_PRODUCT
+                self.dim, opt["hnsw_indexer_store_n"], self.faiss.METRIC_INNER_PRODUCT
             )
-            quantizer.hnsw.efConstruction = opt['hnsw_ef_construction']
-            quantizer.hnsw.efSearch = opt['hnsw_ef_search']
+            quantizer.hnsw.efConstruction = opt["hnsw_ef_construction"]
+            quantizer.hnsw.efSearch = opt["hnsw_ef_search"]
             ivf_index = self.faiss.IndexIVFPQ(
                 quantizer, self.dim, 4096, 128, 8, self.faiss.METRIC_INNER_PRODUCT
             )
-            ivf_index.nprobe = opt['compressed_indexer_nprobe']
+            ivf_index.nprobe = opt["compressed_indexer_nprobe"]
             self.index = ivf_index
 
         if self.is_ivf_index:
@@ -309,19 +309,19 @@ class CompressedIndexer(BaseIndexer):
             )
             self.downcast_quantizer.verbose = True
             self.downcast_quantizer.metric_type = self.faiss.METRIC_INNER_PRODUCT
-            if hasattr(self.downcast_quantizer, 'hnsw'):
-                self.downcast_quantizer.hnsw.efSearch = opt['hnsw_ef_search']
+            if hasattr(self.downcast_quantizer, "hnsw"):
+                self.downcast_quantizer.hnsw.efSearch = opt["hnsw_ef_search"]
                 self.downcast_quantizer.hnsw.efConstruction = opt[
-                    'hnsw_ef_construction'
+                    "hnsw_ef_construction"
                 ]
                 self.downcast_quantizer.hnsw.metric_type = (
                     self.faiss.METRIC_INNER_PRODUCT
                 )
 
             self.setup_gpu_train()
-            self.index.nprobe = opt['compressed_indexer_nprobe']
+            self.index.nprobe = opt["compressed_indexer_nprobe"]
 
-        self.nprobe = opt['compressed_indexer_nprobe']
+        self.nprobe = opt["compressed_indexer_nprobe"]
         self.span = 5  # arbitrarily chosen, from prior evidence
         self.random = random.Random(42)
 
@@ -330,14 +330,14 @@ class CompressedIndexer(BaseIndexer):
         Setup training on the gpu.
         """
         if self.use_gpu_train:
-            logging.warning('Will train index on GPU')
+            logging.warning("Will train index on GPU")
             try:
                 clustering_index = self.faiss.index_cpu_to_all_gpus(
                     self.faiss.IndexFlatIP(self.index_ivf.d)
                 )
                 self.index.clustering_index = clustering_index
             except NameError:
-                logging.warning('GPU training not supported; switching to CPU.')
+                logging.warning("GPU training not supported; switching to CPU.")
 
     def train(self, vectors: List[torch.Tensor]):
         """
@@ -352,16 +352,16 @@ class CompressedIndexer(BaseIndexer):
             # sample
             num_samples = (
                 min(50 * self.nlist, vec.size(0))
-                if hasattr(self, 'n_list')
+                if hasattr(self, "n_list")
                 else vec.size(0) // 2
             )
             vec = vec[torch.LongTensor(random.sample(range(vec.size(0)), num_samples))]
             logging.info(
-                f'Training data {i+1}/{math.ceil(len(vectors) / self.span)} of shape {vec.shape}'
+                f"Training data {i+1}/{math.ceil(len(vectors) / self.span)} of shape {vec.shape}"
             )
             self.index.train(vec.float().numpy())
             logging.info(
-                f'{time.time() - start:.2f}s Elapsed: training complete for {i+1}'
+                f"{time.time() - start:.2f}s Elapsed: training complete for {i+1}"
             )
 
     def add(self, vectors: List[torch.Tensor]):
@@ -375,10 +375,10 @@ class CompressedIndexer(BaseIndexer):
         for i, vecs in enumerate(grouper(vectors, self.span, None)):
             vec = torch.cat([v for v in vecs if v is not None])
             logging.info(
-                f'Adding data {(i+1)}/{math.ceil(len(vectors) / self.span)} of shape: {vec.shape}'
+                f"Adding data {(i+1)}/{math.ceil(len(vectors) / self.span)} of shape: {vec.shape}"
             )
             self.index.add(vec.float().numpy())
-            logging.info(f'{time.time() - start}s Elapsed: adding complete for {i+1}')
+            logging.info(f"{time.time() - start}s Elapsed: adding complete for {i+1}")
 
     def index_data(self, data: List[torch.Tensor]):
         """
@@ -389,13 +389,13 @@ class CompressedIndexer(BaseIndexer):
         """
         start = time.time()
         assert isinstance(data, list)
-        logging.info(f'Indexing {sum(v.size(0) for v in data)} vectors')
+        logging.info(f"Indexing {sum(v.size(0) for v in data)} vectors")
         # First, train
         self.train(data)
 
         # then, Add
         self.add(data)
-        logging.info(f'Indexing complete; total time elapsed: {time.time() - start}')
+        logging.info(f"Indexing complete; total time elapsed: {time.time() - start}")
 
     def deserialize_from(self, file: str, emb_path: Optional[str] = None):
         """
@@ -421,21 +421,21 @@ def indexer_factory(opt: Opt) -> BaseIndexer:
     :return indexer:
         return build indexer, according to options
     """
-    if opt['indexer_type'] == 'compressed':
-        if opt['path_to_index'] == WIKIPEDIA_EXACT_INDEX:
+    if opt["indexer_type"] == "compressed":
+        if opt["path_to_index"] == WIKIPEDIA_EXACT_INDEX:
             logging.warning(
-                f'Changing index path to compressed index: {WIKIPEDIA_COMPRESSED_INDEX}'
+                f"Changing index path to compressed index: {WIKIPEDIA_COMPRESSED_INDEX}"
             )
-            opt['path_to_index'] = modelzoo_path(
-                opt['datapath'], WIKIPEDIA_COMPRESSED_INDEX
+            opt["path_to_index"] = modelzoo_path(
+                opt["datapath"], WIKIPEDIA_COMPRESSED_INDEX
             )
         indexer = CompressedIndexer(opt)
-    elif opt['indexer_type'] == 'exact':
-        if opt['path_to_index'] == WIKIPEDIA_COMPRESSED_INDEX:
+    elif opt["indexer_type"] == "exact":
+        if opt["path_to_index"] == WIKIPEDIA_COMPRESSED_INDEX:
             logging.warning(
-                f'Changing index path to exact index: {WIKIPEDIA_EXACT_INDEX}'
+                f"Changing index path to exact index: {WIKIPEDIA_EXACT_INDEX}"
             )
-            opt['path_to_index'] = modelzoo_path(opt['datapath'], WIKIPEDIA_EXACT_INDEX)
+            opt["path_to_index"] = modelzoo_path(opt["datapath"], WIKIPEDIA_EXACT_INDEX)
         indexer = DenseHNSWFlatIndexer(opt)
     else:
         raise ValueError(f"Unsupported indexer type: {opt['indexer_type']}")

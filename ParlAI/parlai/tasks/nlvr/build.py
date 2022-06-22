@@ -10,19 +10,19 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        'https://github.com/clic-lab/nlvr/archive/master.zip',
-        'nlvr.zip',
-        '32694f83835bd28b86b0f2734efa9544401ed18bd954649b50d1375d43e56b8b',
+        "https://github.com/clic-lab/nlvr/archive/master.zip",
+        "nlvr.zip",
+        "32694f83835bd28b86b0f2734efa9544401ed18bd954649b50d1375d43e56b8b",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'nlvr')
+    dpath = os.path.join(opt["datapath"], "nlvr")
     version = None
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
 
         # make a clean directory if needed
         if build_data.built(dpath):

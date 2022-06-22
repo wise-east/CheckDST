@@ -15,11 +15,11 @@ from parlai.core.teachers import FixedDialogTeacher
 
 from .build import build
 
-SINGLE_TURN_DATA = 'single_turn_safety.json'
+SINGLE_TURN_DATA = "single_turn_safety.json"
 
 
-OK_CLASS = '__ok__'
-NOT_OK_CLASS = '__notok__'
+OK_CLASS = "__ok__"
+NOT_OK_CLASS = "__notok__"
 
 
 class _BaseSafetyTeacher(FixedDialogTeacher, ABC):
@@ -34,38 +34,38 @@ class _BaseSafetyTeacher(FixedDialogTeacher, ABC):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        parser = parser.add_argument_group('Safety Teacher Args')
+        parser = parser.add_argument_group("Safety Teacher Args")
         parser.add_argument(
-            '--round',
+            "--round",
             type=int,
             default=1,
             choices=[1, 2, 3],
-            help='Which round of data to use',
+            help="Which round of data to use",
         )
         parser.add_argument(
-            '--round-only',
-            type='bool',
+            "--round-only",
+            type="bool",
             default=False,
-            help='if False, includes all rounds up to including the specified '
-            'round; if True, only includes data from the specified round',
+            help="if False, includes all rounds up to including the specified "
+            "round; if True, only includes data from the specified round",
         )
         return parser
 
     def __init__(self, opt, shared=None):
-        build(opt['datapath'])  # download the data
+        build(opt["datapath"])  # download the data
         self.opt = opt
         self.data_path = os.path.join(
-            opt['datapath'], 'dialogue_safety', SINGLE_TURN_DATA
+            opt["datapath"], "dialogue_safety", SINGLE_TURN_DATA
         )
 
         self.fixed_random = random.Random(42)
-        self.round = opt['round']
+        self.round = opt["round"]
         self.label_candidates = [NOT_OK_CLASS, OK_CLASS]
 
-        if shared and 'data' in shared:
-            self.data = shared['data']
+        if shared and "data" in shared:
+            self.data = shared["data"]
         else:
-            self._setup_data(opt['datatype'])
+            self._setup_data(opt["datatype"])
 
         super().__init__(opt, shared)
         self.reset()
@@ -83,17 +83,17 @@ class _BaseSafetyTeacher(FixedDialogTeacher, ABC):
     def _setup_data(self, datatype):
         # load data
         self.data_dump = self._load_data_dump()
-        d_type = datatype.split(':')[0]
+        d_type = datatype.split(":")[0]
         self.data = []
-        if not self.opt['round_only']:
+        if not self.opt["round_only"]:
             # loop and add other rounds
             for i in range(self.round - 1):
                 rnd = str(i + 1)
-                for x in ['good', 'bad']:
+                for x in ["good", "bad"]:
                     self.data += self.data_dump[d_type][rnd][x]
 
         # add data from current round
-        for x in ['good', 'bad']:
+        for x in ["good", "bad"]:
             self.data += self.data_dump[d_type][str(self.round)][x]
 
         self.fixed_random.shuffle(self.data)
@@ -103,5 +103,5 @@ class _BaseSafetyTeacher(FixedDialogTeacher, ABC):
 
     def share(self):
         shared = super().share()
-        shared['data'] = self.data
+        shared["data"] = self.data
         return shared

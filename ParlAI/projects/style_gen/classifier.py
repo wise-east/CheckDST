@@ -43,12 +43,12 @@ class ClassifierAgent(ClassificationMixin, TransformerGeneratorAgent):
         Add CLI args.
         """
         TransformerClassifierAgent.add_cmdline_args(parser, partial_opt=partial_opt)
-        agent = parser.add_argument_group('ClassifierOnGenerator Arguments')
+        agent = parser.add_argument_group("ClassifierOnGenerator Arguments")
         agent.add_argument(
-            '--freeze-enc-dec-weights',
-            type='bool',
+            "--freeze-enc-dec-weights",
+            type="bool",
             default=False,
-            help='Only train the classifier head and not the encoder and decoder',
+            help="Only train the classifier head and not the encoder and decoder",
         )
         return agent
 
@@ -58,29 +58,29 @@ class ClassifierAgent(ClassificationMixin, TransformerGeneratorAgent):
         """
 
         # set up classes
-        if opt.get('classes') is None and opt.get('classes_from_file') is None:
+        if opt.get("classes") is None and opt.get("classes_from_file") is None:
             raise RuntimeError(
-                'Must specify --classes or --classes-from-file argument.'
+                "Must specify --classes or --classes-from-file argument."
             )
         if not shared:
-            if opt['classes_from_file'] == 'image_chat_personalities_file':
+            if opt["classes_from_file"] == "image_chat_personalities_file":
                 # Download the file of Image-Chat personalities and use it as the list
                 # of classes
-                opt['classes_from_file'] = get_personality_list_path(opt)
-            if opt['classes_from_file'] is not None:
-                with open(opt['classes_from_file']) as f:
+                opt["classes_from_file"] = get_personality_list_path(opt)
+            if opt["classes_from_file"] is not None:
+                with open(opt["classes_from_file"]) as f:
                     self.class_list = f.read().splitlines()
             else:
-                self.class_list = opt['classes']
+                self.class_list = opt["classes"]
             self.class_dict = {val: i for i, val in enumerate(self.class_list)}
-            if opt.get('class_weights', None) is not None:
-                self.class_weights = opt['class_weights']
+            if opt.get("class_weights", None) is not None:
+                self.class_weights = opt["class_weights"]
             else:
                 self.class_weights = [1.0 for _ in self.class_list]
         else:
-            self.class_list = shared['class_list']
-            self.class_dict = shared['class_dict']
-            self.class_weights = shared['class_weights']
+            self.class_list = shared["class_list"]
+            self.class_dict = shared["class_dict"]
+            self.class_weights = shared["class_weights"]
 
         super().__init__(opt, shared)
 
@@ -91,7 +91,7 @@ class ClassifierAgent(ClassificationMixin, TransformerGeneratorAgent):
                 self.criterion.cuda()
 
         # Freeze generator encoder/decoder weights
-        if opt['freeze_enc_dec_weights']:
+        if opt["freeze_enc_dec_weights"]:
             for param in chain(
                 self.model.encoder.parameters(), self.model.decoder.parameters()
             ):
@@ -109,17 +109,17 @@ class ClassifierAgent(ClassificationMixin, TransformerGeneratorAgent):
     def build_criterion(self):
         weight_tensor = torch.FloatTensor(self.class_weights)
         if not self.fp16:
-            return torch.nn.CrossEntropyLoss(weight=weight_tensor, reduction='none')
+            return torch.nn.CrossEntropyLoss(weight=weight_tensor, reduction="none")
         else:
             # FP16 safe cross entropy (softmax done in FP32)
-            return FP16SafeCrossEntropy(weight=weight_tensor, reduction='none')
+            return FP16SafeCrossEntropy(weight=weight_tensor, reduction="none")
 
     def load_state_dict(self, state_dict):
         """
         Override to add in the classifier head if it doesn't exist.
         """
-        for tensor in ['weight', 'bias']:
-            key = f'classifier_head.{tensor}'
+        for tensor in ["weight", "bias"]:
+            key = f"classifier_head.{tensor}"
             if key not in state_dict:
                 state_dict[key] = getattr(self.model.classifier_head, tensor)
         super().load_state_dict(state_dict)
@@ -129,9 +129,9 @@ class ClassifierAgent(ClassificationMixin, TransformerGeneratorAgent):
         Share model parameters.
         """
         shared = super().share()
-        shared['class_dict'] = self.class_dict
-        shared['class_list'] = self.class_list
-        shared['class_weights'] = self.class_weights
+        shared["class_dict"] = self.class_dict
+        shared["class_list"] = self.class_list
+        shared["class_weights"] = self.class_weights
         return shared
 
     def _get_label_tensor(self, batch):
@@ -144,7 +144,7 @@ class ClassifierAgent(ClassificationMixin, TransformerGeneratorAgent):
         try:
             labels_indices_list = [self.class_dict[label] for label in labels]
         except KeyError as e:
-            warn_once('One of your labels is not in the class list.')
+            warn_once("One of your labels is not in the class list.")
             raise e
 
         labels_tensor = torch.LongTensor(labels_indices_list)
@@ -160,7 +160,7 @@ class ClassifierAgent(ClassificationMixin, TransformerGeneratorAgent):
         for i, pred_id in enumerate(prediction_id.tolist()):
             prob = round_sigfigs(probs[i][pred_id], 4)
             preds.append(
-                'Predicted class: {}\nwith probability: {}'.format(
+                "Predicted class: {}\nwith probability: {}".format(
                     self.class_list[pred_id], prob
                 )
             )
@@ -179,7 +179,7 @@ class ClassifierAgent(ClassificationMixin, TransformerGeneratorAgent):
         labels = self._get_label_tensor(batch)
         scores = self.score(batch)
         loss = self.criterion(scores, labels)
-        self.record_local_metric('loss', AverageMetric.many(loss))
+        self.record_local_metric("loss", AverageMetric.many(loss))
         loss = loss.mean()
         self.backward(loss)
         self.update_params()
@@ -204,14 +204,14 @@ class ClassifierAgent(ClassificationMixin, TransformerGeneratorAgent):
         _, prediction_id = torch.max(probs.float().cpu(), 1)
         preds = [self.class_list[idx] for idx in prediction_id]
 
-        if batch.labels is None or self.opt['ignore_labels']:
+        if batch.labels is None or self.opt["ignore_labels"]:
             # interactive mode
-            if self.opt.get('print_scores', False):
+            if self.opt.get("print_scores", False):
                 preds = self._format_interactive_output(probs, prediction_id)
         else:
             labels = self._get_label_tensor(batch)
             loss = self.criterion(scores, labels)
-            self.record_local_metric('loss', AverageMetric.many(loss))
+            self.record_local_metric("loss", AverageMetric.many(loss))
 
             preds = [self.class_list[idx] for idx in prediction_id]
             labels = batch.labels
@@ -219,7 +219,7 @@ class ClassifierAgent(ClassificationMixin, TransformerGeneratorAgent):
             if preds is not None and labels is not None:
                 self._update_confusion_matrix(preds, labels)
 
-        if self.opt.get('print_scores', False):
+        if self.opt.get("print_scores", False):
             assert probs.size(1) == len(self.class_list)
             cpu_probs = probs.cpu()
             probs_by_class = [

@@ -11,19 +11,19 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        'https://www.dropbox.com/s/4i9u4y24pt3paba/personalized-dialog-dataset.tar.gz?dl=1',
-        'personalized-dialog-dataset.tar.gz',
-        '0da3d5ba631d672e9e2d108dfd6721c8201cc41b837425540faba6815c375c52',
+        "https://www.dropbox.com/s/4i9u4y24pt3paba/personalized-dialog-dataset.tar.gz?dl=1",
+        "personalized-dialog-dataset.tar.gz",
+        "0da3d5ba631d672e9e2d108dfd6721c8201cc41b837425540faba6815c375c52",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'personalized-dialog')
+    dpath = os.path.join(opt["datapath"], "personalized-dialog")
     version = None
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

@@ -15,20 +15,20 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        'https://raw.githubusercontent.com/salesforce/decanlp/d594b2bf127e13d0e61151b6a2af3bf63612f380/local_data/schema.txt',
-        'schema.txt',
-        '31da9bee05796bbe0f6c957f54d1eb82eb5c644a8ee59f2ff1fa890eff3885dd',
+        "https://raw.githubusercontent.com/salesforce/decanlp/d594b2bf127e13d0e61151b6a2af3bf63612f380/local_data/schema.txt",
+        "schema.txt",
+        "31da9bee05796bbe0f6c957f54d1eb82eb5c644a8ee59f2ff1fa890eff3885dd",
         zipped=False,
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'MWSC')
-    version = 'None'
+    dpath = os.path.join(opt["datapath"], "MWSC")
+    version = "None"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)
@@ -38,15 +38,15 @@ def build(opt):
         for downloadable_file in RESOURCES:
             downloadable_file.download_file(dpath)
 
-        pattern = '\\[.*\\]'
+        pattern = "\\[.*\\]"
 
         def get_both_schema(context):
-            variations = [x[1:-1].split('/') for x in re.findall(pattern, context)]
+            variations = [x[1:-1].split("/") for x in re.findall(pattern, context)]
             splits = re.split(pattern, context)
             results = []
             for which_schema in range(2):
                 vs = [v[which_schema] for v in variations]
-                context = ''
+                context = ""
                 for idx in range(len(splits)):
                     context += splits[idx]
                     if idx < len(vs):
@@ -72,12 +72,12 @@ def build(opt):
             context, question, answer = schema
             contexts = get_both_schema(context)
             questions = get_both_schema(question)
-            answers = answer.split('/')
+            answers = answer.split("/")
             for idx in range(2):
                 answer = answers[idx]
-                question = questions[idx] + ' {} or {}?'.format(answers[0], answers[1])
+                question = questions[idx] + " {} or {}?".format(answers[0], answers[1])
                 examples.append(
-                    {'context': contexts[idx], 'question': question, 'answer': answer}
+                    {"context": contexts[idx], "question": question, "answer": answer}
                 )
 
         traindev = examples[:-100]
@@ -85,12 +85,12 @@ def build(opt):
         train = traindev[:80]
         dev = traindev[80:]
 
-        splits = ['train', 'validation', 'test']
+        splits = ["train", "validation", "test"]
         for split, examples in zip(splits, [train, dev, test]):
-            split_fname = '{}.json'.format(split)
-            with PathManager.open(os.path.join(dpath, split_fname), 'a') as split_file:
+            split_fname = "{}.json".format(split)
+            with PathManager.open(os.path.join(dpath, split_fname), "a") as split_file:
                 for ex in examples:
-                    split_file.write(json.dumps(ex) + '\n')
+                    split_file.write(json.dumps(ex) + "\n")
 
         # Mark the data as built.
         build_data.mark_done(dpath, version_string=version)

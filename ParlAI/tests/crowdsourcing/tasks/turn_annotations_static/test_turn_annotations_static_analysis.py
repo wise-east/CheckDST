@@ -39,17 +39,17 @@ try:
 
                 # Paths
                 analysis_samples_folder = os.path.join(
-                    os.path.dirname(os.path.abspath(__file__)), 'analysis_samples'
+                    os.path.dirname(os.path.abspath(__file__)), "analysis_samples"
                 )
                 analysis_outputs_folder = os.path.join(
                     os.path.dirname(os.path.abspath(__file__)),
-                    'test_turn_annotations_static_analysis',
+                    "test_turn_annotations_static_analysis",
                 )
                 expected_stdout_path = os.path.join(
-                    analysis_outputs_folder, 'test_stdout.txt'
+                    analysis_outputs_folder, "test_stdout.txt"
                 )
                 temp_gold_annotations_path = os.path.join(
-                    tmpdir, 'gold_annotations.json'
+                    tmpdir, "gold_annotations.json"
                 )
 
                 # Save a file of gold annotations
@@ -87,19 +87,19 @@ try:
                         "none_all_good": False,
                     },
                 }
-                with open(temp_gold_annotations_path, 'w') as f:
+                with open(temp_gold_annotations_path, "w") as f:
                     json.dump(gold_annotations, f)
 
                 # Run compilation of results
                 parser = TurnAnnotationsStaticResultsCompiler.setup_args()
                 parser.set_defaults(
                     **{
-                        'results_folders': analysis_samples_folder,
-                        'output_folder': tmpdir,
-                        'onboarding_in_flight_data_file': os.path.join(
-                            analysis_samples_folder, 'onboarding_in_flight.jsonl'
+                        "results_folders": analysis_samples_folder,
+                        "output_folder": tmpdir,
+                        "onboarding_in_flight_data_file": os.path.join(
+                            analysis_samples_folder, "onboarding_in_flight.jsonl"
                         ),
-                        'gold_annotations_file': temp_gold_annotations_path,
+                        "gold_annotations_file": temp_gold_annotations_path,
                     }
                 )
                 args = parser.parse_args([])
@@ -117,34 +117,33 @@ try:
                 )
 
                 # Check that the saved results file is what it should be
-                sort_columns = ['hit_id', 'worker_id', 'conversation_id', 'turn_idx']
+                sort_columns = ["hit_id", "worker_id", "conversation_id", "turn_idx"]
                 expected_results_path = os.path.join(
-                    analysis_outputs_folder, 'expected_results.csv'
+                    analysis_outputs_folder, "expected_results.csv"
                 )
                 expected_results = (
                     pd.read_csv(expected_results_path)
-                    .drop('folder', axis=1)
+                    .drop("folder", axis=1)
                     .sort_values(sort_columns)
                     .reset_index(drop=True)
                 )
                 # Drop the 'folder' column, which contains a system-dependent path
                 # string
                 actual_results_rel_path = [
-                    obj for obj in os.listdir(tmpdir) if obj.startswith('results')
+                    obj for obj in os.listdir(tmpdir) if obj.startswith("results")
                 ][0]
                 actual_results_path = os.path.join(tmpdir, actual_results_rel_path)
                 actual_results = (
                     pd.read_csv(actual_results_path)
-                    .drop('folder', axis=1)
+                    .drop("folder", axis=1)
                     .sort_values(sort_columns)
                     .reset_index(drop=True)
                 )
                 if not actual_results.equals(expected_results):
                     raise ValueError(
-                        f'\n\n\tExpected results:\n{expected_results.to_csv()}'
-                        f'\n\n\tActual results:\n{actual_results.to_csv()}'
+                        f"\n\n\tExpected results:\n{expected_results.to_csv()}"
+                        f"\n\n\tActual results:\n{actual_results.to_csv()}"
                     )
-
 
 except ImportError:
     pass

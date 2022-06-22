@@ -65,7 +65,7 @@ class Tokens(object):
 
         # Concatenate into strings
         if as_strings:
-            ngrams = ['{}'.format(' '.join(words[s:e])) for (s, e) in ngrams]
+            ngrams = ["{}".format(" ".join(words[s:e])) for (s, e) in ngrams]
 
         return ngrams
 

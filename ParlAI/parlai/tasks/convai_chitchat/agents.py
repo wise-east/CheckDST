@@ -14,25 +14,25 @@ import os
 
 class DefaultTeacher(DialogTeacher):
     def __init__(self, opt, shared=None):
-        self.datatype = opt['datatype']
+        self.datatype = opt["datatype"]
         self.data_path = DefaultTeacher._path(opt)
-        opt['datafile'] = self.data_path
-        self.id = 'ConvAIChitChat'
+        opt["datafile"] = self.data_path
+        self.id = "ConvAIChitChat"
         super().__init__(opt, shared)
 
     @staticmethod
     def _path(opt):
         build(opt)
-        dt = opt['datatype'].split(':')[0]
+        dt = opt["datatype"].split(":")[0]
 
-        if dt == 'train':
-            path = os.path.join(opt['datapath'], 'ConvAIChitChat', 'train.json')
-        elif dt == 'test':
-            path = os.path.join(opt['datapath'], 'ConvAIChitChat', 'test.json')
-        elif dt == 'valid':
-            raise RuntimeError('warning: validation is not supported')
+        if dt == "train":
+            path = os.path.join(opt["datapath"], "ConvAIChitChat", "train.json")
+        elif dt == "test":
+            path = os.path.join(opt["datapath"], "ConvAIChitChat", "test.json")
+        elif dt == "valid":
+            raise RuntimeError("warning: validation is not supported")
         else:
-            raise RuntimeError('Not valid datatype.')
+            raise RuntimeError("Not valid datatype.")
 
         return path
 
@@ -40,11 +40,11 @@ class DefaultTeacher(DialogTeacher):
     def _fold_utterances(raw_dialog):
         dialog = []
         for utterance in raw_dialog:
-            if len(dialog) > 0 and dialog[-1]['userId'] == utterance['userId']:
-                dialog[-1]['text'] = dialog[-1]['text'] + '\n' + utterance['text']
+            if len(dialog) > 0 and dialog[-1]["userId"] == utterance["userId"]:
+                dialog[-1]["text"] = dialog[-1]["text"] + "\n" + utterance["text"]
             else:
                 dialog.append(
-                    {'text': utterance['text'], 'userId': utterance['userId']}
+                    {"text": utterance["text"], "userId": utterance["userId"]}
                 )
         return dialog
 
@@ -53,7 +53,7 @@ class DefaultTeacher(DialogTeacher):
         examples = [
             u
             for u in map(
-                lambda pair: ((pair[0]['text'], [pair[1]['text']]), False),
+                lambda pair: ((pair[0]["text"], [pair[1]["text"]]), False),
                 zip(opponent_utterances, answer_utterances),
             )
         ]
@@ -62,8 +62,8 @@ class DefaultTeacher(DialogTeacher):
     @staticmethod
     def _data_generator(dialogs_dict):
         for dialog in dialogs_dict:
-            folded_dialog = DefaultTeacher._fold_utterances(dialog['thread'])
-            context = dialog['context']
+            folded_dialog = DefaultTeacher._fold_utterances(dialog["thread"])
+            context = dialog["context"]
 
             if len(folded_dialog) < 2:
                 continue
@@ -71,7 +71,7 @@ class DefaultTeacher(DialogTeacher):
             u1_utterances = folded_dialog[::2]
             u2_utterances = folded_dialog[1::2]
 
-            it = [((context, ['']), True)] + DefaultTeacher._create_learning_examples(
+            it = [((context, [""]), True)] + DefaultTeacher._create_learning_examples(
                 u1_utterances, u2_utterances
             )
             for second_user_examples in it:
@@ -79,19 +79,19 @@ class DefaultTeacher(DialogTeacher):
 
             if len(u1_utterances) > 1:
                 examples = [
-                    ((context, [u1_utterances[0]['text']]), True)
+                    ((context, [u1_utterances[0]["text"]]), True)
                 ] + DefaultTeacher._create_learning_examples(
                     u2_utterances, u1_utterances[1:]
                 )
             else:
-                examples = [((context, [u1_utterances[0]['text']]), True)]
+                examples = [((context, [u1_utterances[0]["text"]]), True)]
 
             for first_user_examples in examples:
                 yield first_user_examples
 
     @staticmethod
     def setup_data(path):
-        print('loading: ' + path)
+        print("loading: " + path)
 
         if path is None:
             return iter(())

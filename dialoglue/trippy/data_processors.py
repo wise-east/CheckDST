@@ -27,11 +27,11 @@ import dataset_multiwoz21
 
 class DataProcessor(object):
     def __init__(self, dataset_config):
-        with open(dataset_config, "r", encoding='utf-8') as f:
+        with open(dataset_config, "r", encoding="utf-8") as f:
             raw_config = json.load(f)
-        self.class_types = raw_config['class_types']
-        self.slot_list = raw_config['slots']
-        self.label_maps = raw_config['label_maps']
+        self.class_types = raw_config["class_types"]
+        self.slot_list = raw_config["slots"]
+        self.label_maps = raw_config["label_maps"]
 
     def get_train_examples(self, data_dir, **args):
         raise NotImplementedError()
@@ -45,51 +45,88 @@ class DataProcessor(object):
 
 class Woz2Processor(DataProcessor):
     def get_train_examples(self, data_dir, args):
-        return dataset_woz2.create_examples(os.path.join(data_dir, 'woz_train_en.json'),
-                                            'train', self.slot_list, self.label_maps, **args)
+        return dataset_woz2.create_examples(
+            os.path.join(data_dir, "woz_train_en.json"),
+            "train",
+            self.slot_list,
+            self.label_maps,
+            **args,
+        )
 
     def get_dev_examples(self, data_dir, args):
-        return dataset_woz2.create_examples(os.path.join(data_dir, 'woz_validate_en.json'),
-                                            'dev', self.slot_list, self.label_maps, **args)
+        return dataset_woz2.create_examples(
+            os.path.join(data_dir, "woz_validate_en.json"),
+            "dev",
+            self.slot_list,
+            self.label_maps,
+            **args,
+        )
 
     def get_test_examples(self, data_dir, args):
-        return dataset_woz2.create_examples(os.path.join(data_dir, 'woz_test_en.json'),
-                                            'test', self.slot_list, self.label_maps, **args)
+        return dataset_woz2.create_examples(
+            os.path.join(data_dir, "woz_test_en.json"),
+            "test",
+            self.slot_list,
+            self.label_maps,
+            **args,
+        )
 
 
 class Multiwoz21Processor(DataProcessor):
     def get_train_examples(self, data_dir, is_fewshot, args):
         fewshot_config = "_fewshot" if is_fewshot else ""
-        return dataset_multiwoz21.create_examples(os.path.join(data_dir, f'train_dials{fewshot_config}.json'),
-                                                  os.path.join(data_dir, 'dialogue_acts.json'),
-                                                  'train', self.slot_list, self.label_maps, **args)
+        return dataset_multiwoz21.create_examples(
+            os.path.join(data_dir, f"train_dials{fewshot_config}.json"),
+            os.path.join(data_dir, "dialogue_acts.json"),
+            "train",
+            self.slot_list,
+            self.label_maps,
+            **args,
+        )
+
     def get_dev_examples(self, data_dir, is_fewshot, args):
         fewshot_config = "_fewshot" if is_fewshot else ""
-        return dataset_multiwoz21.create_examples(os.path.join(data_dir, f'val_dials{fewshot_config}.json'),
-                                                  os.path.join(data_dir, 'dialogue_acts.json'),
-                                                  'train', self.slot_list, self.label_maps, **args)
+        return dataset_multiwoz21.create_examples(
+            os.path.join(data_dir, f"val_dials{fewshot_config}.json"),
+            os.path.join(data_dir, "dialogue_acts.json"),
+            "train",
+            self.slot_list,
+            self.label_maps,
+            **args,
+        )
+
     def get_test_examples(self, data_dir, is_fewshot, args):
         fewshot_config = "_fewshot" if is_fewshot else ""
-        return dataset_multiwoz21.create_examples(os.path.join(data_dir, f'test_dials{fewshot_config}.json'),
-                                                  os.path.join(data_dir, 'dialogue_acts.json'),
-                                                  'train', self.slot_list, self.label_maps, **args)
+        return dataset_multiwoz21.create_examples(
+            os.path.join(data_dir, f"test_dials{fewshot_config}.json"),
+            os.path.join(data_dir, "dialogue_acts.json"),
+            "train",
+            self.slot_list,
+            self.label_maps,
+            **args,
+        )
 
 
 class SimProcessor(DataProcessor):
     def get_train_examples(self, data_dir, args):
-        return dataset_sim.create_examples(os.path.join(data_dir, 'train.json'),
-                                           'train', self.slot_list, **args)
+        return dataset_sim.create_examples(
+            os.path.join(data_dir, "train.json"), "train", self.slot_list, **args
+        )
 
     def get_dev_examples(self, data_dir, args):
-        return dataset_sim.create_examples(os.path.join(data_dir, 'dev.json'),
-                                           'dev', self.slot_list, **args)
+        return dataset_sim.create_examples(
+            os.path.join(data_dir, "dev.json"), "dev", self.slot_list, **args
+        )
 
     def get_test_examples(self, data_dir, args):
-        return dataset_sim.create_examples(os.path.join(data_dir, 'test.json'),
-                                           'test', self.slot_list, **args)
+        return dataset_sim.create_examples(
+            os.path.join(data_dir, "test.json"), "test", self.slot_list, **args
+        )
 
 
-PROCESSORS = {"woz2": Woz2Processor,
-              "sim-m": SimProcessor,
-              "sim-r": SimProcessor,
-              "multiwoz21": Multiwoz21Processor}
+PROCESSORS = {
+    "woz2": Woz2Processor,
+    "sim-m": SimProcessor,
+    "sim-r": SimProcessor,
+    "multiwoz21": Multiwoz21Processor,
+}

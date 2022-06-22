@@ -26,7 +26,7 @@ from parlai.core.torch_classifier_agent import ConfusionMatrixMetric, WeightedF1
 from parlai.utils.misc import warn_once
 
 
-STYLE_SEP_TOKEN = ' STYLE '
+STYLE_SEP_TOKEN = " STYLE "
 
 
 class StyleAgentMixin:
@@ -43,18 +43,18 @@ class StyleAgentMixin:
 
         Does not add arguments from its superclass because it's a mixin.
         """
-        agent = parser.add_argument_group('StyleAgentMixin arguments')
+        agent = parser.add_argument_group("StyleAgentMixin arguments")
         agent.add_argument(
-            '--use-style-frac',
+            "--use-style-frac",
             type=float,
             default=1.0,
-            help='What fraction of the time to use the style label',
+            help="What fraction of the time to use the style label",
         )
         return agent
 
     def __init__(self, opt: Opt, shared=None):
         super().__init__(opt, shared)
-        self.use_style_frac = opt['use_style_frac']
+        self.use_style_frac = opt["use_style_frac"]
 
     def get_temp_history(self, observation: Message) -> Optional[str]:
         """
@@ -63,13 +63,13 @@ class StyleAgentMixin:
         use_style_rand = random.random()
         if use_style_rand < self.use_style_frac:
             # Use the style
-            style = observation.get('personality')
+            style = observation.get("personality")
             # This key name is dependent on Image-Chat and will change for other tasks.
             # If obs does not contain 'personality' (i.e. at the end of an epoch during
             # validation), there will be no style
         else:
-            style = ''
-        if style is not None and style != '':
+            style = ""
+        if style is not None and style != "":
             return STYLE_SEP_TOKEN + style
 
 
@@ -89,7 +89,7 @@ class ClassifierOnGeneratorModel(TransformerGeneratorModel):
 
     def __init__(self, opt, dictionary, num_classes: int):
         super().__init__(opt, dictionary)
-        self.classifier_head = nn.Linear(opt['embedding_size'], num_classes)
+        self.classifier_head = nn.Linear(opt["embedding_size"], num_classes)
 
     def forward(self, *xs):
         """
@@ -150,24 +150,24 @@ class TransformerDecoderWithEmbeds(TransformerDecoder):
             tensor = self.embeddings(input)
         if self.embeddings_scale:
             tensor = tensor * np.sqrt(self.dim)
-        if self.variant == 'xlm':
+        if self.variant == "xlm":
             tensor = self.norm_embeddings(tensor)
         if positions.max().item() > self.n_positions:
             warn_once(
-                'You are inputting a sequence of {x} length, but only have '
-                '--n-positions {y}. Set --truncate or increase --n-positions'.format(
+                "You are inputting a sequence of {x} length, but only have "
+                "--n-positions {y}. Set --truncate or increase --n-positions".format(
                     x=positions.max().item(), y=self.n_positions
                 )
             )
         tensor = tensor + self.position_embeddings(positions).expand_as(tensor)
 
-        if self.variant == 'bart':
+        if self.variant == "bart":
             tensor = self.norm_embeddings(tensor)
 
         tensor = self.dropout(tensor)  # --dropout
 
         new_incr_state = {}
-        if getattr(self.layers, 'is_model_parallel', False):
+        if getattr(self.layers, "is_model_parallel", False):
             tensor, new_incr_state = self._apply_model_parallel(
                 tensor, encoder_output, encoder_mask, incr_state
             )
@@ -180,7 +180,7 @@ class TransformerDecoderWithEmbeds(TransformerDecoder):
                     incr_state=incr_state.get(idx),
                 )
 
-        if self.variant == 'prelayernorm':
+        if self.variant == "prelayernorm":
             tensor = self.norm_embeddings(tensor)
 
         return tensor, new_incr_state
@@ -225,9 +225,9 @@ class ClassificationMixin(Agent):
 
         class_list = set(filtered_predictions + filtered_labels)
         for class_name in class_list:
-            prec_str = f'class_{class_name}_prec'
-            recall_str = f'class_{class_name}_recall'
-            f1_str = f'class_{class_name}_f1'
+            prec_str = f"class_{class_name}_prec"
+            recall_str = f"class_{class_name}_recall"
+            f1_str = f"class_{class_name}_f1"
             precision, recall, f1 = ConfusionMatrixMetric.compute_metrics(
                 filtered_predictions, filtered_labels, class_name
             )
@@ -235,4 +235,4 @@ class ClassificationMixin(Agent):
             self.record_local_metric(prec_str, precision)
             self.record_local_metric(recall_str, recall)
             self.record_local_metric(f1_str, f1)
-        self.record_local_metric('weighted_f1', WeightedF1Metric.compute_many(f1_dict))
+        self.record_local_metric("weighted_f1", WeightedF1Metric.compute_many(f1_dict))

@@ -72,6 +72,6 @@ class DocDB(object):
 
     def add(self, triples):
         cursor = self.connection.cursor()
-        cursor.executemany('INSERT OR IGNORE INTO documents VALUES (?,?,?)', triples)
+        cursor.executemany("INSERT OR IGNORE INTO documents VALUES (?,?,?)", triples)
         cursor.close()
         self.connection.commit()

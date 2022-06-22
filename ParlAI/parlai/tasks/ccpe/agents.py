@@ -15,12 +15,12 @@ class CCPEAllTeacher(FixedDialogTeacher):
         # store datatype
         super().__init__(opt, shared)
 
-        dt = opt['datatype'].split(':')[0]
-        if dt != 'train':
-            raise RuntimeError('Not valid datatype (only train).')
+        dt = opt["datatype"].split(":")[0]
+        if dt != "train":
+            raise RuntimeError("Not valid datatype (only train).")
 
         if shared:
-            self.data = shared['data']
+            self.data = shared["data"]
         else:
             build(opt)
             self._setup_data()
@@ -35,9 +35,9 @@ class CCPEAllTeacher(FixedDialogTeacher):
 
     def _setup_data(self):
 
-        fpath = os.path.join(self.opt['datapath'], 'CCPE', 'ccpe.json')
+        fpath = os.path.join(self.opt["datapath"], "CCPE", "ccpe.json")
 
-        with PathManager.open(fpath, 'r') as infile:
+        with PathManager.open(fpath, "r") as infile:
             json_data = json.load(infile)
 
         flattenedData = []
@@ -45,33 +45,33 @@ class CCPEAllTeacher(FixedDialogTeacher):
             currEp = []
             entry = {}
             currSegments = []
-            for i, utterance in enumerate(json_data[ep]['utterances']):
+            for i, utterance in enumerate(json_data[ep]["utterances"]):
                 if (
-                    i < len(json_data[ep]['utterances']) - 1
-                    and json_data[ep]['utterances'][i + 1]['speaker']
-                    == utterance['speaker']
+                    i < len(json_data[ep]["utterances"]) - 1
+                    and json_data[ep]["utterances"][i + 1]["speaker"]
+                    == utterance["speaker"]
                 ):
-                    json_data[ep]['utterances'][i + 1]['text'] = (
-                        utterance['text']
-                        + '\n'
-                        + json_data[ep]['utterances'][i + 1]['text']
+                    json_data[ep]["utterances"][i + 1]["text"] = (
+                        utterance["text"]
+                        + "\n"
+                        + json_data[ep]["utterances"][i + 1]["text"]
                     )
                     currSegments.append(
-                        utterance['segments'] if 'segments' in utterance else []
+                        utterance["segments"] if "segments" in utterance else []
                     )
                     continue
 
                 if (
-                    i == len(json_data[ep]['utterances']) - 1
-                    or json_data[ep]['utterances'][i + 1]['speaker']
-                    != utterance['speaker']
+                    i == len(json_data[ep]["utterances"]) - 1
+                    or json_data[ep]["utterances"][i + 1]["speaker"]
+                    != utterance["speaker"]
                 ):
-                    entry['speaker'] = utterance['speaker']
-                    entry['text'] = utterance['text']
+                    entry["speaker"] = utterance["speaker"]
+                    entry["text"] = utterance["text"]
                     currSegments.append(
-                        utterance['segments']
-                    ) if 'segments' in utterance else currSegments.append([])
-                    entry['segments'] = currSegments
+                        utterance["segments"]
+                    ) if "segments" in utterance else currSegments.append([])
+                    entry["segments"] = currSegments
                     currEp.append(entry)
                     entry = {}
                     currSegments = []
@@ -90,28 +90,28 @@ class CCPEAllTeacher(FixedDialogTeacher):
             for i, currUtt in enumerate(flattenedData[ep]):
                 if i > 0:
                     if (
-                        currUtt['speaker'] == 'USER'
-                        and flattenedData[ep][i - 1]['speaker'] == 'ASSISTANT'
+                        currUtt["speaker"] == "USER"
+                        and flattenedData[ep][i - 1]["speaker"] == "ASSISTANT"
                     ):
                         entry = []
                         entry.append(userCnt)
-                        entry.append(currUtt['text'])
-                        entry.append([flattenedData[ep][i - 1]['text']])
-                        entry.append(currUtt['segments'])
-                        entry.append(flattenedData[ep][i - 1]['segments'])
+                        entry.append(currUtt["text"])
+                        entry.append([flattenedData[ep][i - 1]["text"]])
+                        entry.append(currUtt["segments"])
+                        entry.append(flattenedData[ep][i - 1]["segments"])
                         entry.append(False)
                         currUserEp.append(entry)
                         userCnt += 1
                     if (
-                        currUtt['speaker'] == 'ASSISTANT'
-                        and flattenedData[ep][i - 1]['speaker'] == 'USER'
+                        currUtt["speaker"] == "ASSISTANT"
+                        and flattenedData[ep][i - 1]["speaker"] == "USER"
                     ):
                         entry = []
                         entry.append(asssistantCnt)
-                        entry.append(currUtt['text'])
-                        entry.append([flattenedData[ep][i - 1]['text']])
-                        entry.append(currUtt['segments'])
-                        entry.append(flattenedData[ep][i - 1]['segments'])
+                        entry.append(currUtt["text"])
+                        entry.append([flattenedData[ep][i - 1]["text"]])
+                        entry.append(currUtt["segments"])
+                        entry.append(flattenedData[ep][i - 1]["segments"])
                         entry.append(False)
                         currAssistantEp.append(entry)
                         asssistantCnt += 1
@@ -127,18 +127,18 @@ class CCPEAllTeacher(FixedDialogTeacher):
         ep = self.data[episode_idx]
         entry = ep[entry_idx]
         action = {
-            'id': entry[0],
-            'text': entry[1],
-            'labels': entry[2],
-            'textSegments': entry[3],
-            'labelSegments': entry[4],
-            'episode_done': entry[5],
+            "id": entry[0],
+            "text": entry[1],
+            "labels": entry[2],
+            "textSegments": entry[3],
+            "labelSegments": entry[4],
+            "episode_done": entry[5],
         }
         return action
 
     def share(self):
         shared = super().share()
-        shared['data'] = self.data
+        shared["data"] = self.data
         return shared
 
 

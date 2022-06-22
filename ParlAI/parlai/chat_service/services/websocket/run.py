@@ -11,7 +11,7 @@ from parlai.chat_service.services.websocket.websocket_manager import WebsocketMa
 import parlai.chat_service.utils.config as config_utils
 
 
-SERVICE_NAME = 'websocket'
+SERVICE_NAME = "websocket"
 
 
 def setup_args():
@@ -28,7 +28,7 @@ def run(opt):
     """
     Run MessengerManager.
     """
-    opt['service'] = SERVICE_NAME
+    opt["service"] = SERVICE_NAME
     manager = WebsocketManager(opt)
     try:
         manager.start_task()
@@ -38,10 +38,10 @@ def run(opt):
         manager.shutdown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     opt = setup_args()
-    config_path = opt.get('config_path')
+    config_path = opt.get("config_path")
     config = config_utils.parse_configuration_file(config_path)
-    opt.update(config['world_opt'])
-    opt['config'] = config
+    opt.update(config["world_opt"])
+    opt["config"] = config
     run(opt)

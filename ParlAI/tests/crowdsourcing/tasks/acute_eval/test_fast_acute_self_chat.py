@@ -44,8 +44,8 @@ try:
 
             # Copy over expected self-chat files
             shutil.copytree(
-                os.path.join(self.TASK_DIRECTORY, 'task_config', 'self_chats'),
-                os.path.join(root_dir, 'self_chats'),
+                os.path.join(self.TASK_DIRECTORY, "task_config", "self_chats"),
+                os.path.join(root_dir, "self_chats"),
             )
 
             # Define output structure
@@ -53,11 +53,11 @@ try:
 
             # Set up config
             test_overrides = [
-                f'+mephisto.blueprint.config_path={self.TASK_DIRECTORY}/task_config/model_config_self_chat.json',
-                f'+mephisto.blueprint.models=\"{self.MODEL_STRING}\"',
+                f"+mephisto.blueprint.config_path={self.TASK_DIRECTORY}/task_config/model_config_self_chat.json",
+                f'+mephisto.blueprint.models="{self.MODEL_STRING}"',
                 '+mephisto.blueprint.model_pairs=""',
-                '+mephisto.blueprint.selfchat_max_turns=6',
-                '+mephisto.blueprint.use_existing_self_chat_files=True',
+                "+mephisto.blueprint.selfchat_max_turns=6",
+                "+mephisto.blueprint.use_existing_self_chat_files=True",
             ]
             # TODO: clean this up when Hydra has support for recursive defaults
             self._set_up_config(
@@ -75,11 +75,11 @@ try:
             runner.set_up_acute_eval()
             self.config.mephisto.blueprint = runner.fast_acute_args
             self._set_up_server()
-            outputs['state'] = self._get_agent_state(task_data=self.TASK_DATA)
+            outputs["state"] = self._get_agent_state(task_data=self.TASK_DATA)
 
             # Run analysis
-            runner.analyze_results(args=f'--mephisto-root {self.database_path}')
-            outputs['results_folder'] = runner.results_path
+            runner.analyze_results(args=f"--mephisto-root {self.database_path}")
+            outputs["results_folder"] = runner.results_path
 
             yield outputs
             # All code after this will be run upon teardown
@@ -88,7 +88,6 @@ try:
 
             # Tear down temp file
             shutil.rmtree(root_dir)
-
 
 except ImportError:
     pass

@@ -15,18 +15,18 @@ import random
 
 class WICTeacher(DialogTeacher):
     def __init__(self, opt, shared=None):
-        self.datatype = opt['datatype']
+        self.datatype = opt["datatype"]
         # build(opt)  # NOTE: the call to build here
-        suffix = 'train' if opt['datatype'].startswith('train') else 'val'
+        suffix = "train" if opt["datatype"].startswith("train") else "val"
         # whatever is placed into datafile will be passed as the argument to
         # setup_data in the next section.
-        opt['datafile'] = os.path.join(opt['datapath'], 'WiC', suffix + '.jsonl')
-        self.id = 'WiC'
+        opt["datafile"] = os.path.join(opt["datapath"], "WiC", suffix + ".jsonl")
+        self.id = "WiC"
         super().__init__(opt, shared)
 
     def setup_data(self, path):
         # note that path is the value provided by opt['datafile']
-        print('loading: ' + path)
+        print("loading: " + path)
         with open(path, "r") as f:
             self.data = f.readlines()
 
@@ -38,15 +38,15 @@ class WICTeacher(DialogTeacher):
 
             templates = [
                 (
-                    f"Does the word \"{word}\" have the same meaning in these two sentences? Yes, No? {sentence1} {sentence2}",
+                    f'Does the word "{word}" have the same meaning in these two sentences? Yes, No? {sentence1} {sentence2}',
                     "yes" if label else "no",
                 ),
                 (
-                    f"Sentence A: {sentence1} Sentence B: {sentence2} \"{word}\" has a similar meaning in sentences A and B. True or False?",
+                    f'Sentence A: {sentence1} Sentence B: {sentence2} "{word}" has a similar meaning in sentences A and B. True or False?',
                     "True" if label else "False",
                 ),
                 (
-                    f"Decide whether the word \"{word}\" is used with the same meaning in the two following sentences. Answer by yes or no. {sentence1} {sentence2}",
+                    f'Decide whether the word "{word}" is used with the same meaning in the two following sentences. Answer by yes or no. {sentence1} {sentence2}',
                     "yes" if label else "no",
                 ),
                 (
@@ -54,7 +54,7 @@ class WICTeacher(DialogTeacher):
                     "yes" if label else "no",
                 ),
                 (
-                    f"Sentence 1: {sentence1} Sentence 2: {sentence2} Determine whether the word \"{word}\" is used in the same sense in both sentences. Yes or no?",
+                    f'Sentence 1: {sentence1} Sentence 2: {sentence2} Determine whether the word "{word}" is used in the same sense in both sentences. Yes or no?',
                     "yes" if label else "no",
                 ),
                 (
@@ -66,7 +66,7 @@ class WICTeacher(DialogTeacher):
                     "yes" if label else "no",
                 ),
                 (
-                    f"The word \"{word}\" has multiple meanings. Does it have the same meaning in sentences 1 and 2? Yes or no? Sentence 1: {sentence1} Sentence 2: {sentence2}",
+                    f'The word "{word}" has multiple meanings. Does it have the same meaning in sentences 1 and 2? Yes or no? Sentence 1: {sentence1} Sentence 2: {sentence2}',
                     "yes" if label else "no",
                 ),
                 (

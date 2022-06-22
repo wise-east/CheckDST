@@ -41,24 +41,24 @@ QUESTION = "Describe the above picture in a sentence."
 
 
 def load_candidates(datapath, datatype, version):
-    if not datatype.startswith('train'):
-        suffix = 'captions_{}{}.json'
-        suffix_val = suffix.format('val', version)
+    if not datatype.startswith("train"):
+        suffix = "captions_{}{}.json"
+        suffix_val = suffix.format("val", version)
 
         val_path = os.path.join(
-            datapath, 'COCO_{}_Caption'.format(version), 'annotations', suffix_val
+            datapath, "COCO_{}_Caption".format(version), "annotations", suffix_val
         )
-        val = json.load(open(val_path))['annotations']
-        val_caps = [x['caption'] for x in val]
-        if datatype.startswith('test'):
-            suffix_train = suffix.format('train', version)
+        val = json.load(open(val_path))["annotations"]
+        val_caps = [x["caption"] for x in val]
+        if datatype.startswith("test"):
+            suffix_train = suffix.format("train", version)
             train_path = os.path.join(
-                datapath, 'COCO_{}_Caption'.format(version), 'annotations', suffix_train
+                datapath, "COCO_{}_Caption".format(version), "annotations", suffix_train
             )
 
-            train = json.load(open(train_path))['annotations']
+            train = json.load(open(train_path))["annotations"]
 
-            train_caps = [x['caption'] for x in train]
+            train_caps = [x["caption"] for x in train]
             test_caps = train_caps + val_caps
             return test_caps
         else:
@@ -68,60 +68,60 @@ def load_candidates(datapath, datatype, version):
 
 
 def _path(opt, version):
-    if version == '2014':
+    if version == "2014":
         build_2014(opt)
         buildImage_2014(opt)
-    elif version == '2017':
+    elif version == "2017":
         build_2017(opt)
         buildImage_2017(opt)
     else:
-        raise Exception('Unknown version for COCO Captions: %s' % version)
+        raise Exception("Unknown version for COCO Captions: %s" % version)
 
-    dt = opt['datatype'].split(':')[0]
+    dt = opt["datatype"].split(":")[0]
 
-    if dt == 'train':
-        annotation_suffix = 'train{}'.format(version)
+    if dt == "train":
+        annotation_suffix = "train{}".format(version)
         img_suffix = os.path.join(
-            'train{}'.format(version),
-            'COCO_train{}_'.format(version) if version == '2014' else '',
+            "train{}".format(version),
+            "COCO_train{}_".format(version) if version == "2014" else "",
         )
-    elif dt == 'valid' or (dt == 'test' and version == '2014'):
-        annotation_suffix = 'val{}'.format(version)
+    elif dt == "valid" or (dt == "test" and version == "2014"):
+        annotation_suffix = "val{}".format(version)
         img_suffix = os.path.join(
-            'val{}'.format(version),
-            'COCO_val{}_'.format(version) if version == '2014' else '',
+            "val{}".format(version),
+            "COCO_val{}_".format(version) if version == "2014" else "",
         )
-    elif dt == 'test':
-        annotation_suffix = 'None'
+    elif dt == "test":
+        annotation_suffix = "None"
         img_suffix = os.path.join(
-            'test{}'.format(version),
-            'COCO_test{}_'.format(version) if version == '2014' else '',
+            "test{}".format(version),
+            "COCO_test{}_".format(version) if version == "2014" else "",
         )
     else:
-        raise RuntimeError('Not valid datatype.')
+        raise RuntimeError("Not valid datatype.")
 
-    if version == '2017':
+    if version == "2017":
         test_info_path = os.path.join(
-            opt['datapath'],
-            'COCO_2017_Caption',
-            'annotations',
-            'image_info_test2017.json',
+            opt["datapath"],
+            "COCO_2017_Caption",
+            "annotations",
+            "image_info_test2017.json",
         )
 
         annotation_path = os.path.join(
-            opt['datapath'],
-            'COCO_2017_Caption',
-            'annotations',
-            'captions_' + annotation_suffix + '.json',
+            opt["datapath"],
+            "COCO_2017_Caption",
+            "annotations",
+            "captions_" + annotation_suffix + ".json",
         )
     else:
         test_info_path = None
         annotation_path = os.path.join(
-            opt['datapath'], 'COCO_2014_Caption', 'dataset_coco.json'
+            opt["datapath"], "COCO_2014_Caption", "dataset_coco.json"
         )
 
     image_path = os.path.join(
-        opt['datapath'], 'COCO-IMG-{}'.format(version), img_suffix
+        opt["datapath"], "COCO-IMG-{}".format(version), img_suffix
     )
 
     return test_info_path, annotation_path, image_path
@@ -132,23 +132,23 @@ class DefaultTeacher(FixedDialogTeacher):
     COCO default teacher that expects open-ended descriptions of images.
     """
 
-    def __init__(self, opt, shared=None, version='2017'):
+    def __init__(self, opt, shared=None, version="2017"):
         super().__init__(opt, shared)
         self.version = version
-        self.image_mode = opt.get('image_mode', 'no_image_model')
-        self.use_intro = opt.get('use_intro', False)
-        self.num_cands = opt.get('num_cands', -1)
-        self.include_rest_val = opt.get('include_rest_val', False)
+        self.image_mode = opt.get("image_mode", "no_image_model")
+        self.use_intro = opt.get("use_intro", False)
+        self.num_cands = opt.get("num_cands", -1)
+        self.include_rest_val = opt.get("include_rest_val", False)
         test_info_path, annotation_path, self.image_path = _path(opt, version)
-        self.test_split = opt['test_split']
+        self.test_split = opt["test_split"]
 
         if shared:
             # another instance was set up already, just reference its data
-            if 'annotation' in shared:
-                self.annotation = shared['annotation']
-            self.image_loader = shared['image_loader']
-            if 'cands' in shared:
-                self.cands = shared['cands']
+            if "annotation" in shared:
+                self.annotation = shared["annotation"]
+            self.image_loader = shared["image_loader"]
+            if "cands" in shared:
+                self.cands = shared["cands"]
         else:
             # need to set up data from scratch
             self._setup_data(test_info_path, annotation_path, opt)
@@ -160,35 +160,35 @@ class DefaultTeacher(FixedDialogTeacher):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        agent = parser.add_argument_group('COCO Caption arguments')
+        agent = parser.add_argument_group("COCO Caption arguments")
         agent.add_argument(
-            '--use_intro',
-            type='bool',
+            "--use_intro",
+            type="bool",
             default=False,
-            help='Include an intro question with each image \
+            help="Include an intro question with each image \
                                 for readability (e.g. for coco_caption, \
-                                Describe the above picture in a sentence.)',
+                                Describe the above picture in a sentence.)",
         )
         agent.add_argument(
-            '--num_cands',
+            "--num_cands",
             type=int,
             default=150,
-            help='Number of candidates to use during \
-                                evaluation, setting to -1 uses all.',
+            help="Number of candidates to use during \
+                                evaluation, setting to -1 uses all.",
         )
         agent.add_argument(
-            '--include_rest_val',
-            type='bool',
+            "--include_rest_val",
+            type="bool",
             default=False,
-            help='Include unused validation images in training',
+            help="Include unused validation images in training",
         )
         agent.add_argument(
-            '--test-split',
+            "--test-split",
             type=int,
             default=-1,
             choices=[-1, 0, 1, 2, 3, 4],
-            help='Which 1k image split of dataset to use for candidates'
-            'if -1, use all 5k test images',
+            help="Which 1k image split of dataset to use for candidates"
+            "if -1, use all 5k test images",
         )
         return parser
 
@@ -198,40 +198,40 @@ class DefaultTeacher(FixedDialogTeacher):
         self.imageEpochDone = False
 
     def num_examples(self):
-        if self.version == '2014' or not self.datatype.startswith('test'):
+        if self.version == "2014" or not self.datatype.startswith("test"):
             return len(self.annotation)
         else:
             # For 2017, we only have annotations for the train and val sets,
             # so for the test set we need to determine how many images we have.
-            return len(self.test_info['images'])
+            return len(self.test_info["images"])
 
     def num_episodes(self):
         return self.num_examples()
 
     def submit_load_request(self, image_id, split=None):
-        if split == 'restval':
-            img_path = self.image_path.replace('train', 'val')
+        if split == "restval":
+            img_path = self.image_path.replace("train", "val")
         else:
             img_path = self.image_path
-        img_path += '%012d.jpg' % (image_id)
+        img_path += "%012d.jpg" % (image_id)
         self.data_loader.request_load(
             self.receive_data, self.image_loader.load, (img_path,)
         )
 
     def get(self, episode_idx, entry_idx=0):
-        action = {'episode_done': True}
+        action = {"episode_done": True}
 
         if self.use_intro:
-            action['text'] = QUESTION
+            action["text"] = QUESTION
 
-        if self.version == '2014':
+        if self.version == "2014":
             ep = self.annotation[episode_idx]
-            action['labels'] = [s['raw'] for s in ep['sentences']]
-            action['image_id'] = ep['cocoid']
-            action['split'] = ep['split']
-            if not self.datatype.startswith('train'):
+            action["labels"] = [s["raw"] for s in ep["sentences"]]
+            action["image_id"] = ep["cocoid"]
+            action["split"] = ep["split"]
+            if not self.datatype.startswith("train"):
                 if self.num_cands > 0:
-                    labels = action['labels']
+                    labels = action["labels"]
                     cands_to_sample = [c for c in self.cands if c not in labels]
                     cands = (
                         random.Random(episode_idx).sample(
@@ -239,16 +239,16 @@ class DefaultTeacher(FixedDialogTeacher):
                         )
                     ) + labels
                     random.shuffle(cands)
-                    action['label_candidates'] = cands
+                    action["label_candidates"] = cands
                 else:
-                    action['label_candidates'] = self.cands
+                    action["label_candidates"] = self.cands
         else:
-            if not self.datatype.startswith('test'):
+            if not self.datatype.startswith("test"):
                 # test set annotations are not available for this dataset
                 anno = self.annotation[episode_idx]
-                action['labels'] = [anno['caption']]
-                action['image_id'] = anno['image_id']
-                if not self.datatype.startswith('train'):
+                action["labels"] = [anno["caption"]]
+                action["image_id"] = anno["image_id"]
+                if not self.datatype.startswith("train"):
                     if self.num_cands == -1:
                         candidates = self.cands
                     else:
@@ -256,14 +256,14 @@ class DefaultTeacher(FixedDialogTeacher):
                         candidates = random.Random(episode_idx).choices(
                             self.cands, k=self.num_cands
                         )
-                    if anno['caption'] not in candidates:
+                    if anno["caption"] not in candidates:
                         candidates.pop(0)
                     else:
-                        candidates.remove(anno['caption'])
+                        candidates.remove(anno["caption"])
 
-                    candidate_labels = [anno['caption']]
+                    candidate_labels = [anno["caption"]]
                     candidate_labels += candidates
-                    action['label_candidates'] = candidate_labels
+                    action["label_candidates"] = candidate_labels
             else:
                 if self.num_cands == -1:
                     candidates = self.cands
@@ -272,8 +272,8 @@ class DefaultTeacher(FixedDialogTeacher):
                     candidates = random.Random(episode_idx).choices(
                         self.cands, k=self.num_cands
                     )
-                action['label_candidates'] = candidates
-                action['image_id'] = self.test_info['images'][episode_idx]['id']
+                action["label_candidates"] = candidates
+                action["image_id"] = self.test_info["images"][episode_idx]["id"]
 
         return action
 
@@ -285,17 +285,17 @@ class DefaultTeacher(FixedDialogTeacher):
         ready = None
         # pull up the currently queued example
         if self.example is not None:
-            if self.image_mode != 'no_image_model' and 'image_id' in self.example:
+            if self.image_mode != "no_image_model" and "image_id" in self.example:
                 # move the image we loaded in the background into the example
                 image = self.data_queue.get()
-                self.example['image'] = image
+                self.example["image"] = image
             ready = (self.example, self.imageEpochDone)
         # get the next base example: super().next_example() calls self.get()
         self.example, self.imageEpochDone = super().next_example()
-        if self.image_mode != 'no_image_model' and 'image_id' in self.example:
+        if self.image_mode != "no_image_model" and "image_id" in self.example:
             # load the next image in the background
-            image_id = self.example['image_id']
-            split = self.example.get('split', None)
+            image_id = self.example["image_id"]
+            split = self.example.get("split", None)
             self.submit_load_request(image_id, split)
         # Try to return the previously cached example
         if ready is None:
@@ -305,30 +305,30 @@ class DefaultTeacher(FixedDialogTeacher):
 
     def share(self):
         shared = super().share()
-        if hasattr(self, 'annotation'):
-            shared['annotation'] = self.annotation
-        shared['image_loader'] = self.image_loader
-        if hasattr(self, 'cands'):
-            shared['cands'] = self.cands
+        if hasattr(self, "annotation"):
+            shared["annotation"] = self.annotation
+        shared["image_loader"] = self.image_loader
+        if hasattr(self, "cands"):
+            shared["cands"] = self.cands
         return shared
 
     def _setup_data(self, test_info_path, annotation_path, opt):
-        if self.version == '2014':
+        if self.version == "2014":
             with PathManager.open(annotation_path) as data_file:
-                raw_data = json.load(data_file)['images']
-            if 'train' in self.datatype:
-                self.annotation = [d for d in raw_data if d['split'] == 'train']
+                raw_data = json.load(data_file)["images"]
+            if "train" in self.datatype:
+                self.annotation = [d for d in raw_data if d["split"] == "train"]
                 if self.include_rest_val:
-                    self.annotation += [d for d in raw_data if d['split'] == 'restval']
-            elif 'valid' in self.datatype:
-                self.annotation = [d for d in raw_data if d['split'] == 'val']
+                    self.annotation += [d for d in raw_data if d["split"] == "restval"]
+            elif "valid" in self.datatype:
+                self.annotation = [d for d in raw_data if d["split"] == "val"]
                 self.cands = [
                     l
                     for d in self.annotation
-                    for l in [s['raw'] for s in d['sentences']]
+                    for l in [s["raw"] for s in d["sentences"]]
                 ]
             else:
-                self.annotation = [d for d in raw_data if d['split'] == 'test']
+                self.annotation = [d for d in raw_data if d["split"] == "test"]
                 if self.test_split != -1:
                     start = self.test_split * 1000
                     end = (self.test_split + 1) * 1000
@@ -336,28 +336,28 @@ class DefaultTeacher(FixedDialogTeacher):
                 self.cands = [
                     l
                     for d in self.annotation
-                    for l in [s['raw'] for s in d['sentences']]
+                    for l in [s["raw"] for s in d["sentences"]]
                 ]
         else:
-            if not self.datatype.startswith('test'):
-                print('loading: ' + annotation_path)
+            if not self.datatype.startswith("test"):
+                print("loading: " + annotation_path)
                 with PathManager.open(annotation_path) as data_file:
-                    self.annotation = json.load(data_file)['annotations']
+                    self.annotation = json.load(data_file)["annotations"]
             else:
-                print('loading: ' + test_info_path)
+                print("loading: " + test_info_path)
                 with PathManager.open(test_info_path) as data_file:
                     self.test_info = json.load(data_file)
-            if not self.datatype.startswith('train'):
+            if not self.datatype.startswith("train"):
                 self.cands = load_candidates(
-                    opt['datapath'], opt['datatype'], self.version
+                    opt["datapath"], opt["datatype"], self.version
                 )
 
 
 class V2014Teacher(DefaultTeacher):
     def __init__(self, opt, shared=None):
-        super(V2014Teacher, self).__init__(opt, shared, '2014')
+        super(V2014Teacher, self).__init__(opt, shared, "2014")
 
 
 class V2017Teacher(DefaultTeacher):
     def __init__(self, opt, shared=None):
-        super(V2017Teacher, self).__init__(opt, shared, '2017')
+        super(V2017Teacher, self).__init__(opt, shared, "2017")

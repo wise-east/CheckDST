@@ -8,28 +8,28 @@ from parlai.utils.testing import AutoTeacherTest
 
 
 class TestDefaultTeacher(AutoTeacherTest):
-    task = 'wizard_of_internet'
+    task = "wizard_of_internet"
 
 
 class TestApprenticeTeacher(AutoTeacherTest):
-    task = 'wizard_of_internet:ApprenticeDialogTeacher'
+    task = "wizard_of_internet:ApprenticeDialogTeacher"
 
 
 class TestWizardGoldKnowledgeTeacher(AutoTeacherTest):
-    task = 'wizard_of_internet:WizardDialogGoldKnowledgeTeacher'
+    task = "wizard_of_internet:WizardDialogGoldKnowledgeTeacher"
 
 
 class TestSearchQueryTeacher(AutoTeacherTest):
-    task = 'wizard_of_internet:SearchQueryTeacher'
+    task = "wizard_of_internet:SearchQueryTeacher"
 
 
 class TestGoldKnowledgeTeacher(AutoTeacherTest):
-    task = 'wizard_of_internet:GoldKnowledgeTeacher'
+    task = "wizard_of_internet:GoldKnowledgeTeacher"
 
 
 class TestGoldDocsTeacher(AutoTeacherTest):
-    task = 'wizard_of_internet:GoldDocsTeacher'
+    task = "wizard_of_internet:GoldDocsTeacher"
 
 
 class TestGoldDocTitlesTeacher(AutoTeacherTest):
-    task = 'wizard_of_internet:GoldDocTitlesTeacher'
+    task = "wizard_of_internet:GoldDocTitlesTeacher"

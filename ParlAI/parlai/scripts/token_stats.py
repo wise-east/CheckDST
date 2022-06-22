@@ -18,13 +18,13 @@ import parlai.utils.logging as logging
 class TokenStats(ParlaiScript):
     @classmethod
     def setup_args(cls):
-        parser = ParlaiParser(True, True, description='Compute tokenized stats.')
-        parser.add_argument('--num-examples', '-n', type=int, default=-1)
-        parser.add_argument('-ltim', '--log-every-n-secs', type=float, default=10)
-        parser.add_argument('--field', default='text')
-        parser.add_argument('--final-only', type='bool', default=False)
+        parser = ParlaiParser(True, True, description="Compute tokenized stats.")
+        parser.add_argument("--num-examples", "-n", type=int, default=-1)
+        parser.add_argument("-ltim", "--log-every-n-secs", type=float, default=10)
+        parser.add_argument("--field", default="text")
+        parser.add_argument("--final-only", type="bool", default=False)
         parser.set_defaults(
-            no_cuda=True, model='test_agents/null', datatype='train:stream:ordered'
+            no_cuda=True, model="test_agents/null", datatype="train:stream:ordered"
         )
         return parser
 
@@ -48,25 +48,25 @@ class TokenStats(ParlaiScript):
         }
 
     def run(self):
-        self.opt['no_cuda'] = True
-        if 'ordered' not in self.opt['datatype'] and 'train' in self.opt['datatype']:
-            self.opt['datatype'] = self.opt['datatype'] + ':ordered'
+        self.opt["no_cuda"] = True
+        if "ordered" not in self.opt["datatype"] and "train" in self.opt["datatype"]:
+            self.opt["datatype"] = self.opt["datatype"] + ":ordered"
         agent = create_agent(self.opt)
         agent.opt.log()
-        num_examples = self.opt['num_examples']
-        field = self.opt['field'] + '_vec'
+        num_examples = self.opt["num_examples"]
+        field = self.opt["field"] + "_vec"
         if num_examples < 0:
-            num_examples = float('inf')
-        assert self.opt['batchsize'] == 1
+            num_examples = float("inf")
+        assert self.opt["batchsize"] == 1
         assert isinstance(agent, TorchAgent)
 
         world = create_task(self.opt, agent)
         teacher = world.get_task_agent()
 
         # set up logging
-        log_every_n_secs = self.opt.get('log_every_n_secs', -1)
+        log_every_n_secs = self.opt.get("log_every_n_secs", -1)
         if log_every_n_secs <= 0:
-            log_every_n_secs = float('inf')
+            log_every_n_secs = float("inf")
         log_time = TimeLogger()
 
         lengths = []
@@ -81,7 +81,7 @@ class TokenStats(ParlaiScript):
             except KeyError:
                 raise KeyError(f"Pick one of {list(processed.keys())}")
             if text_vec is not None and (
-                not self.opt['final_only'] or act.get('episode_done')
+                not self.opt["final_only"] or act.get("episode_done")
             ):
                 cnt += 1
                 lengths.append(float(len(text_vec)))
@@ -89,7 +89,7 @@ class TokenStats(ParlaiScript):
 
             if log_time.time() > log_every_n_secs:
                 report = self._compute_stats(lengths)
-                text, report = log_time.log(report['exs'], total, report)
+                text, report = log_time.log(report["exs"], total, report)
                 logging.info(text)
 
         report = self._compute_stats(lengths)
@@ -97,5 +97,5 @@ class TokenStats(ParlaiScript):
         return report
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     TokenStats.main()

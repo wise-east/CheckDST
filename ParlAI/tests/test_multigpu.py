@@ -8,13 +8,13 @@ import unittest
 import parlai.utils.testing as testing_utils
 
 MODEL_OPTS = {
-    'n_layers': 4,
-    'embedding_size': 16,
-    'ffn_size': 32,
-    'n_heads': 2,
-    'num_epochs': 0.1,
-    'batchsize': 32,
-    'truncate': 8,
+    "n_layers": 4,
+    "embedding_size": 16,
+    "ffn_size": 32,
+    "n_heads": 2,
+    "num_epochs": 0.1,
+    "batchsize": 32,
+    "truncate": 8,
 }
 
 
@@ -23,11 +23,11 @@ class TestModelParallel(unittest.TestCase):
     def test_polyencoder(self):
         testing_utils.train_model(
             {
-                'task': 'integration_tests',
-                'model': 'transformer/polyencoder',
-                'model_parallel': True,
-                'candidates': 'batch',
-                'poly_n_codes': 4,
+                "task": "integration_tests",
+                "model": "transformer/polyencoder",
+                "model_parallel": True,
+                "candidates": "batch",
+                "poly_n_codes": 4,
                 **MODEL_OPTS,
             }
         )
@@ -35,12 +35,12 @@ class TestModelParallel(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             testing_utils.train_model(
                 {
-                    'task': 'integration_tests',
-                    'model': 'transformer/polyencoder',
-                    'data_parallel': True,
-                    'model_parallel': True,
-                    'candidates': 'batch',
-                    'poly_n_codes': 4,
+                    "task": "integration_tests",
+                    "model": "transformer/polyencoder",
+                    "data_parallel": True,
+                    "model_parallel": True,
+                    "candidates": "batch",
+                    "poly_n_codes": 4,
                     **MODEL_OPTS,
                 }
             )
@@ -48,10 +48,10 @@ class TestModelParallel(unittest.TestCase):
     def test_ranker(self):
         testing_utils.train_model(
             {
-                'task': 'integration_tests',
-                'model': 'transformer/ranker',
-                'candidates': 'batch',
-                'model_parallel': True,
+                "task": "integration_tests",
+                "model": "transformer/ranker",
+                "candidates": "batch",
+                "model_parallel": True,
                 **MODEL_OPTS,
             }
         )
@@ -59,11 +59,11 @@ class TestModelParallel(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             testing_utils.train_model(
                 {
-                    'task': 'integration_tests',
-                    'model': 'transformer/ranker',
-                    'data_parallel': True,
-                    'model_parallel': True,
-                    'candidates': 'batch',
+                    "task": "integration_tests",
+                    "model": "transformer/ranker",
+                    "data_parallel": True,
+                    "model_parallel": True,
+                    "candidates": "batch",
                     **MODEL_OPTS,
                 }
             )
@@ -71,21 +71,21 @@ class TestModelParallel(unittest.TestCase):
     def test_classifier(self):
         testing_utils.train_model(
             {
-                'task': 'integration_tests:classifier',
-                'classes': ['one', 'zero'],
-                'model': 'transformer/classifier',
-                'model_parallel': True,
+                "task": "integration_tests:classifier",
+                "classes": ["one", "zero"],
+                "model": "transformer/classifier",
+                "model_parallel": True,
                 **MODEL_OPTS,
             }
         )
         with self.assertRaises(RuntimeError):
             testing_utils.train_model(
                 {
-                    'task': 'integration_tests:classifier',
-                    'classes': ['one', 'zero'],
-                    'model': 'transformer/classifier',
-                    'data_parallel': True,
-                    'model_parallel': True,
+                    "task": "integration_tests:classifier",
+                    "classes": ["one", "zero"],
+                    "model": "transformer/classifier",
+                    "data_parallel": True,
+                    "model_parallel": True,
                     **MODEL_OPTS,
                 }
             )
@@ -93,9 +93,9 @@ class TestModelParallel(unittest.TestCase):
     def test_transformer_generator(self):
         testing_utils.train_model(
             {
-                'task': 'integration_tests',
-                'model': 'transformer/generator',
-                'model_parallel': True,
+                "task": "integration_tests",
+                "model": "transformer/generator",
+                "model_parallel": True,
                 **MODEL_OPTS,
             }
         )
@@ -106,11 +106,11 @@ class TestDataParallel(unittest.TestCase):
     def test_polyencoder(self):
         testing_utils.train_model(
             {
-                'task': 'integration_tests',
-                'model': 'transformer/polyencoder',
-                'candidates': 'batch',
-                'poly_n_codes': 4,
-                'data_parallel': True,
+                "task": "integration_tests",
+                "model": "transformer/polyencoder",
+                "candidates": "batch",
+                "poly_n_codes": 4,
+                "data_parallel": True,
                 **MODEL_OPTS,
             }
         )
@@ -118,10 +118,10 @@ class TestDataParallel(unittest.TestCase):
     def test_ranker(self):
         testing_utils.train_model(
             {
-                'task': 'integration_tests',
-                'model': 'transformer/ranker',
-                'candidates': 'batch',
-                'data_parallel': True,
+                "task": "integration_tests",
+                "model": "transformer/ranker",
+                "candidates": "batch",
+                "data_parallel": True,
                 **MODEL_OPTS,
             }
         )
@@ -129,10 +129,10 @@ class TestDataParallel(unittest.TestCase):
     def test_classifier(self):
         testing_utils.train_model(
             {
-                'task': 'integration_tests:classifier',
-                'classes': ['one', 'zero'],
-                'data_parallel': True,
-                'model': 'transformer/classifier',
+                "task": "integration_tests:classifier",
+                "classes": ["one", "zero"],
+                "data_parallel": True,
+                "model": "transformer/classifier",
                 **MODEL_OPTS,
             }
         )

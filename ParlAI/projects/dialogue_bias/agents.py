@@ -17,4 +17,4 @@ class NoBiasStyleGenAgent(StyleGenAgent):
     """
 
     def get_temp_history(self, observation: Message) -> Optional[str]:
-        return STYLE_SEP_TOKEN + 'no_bias'
+        return STYLE_SEP_TOKEN + "no_bias"

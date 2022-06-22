@@ -27,21 +27,21 @@ def run_task(cfg: DictConfig, task_directory: str, world_module=None):
     _ = frontend_build_dir  # Unused at the moment
 
     db, cfg = load_db_and_process_config(cfg)
-    print(f'\nHydra config:\n{OmegaConf.to_yaml(cfg)}')
+    print(f"\nHydra config:\n{OmegaConf.to_yaml(cfg)}")
 
     random.seed(42)
 
     # Update task name when on sandbox or local to ensure data is split.
-    task_name = cfg.mephisto.task.get('task_name', 'model_chat')
+    task_name = cfg.mephisto.task.get("task_name", "model_chat")
     architect_type = cfg.mephisto.architect._architect_type
-    if architect_type == 'local':
+    if architect_type == "local":
         task_name = f"{task_name}_local"
-    elif architect_type == 'mturk_sandbox':
+    elif architect_type == "mturk_sandbox":
         task_name = f"{task_name}_sandbox"
     cfg.mephisto.task.task_name = task_name
 
     soft_block_qual_name = cfg.mephisto.blueprint.get(
-        'block_qualification', f'{task_name}_block'
+        "block_qualification", f"{task_name}_block"
     )
     # Default to a task-specific name to avoid soft-block collisions
     soft_block_mturk_workers(cfg=cfg, db=db, soft_block_qual_name=soft_block_qual_name)

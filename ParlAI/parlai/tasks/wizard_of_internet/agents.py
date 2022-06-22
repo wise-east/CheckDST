@@ -31,14 +31,14 @@ from .build import build
 
 
 def get_dtype(opt):
-    return DatatypeHelper.fold(opt.get('datatype', 'train'))
+    return DatatypeHelper.fold(opt.get("datatype", "train"))
 
 
 def _path(opt):
     build(opt)
-    dpath = os.path.join(opt['datapath'], CONST.DATASET_NAME)
+    dpath = os.path.join(opt["datapath"], CONST.DATASET_NAME)
     dtype = get_dtype(opt)
-    return os.path.join(dpath, f'{dtype}.jsonl')
+    return os.path.join(dpath, f"{dtype}.jsonl")
 
 
 def get_single_val_from_dict(dialog_json):
@@ -87,17 +87,17 @@ def parse_wizard_message(message_dict, doc_lines_delim):
             doc_lines = []
             doc_lines_selection = selections[doc_ind + 1]
             doc_selected = False
-            for line_ind, line in enumerate(doc['content']):
+            for line_ind, line in enumerate(doc["content"]):
                 doc_lines.append(line)
                 if has_selection and doc_lines_selection[line_ind]:
                     doc_selected = True
                     knowledge[CONST.SELECTED_SENTENCES].append(line)
             full_doc = doc_lines_delim.join(doc_lines)
             knowledge[CONST.RETRIEVED_DOCS].append(full_doc)
-            knowledge[CONST.RETRIEVED_DOCS_TITLES].append(doc['title'])
-            knowledge[CONST.RETRIEVED_DOCS_URLS].append(doc['url'])
+            knowledge[CONST.RETRIEVED_DOCS_TITLES].append(doc["title"])
+            knowledge[CONST.RETRIEVED_DOCS_URLS].append(doc["url"])
             if doc_selected:
-                knowledge[CONST.SELECTED_DOCS_TITLES].append(doc['title'])
+                knowledge[CONST.SELECTED_DOCS_TITLES].append(doc["title"])
                 knowledge[CONST.SELECTED_DOCS].append(full_doc)
 
         if not knowledge[CONST.RETRIEVED_DOCS]:
@@ -116,7 +116,7 @@ def parse_wizard_message(message_dict, doc_lines_delim):
     return d
 
 
-def parse_search_results(message_dict, delim='; '):
+def parse_search_results(message_dict, delim="; "):
     d = {CONST.SPEAKER_ID: CONST.SEARCH_AGENT}
     d[CONST.SEARCH_RESULTS] = message_dict[CONST.CONTEXT][CONST.CONTENTS]
     all_title = [
@@ -139,40 +139,40 @@ class WizardOfInternetBaseTeacher(DialogTeacher):
     def __init__(self, opt: Opt, shared=None):
         opt = deepcopy(opt)
         self.datatype = get_dtype(opt)
-        opt['datafile'] = _path(opt)
-        self.include_persona = opt.get('include_persona', CONST.INCLUDE_PERSONA_DEFAULT)
+        opt["datafile"] = _path(opt)
+        self.include_persona = opt.get("include_persona", CONST.INCLUDE_PERSONA_DEFAULT)
         self.skip_empty_text = opt.get(
-            'skip_empty_text', CONST.SKIP_ON_EMPTY_TEXT_DEFAULT
+            "skip_empty_text", CONST.SKIP_ON_EMPTY_TEXT_DEFAULT
         )
-        self.text_flatten_delimeter = opt.get('delimiter', '\n')
-        self.docs_delim = opt.get('docs_delimiter', '\n')
-        self.docs_titles_delimeter = opt.get('docs_title_delimiter', '\n')
-        self.doc_lines_delim = opt.get('doc_lines_delimiter', '\n')
-        self.id = 'WizInternetBase'
+        self.text_flatten_delimeter = opt.get("delimiter", "\n")
+        self.docs_delim = opt.get("docs_delimiter", "\n")
+        self.docs_titles_delimeter = opt.get("docs_title_delimiter", "\n")
+        self.doc_lines_delim = opt.get("doc_lines_delimiter", "\n")
+        self.id = "WizInternetBase"
         super().__init__(opt, shared=shared)
 
     @classmethod
     def add_cmdline_args(cls, parser: ParlaiParser, partial_opt=None) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        arg_group = parser.add_argument_group('Wizard Base Dialog Teacher arguments')
+        arg_group = parser.add_argument_group("Wizard Base Dialog Teacher arguments")
         arg_group.add_argument(
-            '--include-persona',
-            type='bool',
+            "--include-persona",
+            type="bool",
             default=CONST.INCLUDE_PERSONA_DEFAULT,
-            help='Whether to include the apprentice persona in text',
+            help="Whether to include the apprentice persona in text",
         )
         arg_group.add_argument(
-            '--skip-empty-text',
-            type='bool',
+            "--skip-empty-text",
+            type="bool",
             default=CONST.SKIP_ON_EMPTY_TEXT_DEFAULT,
-            help='Whether to skip response to empty messages (may happen if persona is not included)',
+            help="Whether to skip response to empty messages (may happen if persona is not included)",
         )
         return parser
 
     def _load_data(self, datafile):
-        logging.info(f'Loading data from {datafile} ...')
+        logging.info(f"Loading data from {datafile} ...")
         dialogs = []
-        with jsonlines.open(datafile, 'r') as fin:
+        with jsonlines.open(datafile, "r") as fin:
             for dialog_json in tqdm(fin):
                 dialogs.append(self._get_episode_examples(dialog_json))
         return dialogs
@@ -191,7 +191,7 @@ class WizardOfInternetBaseTeacher(DialogTeacher):
                 d.update(parse_apprentice_message(message))
             elif action == CONST.ACTION_WIZARD_TO_APPRENTICE:
                 # TODO: must avoid having these in the dataset in the first place
-                assert message[CONST.MESSAGE_TEXT], 'Empty message text'
+                assert message[CONST.MESSAGE_TEXT], "Empty message text"
 
                 if (  # Getting the search query that Wizard used for this utterance, if any
                     msg_ind > 1
@@ -231,7 +231,7 @@ class WizardOfInternetBaseTeacher(DialogTeacher):
                 ][CONST.MESSAGE_TEXT]
 
             # TODO: remove on the final version
-            assert 'id' in d, str(message)
+            assert "id" in d, str(message)
 
             # Getting current actions's previous message/action
             if (
@@ -262,7 +262,7 @@ class WizardOfInternetBaseTeacher(DialogTeacher):
         if prv_msg:
             parlai_msg[CONST.MESSAGE_TEXT] = prv_msg[1][CONST.MESSAGE_TEXT]
         else:
-            parlai_msg[CONST.MESSAGE_TEXT] = ''
+            parlai_msg[CONST.MESSAGE_TEXT] = ""
         return parlai_msg
 
     @abstractmethod
@@ -290,7 +290,7 @@ class WizardOfInternetBaseTeacher(DialogTeacher):
         persona = action[CONST.PERSONA]
         curr_text = parlai_message[CONST.MESSAGE_TEXT]
         if curr_text:
-            new_text = f'{persona}{self.text_flatten_delimeter}{curr_text}'
+            new_text = f"{persona}{self.text_flatten_delimeter}{curr_text}"
         else:
             new_text = persona
 
@@ -328,7 +328,7 @@ class WizardOfInternetBaseTeacher(DialogTeacher):
 class ApprenticeDialogTeacher(WizardOfInternetBaseTeacher):
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared=shared)
-        self.id = 'WizInternetApprenticeTeacher'
+        self.id = "WizInternetApprenticeTeacher"
 
     def _teacher_action_type(self) -> str:
         return CONST.ACTION_APPRENTICE_TO_WIZARD
@@ -336,20 +336,20 @@ class ApprenticeDialogTeacher(WizardOfInternetBaseTeacher):
 
 class WizardDialogTeacher(WizardOfInternetBaseTeacher):
     def __init__(self, opt, shared=None):
-        self.prepend_gold_knowledge = opt.get('prepend_gold_knowledge')
-        self.gold_knowledge_delimiter = opt.get('gold_knowledge_delimiter', '\n')
+        self.prepend_gold_knowledge = opt.get("prepend_gold_knowledge")
+        self.gold_knowledge_delimiter = opt.get("gold_knowledge_delimiter", "\n")
         super().__init__(opt, shared=shared)
-        self.id = 'WizInternetWizardTeacher'
+        self.id = "WizInternetWizardTeacher"
 
     @classmethod
     def add_cmdline_args(cls, parser: ParlaiParser, partial_opt=None) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        arg_group = parser.add_argument_group('Wizard Dialog Knowledge arguments')
+        arg_group = parser.add_argument_group("Wizard Dialog Knowledge arguments")
         arg_group.add_argument(
-            '--prepend-gold-knowledge',
-            type='bool',
+            "--prepend-gold-knowledge",
+            type="bool",
             default=False,
-            help='If true, prepend text with checked sentences',
+            help="If true, prepend text with checked sentences",
         )
         return parser
 
@@ -365,27 +365,27 @@ class WizardDialogTeacher(WizardOfInternetBaseTeacher):
                 == CONST.NO_SELECTED_SENTENCES_TOKEN
             )
             or (model_response.is_padding())
-            or ('text' not in model_response)
+            or ("text" not in model_response)
         ):
             # Has NOT selected knowledge or a is batch padding message
             return
 
-        resp = model_response['text']
+        resp = model_response["text"]
         self.metrics.add(
-            'knowledge_f1_docs',
-            F1Metric.compute(resp, [' '.join(teacher_action[CONST.SELECTED_DOCS])]),
+            "knowledge_f1_docs",
+            F1Metric.compute(resp, [" ".join(teacher_action[CONST.SELECTED_DOCS])]),
         )
         self.metrics.add(
-            'knowledge_f1_max_docs', F1Metric.compute(resp, CONST.SELECTED_DOCS)
+            "knowledge_f1_max_docs", F1Metric.compute(resp, CONST.SELECTED_DOCS)
         )
         self.metrics.add(
-            'knowledge_f1_sentences',
+            "knowledge_f1_sentences",
             F1Metric.compute(
-                resp, [' '.join(teacher_action[CONST.SELECTED_SENTENCES])]
+                resp, [" ".join(teacher_action[CONST.SELECTED_SENTENCES])]
             ),
         )
         self.metrics.add(
-            'knowledge_f1_max_sentences',
+            "knowledge_f1_max_sentences",
             F1Metric.compute(resp, CONST.SELECTED_SENTENCES),
         )
 
@@ -414,8 +414,8 @@ class WizardDialogTeacher(WizardOfInternetBaseTeacher):
                 message.force_set(
                     CONST.MESSAGE_TEXT,
                     (
-                        f'{CONST.KNOWLEDGE_TOKEN} {gold_knowledge} {CONST.END_KNOWLEDGE_TOKEN}'
-                        f' {self.gold_knowledge_delimiter} {text}'
+                        f"{CONST.KNOWLEDGE_TOKEN} {gold_knowledge} {CONST.END_KNOWLEDGE_TOKEN}"
+                        f" {self.gold_knowledge_delimiter} {text}"
                     ),
                 )
             yield message, episode_started
@@ -453,22 +453,22 @@ class BaseSQKnowledgeTeacher(WizardOfInternetBaseTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        self.dialog_history = opt.get('dialog_history', CONST.DIALOG_HIST_DEFAULT)
+        self.dialog_history = opt.get("dialog_history", CONST.DIALOG_HIST_DEFAULT)
         super().__init__(opt, shared=shared)
-        self.id = 'BaseKnowledgeTeacher'
+        self.id = "BaseKnowledgeTeacher"
 
     @classmethod
     def add_cmdline_args(cls, parser: ParlaiParser, partial_opt=None) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
         arg_group = parser.add_argument_group(
-            'Base Search Query and Knowledge arguments'
+            "Base Search Query and Knowledge arguments"
         )
         arg_group.add_argument(
-            '--dialog-history',
+            "--dialog-history",
             type=str,
             choices=[CONST.HISTORY_TYPE.FULL, CONST.HISTORY_TYPE.ONLY_LAST],
             default=CONST.DIALOG_HIST_DEFAULT,
-            help='Full dialogue history or the only the last previous message',
+            help="Full dialogue history or the only the last previous message",
         )
         return parser
 
@@ -504,20 +504,20 @@ class BaseSQKnowledgeTeacher(WizardOfInternetBaseTeacher):
 class SearchQueryTeacher(BaseSQKnowledgeTeacher):
     def __init__(self, opt, shared=None):
         self.only_last_search_query = opt.get(
-            'only_last_search_query', CONST.ONLY_LAST_QUERY_DEFAULT
+            "only_last_search_query", CONST.ONLY_LAST_QUERY_DEFAULT
         )
         super().__init__(opt, shared=shared)
-        self.id = 'SearchQueryGenerationTeacher'
+        self.id = "SearchQueryGenerationTeacher"
 
     @classmethod
     def add_cmdline_args(cls, parser: ParlaiParser, partial_opt=None) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        arg_group = parser.add_argument_group('Search Query Teacher')
+        arg_group = parser.add_argument_group("Search Query Teacher")
         arg_group.add_argument(
-            '--only-last-search-query',
-            type='bool',
+            "--only-last-search-query",
+            type="bool",
             default=CONST.ONLY_LAST_QUERY_DEFAULT,
-            help='Whether to include only the last search before sending the response.',
+            help="Whether to include only the last search before sending the response.",
         )
         return parser
 
@@ -539,7 +539,7 @@ class SearchQueryTeacher(BaseSQKnowledgeTeacher):
 class BaseKnowledgeTeacher(BaseSQKnowledgeTeacher):
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared=shared)
-        self.id = 'KnowledgeGenerationTeacher'
+        self.id = "KnowledgeGenerationTeacher"
 
     def _teacher_action_type(self) -> str:
         return CONST.ACTION_WIZARD_DOC_SELECTION

@@ -14,6 +14,6 @@ def download(datapath):
     """
     Download the model.
     """
-    opt = {'datapath': datapath, 'model_type': 'transresnet'}
-    fnames = ['transresnet.tgz']
-    download_models(opt, fnames, 'personality_captions')
+    opt = {"datapath": datapath, "model_type": "transresnet"}
+    fnames = ["transresnet.tgz"]
+    download_models(opt, fnames, "personality_captions")

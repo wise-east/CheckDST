@@ -22,30 +22,30 @@ import pstats
 
 def setup_args(parser=None):
     if parser is None:
-        parser = ParlaiParser(True, True, 'Interactive chat with a model')
-    parser.add_argument('-d', '--display-examples', type='bool', default=True)
-    parser.add_argument('-ne', '--num-examples', type=int, default=5)
+        parser = ParlaiParser(True, True, "Interactive chat with a model")
+    parser.add_argument("-d", "--display-examples", type="bool", default=True)
+    parser.add_argument("-ne", "--num-examples", type=int, default=5)
     parser.add_argument(
-        '--display-prettify',
-        type='bool',
+        "--display-prettify",
+        type="bool",
         default=False,
-        help='Set to use a prettytable when displaying '
-        'examples with text candidates',
+        help="Set to use a prettytable when displaying "
+        "examples with text candidates",
     )
     parser.add_argument(
-        '--display-add-fields',
+        "--display-add-fields",
         type=str,
-        default='',
+        default="",
         help='Display these fields when verbose is off (e.g., "--display-add-fields label_candidates,beam_texts")',
     )
     parser.add_argument(
-        '-it',
-        '--interactive-task',
-        type='bool',
+        "-it",
+        "--interactive-task",
+        type="bool",
         default=True,
-        help='Create interactive version of task',
+        help="Create interactive version of task",
     )
-    parser.set_defaults(interactive_mode=True, task='interactive')
+    parser.set_defaults(interactive_mode=True, task="interactive")
     return parser
 
 
@@ -63,11 +63,11 @@ def profile_interactive(opt):
     cnt = 0
     while True:
         world.parley()
-        if opt.get('display_examples'):
+        if opt.get("display_examples"):
             print("---")
             print(world.display())
         cnt += 1
-        if cnt >= opt.get('num_examples', 100):
+        if cnt >= opt.get("num_examples", 100):
             break
         if world.epoch_done():
             logging.info("epoch done")
@@ -75,13 +75,13 @@ def profile_interactive(opt):
 
     pr.disable()
     s = io.StringIO()
-    sortby = 'cumulative'
+    sortby = "cumulative"
     ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
     ps.print_stats()
     print(s.getvalue())
 
 
-@register_script('profile_interactive', hidden=True)
+@register_script("profile_interactive", hidden=True)
 class ProfileInteractive(ParlaiScript):
     @classmethod
     def setup_args(cls):
@@ -91,6 +91,6 @@ class ProfileInteractive(ParlaiScript):
         return profile_interactive(self.opt)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     random.seed(42)
     ProfileInteractive.main()

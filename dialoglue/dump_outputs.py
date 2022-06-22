@@ -121,7 +121,7 @@ commands = [
     restaurant8k_command,
     dstc8_command,
     top_command,
-    multiwoz_command
+    multiwoz_command,
 ]
 
 checkpoints = [
@@ -144,17 +144,17 @@ datasets = [
     "multiwoz",
 ]
 
-for cmd,ckpt in zip(commands, checkpoints):
+for cmd, ckpt in zip(commands, checkpoints):
     if "multiwoz" in ckpt:
         open("mwoz_command_temp.sh", "w+").write(cmd.replace("{0}", "../" + ckpt))
-        cmd = "bash mwoz_command_temp.sh"      
+        cmd = "bash mwoz_command_temp.sh"
     else:
         continue
 
     os.system(cmd.format(ckpt))
 
 output_dict = {}
-for dataset,ckpt in zip(datasets,checkpoints):
+for dataset, ckpt in zip(datasets, checkpoints):
     if dataset == "multiwoz":
         data = json.load(open(ckpt + "pred_res.test.final.json"))
     else:

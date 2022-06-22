@@ -16,26 +16,26 @@ class GraphMutations(Enum):
 
 
 try:
-    stopwords.words('english')
+    stopwords.words("english")
 except LookupError:
-    nltk.download('stopwords')
+    nltk.download("stopwords")
 
 
 # The set of words in the description of graph that we skip while checking
 # for overlap between knowledge graph vertices and the description.
 # We remove the word "you" from this set becuase otherwise the edges that have you (player) vertices,
 # which are quite important, will be reduced to empty vertices, and thus dropped.
-GRAPH_VERT_SKIP_TOKEN = set(stopwords.words('english')) - {'you'}
+GRAPH_VERT_SKIP_TOKEN = set(stopwords.words("english")) - {"you"}
 
-LOCATION_NAME = 'loc-name'
-LOCATION_DESCRIPTION = 'loc-desc'
-SURROUNDING_OBJECTS = 'surr_obj'
-KNOWLEDGE_GRAPH = 'KG'
-ACTION = 'action'
-OBSERVATION = 'obs'
+LOCATION_NAME = "loc-name"
+LOCATION_DESCRIPTION = "loc-desc"
+SURROUNDING_OBJECTS = "surr_obj"
+KNOWLEDGE_GRAPH = "KG"
+ACTION = "action"
+OBSERVATION = "obs"
 
 # The delimiter characetrs between members of a set (eg objects, graph edges, etc.)
-SET_MEMBERS_DELIM = ' ; '
-GRAPH_DELIM = ','
+SET_MEMBERS_DELIM = " ; "
+GRAPH_DELIM = ","
 
-EMPTY_GRAPH_TOKEN = '__empty-graph__'
+EMPTY_GRAPH_TOKEN = "__empty-graph__"

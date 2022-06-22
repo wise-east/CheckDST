@@ -10,20 +10,20 @@ from parlai.utils.logging import logger
 from parlai.core.build_data import DownloadableFile
 
 
-MSC_DATASETS_VERSION = 'v0.1'
+MSC_DATASETS_VERSION = "v0.1"
 
 
 RESOURCES = [
     DownloadableFile(
-        f'http://parl.ai/downloads/msc/msc_{MSC_DATASETS_VERSION}.tar.gz',
-        f'msc_{MSC_DATASETS_VERSION}.tar.gz',
-        'e640e37cf4317cd09fc02a4cd57ef130a185f23635f4003b0cee341ffcb45e60',
+        f"http://parl.ai/downloads/msc/msc_{MSC_DATASETS_VERSION}.tar.gz",
+        f"msc_{MSC_DATASETS_VERSION}.tar.gz",
+        "e640e37cf4317cd09fc02a4cd57ef130a185f23635f4003b0cee341ffcb45e60",
     )
 ]
 
 
 def get_msc_dir_path(opt):
-    dpath = os.path.join(opt['datapath'], 'msc')
+    dpath = os.path.join(opt["datapath"], "msc")
     return dpath
 
 
@@ -32,7 +32,7 @@ def build(opt):
     # create particular instance of dataset depending on flags..
     dpath = get_msc_dir_path(opt)
     if not build_data.built(dpath, version):
-        logger.warning('[build data: ' + dpath + ']')
+        logger.warning("[build data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

@@ -14,26 +14,26 @@ import parlai.utils.logging as logging
 
 
 # Bad persona violations
-PERSONA_REPEATS_PROMPT = 'repeated the prompt text'
-ASKED_WIZARD_QUESTION = 'asked wizard in the persona details'
-COPIED_EXTENDED_PERSONA = 'extended persona copies the main persona'
-GENERIC_EXTENDED_PERSONA = 'extended persona is generic'
+PERSONA_REPEATS_PROMPT = "repeated the prompt text"
+ASKED_WIZARD_QUESTION = "asked wizard in the persona details"
+COPIED_EXTENDED_PERSONA = "extended persona copies the main persona"
+GENERIC_EXTENDED_PERSONA = "extended persona is generic"
 
-QUESTION_PHRASE = 'what is your'
+QUESTION_PHRASE = "what is your"
 
 # Wizard knowledge violations
 DEFAULT_KNOWLEDGE_OVERLAP_THRESHOLD = 0.05
 
-POOR_SEARCH_QUERIES = 'poor search queries'
-IRRELEVANT_SEARCH__QUERIES = 'irrelevant search terms'
-NOT_ENOUGH_SEARCH = 'not enough selected knowledge sources'
-SELECTED_SHORT_PIECES = 'short knowledge pieces selected.'
-LOW_KNOWLEDGE_OVERLAP = 'low knowledge overlap'
+POOR_SEARCH_QUERIES = "poor search queries"
+IRRELEVANT_SEARCH__QUERIES = "irrelevant search terms"
+NOT_ENOUGH_SEARCH = "not enough selected knowledge sources"
+SELECTED_SHORT_PIECES = "short knowledge pieces selected."
+LOW_KNOWLEDGE_OVERLAP = "low knowledge overlap"
 
 
 def tokenize_text(text, stemmer, as_set=True):
     text = normalize_answer(text)
-    tokens = [stemmer.stem(word) for word in text.split(' ')]
+    tokens = [stemmer.stem(word) for word in text.split(" ")]
     if as_set:
         tokens = set(tokens)
     return tokens
@@ -50,9 +50,9 @@ def overlap_ratios(a: set, b: set) -> float:
 
 def is_valid_agent_chat_message(message, agent_id):
     return (
-        message.get('text')
-        and message.get('id') == agent_id
-        and not message.get('is_search_query', False)
+        message.get("text")
+        and message.get("id") == agent_id
+        and not message.get("is_search_query", False)
     )
 
 
@@ -60,14 +60,14 @@ def bad_persona(persona, stemmer):
     """
     Check for poor persona selection by apprentice.
     """
-    persona_parts = persona.split('\n')
+    persona_parts = persona.split("\n")
 
     # It is not from the persona selection ones (personas used during the pilot).
     if not (
         len(persona_parts) == 2
-        or (len(persona_parts) == 3 and 'I live in ' in persona_parts[0])
+        or (len(persona_parts) == 3 and "I live in " in persona_parts[0])
     ):
-        logging.warning(f'Old fashioned persona: {persona}')
+        logging.warning(f"Old fashioned persona: {persona}")
         return
 
     # Removing the location ('I live in X') part
@@ -79,11 +79,11 @@ def bad_persona(persona, stemmer):
     violations = []
 
     # Bad main persona response
-    if main_pers.startswith('My favorite '):
-        for phrase in ('i like', 'my favorite'):
+    if main_pers.startswith("My favorite "):
+        for phrase in ("i like", "my favorite"):
             persona_core = main_pers
             # Remove the original My favorite
-            persona_core = main_pers[len('My favorite ') :]
+            persona_core = main_pers[len("My favorite ") :]
             if phrase in persona_core.lower():
                 violations.append(PERSONA_REPEATS_PROMPT)
                 break
@@ -100,8 +100,8 @@ def bad_persona(persona, stemmer):
         violations.append(COPIED_EXTENDED_PERSONA)
 
     # Use of non-generic words in persona.
-    common_phrases = ('i', 'it', 'like', 'very', 'much', 'favorite', 'is', 'am')
-    tokens = [w.strip() for w in ext_pers.split(' ') if w]
+    common_phrases = ("i", "it", "like", "very", "much", "favorite", "is", "am")
+    tokens = [w.strip() for w in ext_pers.split(" ") if w]
     ext_useful_words = [t for t in tokens if t not in common_phrases]
     if len(tokens) > 4 and len(ext_useful_words) < 2:
         violations.append(GENERIC_EXTENDED_PERSONA)
@@ -120,19 +120,19 @@ def poor_knowledge_selection(messages, persona, stemmer, knwldg_ovlp_thrshld):
 
     n_search_query_not_in_history = 0
     for msg in messages:
-        if msg.get('text', None):
+        if msg.get("text", None):
             message_history_tokens = message_history_tokens.union(
-                tokenize_text(msg['text'], stemmer)
+                tokenize_text(msg["text"], stemmer)
             )
 
-        if msg['id'] != 'Wizard':
+        if msg["id"] != "Wizard":
             continue
 
-        selections = msg.get('task_data', {}).get('selected_text_candaidtes')
+        selections = msg.get("task_data", {}).get("selected_text_candaidtes")
         if not selections or selections[0][0]:
             continue
 
-        search_query = msg['task_data']['search_query']
+        search_query = msg["task_data"]["search_query"]
         search_terms.append(search_query)
         if message_history_tokens.isdisjoint(tokenize_text(search_query, stemmer)):
             n_search_query_not_in_history += 1
@@ -143,22 +143,22 @@ def poor_knowledge_selection(messages, persona, stemmer, knwldg_ovlp_thrshld):
             for sentence_id in range(len(doc_selections)):
                 if doc_selections[sentence_id]:
                     selected_parts.append(
-                        msg['task_data']['text_candidates'][doc_id - 1]['content'][
+                        msg["task_data"]["text_candidates"][doc_id - 1]["content"][
                             sentence_id
                         ]
                     )
 
         selected_knowledge.append(
-            {'text': msg['text'], 'knowledge': ' '.join(selected_parts)}
+            {"text": msg["text"], "knowledge": " ".join(selected_parts)}
         )
 
     knowledge_length = []
     knowledge_overlaps = []
     for knwldg in selected_knowledge:
-        knowledge_tokens = tokenize_text(knwldg['knowledge'], stemmer)
+        knowledge_tokens = tokenize_text(knwldg["knowledge"], stemmer)
         knowledge_length.append(len(knowledge_tokens))
 
-        response_tokens = tokenize_text(knwldg['text'], stemmer)
+        response_tokens = tokenize_text(knwldg["text"], stemmer)
         knowledge_overlaps.append(overlap_ratios(knowledge_tokens, response_tokens))
 
     violations = []
@@ -182,7 +182,7 @@ def poor_knowledge_selection(messages, persona, stemmer, knwldg_ovlp_thrshld):
     # Small overlap between response and the selected knowledge parts
     knowledge_overlap_avg = np.average(knowledge_overlaps)
     if knowledge_overlap_avg < knwldg_ovlp_thrshld:
-        violations.append(f'{LOW_KNOWLEDGE_OVERLAP} ({knowledge_overlap_avg})')
+        violations.append(f"{LOW_KNOWLEDGE_OVERLAP} ({knowledge_overlap_avg})")
 
     return violations
 
@@ -212,25 +212,25 @@ class WizardOfInternetAcceptabilityChecker(AcceptabilityChecker):
             violation_types,
         )
         if general_chat_violations:
-            violations.extend(general_chat_violations.split(','))
+            violations.extend(general_chat_violations.split(","))
 
-        if agent_id == 'Apprentice':
+        if agent_id == "Apprentice":
             persona_violations = bad_persona(persona, self.post_stemmer)
             if persona_violations:
                 violations.extend(persona_violations)
 
-        if agent_id == 'Wizard':
+        if agent_id == "Wizard":
             knowledge_violations = poor_knowledge_selection(
                 messages, persona, self.post_stemmer, self.knowledge_overlap_threshold
             )
             if knowledge_violations:
                 violations.extend(knowledge_violations)
 
-        return ','.join(violations)
+        return ",".join(violations)
 
     def get_conversation_messages(self, agent_messages, agent_id):
         return [
-            msg['text']
+            msg["text"]
             for msg in agent_messages
             if is_valid_agent_chat_message(msg, agent_id)
         ]

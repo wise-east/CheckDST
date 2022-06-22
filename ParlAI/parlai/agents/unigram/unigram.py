@@ -35,7 +35,7 @@ class UnigramAgent(Agent):
         Adds command line arguments.
         """
         parser.add_argument(
-            '--num-words', type=int, default=10, help='Number of unigrams to output.'
+            "--num-words", type=int, default=10, help="Number of unigrams to output."
         )
         cls.dictionary_class().add_cmdline_args(parser, partial_opt=partial_opt)
         return parser
@@ -54,13 +54,13 @@ class UnigramAgent(Agent):
         :param opt: parlai options
         :param shared: Used to duplicate the model for batching/hogwild.
         """
-        self.id = 'UnigramAgent'
+        self.id = "UnigramAgent"
         self.unigram_cache = None
         self.opt = opt
-        self.num_words = opt['num_words']
+        self.num_words = opt["num_words"]
 
         if shared is not None:
-            self.dict = shared['dict']
+            self.dict = shared["dict"]
         else:
             self.dict = self.dictionary_class()(opt)
 
@@ -68,7 +68,7 @@ class UnigramAgent(Agent):
         """
         Basic sharing function.
         """
-        return {'dict': self.dict}
+        return {"dict": self.dict}
 
     def observe(self, obs):
         """
@@ -83,7 +83,7 @@ class UnigramAgent(Agent):
         Used to filter punctuation and special tokens.
         """
         return (
-            not word.startswith('__') and word != '\n' and not re.match(r'[^\w]', word)
+            not word.startswith("__") and word != "\n" and not re.match(r"[^\w]", word)
         )
 
     def get_prediction(self):
@@ -98,14 +98,14 @@ class UnigramAgent(Agent):
             most_common = ((u, v) for u, v in most_common if self.is_valid_word(u))
             most_common = islice(most_common, self.num_words)
             most_common = (u for u, v in most_common)
-            self.unigram_cache = ' '.join(list(most_common))
+            self.unigram_cache = " ".join(list(most_common))
         return self.unigram_cache
 
     def act(self):
         """
         Stub act, which always makes the same prediction.
         """
-        return {'id': self.getID(), 'text': self.get_prediction()}
+        return {"id": self.getID(), "text": self.get_prediction()}
 
     def save(self, path=None):
         """
@@ -116,10 +116,10 @@ class UnigramAgent(Agent):
         if not path:
             return
 
-        with PathManager.open(path, 'w') as f:
-            f.write(self.get_prediction() + '\n')
+        with PathManager.open(path, "w") as f:
+            f.write(self.get_prediction() + "\n")
 
-        with PathManager.open(path + '.opt', 'w') as f:
+        with PathManager.open(path + ".opt", "w") as f:
             json.dump(self.opt, f)
 
     def load(self, path):

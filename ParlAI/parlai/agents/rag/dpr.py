@@ -34,25 +34,25 @@ except ImportError:
     from transformers import BertTokenizer
 
 
-@register_agent('dpr_agent')
+@register_agent("dpr_agent")
 class DPRAgent(TransformerRankerAgent):
     """
     TRA Wrapper for the DPR Models.
     """
 
     def __init__(self, opt, shared=None):
-        config: BertConfig = BertConfig.from_pretrained('bert-base-uncased')
-        opt['n_heads'] = config.num_attention_heads
-        opt['n_layers'] = config.num_hidden_layers
-        opt['embedding_size'] = config.hidden_size
-        opt['ffn_size'] = config.intermediate_size
-        opt['dropout'] = config.hidden_dropout_prob
-        opt['attention_dropout'] = config.attention_probs_dropout_prob
-        opt['reduction_type'] = 'first'
-        opt['n_positions'] = config.max_position_embeddings
-        opt['activation'] = config.hidden_act
-        opt['variant'] = 'xlm'
-        opt['n_segments'] = config.type_vocab_size
+        config: BertConfig = BertConfig.from_pretrained("bert-base-uncased")
+        opt["n_heads"] = config.num_attention_heads
+        opt["n_layers"] = config.num_hidden_layers
+        opt["embedding_size"] = config.hidden_size
+        opt["ffn_size"] = config.intermediate_size
+        opt["dropout"] = config.hidden_dropout_prob
+        opt["attention_dropout"] = config.attention_probs_dropout_prob
+        opt["reduction_type"] = "first"
+        opt["n_positions"] = config.max_position_embeddings
+        opt["activation"] = config.hidden_act
+        opt["variant"] = "xlm"
+        opt["n_segments"] = config.type_vocab_size
         super().__init__(opt, shared)
 
     def build_model(self):
@@ -62,8 +62,8 @@ class DPRAgent(TransformerRankerAgent):
         """
         Overrides BiencoderAgent to not add start/end.
         """
-        kwargs['add_start'] = False
-        kwargs['add_end'] = False
+        kwargs["add_start"] = False
+        kwargs["add_end"] = False
         return TorchRankerAgent.vectorize(self, *args, **kwargs)
 
     def load_state_dict(self, state_dict: Dict[str, torch.Tensor]):
@@ -85,38 +85,38 @@ class DprEncoder(TransformerEncoder):
     models.
     """
 
-    CONFIG_PATH = 'config.json'
+    CONFIG_PATH = "config.json"
 
     def __init__(
         self,
         opt: Opt,
-        dpr_model: str = 'bert',
+        dpr_model: str = "bert",
         pretrained_path: str = DPR_ZOO_MODEL,
-        encoder_type: str = 'query',
+        encoder_type: str = "query",
     ):
         # Override options
         try:
-            config: BertConfig = BertConfig.from_pretrained('bert-base-uncased')
+            config: BertConfig = BertConfig.from_pretrained("bert-base-uncased")
         except OSError:
             config_path = PathManager.get_local_path(
-                os.path.join(opt['datapath'], "bert_base_uncased", self.CONFIG_PATH)
+                os.path.join(opt["datapath"], "bert_base_uncased", self.CONFIG_PATH)
             )
             config: BertConfig = BertConfig.from_pretrained(config_path)
 
         pretrained_path = modelzoo_path(
-            opt['datapath'], pretrained_path
+            opt["datapath"], pretrained_path
         )  # type: ignore
         if not os.path.exists(pretrained_path):
             # when initializing from parlai rag models, the pretrained path
             # may not longer exist. This is fine if we've already trained
             # the model.
-            assert dpr_model == 'bert_from_parlai_rag'
-            logging.error(f'Pretrained Path does not exist: {pretrained_path}')
+            assert dpr_model == "bert_from_parlai_rag"
+            logging.error(f"Pretrained Path does not exist: {pretrained_path}")
             pretrained_path = modelzoo_path(
-                opt['datapath'], DPR_ZOO_MODEL
+                opt["datapath"], DPR_ZOO_MODEL
             )  # type: ignore
-            dpr_model = 'bert'
-            logging.error(f'Setting to zoo model: {pretrained_path}')
+            dpr_model = "bert"
+            logging.error(f"Setting to zoo model: {pretrained_path}")
         enc_opt = {
             "n_heads": config.num_attention_heads,
             "n_layers": config.num_hidden_layers,
@@ -125,8 +125,8 @@ class DprEncoder(TransformerEncoder):
             "dropout": config.hidden_dropout_prob,
             "attention_dropout": config.attention_probs_dropout_prob,
             "activation": config.hidden_act,
-            "variant": 'xlm',
-            "reduction_type": 'first',
+            "variant": "xlm",
+            "reduction_type": "first",
             "n_positions": config.max_position_embeddings,
             "n_segments": config.type_vocab_size,
         }
@@ -138,10 +138,10 @@ class DprEncoder(TransformerEncoder):
             vocabulary_size=config.vocab_size,
             padding_idx=config.pad_token_id,
             embedding=embedding,
-            reduction_type='first',
+            reduction_type="first",
         )
 
-        self._load_state(opt['datapath'], dpr_model, pretrained_path, encoder_type)
+        self._load_state(opt["datapath"], dpr_model, pretrained_path, encoder_type)
 
     def _load_state(
         self, datapath: str, dpr_model: str, pretrained_path: str, encoder_type: str
@@ -156,7 +156,7 @@ class DprEncoder(TransformerEncoder):
         :param encoder_type:
             whether this is a query or document encoder
         """
-        if dpr_model == 'bert':
+        if dpr_model == "bert":
             state_dict = BertConversionUtils.load_bert_state(
                 datapath,
                 self.state_dict(),
@@ -164,8 +164,8 @@ class DprEncoder(TransformerEncoder):
                 encoder_type=encoder_type,
             )
             self.load_state_dict(state_dict)
-        elif dpr_model == 'bert_from_parlai_rag':
-            state_dict = torch.load(pretrained_path, map_location='cpu')["model"]
+        elif dpr_model == "bert_from_parlai_rag":
+            state_dict = torch.load(pretrained_path, map_location="cpu")["model"]
             key = f"{encoder_type}_encoder."
             state_dict = {
                 k.split(key)[-1]: v for k, v in state_dict.items() if key in k
@@ -179,7 +179,7 @@ class DprQueryEncoder(DprEncoder):
     """
 
     def __init__(self, *args, **kwargs):
-        kwargs['encoder_type'] = 'query'
+        kwargs["encoder_type"] = "query"
         super().__init__(*args, **kwargs)
 
 
@@ -189,7 +189,7 @@ class DprDocumentEncoder(DprEncoder):
     """
 
     def __init__(self, *args, **kwargs):
-        kwargs['encoder_type'] = 'document'
+        kwargs["encoder_type"] = "document"
         super().__init__(*args, **kwargs)
 
 
@@ -209,26 +209,26 @@ class DPRModel(TransformerMemNetModel):
             document_model: dpr document model type
             document_path: path to pre-trained document model
         """
-        query_model = 'bert'
-        document_model = 'bert'
-        query_path = opt['model_file']
-        document_path = opt['model_file']
+        query_model = "bert"
+        document_model = "bert"
+        query_path = opt["model_file"]
+        document_path = opt["model_file"]
         try:
             # determine if loading a RAG model
             loaded_opt = Opt.load(f"{query_path}.opt")
-            document_path = loaded_opt.get('dpr_model_file', document_path)
-            if loaded_opt['model'] in ['rag', 'fid'] and loaded_opt['query_model'] in [
-                'bert',
-                'bert_from_parlai_rag',
+            document_path = loaded_opt.get("dpr_model_file", document_path)
+            if loaded_opt["model"] in ["rag", "fid"] and loaded_opt["query_model"] in [
+                "bert",
+                "bert_from_parlai_rag",
             ]:
-                query_model = 'bert_from_parlai_rag'
-                if loaded_opt['model'] == 'fid':
+                query_model = "bert_from_parlai_rag"
+                if loaded_opt["model"] == "fid":
                     # document model is always frozen
                     # but may be loading a FiD-RAG Model
                     doc_loaded_opt = Opt.load(
                         f"{modelzoo_path(opt['datapath'], document_path)}.opt"
                     )
-                    document_path = doc_loaded_opt.get('dpr_model_file', document_path)
+                    document_path = doc_loaded_opt.get("dpr_model_file", document_path)
 
         except FileNotFoundError:
             pass
@@ -242,7 +242,7 @@ class DPRModel(TransformerMemNetModel):
         dictionary: DictionaryAgent,
         embedding: Optional[torch.nn.Embedding] = None,
         padding_idx: Optional[int] = None,
-        reduction_type: str = 'mean',
+        reduction_type: str = "mean",
     ):
         query_model, query_path, *_ = cls._get_build_options(opt)
         return DprQueryEncoder(opt, dpr_model=query_model, pretrained_path=query_path)
@@ -254,7 +254,7 @@ class DPRModel(TransformerMemNetModel):
         dictionary: DictionaryAgent,
         embedding: Optional[torch.nn.Embedding] = None,
         padding_idx: Optional[int] = None,
-        reduction_type: str = 'mean',
+        reduction_type: str = "mean",
     ):
         _, _, document_model, document_path = cls._get_build_options(opt)
         return DprDocumentEncoder(
@@ -264,7 +264,7 @@ class DPRModel(TransformerMemNetModel):
 
 class BertTokenizerDictionaryAgent(HuggingFaceDictionaryAgent):
     def get_tokenizer(self, opt: Opt):
-        return BertTokenizer.from_pretrained('bert-base-uncased')
+        return BertTokenizer.from_pretrained("bert-base-uncased")
 
     @property
     def add_special_tokens(self) -> bool:

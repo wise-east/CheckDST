@@ -16,19 +16,19 @@ import os
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/genderation_bias/genderation_bias.tgz',
-        'genderation_bias.tgz',
-        '9a0252c6bb778757ac60dee9df23a169192f4a853ceb2b530af2343abeb1498a',
+        "http://parl.ai/downloads/genderation_bias/genderation_bias.tgz",
+        "genderation_bias.tgz",
+        "9a0252c6bb778757ac60dee9df23a169192f4a853ceb2b530af2343abeb1498a",
     )
 ]
 
 
 def build(opt):
-    version = 'v1.0'
-    dpath = os.path.join(opt['datapath'], 'light_genderation_bias')
+    version = "v1.0"
+    dpath = os.path.join(opt["datapath"], "light_genderation_bias")
 
     if not build_data.built(dpath, version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

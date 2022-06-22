@@ -13,24 +13,24 @@ from parlai.tasks.md_gender.build import build
 Gender utilities for the multiclass gender classification tasks.
 """
 
-MASK_TOKEN = '[MASK]'
+MASK_TOKEN = "[MASK]"
 
-MASC = 'male'
-FEM = 'female'
-NEUTRAL = 'gender-neutral'
-NONBINARY = 'non-binary'
-UNKNOWN = 'unknown'
+MASC = "male"
+FEM = "female"
+NEUTRAL = "gender-neutral"
+NONBINARY = "non-binary"
+UNKNOWN = "unknown"
 
 
-SELF_UNKNOWN_LABELS = [f'SELF:{MASC}', f'SELF:{FEM}']
-PARTNER_UNKNOWN_LABELS = [f'PARTNER:{MASC}', f'PARTNER:{FEM}']
-UNKNOWN_LABELS = {'self': SELF_UNKNOWN_LABELS, 'partner': PARTNER_UNKNOWN_LABELS}
+SELF_UNKNOWN_LABELS = [f"SELF:{MASC}", f"SELF:{FEM}"]
+PARTNER_UNKNOWN_LABELS = [f"PARTNER:{MASC}", f"PARTNER:{FEM}"]
+UNKNOWN_LABELS = {"self": SELF_UNKNOWN_LABELS, "partner": PARTNER_UNKNOWN_LABELS}
 
 PUNCTUATION_LST = [
-    (' .', '.'),
-    (' !', '!'),
-    (' ?', '?'),
-    (' ,', ','),
+    (" .", "."),
+    (" !", "!"),
+    (" ?", "?"),
+    (" ,", ","),
     (" ' ", "'"),
     (" . . . ", "... "),
     (" ( ", " ("),
@@ -38,19 +38,19 @@ PUNCTUATION_LST = [
     (" ; ", "; "),
 ]
 
-SELF_CANDS = [f'SELF:{MASC}', f'SELF:{FEM}']
-PARTNER_CANDS = [f'PARTNER:{NEUTRAL}', f'PARTNER:{MASC}', f'PARTNER:{FEM}']
+SELF_CANDS = [f"SELF:{MASC}", f"SELF:{FEM}"]
+PARTNER_CANDS = [f"PARTNER:{NEUTRAL}", f"PARTNER:{MASC}", f"PARTNER:{FEM}"]
 ABOUT_CANDS = [
-    f'ABOUT:{NEUTRAL}',
-    f'ABOUT:{FEM}',
-    f'ABOUT:{MASC}',
-    f'ABOUT:{NONBINARY}',
+    f"ABOUT:{NEUTRAL}",
+    f"ABOUT:{FEM}",
+    f"ABOUT:{MASC}",
+    f"ABOUT:{NONBINARY}",
 ]
-ALL_CANDS = {'self': SELF_CANDS, 'partner': PARTNER_CANDS, 'about': ABOUT_CANDS}
-EMPTY_LABELS = {'self': 'SELF:{}', 'partner': 'PARTNER:{}', 'about': 'ABOUT:{}'}
+ALL_CANDS = {"self": SELF_CANDS, "partner": PARTNER_CANDS, "about": ABOUT_CANDS}
+EMPTY_LABELS = {"self": "SELF:{}", "partner": "PARTNER:{}", "about": "ABOUT:{}"}
 
 
-def get_data_stats(data, key='label', lst=True):
+def get_data_stats(data, key="label", lst=True):
     counts = defaultdict(int)
     for ex in data:
         if lst:
@@ -59,45 +59,45 @@ def get_data_stats(data, key='label', lst=True):
             label = ex[key]
         counts[label] += 1
 
-    print('Total dataset counts:')
+    print("Total dataset counts:")
     tups = sorted([(k, v) for k, v in counts.items()], key=lambda x: x[0])
     for k, v in tups:
-        print(f'{k}: {v}')
+        print(f"{k}: {v}")
 
 
 def add_common_args(parser):
     """
     Add arguments common across all of the datasets.
     """
-    agent = parser.add_argument_group('Gender Multiclass args')
+    agent = parser.add_argument_group("Gender Multiclass args")
     agent.add_argument(
-        '--balance',
-        type='bool',
+        "--balance",
+        type="bool",
         default=False,
-        help='Whether to balance the data between classes during training',
+        help="Whether to balance the data between classes during training",
     )
     agent.add_argument(
-        '--balance-valid',
-        type='bool',
+        "--balance-valid",
+        type="bool",
         default=False,
-        help='Whether to balance the validation data',
+        help="Whether to balance the validation data",
     )
     agent.add_argument(
-        '--add-unknown-classes',
-        type='bool',
+        "--add-unknown-classes",
+        type="bool",
         default=False,
-        help='Add unknown classes as neutral',
+        help="Add unknown classes as neutral",
     )
     agent.add_argument(
-        '--unknown-temp',
+        "--unknown-temp",
         type=float,
         default=1.0,
-        help='Rate at which to sample examples from the unknown class',
+        help="Rate at which to sample examples from the unknown class",
     )
     return parser
 
 
-def balance_data(data_list, key='labels', shuffle=True, exclude_labels=None):
+def balance_data(data_list, key="labels", shuffle=True, exclude_labels=None):
     """
     Given a list of acts, balance the list by label.
     """
@@ -156,27 +156,27 @@ def get_inferred_about_data(task, opt, threshold=0.8):
     Load inferred ABOUT data from teh ABOUT classifier.
     """
     root = os.path.join(
-        opt['datapath'], 'md_gender', 'data_to_release', 'inferred_about'
+        opt["datapath"], "md_gender", "data_to_release", "inferred_about"
     )
-    task_str = task.split(':')[-1]
-    dt = opt['datatype'].split(':')[0]
-    with open(os.path.join(root, f'{task_str}_{dt}_binary.txt'), 'r') as f:
+    task_str = task.split(":")[-1]
+    dt = opt["datatype"].split(":")[0]
+    with open(os.path.join(root, f"{task_str}_{dt}_binary.txt"), "r") as f:
         lines = f.read().splitlines()
     examples = []
     for line in lines:
-        text, label, score = line.split('\t')
+        text, label, score = line.split("\t")
         if threshold is not None and float(score) < threshold:
             # replace label with NEUTRAL
-            label = f'ABOUT:{NEUTRAL}'
+            label = f"ABOUT:{NEUTRAL}"
         if not text or not label:
             continue
         examples.append(
             {
-                'text': text,
-                'labels': [label],
-                'class_type': 'about',
-                'label_candidates': ABOUT_CANDS,
-                'episode_done': True,
+                "text": text,
+                "labels": [label],
+                "class_type": "about",
+                "label_candidates": ABOUT_CANDS,
+                "episode_done": True,
             }
         )
 
@@ -214,14 +214,14 @@ def get_explicitly_gendered_words(opt):
     Examples include brother, girl, actress, husbands, etc.
     """
     build(opt)
-    folder = os.path.join(opt['datapath'], 'md_gender', 'data_to_release', 'word_list')
-    male_words = os.path.join(folder, 'male_word_file.txt')
-    female_words = os.path.join(folder, 'female_word_file.txt')
+    folder = os.path.join(opt["datapath"], "md_gender", "data_to_release", "word_list")
+    male_words = os.path.join(folder, "male_word_file.txt")
+    female_words = os.path.join(folder, "female_word_file.txt")
 
-    with open(male_words, 'r') as f:
+    with open(male_words, "r") as f:
         male = f.read().splitlines()
 
-    with open(female_words, 'r') as f:
+    with open(female_words, "r") as f:
         female = f.read().splitlines()
 
     return male, female
@@ -233,15 +233,15 @@ def mask_gendered_words(text, gendered_list, mask_token=MASK_TOKEN):
     """
     text = format_text(text, lower=False)
     to_ret = []
-    orig_text = text.split(' ')
-    lowered_text = text.lower().split(' ')
+    orig_text = text.split(" ")
+    lowered_text = text.lower().split(" ")
     for word, word_lower in zip(orig_text, lowered_text):
         if word_lower in gendered_list:
             to_ret.append(mask_token)
         else:
             to_ret.append(word)
 
-    return unformat_text(' '.join(to_ret))
+    return unformat_text(" ".join(to_ret))
 
 
 CONTRACTIONS_LIST = [

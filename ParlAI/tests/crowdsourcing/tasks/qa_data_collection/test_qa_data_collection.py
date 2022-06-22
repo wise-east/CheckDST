@@ -13,7 +13,7 @@ import unittest
 
 
 # Inputs
-AGENT_DISPLAY_IDS = ('QA Agent',)
+AGENT_DISPLAY_IDS = ("QA Agent",)
 AGENT_MESSAGES = [("Who was the first reigning pope to ever visit the Americas?",)]
 FORM_MESSAGES = ("Pope Paul VI",)
 FORM_TASK_DATA = ({},)
@@ -52,9 +52,9 @@ try:
 
             # Paths
             expected_states_folder = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), 'expected_states'
+                os.path.dirname(os.path.abspath(__file__)), "expected_states"
             )
-            expected_state_path = os.path.join(expected_states_folder, 'state.json')
+            expected_state_path = os.path.join(expected_states_folder, "state.json")
 
             # # Setup
 
@@ -62,9 +62,9 @@ try:
 
             # Set up the config and database
             overrides = [
-                'mephisto.blueprint.num_conversations=1',
-                'mephisto.task.allowed_concurrent=0',
-                '+turn_timeout=300',
+                "mephisto.blueprint.num_conversations=1",
+                "mephisto.task.allowed_concurrent=0",
+                "+turn_timeout=300",
             ]
             # TODO: remove all of these params once Hydra 1.1 is released with
             #  support for recursive defaults
@@ -93,7 +93,6 @@ try:
                 form_task_data=FORM_TASK_DATA,
                 expected_states=(expected_state,),
             )
-
 
 except ImportError:
     pass

@@ -33,14 +33,14 @@ from parlai.core.script import ParlaiScript, register_script
 
 
 def multiprocess_train(
-    rank, opt, port=61337, rank_offset=0, gpu=None, hostname='localhost'
+    rank, opt, port=61337, rank_offset=0, gpu=None, hostname="localhost"
 ):
     init_method = f"tcp://{hostname}:{port}"
     with distributed_utils.distributed_context(
         rank, opt, rank_offset, gpu, init_method=init_method
     ) as opt:
         # Run the actual training
-        opt['multiprocessing'] = True
+        opt["multiprocessing"] = True
         try:
             return single_train.TrainLoop(opt).train()
         except Exception:
@@ -66,9 +66,9 @@ def launch_and_train(opt, port=None):
         # need to give rank offset as 1 to cover the fact that the main
         # process is rank 0, but that spawn() doesn't let you control rank
         (opt, port, 1),
-        nprocs=opt['distributed_world_size'] - 1,  # main proc will also run loop
+        nprocs=opt["distributed_world_size"] - 1,  # main proc will also run loop
         join=False,
-        start_method='spawn',
+        start_method="spawn",
     )
 
     try:
@@ -95,16 +95,16 @@ class MultiProcessTrain(ParlaiScript):
     @classmethod
     def setup_args(cls):
         argparser = setup_args()
-        argparser.add_argument('--port', type=int, default=None)
+        argparser.add_argument("--port", type=int, default=None)
         return argparser
 
     def run(self):
-        if self.opt['port'] is None:
+        if self.opt["port"] is None:
             port = None
         else:
-            port = self.opt['port']
+            port = self.opt["port"]
         return launch_and_train(self.opt, port)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     MultiProcessTrain.main()

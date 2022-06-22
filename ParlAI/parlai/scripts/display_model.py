@@ -26,32 +26,32 @@ import random
 
 
 def simple_display(opt, world, turn):
-    if opt['batchsize'] > 1:
-        raise RuntimeError('Simple view only support batchsize=1')
+    if opt["batchsize"] > 1:
+        raise RuntimeError("Simple view only support batchsize=1")
     teacher, response = world.get_acts()
     if turn == 0:
-        text = "- - - NEW EPISODE: " + teacher.get('id', "[no agent id]") + "- - -"
-        print(colorize(text, 'highlight'))
-    text = teacher.get('text', '[no text field]')
-    print(colorize(text, 'text'))
-    response_text = response.get('text', 'No response')
-    labels = teacher.get('labels', teacher.get('eval_labels', ['[no labels field]']))
-    labels = '|'.join(labels)
-    print(colorize('    labels: ' + labels, 'labels'))
-    print(colorize('     model: ' + response_text, 'text2'))
+        text = "- - - NEW EPISODE: " + teacher.get("id", "[no agent id]") + "- - -"
+        print(colorize(text, "highlight"))
+    text = teacher.get("text", "[no text field]")
+    print(colorize(text, "text"))
+    response_text = response.get("text", "No response")
+    labels = teacher.get("labels", teacher.get("eval_labels", ["[no labels field]"]))
+    labels = "|".join(labels)
+    print(colorize("    labels: " + labels, "labels"))
+    print(colorize("     model: " + response_text, "text2"))
 
 
 def setup_args():
-    parser = ParlaiParser(True, True, 'Display model predictions.')
-    parser.add_argument('-n', '-ne', '--num-examples', default=10)
+    parser = ParlaiParser(True, True, "Display model predictions.")
+    parser.add_argument("-n", "-ne", "--num-examples", default=10)
     parser.add_argument(
-        '--display-add-fields',
+        "--display-add-fields",
         type=str,
-        default='',
+        default="",
         help='Display these fields when verbose is off (e.g., "--display-add-fields label_candidates,beam_texts")',
     )
     # by default we want to display info about the validation set
-    parser.set_defaults(datatype='valid')
+    parser.set_defaults(datatype="valid")
     return parser
 
 
@@ -66,14 +66,14 @@ def display_model(opt):
     # Show some example dialogs.
     turn = 0
     with world:
-        for _k in range(int(opt['num_examples'])):
+        for _k in range(int(opt["num_examples"])):
             world.parley()
-            if opt['verbose'] or opt.get('display_add_fields', ''):
+            if opt["verbose"] or opt.get("display_add_fields", ""):
                 print(world.display() + "\n~~")
             else:
                 simple_display(opt, world, turn)
             turn += 1
-            if world.get_acts()[0]['episode_done']:
+            if world.get_acts()[0]["episode_done"]:
                 turn = 0
             if world.epoch_done():
                 logging.info("epoch done")
@@ -81,7 +81,7 @@ def display_model(opt):
                 break
 
 
-@register_script('display_model', aliases=['dm'])
+@register_script("display_model", aliases=["dm"])
 class DisplayModel(ParlaiScript):
     @classmethod
     def setup_args(cls):
@@ -91,5 +91,5 @@ class DisplayModel(ParlaiScript):
         display_model(self.opt)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     DisplayModel.main()

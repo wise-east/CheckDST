@@ -36,7 +36,7 @@ def create_embeddings(dictionary, embedding_size, padding_idx):
     Create and initialize word embeddings.
     """
     e = nn.Embedding(len(dictionary), embedding_size, padding_idx)
-    nn.init.normal_(e.weight, mean=0, std=embedding_size ** -0.5)
+    nn.init.normal_(e.weight, mean=0, std=embedding_size**-0.5)
     nn.init.constant_(e.weight[padding_idx], 0)
     return e
 
@@ -45,19 +45,19 @@ def get_n_positions_from_options(opt: Opt):
     """
     Determine n_positions from options dict.
     """
-    if opt.get('n_positions'):
+    if opt.get("n_positions"):
         # if the number of positions is explicitly provided, use that
-        n_positions = opt['n_positions']
+        n_positions = opt["n_positions"]
     else:
         # else, use the worst case from truncate
         n_positions = max(
-            opt.get('truncate') or 0,
-            opt.get('text_truncate') or 0,
-            opt.get('label_truncate') or 0,
+            opt.get("truncate") or 0,
+            opt.get("text_truncate") or 0,
+            opt.get("label_truncate") or 0,
         )
         if n_positions == 0:
             # default to 1024
             n_positions = 1024
     if n_positions < 0:
-        raise ValueError('n_positions must be positive')
+        raise ValueError("n_positions must be positive")
     return n_positions

@@ -18,20 +18,20 @@ class TestConvoRender(unittest.TestCase):
         self_chat_pp = self_chat.setup_args()
         self_chat_opt = self_chat_pp.parse_args(
             [
-                '-m',
-                'fixed_response',
-                '--fixed-response',
-                'Hey there',
-                '--save-format',
-                'conversations',
-                '--outfile',
-                'self_chat_output',
+                "-m",
+                "fixed_response",
+                "--fixed-response",
+                "Hey there",
+                "--save-format",
+                "conversations",
+                "--outfile",
+                "self_chat_output",
             ]
         )
         self_chat.self_chat(self_chat_opt)
 
         convo_render_pp = convo_render.setup_args()
         convo_render_opt = convo_render_pp.parse_args(
-            ['-i', 'self_chat_output.jsonl', '-o', 'self_chat_output.html']
+            ["-i", "self_chat_output.jsonl", "-o", "self_chat_output.html"]
         )
         convo_render.render_convo(convo_render_opt)

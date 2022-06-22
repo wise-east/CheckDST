@@ -30,122 +30,122 @@ def add_common_cmdline_args(parser):
     Add common command line args.
     """
     parser.add_argument(
-        '-esz',
-        '--embedding-size',
+        "-esz",
+        "--embedding-size",
         type=int,
         default=300,
-        help='Size of all embedding layers. Must be a multiple of --n-heads.',
+        help="Size of all embedding layers. Must be a multiple of --n-heads.",
     )
     parser.add_argument(
-        '-nl', '--n-layers', type=int, default=2, help='Number of transformer layers.'
+        "-nl", "--n-layers", type=int, default=2, help="Number of transformer layers."
     )
     parser.add_argument(
-        '-hid',
-        '--ffn-size',
+        "-hid",
+        "--ffn-size",
         type=int,
         default=300,
-        help='Hidden size of the FFN layers',
+        help="Hidden size of the FFN layers",
     )
     parser.add_argument(
-        '--dropout',
+        "--dropout",
         type=float,
         default=0.0,
-        help='Dropout used around embeddings and before layer layer normalizations. '
-        'This is used in Vaswani 2017 and works well on large datasets.',
+        help="Dropout used around embeddings and before layer layer normalizations. "
+        "This is used in Vaswani 2017 and works well on large datasets.",
     )
     parser.add_argument(
-        '--attention-dropout',
+        "--attention-dropout",
         type=float,
         default=0.0,
-        help='Dropout used after attention softmax. This is not used in Vaswani 2017.',
+        help="Dropout used after attention softmax. This is not used in Vaswani 2017.",
     )
     parser.add_argument(
-        '--relu-dropout',
+        "--relu-dropout",
         type=float,
         default=0.0,
-        help='Dropout used after the ReLU in the FFN. Not used in Vaswani 2017, '
-        'but used in Tensor2Tensor.',
+        help="Dropout used after the ReLU in the FFN. Not used in Vaswani 2017, "
+        "but used in Tensor2Tensor.",
     )
     parser.add_argument(
-        '--n-heads', type=int, default=2, help='Number of multihead attention heads'
+        "--n-heads", type=int, default=2, help="Number of multihead attention heads"
     )
     parser.add_argument(
-        '--learn-positional-embeddings',
-        type='bool',
+        "--learn-positional-embeddings",
+        type="bool",
         default=False,
-        help='If off, sinusoidal embeddings are used. If on, position embeddings are '
-        'learned from scratch.',
+        help="If off, sinusoidal embeddings are used. If on, position embeddings are "
+        "learned from scratch.",
     )
-    parser.add_argument('--embeddings-scale', type='bool', default=True)
+    parser.add_argument("--embeddings-scale", type="bool", default=True)
     parser.add_argument(
-        '--n-positions',
+        "--n-positions",
         type=int,
         default=None,
         hidden=True,
-        help='Number of positional embeddings to learn. Defaults '
-        'to truncate or 1024 if not provided.',
+        help="Number of positional embeddings to learn. Defaults "
+        "to truncate or 1024 if not provided.",
     )
     parser.add_argument(
-        '--n-segments',
+        "--n-segments",
         type=int,
         default=0,
-        help='The number of segments that support the model. '
-        'If zero no segment and no langs_embedding.',
+        help="The number of segments that support the model. "
+        "If zero no segment and no langs_embedding.",
     )
     parser.add_argument(
-        '--variant',
-        choices={'aiayn', 'xlm', 'prelayernorm', 'bart'},
-        default='aiayn',
-        help='Chooses locations of layer norms, etc. prelayernorm '
-        'is used to match some fairseq models',
-        recommended='xlm',
+        "--variant",
+        choices={"aiayn", "xlm", "prelayernorm", "bart"},
+        default="aiayn",
+        help="Chooses locations of layer norms, etc. prelayernorm "
+        "is used to match some fairseq models",
+        recommended="xlm",
     )
     parser.add_argument(
-        '--activation',
-        choices={'relu', 'gelu'},
-        default='relu',
-        help='Nonlinear activation to use. AIAYN uses relu, but '
-        'more recent papers prefer gelu.',
-        recommended='gelu',
+        "--activation",
+        choices={"relu", "gelu"},
+        default="relu",
+        help="Nonlinear activation to use. AIAYN uses relu, but "
+        "more recent papers prefer gelu.",
+        recommended="gelu",
     )
     parser.add_argument(
-        '--output-scaling',
+        "--output-scaling",
         type=float,
         default=1.0,
-        help='scale the output of every transformer by this quantity.',
+        help="scale the output of every transformer by this quantity.",
     )
     parser.add_argument(
-        '--share-word-embeddings',
-        type='bool',
+        "--share-word-embeddings",
+        type="bool",
         default=True,
-        help='Share word embeddings table for candidate and context'
-        'in the memory network',
+        help="Share word embeddings table for candidate and context"
+        "in the memory network",
     )
     parser.add_argument(
-        '-nel',
-        '--n-encoder-layers',
+        "-nel",
+        "--n-encoder-layers",
         type=int,
         default=-1,
-        help='This will overidde the n-layers for asymmetrical transformers',
+        help="This will overidde the n-layers for asymmetrical transformers",
     )
     parser.add_argument(
-        '-ndl',
-        '--n-decoder-layers',
+        "-ndl",
+        "--n-decoder-layers",
         type=int,
         default=-1,
-        help='This will overidde the n-layers for asymmetrical transformers',
+        help="This will overidde the n-layers for asymmetrical transformers",
     )
     parser.add_argument(
-        '--model-parallel',
-        type='bool',
+        "--model-parallel",
+        type="bool",
         default=False,
-        help='Shard the layers across multiple GPUs.',
+        help="Shard the layers across multiple GPUs.",
     )
     parser.add_argument(
-        '--checkpoint-activations',
-        type='bool',
+        "--checkpoint-activations",
+        type="bool",
         default=False,
-        help='Recompute activations on backward pass to conserve memory.',
+        help="Recompute activations on backward pass to conserve memory.",
     )
 
 
@@ -179,58 +179,58 @@ class TransformerRankerAgent(TorchRankerAgent):
         Add command-line arguments specifically for this agent.
         """
         super().add_cmdline_args(parser, partial_opt=partial_opt)
-        agent = parser.add_argument_group('Transformer Arguments')
+        agent = parser.add_argument_group("Transformer Arguments")
         add_common_cmdline_args(agent)
         # memory and knowledge arguments
         agent.add_argument(
-            '--use-memories',
-            type='bool',
+            "--use-memories",
+            type="bool",
             default=False,
-            help='use memories: must implement the function '
-            '`_vectorize_memories` to use this',
+            help="use memories: must implement the function "
+            "`_vectorize_memories` to use this",
         )
         agent.add_argument(
-            '--wrap-memory-encoder',
-            type='bool',
+            "--wrap-memory-encoder",
+            type="bool",
             default=False,
-            help='wrap memory encoder with MLP',
+            help="wrap memory encoder with MLP",
         )
         agent.add_argument(
-            '--memory-attention',
+            "--memory-attention",
             type=str,
-            default='sqrt',
-            choices=['cosine', 'dot', 'sqrt'],
-            help='similarity for basic attention mechanism '
-            'when using transformer to encode memories',
+            default="sqrt",
+            choices=["cosine", "dot", "sqrt"],
+            help="similarity for basic attention mechanism "
+            "when using transformer to encode memories",
         )
         # model specific arguments
-        agent.add_argument('--normalize-sent-emb', type='bool', default=False)
-        agent.add_argument('--share-encoders', type='bool', default=True)
+        agent.add_argument("--normalize-sent-emb", type="bool", default=False)
+        agent.add_argument("--share-encoders", type="bool", default=True)
         parser.add_argument(
-            '--share-word-embeddings',
-            type='bool',
+            "--share-word-embeddings",
+            type="bool",
             default=True,
-            help='Share word embeddings table for candidate and context'
-            'in the memory network',
+            help="Share word embeddings table for candidate and context"
+            "in the memory network",
         )
         agent.add_argument(
-            '--learn-embeddings', type='bool', default=True, help='learn embeddings'
+            "--learn-embeddings", type="bool", default=True, help="learn embeddings"
         )
         agent.add_argument(
-            '--data-parallel',
-            type='bool',
+            "--data-parallel",
+            type="bool",
             default=False,
-            help='use model in data parallel, requires ' 'multiple gpus',
+            help="use model in data parallel, requires " "multiple gpus",
         )
         agent.add_argument(
-            '--reduction-type',
+            "--reduction-type",
             type=str,
-            default='mean',
-            choices=['first', 'max', 'mean'],
-            help='Type of reduction at the end of transformer',
+            default="mean",
+            choices=["first", "max", "mean"],
+            help="Type of reduction at the end of transformer",
         )
 
-        parser.set_defaults(learningrate=0.0001, optimizer='adamax', truncate=1024)
+        parser.set_defaults(learningrate=0.0001, optimizer="adamax", truncate=1024)
         cls.dictionary_class().add_cmdline_args(parser, partial_opt=partial_opt)
 
         return agent
@@ -242,7 +242,7 @@ class TransformerRankerAgent(TorchRankerAgent):
             return torch.bmm(output.unsqueeze(1), cands.transpose(1, 2)).squeeze(1)
         else:
             raise RuntimeError(
-                'Unexpected candidate dimensions {}' ''.format(cands.dim())
+                "Unexpected candidate dimensions {}" "".format(cands.dim())
             )
 
     def build_model(self, states=None):
@@ -250,8 +250,8 @@ class TransformerRankerAgent(TorchRankerAgent):
         Build and return model.
         """
         model = TransformerMemNetModel(self.opt, self.dict)
-        if self.opt['embedding_type'] != 'random':
-            self._copy_embeddings(model.embeddings.weight, self.opt['embedding_type'])
+        if self.opt["embedding_type"] != "random":
+            self._copy_embeddings(model.embeddings.weight, self.opt["embedding_type"])
         return model
 
     def batchify(self, obs_batch, sort=False):
@@ -259,29 +259,29 @@ class TransformerRankerAgent(TorchRankerAgent):
         Override so that we can add memories to the Batch object.
         """
         batch = super().batchify(obs_batch, sort)
-        if self.opt['use_memories']:
+        if self.opt["use_memories"]:
             valid_obs = [(i, ex) for i, ex in enumerate(obs_batch) if self.is_valid(ex)]
             valid_inds, exs = zip(*valid_obs)
             mems = None
-            if any('memory_vecs' in ex for ex in exs):
-                mems = [ex.get('memory_vecs', None) for ex in exs]
+            if any("memory_vecs" in ex for ex in exs):
+                mems = [ex.get("memory_vecs", None) for ex in exs]
             batch.memory_vecs = mems
         return batch
 
     def _vectorize_memories(self, obs):
         # TODO: move this to Torch Ranker Agent
         raise NotImplementedError(
-            'Abstract class: user must implement this function to use memories'
+            "Abstract class: user must implement this function to use memories"
         )
 
     def vectorize(self, *args, **kwargs):
         """
         Override to include vectorization of memories.
         """
-        kwargs['add_start'] = False
-        kwargs['add_end'] = False
+        kwargs["add_start"] = False
+        kwargs["add_end"] = False
         obs = super().vectorize(*args, **kwargs)
-        if self.opt['use_memories']:
+        if self.opt["use_memories"]:
             obs = self._vectorize_memories(obs)
         return obs
 
@@ -299,7 +299,7 @@ class TransformerRankerAgent(TorchRankerAgent):
         """
         # convoluted check that not all memories are empty
         if (
-            self.opt['use_memories']
+            self.opt["use_memories"]
             and batch.memory_vecs is not None
             and sum(len(m) for m in batch.memory_vecs)
         ):
@@ -334,7 +334,7 @@ class TransformerGeneratorAgent(TorchGeneratorAgent):
         """
         Add command-line arguments specifically for this agent.
         """
-        agent = parser.add_argument_group('Transformer Arguments')
+        agent = parser.add_argument_group("Transformer Arguments")
         add_common_cmdline_args(agent)
         cls.dictionary_class().add_cmdline_args(parser, partial_opt=partial_opt)
 
@@ -346,9 +346,9 @@ class TransformerGeneratorAgent(TorchGeneratorAgent):
         Build and return model.
         """
         model = TransformerGeneratorModel(self.opt, self.dict)
-        if self.opt['embedding_type'] != 'random':
+        if self.opt["embedding_type"] != "random":
             self._copy_embeddings(
-                model.encoder.embeddings.weight, self.opt['embedding_type']
+                model.encoder.embeddings.weight, self.opt["embedding_type"]
             )
         return model
 
@@ -358,17 +358,17 @@ class TransformerGeneratorAgent(TorchGeneratorAgent):
         """
         # map extra special tokens carefully
         new_size = self.model.embeddings.weight.size()[0]
-        orig_size = state_dict['embeddings.weight'].size()[0]
-        logging.info(f'Resizing token embeddings from {orig_size} to {new_size}')
+        orig_size = state_dict["embeddings.weight"].size()[0]
+        logging.info(f"Resizing token embeddings from {orig_size} to {new_size}")
         if new_size <= orig_size:
             # new size should be greater than original size,
             # as we are adding special tokens
             raise RuntimeError(msg)
 
         for emb_weights in [
-            'embeddings.weight',
-            'encoder.embeddings.weight',
-            'decoder.embeddings.weight',
+            "embeddings.weight",
+            "encoder.embeddings.weight",
+            "decoder.embeddings.weight",
         ]:
             # get new_embs
             old_embs = state_dict[emb_weights]
@@ -395,13 +395,13 @@ class TransformerClassifierAgent(TorchClassifierAgent):
         )  # add transformer args
         super().add_cmdline_args(parser, partial_opt=partial_opt)
         parser.add_argument(
-            '--load-from-pretrained-ranker',
-            type='bool',
+            "--load-from-pretrained-ranker",
+            type="bool",
             default=False,
-            help='load model from base transformer ranking model '
-            '(used for pretraining)',
+            help="load model from base transformer ranking model "
+            "(used for pretraining)",
         )
-        parser.set_defaults(reduction_type='first')
+        parser.set_defaults(reduction_type="first")
         return parser
 
     def build_model(self):
@@ -413,8 +413,8 @@ class TransformerClassifierAgent(TorchClassifierAgent):
         """
         Add the start and end token to the text.
         """
-        kwargs['add_start'] = True
-        kwargs['add_end'] = True
+        kwargs["add_start"] = True
+        kwargs["add_end"] = True
         obs = super().vectorize(*args, **kwargs)
         return obs
 
@@ -424,18 +424,18 @@ class TransformerClassifierAgent(TorchClassifierAgent):
         """
         obs = super()._set_text_vec(*args, **kwargs)
 
-        if 'text_vec' in obs and 'added_start_end' not in obs:
+        if "text_vec" in obs and "added_start_end" not in obs:
             obs.force_set(
-                'text_vec', self._add_start_end_tokens(obs['text_vec'], True, True)
+                "text_vec", self._add_start_end_tokens(obs["text_vec"], True, True)
             )
-            obs['added_start_end'] = True
+            obs["added_start_end"] = True
 
         # check truncation after adding start end tokens
-        if obs.get('text_vec') is not None:
+        if obs.get("text_vec") is not None:
             truncated_vec = self._check_truncate(
-                obs['text_vec'], self.text_truncate, True
+                obs["text_vec"], self.text_truncate, True
             )
-            obs.force_set('text_vec', torch.LongTensor(truncated_vec))
+            obs.force_set("text_vec", torch.LongTensor(truncated_vec))
 
         return obs
 
@@ -448,7 +448,7 @@ class TransformerClassifierAgent(TorchClassifierAgent):
 
         This is easily overridable to facilitate transfer of state dicts.
         """
-        if self.is_finetune and self.opt['load_from_pretrained_ranker']:
+        if self.is_finetune and self.opt["load_from_pretrained_ranker"]:
             self.base_model.load_state_dict(state_dict, strict=False)
         else:
             self.model.load_state_dict(state_dict)

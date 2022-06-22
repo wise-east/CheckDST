@@ -6,7 +6,7 @@
 
 import os
 
-NEEDLE3 = '&mdash; ParlAI  documentation</title>'
+NEEDLE3 = "&mdash; ParlAI  documentation</title>"
 REPLACEMENT3 = """
 &mdash; ParlAI Documentation</title>
 <link rel="shortcut icon" type="image/png" href="/static/img/favicon-32x32.png" sizes="32x32"/>
@@ -15,14 +15,14 @@ REPLACEMENT3 = """
 """.strip()  # noqa: E501
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for root, _, files in os.walk("build/docs/"):
         for file in files:
             if file.endswith(".html"):
                 file_path = os.path.join(root, file)
                 print("Postprocessing ", file_path)
-                with open(file_path, 'r') as fin:
+                with open(file_path, "r") as fin:
                     content = fin.read()
                     content = content.replace(NEEDLE3, REPLACEMENT3)
-                with open(file_path, 'w') as fout:
+                with open(file_path, "w") as fout:
                     fout.write(content)

@@ -12,19 +12,19 @@ import os
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/babi/babi.tar.gz',
-        'babi.tar.gz',
-        'f7f0bee187efca0d81c3daac1b162cda4eb7f9505dee5ad6846eabbed3dbf92e',
+        "http://parl.ai/downloads/babi/babi.tar.gz",
+        "babi.tar.gz",
+        "f7f0bee187efca0d81c3daac1b162cda4eb7f9505dee5ad6846eabbed3dbf92e",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'bAbI')
-    version = 'None'
+    dpath = os.path.join(opt["datapath"], "bAbI")
+    version = "None"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

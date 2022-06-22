@@ -81,7 +81,7 @@ class AbstractCrowdsourcingTest:
             task_directory, os.path.dirname(__file__)
         )
         relative_config_path = os.path.join(
-            relative_task_directory, 'hydra_configs', 'conf'
+            relative_task_directory, "hydra_configs", "conf"
         )
         if overrides is None:
             overrides = []
@@ -89,12 +89,12 @@ class AbstractCrowdsourcingTest:
             self.config = compose(
                 config_name="example",
                 overrides=[
-                    f'+mephisto.blueprint._blueprint_type={blueprint_type}',
-                    f'+mephisto.blueprint.link_task_source=False',
-                    f'+mephisto/architect=mock',
-                    f'+mephisto/provider=mock',
-                    f'+task_dir={task_directory}',
-                    f'+current_time={int(time.time())}',
+                    f"+mephisto.blueprint._blueprint_type={blueprint_type}",
+                    f"+mephisto.blueprint.link_task_source=False",
+                    f"+mephisto/architect=mock",
+                    f"+mephisto/provider=mock",
+                    f"+task_dir={task_directory}",
+                    f"+current_time={int(time.time())}",
                 ]
                 + overrides,
             )
@@ -130,7 +130,7 @@ class AbstractCrowdsourcingTest:
         if len(channels) > 0:
             return channels[0]
         else:
-            raise ValueError('No channel could be detected!')
+            raise ValueError("No channel could be detected!")
 
     def _register_mock_agents(self, num_agents: int = 1) -> List[str]:
         """
@@ -164,21 +164,21 @@ class AbstractCrowdsourcingTest:
                 except IndexError:
                     num_tries += 1
                     print(
-                        f'The agent could not be registered after {num_tries:d} '
-                        f'attempt(s), out of {max_num_tries:d} attempts total. Waiting '
-                        f'for {wait_time:0.1f} seconds...'
+                        f"The agent could not be registered after {num_tries:d} "
+                        f"attempt(s), out of {max_num_tries:d} attempts total. Waiting "
+                        f"for {wait_time:0.1f} seconds..."
                     )
                     time.sleep(wait_time)
                     wait_time *= 2  # Wait for longer next time
             else:
-                raise ValueError('The worker could not be registered!')
+                raise ValueError("The worker could not be registered!")
 
         # Get all agents' IDs
         agents = self.db.find_agents()
         if len(agents) != num_agents:
             raise ValueError(
-                f'The actual number of agents is {len(agents):d} instead of the '
-                f'desired {num_agents:d}!'
+                f"The actual number of agents is {len(agents):d} instead of the "
+                f"desired {num_agents:d}!"
             )
         agent_ids = [agent.db_id for agent in agents]
 
@@ -233,7 +233,7 @@ class AbstractOneTurnCrowdsourcingTest(AbstractCrowdsourcingTest):
         """
         Given an agent state, test that it is as expected.
         """
-        del state['times']  # Delete variable timestamps
+        del state["times"]  # Delete variable timestamps
         data_regression.check(state)
 
 
@@ -295,10 +295,10 @@ class AbstractParlAIChatTest(AbstractCrowdsourcingTest):
             self.server.send_agent_act(
                 agent_id=agent_id,
                 act_content={
-                    'text': form_messages[agent_idx],
-                    'task_data': form_task_data[agent_idx],
-                    'id': agent_display_ids[agent_idx],
-                    'episode_done': False,
+                    "text": form_messages[agent_idx],
+                    "task_data": form_task_data[agent_idx],
+                    "id": agent_display_ids[agent_idx],
+                    "episode_done": False,
                 },
             )
 
@@ -307,8 +307,8 @@ class AbstractParlAIChatTest(AbstractCrowdsourcingTest):
             self.server.send_agent_act(
                 agent_id=agent_id,
                 act_content={
-                    'task_data': {'final_data': {}},
-                    'MEPHISTO_is_submit': True,
+                    "task_data": {"final_data": {}},
+                    "MEPHISTO_is_submit": True,
                 },
             )
 
@@ -322,43 +322,43 @@ class AbstractParlAIChatTest(AbstractCrowdsourcingTest):
             actual_states = [agent.state.get_data() for agent in self.db.find_agents()]
             assert len(actual_states) == len(expected_states)
             expected_num_messages = sum(
-                len(state['outputs']['messages']) for state in expected_states
+                len(state["outputs"]["messages"]) for state in expected_states
             )
             actual_num_messages = sum(
-                len(state['outputs']['messages']) for state in actual_states
+                len(state["outputs"]["messages"]) for state in actual_states
             )
             if expected_num_messages == actual_num_messages:
                 break
             else:
                 num_tries += 1
                 print(
-                    f'The expected number of messages is '
-                    f'{expected_num_messages:d}, but the actual number of messages '
-                    f'is {actual_num_messages:d}! Waiting for {wait_time:0.1f} seconds '
-                    f'for more messages to arrive (try #{num_tries:d} of '
-                    f'{max_num_tries:d})...'
+                    f"The expected number of messages is "
+                    f"{expected_num_messages:d}, but the actual number of messages "
+                    f"is {actual_num_messages:d}! Waiting for {wait_time:0.1f} seconds "
+                    f"for more messages to arrive (try #{num_tries:d} of "
+                    f"{max_num_tries:d})..."
                 )
                 time.sleep(wait_time)
         else:
             actual_num_messages = sum(
-                len(state['outputs']['messages']) for state in actual_states
+                len(state["outputs"]["messages"]) for state in actual_states
             )
-            print(f'\nPrinting all {actual_num_messages:d} messages received:')
+            print(f"\nPrinting all {actual_num_messages:d} messages received:")
             for state in actual_states:
-                for message in state['outputs']['messages']:
+                for message in state["outputs"]["messages"]:
                     print(message)
             raise ValueError(
-                f'The expected number of messages ({expected_num_messages:d}) never '
-                f'arrived!'
+                f"The expected number of messages ({expected_num_messages:d}) never "
+                f"arrived!"
             )
 
         # Check the contents of each message
         for actual_state, expected_state in zip(actual_states, expected_states):
             clean_actual_state = self._remove_non_deterministic_keys(actual_state)
-            assert clean_actual_state['inputs'] == expected_state['inputs']
+            assert clean_actual_state["inputs"] == expected_state["inputs"]
             for actual_message, expected_message in zip(
-                clean_actual_state['outputs']['messages'],
-                expected_state['outputs']['messages'],
+                clean_actual_state["outputs"]["messages"],
+                expected_state["outputs"]["messages"],
             ):
                 for key, expected_value in expected_message.items():
                     self._check_output_key(
@@ -375,7 +375,7 @@ class AbstractParlAIChatTest(AbstractCrowdsourcingTest):
         return actual_state
 
     def _check_output_key(
-        self: Union['AbstractParlAIChatTest', unittest.TestCase],
+        self: Union["AbstractParlAIChatTest", unittest.TestCase],
         key: str,
         actual_value: Any,
         expected_value: Any,
@@ -389,24 +389,24 @@ class AbstractParlAIChatTest(AbstractCrowdsourcingTest):
         This function can be extended to handle special cases for subclassed Mephisto
         tasks.
         """
-        if key == 'timestamp':
+        if key == "timestamp":
             pass  # The timestamp will obviously be different
-        elif key == 'data':
+        elif key == "data":
             for key_inner, expected_value_inner in expected_value.items():
-                if key_inner in ['beam_texts', 'message_id']:
+                if key_inner in ["beam_texts", "message_id"]:
                     pass  # The message ID will be different
                 else:
                     if actual_value[key_inner] != expected_value_inner:
                         raise ValueError(
                             f'The value of ["{key}"]["{key_inner}"] is supposed to be '
-                            f'{expected_value_inner} but is actually '
-                            f'{actual_value[key_inner]}!'
+                            f"{expected_value_inner} but is actually "
+                            f"{actual_value[key_inner]}!"
                         )
         else:
             if actual_value != expected_value:
                 raise ValueError(
                     f'The value of ["{key}"] is supposed to be {expected_value} but is '
-                    f'actually {actual_value}!'
+                    f"actually {actual_value}!"
                 )
 
     def _send_agent_message(
@@ -437,12 +437,12 @@ def check_stdout(actual_stdout: str, expected_stdout_path: str):
     TODO: this can probably be moved to a method of an abstract test class once all
      analysis code relies on pytest regressions for some of its tests.
     """
-    actual_stdout_lines = actual_stdout.split('\n')
+    actual_stdout_lines = actual_stdout.split("\n")
     with open(expected_stdout_path) as f:
         expected_stdout = f.read()
-    for expected_line in expected_stdout.split('\n'):
+    for expected_line in expected_stdout.split("\n"):
         if not any(expected_line in actual_line for actual_line in actual_stdout_lines):
             raise ValueError(
-                f'\n\tThe following line:\n\n{expected_line}\n\n\twas not found '
-                f'in the actual stdout:\n\n{actual_stdout}'
+                f"\n\tThe following line:\n\n{expected_line}\n\n\twas not found "
+                f"in the actual stdout:\n\n{actual_stdout}"
             )

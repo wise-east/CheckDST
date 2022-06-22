@@ -57,9 +57,9 @@ def retriever_factory(
     :return retriever:
         return a retriever for RAG.
     """
-    if opt.get('converting'):
+    if opt.get("converting"):
         return None
-    retriever = RetrieverType(opt['rag_retriever_type'])
+    retriever = RetrieverType(opt["rag_retriever_type"])
     if retriever is RetrieverType.SEARCH_ENGINE:
         return BB2SearchQuerySearchEngineRetriever(opt, dictionary, shared=shared)
     elif retriever is RetrieverType.SEARCH_TERM_FAISS:
@@ -77,17 +77,17 @@ class BlenderBot2RagModel(RagModel):
 
     def __init__(self, opt: Opt, dictionary: DictionaryAgent, retriever_shared=None):
         # TODO: Get rid of this hack
-        opt['converting'] = True
+        opt["converting"] = True
         super().__init__(opt, dictionary, retriever_shared)
-        opt['converting'] = False
+        opt["converting"] = False
         self.opt = opt
         self.dummy_retriever = DummyRetriever(opt, dictionary)
         self.retriever = retriever_factory(opt, dictionary, shared=retriever_shared)
         assert self.retriever is not None
         query_encoder = (
             self.retriever.query_encoder
-            if hasattr(self.retriever, 'query_encoder')
-            and opt['share_search_and_memory_query_encoder']
+            if hasattr(self.retriever, "query_encoder")
+            and opt["share_search_and_memory_query_encoder"]
             else None
         )
         self.long_term_memory = LongTermMemory(
@@ -98,9 +98,9 @@ class BlenderBot2RagModel(RagModel):
 
         # attrs
         self.knowledge_access_method = KnowledgeAccessMethod(
-            opt['knowledge_access_method']
+            opt["knowledge_access_method"]
         )
-        self.search = RetrieverType(opt['rag_retriever_type']) in [
+        self.search = RetrieverType(opt["rag_retriever_type"]) in [
             RetrieverType.SEARCH_ENGINE,
             RetrieverType.SEARCH_TERM_FAISS,
         ]
@@ -309,7 +309,7 @@ class BlenderBot2RagModel(RagModel):
         on the.
         """
         start = time.time()
-        logging.debug(f'Begin encoder: {time.time() - start:.2f}')
+        logging.debug(f"Begin encoder: {time.time() - start:.2f}")
         if input_turns_cnt is not None:
             if query_generator_vec is not None:
                 query_generator_vec = query_generator_vec.repeat_interleave(
@@ -339,7 +339,7 @@ class BlenderBot2RagModel(RagModel):
             retrieval_type, search_queries = self.query_generator.classify_retrieval(
                 query_generator_vec, num_memories, generated_memories
             )
-            logging.debug(f'Classify Retrieval: {time.time() - start:.2f}')
+            logging.debug(f"Classify Retrieval: {time.time() - start:.2f}")
         else:
             retrieval_type = torch.LongTensor(input.size(0))
             search_queries = None
@@ -356,10 +356,10 @@ class BlenderBot2RagModel(RagModel):
             search_docs, search_doc_scores = self.perform_search(
                 search_queries, query_vec, search_indices
             )
-            logging.debug(f'Search Complete: {time.time() - start:.2f}')
-            logging.debug(f'search: {search_docs}')
+            logging.debug(f"Search Complete: {time.time() - start:.2f}")
+            logging.debug(f"search: {search_docs}")
             if gold_doc_vec is not None:
-                logging.debug(f'num gold docs: {num_gold_docs}')
+                logging.debug(f"num gold docs: {num_gold_docs}")
             self._fill_docs_and_scores(
                 top_docs,
                 doc_scores,
@@ -384,7 +384,7 @@ class BlenderBot2RagModel(RagModel):
                 memory_decoder_vec,
                 generated_memories,
             )
-            logging.debug(f'Memory Access Complete: {time.time() - start:.2f}')
+            logging.debug(f"Memory Access Complete: {time.time() - start:.2f}")
             if memories is not None and memory_scores is not None:
                 self._fill_docs_and_scores(
                     top_docs, doc_scores, memory_indices, memories, memory_scores
@@ -398,7 +398,7 @@ class BlenderBot2RagModel(RagModel):
             dummy_docs, dummy_scores = self.dummy_retriever.retrieve(
                 query_vec[no_search_indices]  # type: ignore
             )
-            logging.debug('no search')
+            logging.debug("no search")
             self._fill_docs_and_scores(
                 top_docs, doc_scores, no_search_indices, dummy_docs, dummy_scores
             )
@@ -469,7 +469,7 @@ class BlenderBot2RagModel(RagModel):
                         text=self.dict.vec2txt(
                             clean_vec_with_dict(self.dict, gold_docs[i][g_idx])
                         ),
-                        docid='',
+                        docid="",
                     )
                     scores[idx][replace] = scores[idx][0].detach()
             try:
@@ -480,8 +480,8 @@ class BlenderBot2RagModel(RagModel):
             except IndexError:
                 # Docs are not provided for this example for this retrieval type.
                 # Therefore, we assert that we are in the 'all' mode.
-                top_docs[i] += [BLANK_DOC] * self.opt['n_docs']
-                doc_scores[i].append(torch.ones(self.opt['n_docs']).to(device))
+                top_docs[i] += [BLANK_DOC] * self.opt["n_docs"]
+                doc_scores[i].append(torch.ones(self.opt["n_docs"]).to(device))
 
         return top_docs, doc_scores
 
@@ -604,14 +604,14 @@ class BlenderBot2RagModel(RagModel):
                         dim=1,
                     )
             self.long_term_memory.write_memory(memory_dict)  # type: ignore
-            logging.debug(f'Write Memory Complete: {time.time() - start:.2f}')
+            logging.debug(f"Write Memory Complete: {time.time() - start:.2f}")
         if self.long_term_memory.has_memory():
             memories, memory_scores = self.long_term_memory.retrieve(
                 query_vec[memory_indices]  # type: ignore
             )
-            logging.debug(f'Memory Retrieval Complete: {time.time() - start:.2f}')
-            logging.debug(f'memories: {memories}')
-            logging.verbose('Reading from Memory')
+            logging.debug(f"Memory Retrieval Complete: {time.time() - start:.2f}")
+            logging.debug(f"memories: {memories}")
+            logging.verbose("Reading from Memory")
 
         return memories, memory_scores
 
@@ -634,8 +634,8 @@ class DummyRetriever(RagRetriever):
         Simply construct a list of blank documents for each query.
         """
 
-        documents = [[BLANK_DOC] * self.opt['n_docs']] * query.size(0)
-        scores = torch.ones(query.size(0), self.opt['n_docs']).to(query.device)
+        documents = [[BLANK_DOC] * self.opt["n_docs"]] * query.size(0)
+        scores = torch.ones(query.size(0), self.opt["n_docs"]).to(query.device)
         return documents, scores
 
 
@@ -654,39 +654,39 @@ class LongTermMemory(RagRetriever):
         shared=None,
     ):
         super().__init__(opt, dictionary, shared)
-        self.n_docs = opt['n_docs']
+        self.n_docs = opt["n_docs"]
         if query_encoder is None:
             self.query_encoder = DprQueryEncoder(
                 opt,
-                dpr_model=opt['memory_reader_model'],
-                pretrained_path=opt['dpr_model_file'],
+                dpr_model=opt["memory_reader_model"],
+                pretrained_path=opt["dpr_model_file"],
             )
         else:
             self.query_encoder = query_encoder
         self.memory_encoder = DprDocumentEncoder(
             opt,
-            dpr_model=opt['memory_writer_model'],
-            pretrained_path=opt['memory_writer_model_file'],
+            dpr_model=opt["memory_writer_model"],
+            pretrained_path=opt["memory_writer_model_file"],
         ).eval()
         self._tokenizer = RagRetrieverTokenizer(
-            datapath=opt['datapath'],
-            query_model=opt['query_model'],
+            datapath=opt["datapath"],
+            query_model=opt["query_model"],
             dictionary=dictionary,
-            delimiter='\n',
-            max_length=opt['memory_retriever_truncate']
-            if opt['memory_retriever_truncate'] > 0
-            else opt['rag_query_truncate'],
+            delimiter="\n",
+            max_length=opt["memory_retriever_truncate"]
+            if opt["memory_retriever_truncate"] > 0
+            else opt["rag_query_truncate"],
         )
-        self.max_memories = opt.get('max_memories', 100)
-        self.num_memory_slots = opt.get('batchsize', 1) * opt.get('rag_turn_n_turns', 1)
+        self.max_memories = opt.get("max_memories", 100)
+        self.num_memory_slots = opt.get("batchsize", 1) * opt.get("rag_turn_n_turns", 1)
         self.memory_vec_dict: Dict[int, torch.LongTensor] = {  # type: ignore
-            k: torch.zeros(self.max_memories, opt['max_doc_token_length']).to(
+            k: torch.zeros(self.max_memories, opt["max_doc_token_length"]).to(
                 torch.int64
             )
             for k in range(self.num_memory_slots)
         }
         self.memory_enc_dict: Dict[int, torch.Tensor] = {
-            k: torch.zeros(self.max_memories, opt['retriever_embedding_size'])
+            k: torch.zeros(self.max_memories, opt["retriever_embedding_size"])
             for k in range(self.num_memory_slots)
         }
         self.active_memory_slots: List[int] = []
@@ -710,7 +710,7 @@ class LongTermMemory(RagRetriever):
         self.active_memory_slots = list(mem_dict.keys())
         with torch.no_grad():
             slot_num_mems = [m.size(0) for m in mem_dict.values()]
-            logging.debug(f'Writing {slot_num_mems} memories')
+            logging.debug(f"Writing {slot_num_mems} memories")
             mem_vecs = torch.cat(list(mem_dict.values()), dim=0)
             mem_encs = self.memory_encoder(mem_vecs)
             offset = 0
@@ -761,8 +761,8 @@ class LongTermMemory(RagRetriever):
             )
             mem_docs = []
             for mem in memories_i:
-                mem_doc = Document('', self._tokenizer.decode(mem), '')  # type: ignore
-                mem_doc.TITLE_DELIM = self.opt['memory_doc_title_delimiter']
+                mem_doc = Document("", self._tokenizer.decode(mem), "")  # type: ignore
+                mem_doc.TITLE_DELIM = self.opt["memory_doc_title_delimiter"]
                 mem_docs.append(mem_doc)
 
             if len(mem_docs) < self.n_docs:

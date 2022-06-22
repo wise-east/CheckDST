@@ -24,38 +24,38 @@ import copy
 import os
 
 tasks = {}
-tasks[1] = os.path.join('task1_qa', 'task1_qa_pipe_')
-tasks[2] = os.path.join('task2_recs', 'task2_recs_')
-tasks[3] = os.path.join('task3_qarecs', 'task3_qarecs_pipe_')
-tasks[4] = os.path.join('task4_reddit', 'task4_reddit', 'task4_reddit_pipeless_')
+tasks[1] = os.path.join("task1_qa", "task1_qa_pipe_")
+tasks[2] = os.path.join("task2_recs", "task2_recs_")
+tasks[3] = os.path.join("task3_qarecs", "task3_qarecs_pipe_")
+tasks[4] = os.path.join("task4_reddit", "task4_reddit", "task4_reddit_pipeless_")
 
 
 def _path(task, opt):
     # Build the data if it doesn't exist.
     build(opt)
-    suffix = ''
-    dt = opt['datatype'].split(':')[0]
-    if dt == 'train':
-        suffix = 'train'
-    elif dt == 'test':
-        suffix = 'test'
-    elif dt == 'valid':
-        suffix = 'dev'
+    suffix = ""
+    dt = opt["datatype"].split(":")[0]
+    if dt == "train":
+        suffix = "train"
+    elif dt == "test":
+        suffix = "test"
+    elif dt == "valid":
+        suffix = "dev"
 
     datafile = os.path.join(
-        opt['datapath'],
-        'MovieDialog',
-        'movie_dialog_dataset',
-        '{t}{s}.txt'.format(t=tasks[int(task)], s=suffix),
+        opt["datapath"],
+        "MovieDialog",
+        "movie_dialog_dataset",
+        "{t}{s}.txt".format(t=tasks[int(task)], s=suffix),
     )
     if int(task) == 4:
-        if dt == 'train':
+        if dt == "train":
             candpath = None
         else:
-            candpath = datafile.replace(suffix + '.txt', 'cand-{dt}.txt'.format(dt=dt))
+            candpath = datafile.replace(suffix + ".txt", "cand-{dt}.txt".format(dt=dt))
     else:
         candpath = os.path.join(
-            opt['datapath'], 'MovieDialog', 'movie_dialog_dataset', 'entities.txt'
+            opt["datapath"], "MovieDialog", "movie_dialog_dataset", "entities.txt"
         )
     return datafile, candpath
 
@@ -71,8 +71,8 @@ class KBTeacher(FbDeprecatedDialogTeacher):
         Initialize teacher.
         """
         build(opt)
-        opt['datafile'] = os.path.join(
-            opt['datapath'], 'MovieDialog', 'movie_dialog_dataset', 'movie_kb.txt'
+        opt["datafile"] = os.path.join(
+            opt["datapath"], "MovieDialog", "movie_dialog_dataset", "movie_kb.txt"
         )
         super().__init__(opt, shared)
 
@@ -89,10 +89,10 @@ class TaskTeacher(FbDeprecatedDialogTeacher):
         """
         try:
             # expecting "moviedialog:task:N"
-            self.task = opt['task'].split(':')[2]
+            self.task = opt["task"].split(":")[2]
         except IndexError:
-            self.task = '1'  # default task
-        opt['datafile'], opt['cands_datafile'] = _path(self.task, opt)
+            self.task = "1"  # default task
+        opt["datafile"], opt["cands_datafile"] = _path(self.task, opt)
         super().__init__(opt, shared)
 
 
@@ -107,7 +107,7 @@ class DefaultTeacher(MultiTaskTeacher):
         Initialize teacher.
         """
         opt = copy.deepcopy(opt)
-        opt['task'] = ','.join(
-            'moviedialog:Task:%d' % (i + 1) for i in range(len(tasks))
+        opt["task"] = ",".join(
+            "moviedialog:Task:%d" % (i + 1) for i in range(len(tasks))
         )
         super().__init__(opt, shared)

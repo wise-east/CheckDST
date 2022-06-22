@@ -57,27 +57,27 @@ class RagModel(TorchGeneratorModel):
         self.end_idx = dictionary[dictionary.end_token]
         super().__init__(self.pad_idx, self.start_idx, self.end_idx)
         self.fp16 = (
-            not opt['no_cuda'] and torch.cuda.is_available() and opt.get('fp16', False)
+            not opt["no_cuda"] and torch.cuda.is_available() and opt.get("fp16", False)
         )
         self.dict = dictionary
         self.embeddings = create_embeddings(
-            dictionary, opt['embedding_size'], self.pad_idx
+            dictionary, opt["embedding_size"], self.pad_idx
         )
         # attrs
-        self.rag_model_type = opt['rag_model_type']
+        self.rag_model_type = opt["rag_model_type"]
         self.rag_model_interface = RAG_MODELS[self.rag_model_type](opt, self.pad_idx)
-        self.generation_model = opt['generation_model']
-        self.n_extra_positions = opt['n_extra_positions']
-        self.n_positions = get_n_positions_from_options(opt) + opt['n_extra_positions']
-        assert opt['n_extra_positions'] >= 0
+        self.generation_model = opt["generation_model"]
+        self.n_extra_positions = opt["n_extra_positions"]
+        self.n_positions = get_n_positions_from_options(opt) + opt["n_extra_positions"]
+        assert opt["n_extra_positions"] >= 0
         self.expanded_input_truncate = min(
-            opt['text_truncate'] or opt['truncate'], get_n_positions_from_options(opt)
+            opt["text_truncate"] or opt["truncate"], get_n_positions_from_options(opt)
         )
         if self.n_extra_positions > 0:
             self.expanded_input_truncate = max(
                 self.expanded_input_truncate, self.n_extra_positions
             )
-        self.min_doc_token_length = opt['min_doc_token_length']
+        self.min_doc_token_length = opt["min_doc_token_length"]
 
         # modules
         self.retriever = retriever_factory(opt, dictionary, shared=retriever_shared)
@@ -352,7 +352,7 @@ class RagModel(TorchGeneratorModel):
                 input_i = input[i, :]
                 doc = docs[rank]
                 doc_tokens = self.dict.txt2vec(doc.get_passage_str())
-                if self.generation_model == 'bart' and self.n_extra_positions <= 0:
+                if self.generation_model == "bart" and self.n_extra_positions <= 0:
                     # move SOS to start of passage since we append question to end
                     input_i = input_i[1:]
                     sample_doc_tokens = torch.LongTensor(
@@ -449,7 +449,7 @@ class RagModel(TorchGeneratorModel):
         bsz = ys.size(0)
         seqlen = ys.size(1)
         inputs = ys.narrow(1, 0, seqlen - 1)
-        if (ys[:, 0] == self.START_IDX).any() and self.generation_model != 'bart':
+        if (ys[:, 0] == self.START_IDX).any() and self.generation_model != "bart":
             raise AssertionError(
                 "The Beginning of Sentence token is automatically added to the "
                 "label in decode_forced, but you included it in the label. This means "
@@ -489,13 +489,13 @@ class RagEncoder(TransformerEncoder):
 
         The Rag Seq2seq encoder is just a regular encoder
         """
-        n_init_positions = get_n_positions_from_options(opt) + opt['n_extra_positions']
+        n_init_positions = get_n_positions_from_options(opt) + opt["n_extra_positions"]
         super().__init__(
             opt=opt,
             vocabulary_size=len(dictionary),
             embedding=embedding,
             padding_idx=padding_idx,
-            reduction_type='none',
+            reduction_type="none",
             n_positions=n_init_positions,
         )
 
@@ -516,14 +516,14 @@ class T5RagModel(RagModel):
     """
 
     def __init__(self, opt, dictionary, retriever_shared=None):
-        opt['t5'] = build_t5(opt)
-        if opt['t5_model_parallel']:
-            opt['t5'].parallelize()
+        opt["t5"] = build_t5(opt)
+        if opt["t5_model_parallel"]:
+            opt["t5"].parallelize()
         else:
-            opt['t5'].deparallelize()
+            opt["t5"].deparallelize()
         super().__init__(opt, dictionary, retriever_shared)
-        self.embedding_size = opt['t5'].model_dim
-        self.t5 = opt.pop('t5', None)
+        self.embedding_size = opt["t5"].model_dim
+        self.t5 = opt.pop("t5", None)
 
     @classmethod
     def build_encoder(
@@ -537,7 +537,7 @@ class T5RagModel(RagModel):
     ):
         return RagModel.build_encoder(
             opt,
-            encoder=opt['t5'].get_encoder(),
+            encoder=opt["t5"].get_encoder(),
             encoder_class=ParlaiT5Encoder,
             **kwargs,
         )
@@ -554,7 +554,7 @@ class T5RagModel(RagModel):
     ):
         return RagModel.build_decoder(
             opt,
-            decoder=opt['t5'].get_decoder(),
+            decoder=opt["t5"].get_decoder(),
             decoder_class=ParlaiT5Decoder,
             **kwargs,
         )
@@ -566,6 +566,6 @@ class T5RagModel(RagModel):
 
     @set_device
     def decoder_output(self, latent: torch.Tensor):
-        tensor = latent * (self.t5.model_dim ** -0.5)
+        tensor = latent * (self.t5.model_dim**-0.5)
         logits = self.t5.lm_head(tensor)
         return logits

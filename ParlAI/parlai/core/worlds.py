@@ -65,7 +65,7 @@ def validate(observation):
     if observation is not None and isinstance(observation, dict):
         return observation
     else:
-        raise RuntimeError('Must return dictionary or Message object from act().')
+        raise RuntimeError("Must return dictionary or Message object from act().")
 
 
 class World(object):
@@ -76,11 +76,11 @@ class World(object):
     """
 
     def __init__(self, opt: Opt, agents=None, shared=None):
-        self.id = opt['task']
+        self.id = opt["task"]
         self.opt = copy.deepcopy(opt)
         if shared:
             # Create agents based on shared data.
-            self.agents = create_agents_from_shared(shared['agents'])
+            self.agents = create_agents_from_shared(shared["agents"])
         else:
             # Add passed in agents to world directly.
             self.agents = agents
@@ -112,15 +112,15 @@ class World(object):
         Useful for monitoring and debugging. By default, display the messages between
         the agents.
         """
-        if not hasattr(self, 'acts'):
-            return ''
+        if not hasattr(self, "acts"):
+            return ""
         return display_messages(
             self.acts,
-            ignore_agent_reply=self.opt.get('ignore_agent_reply', False),
-            add_fields=self.opt.get('display_add_fields', ''),
-            prettify=self.opt.get('display_prettify', False),
-            max_len=self.opt.get('max_display_len', 1000),
-            verbose=self.opt.get('verbose', False),
+            ignore_agent_reply=self.opt.get("ignore_agent_reply", False),
+            add_fields=self.opt.get("display_add_fields", ""),
+            prettify=self.opt.get("display_prettify", False),
+            max_len=self.opt.get("max_display_len", 1000),
+            verbose=self.opt.get("verbose", False),
         )
 
     def episode_done(self):
@@ -143,9 +143,9 @@ class World(object):
         Share the world.
         """
         shared_data = {}
-        shared_data['world_class'] = type(self)
-        shared_data['opt'] = self.opt
-        shared_data['agents'] = self._share_agents()
+        shared_data["world_class"] = type(self)
+        shared_data["opt"] = self.opt
+        shared_data["agents"] = self._share_agents()
         return shared_data
 
     def clone(self):
@@ -161,7 +161,7 @@ class World(object):
         Allows other classes to create the same agents without duplicating the data
         (i.e. sharing parameters).
         """
-        if not hasattr(self, 'agents'):
+        if not hasattr(self, "agents"):
             return None
         shared_agents = [a.share() for a in self.agents]
         return shared_agents
@@ -176,13 +176,13 @@ class World(object):
         """
         Return task agent, if applicable.
         """
-        raise NotImplementedError('Implement in subworld')
+        raise NotImplementedError("Implement in subworld")
 
     def get_model_agent(self):
         """
         Return model agent, if applicable.
         """
-        raise NotImplementedError('Implement in subworld')
+        raise NotImplementedError("Implement in subworld")
 
     def get_acts(self):
         """
@@ -291,9 +291,9 @@ class World(object):
         """
         self.total_parleys += 1
         if self.max_exs is None:
-            if 'num_epochs' in self.opt and self.opt['num_epochs'] > 0:
+            if "num_epochs" in self.opt and self.opt["num_epochs"] > 0:
                 if self.num_examples:
-                    self.max_exs = self.num_examples() * self.opt['num_epochs']
+                    self.max_exs = self.num_examples() * self.opt["num_epochs"]
                 else:
                     self.max_exs = -1
             else:
@@ -301,7 +301,7 @@ class World(object):
         # when we know the size of the data
         if self.max_exs > 0 or self.num_examples():
             self.total_epochs = (
-                self.total_parleys * self.opt.get('batchsize', 1) / self.num_examples()
+                self.total_parleys * self.opt.get("batchsize", 1) / self.num_examples()
             )
         # when we do not know the size of the data
         else:
@@ -330,14 +330,14 @@ class DialogPartnerWorld(World):
 
     def __init__(self, opt: Opt, agents=None, shared=None):
         if not ((agents is not None) ^ (shared is not None)):
-            raise ValueError('You must supply either agents or shared, but not both.')
+            raise ValueError("You must supply either agents or shared, but not both.")
         super().__init__(opt)
         if shared:
             # Create agents based on shared data.
-            self.agents = create_agents_from_shared(shared['agents'])
+            self.agents = create_agents_from_shared(shared["agents"])
         else:
             if len(agents) != 2:
-                raise RuntimeError('There must be exactly two agents for this world.')
+                raise RuntimeError("There must be exactly two agents for this world.")
             # Add passed in agents directly.
             self.agents = agents
         self.acts = [None] * len(self.agents)
@@ -376,7 +376,7 @@ class DialogPartnerWorld(World):
         Only the first agent indicates when the episode is done.
         """
         if self.acts[0] is not None:
-            return self.acts[0].get('episode_done', False)
+            return self.acts[0].get("episode_done", False)
         else:
             return False
 
@@ -394,7 +394,7 @@ class DialogPartnerWorld(World):
 
         metrics = {}
         for a in self.agents:
-            if hasattr(a, 'report'):
+            if hasattr(a, "report"):
                 m = a.report()
                 for k, v in m.items():
                     if not isinstance(v, Metric):
@@ -403,15 +403,15 @@ class DialogPartnerWorld(World):
                         # first agent gets priority in settings values for keys
                         # this way model can't e.g. override accuracy to 100%
                         metrics[k] = v
-        if metrics and 'exs' in metrics:
-            self.total_exs += metrics['exs'].value()
+        if metrics and "exs" in metrics:
+            self.total_exs += metrics["exs"].value()
         return metrics
 
     def num_examples(self):
         """
         Return number of examples.
         """
-        if hasattr(self.get_task_agent(), 'num_examples'):
+        if hasattr(self.get_task_agent(), "num_examples"):
             return self.get_task_agent().num_examples()
         return 0
 
@@ -419,7 +419,7 @@ class DialogPartnerWorld(World):
         """
         Return number of episodes.
         """
-        if hasattr(self.get_task_agent(), 'num_episodes'):
+        if hasattr(self.get_task_agent(), "num_episodes"):
             return self.get_task_agent().num_episodes()
         return 0
 
@@ -436,7 +436,7 @@ class DialogPartnerWorld(World):
         """
         super().update_counters()
         for a in self.agents:
-            if hasattr(a, 'update_counters'):
+            if hasattr(a, "update_counters"):
                 a.update_counters()
 
 
@@ -451,7 +451,7 @@ class MultiAgentDialogWorld(World):
         super().__init__(opt)
         if shared:
             # Create agents based on shared data.
-            self.agents = create_agents_from_shared(shared['agents'])
+            self.agents = create_agents_from_shared(shared["agents"])
         else:
             # Add passed in agents directly.
             self.agents = agents
@@ -510,15 +510,15 @@ class MultiAgentDialogWorld(World):
         """
         metrics = {}
         for a in self.agents:
-            if hasattr(a, 'report'):
+            if hasattr(a, "report"):
                 m = a.report()
                 for k, v in m.items():
                     if k not in metrics:
                         # first agent gets priority in settings values for keys
                         # this way model can't e.g. override accuracy to 100%
                         metrics[k] = v
-        if metrics and 'exs' in metrics:
-            self.total_exs += metrics['exs'].value()
+        if metrics and "exs" in metrics:
+            self.total_exs += metrics["exs"].value()
         return metrics
 
     def shutdown(self):
@@ -541,17 +541,17 @@ class MultiWorld(World):
     def __init__(self, opt: Opt, agents=None, shared=None, default_world=None):
         super().__init__(opt)
         self.worlds: List[World] = []
-        for index, k in enumerate(opt['task'].split(',')):
+        for index, k in enumerate(opt["task"].split(",")):
             k = k.strip()
             if k:
                 if shared:
                     # Create worlds based on shared data.
-                    s = shared['worlds'][index]
-                    self.worlds.append(s['world_class'](s['opt'], None, s))
+                    s = shared["worlds"][index]
+                    self.worlds.append(s["world_class"](s["opt"], None, s))
                 else:
                     # Agents are already specified.
                     opt_singletask = copy.deepcopy(opt)
-                    opt_singletask['task'] = k
+                    opt_singletask["task"] = k
                     self.worlds.append(
                         create_task_world(
                             opt_singletask, agents, default_world=default_world
@@ -561,12 +561,12 @@ class MultiWorld(World):
         self.new_world = True
         self.parleys = -1
         # Check to see if we are training
-        self.is_training = DatatypeHelper.is_training(opt.get('datatype'))
+        self.is_training = DatatypeHelper.is_training(opt.get("datatype"))
         # Make multi-task task probabilities.
         self.cum_task_weights = [1] * len(self.worlds)
         self.task_choices = range(len(self.worlds))
-        weights = self.opt.get('multitask_weights', [1])
-        if weights == 'stochastic':
+        weights = self.opt.get("multitask_weights", [1])
+        if weights == "stochastic":
             weights = [w.num_episodes() for w in self.worlds]
         sum = 0
         for i in self.task_choices:
@@ -595,7 +595,7 @@ class MultiWorld(World):
         """
         Return sum of each subworld's number of examples.
         """
-        if not hasattr(self, 'num_exs'):
+        if not hasattr(self, "num_exs"):
             worlds_num_exs = [w.num_examples() for w in self.worlds]
             if any(num is None for num in worlds_num_exs):
                 self.num_exs = None
@@ -607,7 +607,7 @@ class MultiWorld(World):
         """
         Return sum of each subworld's number of episodes.
         """
-        if not hasattr(self, 'num_eps'):
+        if not hasattr(self, "num_eps"):
             worlds_num_eps = [w.num_episodes() for w in self.worlds]
             if any(num is None for num in worlds_num_eps):
                 self.num_eps = None
@@ -644,9 +644,9 @@ class MultiWorld(World):
         Share all the subworlds.
         """
         shared_data = {}
-        shared_data['world_class'] = type(self)
-        shared_data['opt'] = self.opt
-        shared_data['worlds'] = [w.share() for w in self.worlds]
+        shared_data["world_class"] = type(self)
+        shared_data["opt"] = self.opt
+        shared_data["worlds"] = [w.share() for w in self.worlds]
         return shared_data
 
     def epoch_done(self):
@@ -698,14 +698,14 @@ class MultiWorld(World):
         Display all subworlds.
         """
         if self.world_idx != -1:
-            s = ''
+            s = ""
             w = self.worlds[self.world_idx]
             if self.parleys == 0:
-                s = '[world ' + str(self.world_idx) + ':' + w.getID() + ']\n'
+                s = "[world " + str(self.world_idx) + ":" + w.getID() + "]\n"
             s = s + w.display()
             return s
         else:
-            return ''
+            return ""
 
     def report(self):
         """
@@ -713,10 +713,10 @@ class MultiWorld(World):
         """
         metrics = aggregate_named_reports(
             {w.getID(): w.report() for w in self.worlds},
-            micro_average=self.opt.get('aggregate_micro', False),
+            micro_average=self.opt.get("aggregate_micro", False),
         )
-        if 'exs' in metrics:
-            self.total_exs += metrics['exs'].value()
+        if "exs" in metrics:
+            self.total_exs += metrics["exs"].value()
         return metrics
 
     def reset(self):
@@ -746,17 +746,17 @@ def _override_opts_in_shared(table, overrides):
     Looks recursively for ``opt`` dictionaries within shared dict and overrides any key-
     value pairs with pairs from the overrides dict.
     """
-    if 'opt' in table:
+    if "opt" in table:
         # change values if an 'opt' dict is available
         for k, v in overrides.items():
-            table['opt'][k] = v
+            table["opt"][k] = v
     for k, v in table.items():
         # look for sub-dictionaries which also might contain an 'opt' dict
-        if type(v) == dict and k != 'opt' and 'opt' in v:
+        if type(v) == dict and k != "opt" and "opt" in v:
             _override_opts_in_shared(v, overrides)
         elif type(v) == list:
             for item in v:
-                if type(item) == dict and 'opt' in item:
+                if type(item) == dict and "opt" in item:
                     # if this is a list of agent shared dicts, we want to iterate
                     _override_opts_in_shared(item, overrides)
                 else:
@@ -779,20 +779,20 @@ class BatchWorld(World):
     def __init__(self, opt: Opt, world):
         super().__init__(opt)
         self.opt = opt
-        self.random = opt.get('datatype', None) == 'train'
+        self.random = opt.get("datatype", None) == "train"
         self.world = world
         self.worlds: List[World] = []
-        for i in range(opt['batchsize']):
+        for i in range(opt["batchsize"]):
             # make sure that any opt dicts in shared have batchindex set to i
             # this lets all shared agents know which batchindex they have,
             # which is needed for ordered data (esp valid/test sets)
             shared = world.share()
-            shared['batchindex'] = i
-            for agent_shared in shared.get('agents', ''):
-                agent_shared['batchindex'] = i
+            shared["batchindex"] = i
+            for agent_shared in shared.get("agents", ""):
+                agent_shared["batchindex"] = i
             # TODO: deprecate override_opts
-            _override_opts_in_shared(shared, {'batchindex': i})
-            self.worlds.append(shared['world_class'](opt, None, shared))
+            _override_opts_in_shared(shared, {"batchindex": i})
+            self.worlds.append(shared["world_class"](opt, None, shared))
         self.batch_observations = [None] * len(self.world.get_agents())
         self.first_batch = None
         self.acts = [None] * len(self.world.get_agents())
@@ -809,7 +809,7 @@ class BatchWorld(World):
                 # shouldn't send None, should send empty observations
                 batch_actions[i] = [{}] * len(self.worlds)
 
-            if hasattr(w, 'observe'):
+            if hasattr(w, "observe"):
                 # The world has its own observe function, which the action
                 # first goes through (agents receive messages via the world,
                 # not from each other).
@@ -819,14 +819,14 @@ class BatchWorld(World):
 
             if index == index_acting:
                 # self_observe is distinguished from a normal observe
-                if hasattr(agents[index], 'self_observe'):
+                if hasattr(agents[index], "self_observe"):
                     agents[index].self_observe(observation)
             else:
                 observation = agents[index].observe(observation)
 
             # TODO: not so sure about this...
             if observation is None:
-                raise ValueError('Agents should return what they observed.')
+                raise ValueError("Agents should return what they observed.")
             batch_observations.append(observation)
         return batch_observations
 
@@ -837,7 +837,7 @@ class BatchWorld(World):
         # Given batch observation, do update for agents[index].
         # Call update on agent
         a = self.world.get_agents()[agent_idx]
-        if hasattr(a, 'batch_act'):
+        if hasattr(a, "batch_act"):
             batch_actions = a.batch_act(batch_observation)
             # Store the actions locally in each world.
             for i, w in enumerate(self.worlds):
@@ -864,7 +864,7 @@ class BatchWorld(World):
         num_agents = len(self.world.get_agents())
         batch_observations = self.batch_observations
 
-        if hasattr(self.world, 'parley_init'):
+        if hasattr(self.world, "parley_init"):
             for w in self.worlds:
                 w.parley_init()
 
@@ -873,7 +873,7 @@ class BatchWorld(World):
             batch_act = self.batch_act(agent_idx, batch_observations[agent_idx])
             self.acts[agent_idx] = batch_act
             # We possibly execute this action in the world.
-            if hasattr(self.world, 'execute'):
+            if hasattr(self.world, "execute"):
                 for w in self.worlds:
                     w.execute(w.agents[agent_idx], batch_act[agent_idx])
             # All agents (might) observe the results.
@@ -890,7 +890,7 @@ class BatchWorld(World):
         s = "[--batchsize " + str(len(self.worlds)) + "--]\n"
         for i, w in enumerate(self.worlds):
             s += "[batch world " + str(i) + ":]\n"
-            s += w.display() + '\n'
+            s += w.display() + "\n"
         s += "[--end of batch--]"
         return s
 
@@ -997,8 +997,8 @@ class DynamicBatchWorld(World):
         # check some assumptions
         if isinstance(world, (BatchWorld, MultiAgentDialogWorld)):
             raise TypeError(
-                'World must be a DialogPartnerWorld or a '
-                'MultiWorld of DialogPartnerWorld'
+                "World must be a DialogPartnerWorld or a "
+                "MultiWorld of DialogPartnerWorld"
             )
 
         if len(world.get_agents()) != 2:
@@ -1006,36 +1006,36 @@ class DynamicBatchWorld(World):
                 "Dynamic batch only works in a fixed dialog world with two agents."
             )
 
-        if not hasattr(world.get_model_agent(), 'batch_act'):
+        if not hasattr(world.get_model_agent(), "batch_act"):
             raise TypeError("Model agent doesn't have batch_act.")
 
-        self.truncate = opt.get('text_truncate', None) or opt.get('truncate', None)
-        self.l_truncate = opt.get('label_truncate', None) or opt.get('truncate', None)
+        self.truncate = opt.get("text_truncate", None) or opt.get("truncate", None)
+        self.l_truncate = opt.get("label_truncate", None) or opt.get("truncate", None)
         if self.truncate is None or self.truncate < 0:
             raise ValueError(
-                'You must use --text-truncate or --truncate in order to use '
-                'dynamic batching.'
+                "You must use --text-truncate or --truncate in order to use "
+                "dynamic batching."
             )
 
         # size of the buffer we will use to find worlds
-        if opt['dynamic_batching']:
+        if opt["dynamic_batching"]:
             self._BUFFER_SIZE = 1021  # chosen as a prime number
         else:
             # we're secretly running in vanilla BS mode, via background
             # preprocessing
-            self._BUFFER_SIZE = opt['batchsize']
+            self._BUFFER_SIZE = opt["batchsize"]
 
-        if opt['dynamic_batching'] == 'full':
+        if opt["dynamic_batching"] == "full":
             # full dynamic batching, we can grow our batchsize
             self.max_batch_size = self._BUFFER_SIZE
         else:
             # simple batchsort
-            self.max_batch_size = opt['batchsize']
+            self.max_batch_size = opt["batchsize"]
 
         # TODO: check to ensure the agent has self_observe
         self.world = world
         # TODO: maybe generalize this
-        self.max_words = (self.l_truncate + self.truncate) * opt['batchsize']
+        self.max_words = (self.l_truncate + self.truncate) * opt["batchsize"]
 
         # buffer worlds
         self.worlds = [world.clone() for _ in range(self._BUFFER_SIZE)]
@@ -1100,14 +1100,14 @@ class DynamicBatchWorld(World):
         return ((n + FP16_PAD_SIZE - 1) // FP16_PAD_SIZE) * FP16_PAD_SIZE
 
     def _score(self, obs):
-        if 'text_vec' in obs:
+        if "text_vec" in obs:
             # note that all examples have a cost that is based on their
             # nearest multiple of 4. We can therefore mix-and-match
             # anything with the same cost for increased stochasticity,
             # while not really wasting much padding.
             return tuple(
                 self._ceil(len(obs[key]))
-                for key in ['text_vec', 'labels_vec', 'eval_labels_vec']
+                for key in ["text_vec", "labels_vec", "eval_labels_vec"]
                 if key in obs
             )
         else:
@@ -1123,7 +1123,7 @@ class DynamicBatchWorld(World):
             if self.worlds[i].epoch_done():
                 continue
 
-            if hasattr(self.world, 'parley_init'):
+            if hasattr(self.world, "parley_init"):
                 self.worlds[i].parley_init()
 
             act = self.worlds[i].get_task_agent().act()
@@ -1131,7 +1131,7 @@ class DynamicBatchWorld(World):
             # we log the task act and the index of the act
             # in the buffer for world logging purposes
             self._task_acts[i] = act  # for world logging
-            self._task_acts[i].force_set('dyn_batch_idx', i)
+            self._task_acts[i].force_set("dyn_batch_idx", i)
 
             obs = self.worlds[i].get_model_agent().observe(act)
             self._obs[i] = obs
@@ -1215,7 +1215,7 @@ class DynamicBatchWorld(World):
             # we log the task act and the index of the act
             # in the buffer for world logging purposes
             self._task_acts[i] = act
-            self._task_acts[i].force_set('dyn_batch_idx', i)
+            self._task_acts[i].force_set("dyn_batch_idx", i)
             # save the observations to form a batch
             obs = self.worlds[i].get_model_agent().observe(act)
             self._scores[i] = self._score(obs)
@@ -1246,7 +1246,7 @@ class BackgroundDriverWorld(World):
 
         import torch.multiprocessing as mp
 
-        self._num_workers = self.opt['num_workers']
+        self._num_workers = self.opt["num_workers"]
         # 4 per worker is somewhat arbitrary. 1 is potentially too few:
         # every worker is prevented from queuing up multiple batches.
         # Unbounded could fill up our memory too much. So 4 per worker.
@@ -1270,7 +1270,7 @@ class BackgroundDriverWorld(World):
             # subprocesses! (See ChunkTeacher for one example). Fortunately, we
             # CAN use threads in the MAIN process, and we exploit this at
             # times.
-            start_method='fork',
+            start_method="fork",
         )
 
     def reset(self):
@@ -1341,7 +1341,7 @@ class BackgroundWorkerDynamicBatchWorld(DynamicBatchWorld):
         torch.set_num_threads(1)  # prevent threads from spawning in this worker
         logging.info(f"Launching background on Index {index}")
         opt = copy.deepcopy(opt)
-        opt['background_index'] = index
+        opt["background_index"] = index
         try:
             world = cls(opt, model_agent=model_agent, process_queue=process_queue)
             while True:
@@ -1351,14 +1351,14 @@ class BackgroundWorkerDynamicBatchWorld(DynamicBatchWorld):
 
             error = traceback.format_exc()
             logging.critical(
-                f'Exception on background preprocesser index {index}!\n' + error
+                f"Exception on background preprocesser index {index}!\n" + error
             )
             raise
 
     def __init__(self, opt: Opt, model_agent=None, process_queue=None):
         base_world = create_task_world(opt, [model_agent])
         self.process_queue = process_queue
-        self.index = opt['background_index']
+        self.index = opt["background_index"]
         super().__init__(opt, base_world)
 
     def handle_batch(self, batch):
@@ -1380,13 +1380,13 @@ def _create_task_agents(opt: Opt):
     defined by the task name directly.  (This saves the task creator bothering to define
     the create_agents function when it is not needed.)
     """
-    if opt.get('interactive_task', False) or opt.get('selfchat_task', False):
+    if opt.get("interactive_task", False) or opt.get("selfchat_task", False):
         # do not need task agents in interactive or self chat settings
         return []
 
     try:
         # Tries to call the create_agent function in agents.py
-        my_module = load_task_module(opt['task'])
+        my_module = load_task_module(opt["task"])
         task_agents = my_module.create_agents(opt)  # type: ignore
     except (ModuleNotFoundError, AttributeError):
         # Create_agent not found, so try to create the teacher directly.
@@ -1404,9 +1404,9 @@ def create_task_world(opt: Opt, user_agents, default_world=None):
     """
     task_agents = _create_task_agents(opt)
     world_class = load_world_module(
-        opt['task'],
-        interactive_task=opt.get('interactive_task', False),
-        selfchat_task=opt.get('selfchat_task', False),
+        opt["task"],
+        interactive_task=opt.get("interactive_task", False),
+        selfchat_task=opt.get("selfchat_task", False),
         num_agents=len(user_agents + task_agents),
         default_world=default_world,
     )
@@ -1422,10 +1422,10 @@ def create_task(opt: Opt, user_agents, default_world=None):
     or ``"#babi-1k"`` or ``"#QA"``, see ``parlai/tasks/tasks.py`` and see
     ``parlai/tasks/task_list.py`` for list of tasks.
     """
-    task = opt.get('task')
+    task = opt.get("task")
     if not task:
         raise RuntimeError(
-            'No task specified. Please select a task with ' + '--task {task_name}.'
+            "No task specified. Please select a task with " + "--task {task_name}."
         )
     if type(user_agents) != list:
         user_agents = [user_agents]
@@ -1433,10 +1433,10 @@ def create_task(opt: Opt, user_agents, default_world=None):
     # Convert any hashtag task labels to task directory path names.
     # (e.g. "#QA" to the list of tasks that are QA tasks).
     opt = copy.deepcopy(opt)
-    opt['task'] = ids_to_tasks(opt['task'])
+    opt["task"] = ids_to_tasks(opt["task"])
     logging.info(f"creating task(s): {opt['task']}")
 
-    if ',' not in opt['task']:
+    if "," not in opt["task"]:
         # Single task
         world = create_task_world(opt, user_agents, default_world=default_world)
     else:
@@ -1444,15 +1444,15 @@ def create_task(opt: Opt, user_agents, default_world=None):
         # TODO: remove and replace with multiteachers only?
         world = MultiWorld(opt, user_agents, default_world=default_world)
 
-    if DatatypeHelper.is_training(opt['datatype']) and opt.get('num_workers', 0) > 0:
+    if DatatypeHelper.is_training(opt["datatype"]) and opt.get("num_workers", 0) > 0:
         # note that we never use Background preprocessing in the valid/test
         # worlds, as we are unable to call Teacher.observe(model_act) in BG
         # preprocessing, so we are unable to compute Metrics or accurately
         # differentiate MultiWorld stats.
         world = BackgroundDriverWorld(opt, world)
-    elif opt.get('batchsize', 1) > 1 and opt.get('dynamic_batching'):
+    elif opt.get("batchsize", 1) > 1 and opt.get("dynamic_batching"):
         world = DynamicBatchWorld(opt, world)
-    elif opt.get('batchsize', 1) > 1:
+    elif opt.get("batchsize", 1) > 1:
         # otherwise check if should use batchworld
         world = BatchWorld(opt, world)
 

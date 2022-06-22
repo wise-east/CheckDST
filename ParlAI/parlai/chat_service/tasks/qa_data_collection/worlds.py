@@ -12,13 +12,13 @@ import importlib
 
 
 def get_task(opt):
-    module_name = 'parlai.tasks.squad.agents'
-    class_name = 'DefaultTeacher'
+    module_name = "parlai.tasks.squad.agents"
+    class_name = "DefaultTeacher"
     my_module = importlib.import_module(module_name)
     task_class = getattr(my_module, class_name)
     task_opt = opt.copy()
-    task_opt['datatype'] = 'train'
-    task_opt['datapath'] = opt['datapath']
+    task_opt["datatype"] = "train"
+    task_opt["datapath"] = opt["datapath"]
     return task_class(task_opt)
 
 
@@ -30,7 +30,7 @@ class QADataCollectionTaskWorld(World):
     etc.
     """
 
-    collector_agent_id = 'QA Collector'
+    collector_agent_id = "QA Collector"
 
     def __init__(self, opt, task, agent):
         self.task = task
@@ -45,13 +45,13 @@ class QADataCollectionTaskWorld(World):
 
     @staticmethod
     def assign_roles(agents):
-        agents[0].disp_id = 'Agent'
+        agents[0].disp_id = "Agent"
 
     def parley(self):
         # Each turn starts from the QA Collector agent
         self.turn_index = (self.turn_index + 1) % 2
-        ad = {'episode_done': False}
-        ad['id'] = self.__class__.collector_agent_id
+        ad = {"episode_done": False}
+        ad["id"] = self.__class__.collector_agent_id
 
         if self.turn_index == 0:
             # At the first turn, the QA Collector agent provides the context
@@ -59,10 +59,10 @@ class QADataCollectionTaskWorld(World):
 
             # Get context from SQuAD teacher agent
             qa = self.task.act()
-            context = '\n'.join(qa['text'].split('\n')[:-1])
+            context = "\n".join(qa["text"].split("\n")[:-1])
 
             # Wrap the context with a prompt telling the person what to do next
-            ad['text'] = context + '\n\nPlease provide a question given this context.'
+            ad["text"] = context + "\n\nPlease provide a question given this context."
 
             self.agent.observe(validate(ad))
             self.question = self.agent.act()
@@ -76,9 +76,9 @@ class QADataCollectionTaskWorld(World):
             # person to provide the answer
 
             # A prompt telling the person what to do next
-            ad['text'] = 'Thanks. And what is the answer to your question?'
+            ad["text"] = "Thanks. And what is the answer to your question?"
 
-            ad['episode_done'] = True  # end of episode
+            ad["episode_done"] = True  # end of episode
 
             self.agent.observe(validate(ad))
             self.answer = self.agent.act()

@@ -7,4 +7,4 @@ from .build import download as download_dodeca
 
 
 def download(datapath):
-    download_dodeca(datapath, 'eli5_ft')
+    download_dodeca(datapath, "eli5_ft")

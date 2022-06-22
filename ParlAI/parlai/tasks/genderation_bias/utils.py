@@ -16,10 +16,10 @@ from parlai.core.opt import Opt
 from typing import List, Tuple
 
 PUNCTUATION_LST = [
-    (' .', '.'),
-    (' !', '!'),
-    (' ?', '?'),
-    (' ,', ','),
+    (" .", "."),
+    (" !", "!"),
+    (" ?", "?"),
+    (" ,", ","),
     (" ' ", "'"),
     (" . . . ", "... "),
     (" ( ", " ("),
@@ -64,20 +64,20 @@ def get_word_list_token(text: str, word_lists: Tuple[List[str], List[str]]) -> s
     text = format_text(text)
     m_cnt = 0
     f_cnt = 0
-    for word in text.split(' '):
+    for word in text.split(" "):
         if word in m_list:
             m_cnt += 1
         if word in f_list:
             f_cnt += 1
 
     if f_cnt == 0 and m_cnt == 0:
-        return 'f0m0'
+        return "f0m0"
     elif f_cnt == 0 and m_cnt > 0:
-        return 'f0m1'
+        return "f0m1"
     elif f_cnt > 0 and m_cnt == 0:
-        return 'f1m0'
+        return "f1m0"
     else:
-        return 'f1m1'
+        return "f1m1"
 
 
 def flatten_and_classify(
@@ -85,7 +85,7 @@ def flatten_and_classify(
     context_length: int,
     word_lists: Tuple[List[str], List[str]],
     include_labels: bool = True,
-    delimiter: str = '\n',
+    delimiter: str = "\n",
 ):
     """
     Flatten the dialogue history of an episode, explode into N new examples.
@@ -108,19 +108,19 @@ def flatten_and_classify(
     new_episode = []
 
     for ex in episode:
-        context.append(ex.get('text', ''))
+        context.append(ex.get("text", ""))
         # add context
         if len(context) > 1:
-            ex.force_set('text', delimiter.join(context))
+            ex.force_set("text", delimiter.join(context))
         # set episode_done to be True
-        ex.force_set('episode_done', True)
-        labels = ex.get('labels', ex.get('eval_labels', None))
+        ex.force_set("episode_done", True)
+        labels = ex.get("labels", ex.get("eval_labels", None))
         if labels is not None and include_labels:
             context.append(random.choice(labels))
 
         # word list
         control_tok = get_word_list_token(random.choice(labels), word_lists)
-        ex.force_set('text', ex['text'] + ' ' + control_tok)
+        ex.force_set("text", ex["text"] + " " + control_tok)
         new_episode.append(ex)
 
     return new_episode
@@ -142,19 +142,19 @@ def get_original_task_module(opt: Opt, multi_possible: bool = False):
         return module associated with task.
     """
     modules = []
-    tasks = opt['task'].split(',')
+    tasks = opt["task"].split(",")
     if not multi_possible:
         assert len(tasks) == 1
 
     for task in tasks:
-        if len(task.split(':')) < 3:
+        if len(task.split(":")) < 3:
             raise RuntimeError(
-                '\n\n********************************************************\n'
-                'Must specify original task using the following format:\n'
-                '`--task internal:flattened:task:<ORIGINAL TASK NAME>`'
-                '\n********************************************************\n'
+                "\n\n********************************************************\n"
+                "Must specify original task using the following format:\n"
+                "`--task internal:flattened:task:<ORIGINAL TASK NAME>`"
+                "\n********************************************************\n"
             )
-        original_task = ':'.join(task.split(':')[2:])
+        original_task = ":".join(task.split(":")[2:])
         task_module = load_teacher_module(original_task)
         modules.append(task_module)
 

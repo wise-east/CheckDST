@@ -21,11 +21,11 @@ Modified to use data directory rather than a hard-coded processed data directory
 
 
 def select_pars(qa_dct, docs_list, word_freqs, n_sents=100, n_context=3):
-    question = qa_dct['title'][0]
-    split_docs = [sentence_split(doc['text'][0], max_len=64) for doc in docs_list]
-    q_ti_dct = tf_idf_vec(question, word_freqs['title'][0], word_freqs['title'][1])
+    question = qa_dct["title"][0]
+    split_docs = [sentence_split(doc["text"][0], max_len=64) for doc in docs_list]
+    q_ti_dct = tf_idf_vec(question, word_freqs["title"][0], word_freqs["title"][1])
     split_docs_pre = [
-        (i, j, sen, tf_idf_vec(sen, word_freqs['doc'][0], word_freqs['doc'][1]))
+        (i, j, sen, tf_idf_vec(sen, word_freqs["doc"][0], word_freqs["doc"][1]))
         for i, doc in enumerate(split_docs)
         for j, sen in enumerate(doc)
     ]
@@ -56,60 +56,60 @@ def select_pars(qa_dct, docs_list, word_freqs, n_sents=100, n_context=3):
                     this_par += [(i, j + k)]
                     last_seen = (i, j + k)
     par_ids = par_ids[1:] + [this_par]
-    extract_doc = ' <P> '.join(
-        [''] + [' '.join([split_docs[i][j] for i, j in par]) for par in par_ids]
+    extract_doc = " <P> ".join(
+        [""] + [" ".join([split_docs[i][j] for i, j in par]) for par in par_ids]
     ).strip()
     return extract_doc
 
 
 def make_example(qa_dct, docs_list, word_freqs, n_sents=100, n_context=3):
-    q_id = qa_dct['id']
-    question = qa_dct['title'][0] + ' --T-- ' + qa_dct['selftext'][0]
-    answer = qa_dct['comments'][0]['body'][0]
+    q_id = qa_dct["id"]
+    question = qa_dct["title"][0] + " --T-- " + qa_dct["selftext"][0]
+    answer = qa_dct["comments"][0]["body"][0]
     document = select_pars(qa_dct, docs_list, word_freqs, n_sents, n_context)
-    return {'id': q_id, 'question': question, 'document': document, 'answer': answer}
+    return {"id": q_id, "question": question, "document": document, "answer": answer}
 
 
 def setup_args():
     parser = ParlaiParser(False, False)
     parser.add_parlai_data_path()
-    sentences = parser.add_argument_group('Gather into train, valid and test')
+    sentences = parser.add_argument_group("Gather into train, valid and test")
     sentences.add_argument(
-        '-sid', '--slice_id', default=0, type=int, metavar='N', help='slice to process'
+        "-sid", "--slice_id", default=0, type=int, metavar="N", help="slice to process"
     )
     sentences.add_argument(
-        '-ns',
-        '--num_selected',
+        "-ns",
+        "--num_selected",
         default=15,
         type=int,
-        metavar='N',
-        help='number of selected passages',
+        metavar="N",
+        help="number of selected passages",
     )
     sentences.add_argument(
-        '-nc',
-        '--num_context',
+        "-nc",
+        "--num_context",
         default=3,
         type=int,
-        metavar='N',
-        help='number of sentences per passage',
+        metavar="N",
+        help="number of sentences per passage",
     )
     sentences.add_argument(
-        '-sr_n',
-        '--subreddit_name',
-        default='explainlikeimfive',
+        "-sr_n",
+        "--subreddit_name",
+        default="explainlikeimfive",
         type=str,
-        help='subreddit name',
+        help="subreddit name",
     )
     return parser.parse_args()
 
 
 def main():
     opt = setup_args()
-    reddit = opt['subreddit_name']
-    n_slice = opt['slice_id']
-    n_sents = opt['num_selected']
-    n_context = opt['num_context']
-    eli_path = pjoin(opt['datapath'], 'eli5')
+    reddit = opt["subreddit_name"]
+    n_slice = opt["slice_id"]
+    n_sents = opt["num_selected"]
+    n_context = opt["num_context"]
+    eli_path = pjoin(opt["datapath"], "eli5")
     slice_json = pjoin(
         eli_path,
         "processed_data/collected_docs/%s/slices/slice_%d.json" % (reddit, n_slice),
@@ -123,11 +123,11 @@ def main():
             eli_path, "pre_computed/%s_unigram_counts.json" % (reddit,)
         )
         word_counts = json.load(open(unigram_json))
-        qt_freqs = dict(word_counts['question_title'])
+        qt_freqs = dict(word_counts["question_title"])
         qt_sum = sum(qt_freqs.values())
-        d_freqs = dict(word_counts['document'])
+        d_freqs = dict(word_counts["document"])
         d_sum = sum(d_freqs.values())
-        word_freqs = {'title': (qt_freqs, qt_sum), 'doc': (d_freqs, d_sum)}
+        word_freqs = {"title": (qt_freqs, qt_sum), "doc": (d_freqs, d_sum)}
         print("loaded data")
         processed = []
         st_time = time()
@@ -139,22 +139,22 @@ def main():
             if i % 10 == 0:
                 print(i, len(processed), time() - st_time)
         selected_dir = pjoin(
-            eli_path, 'processed_data/selected_%d_%d' % (n_sents, n_context)
+            eli_path, "processed_data/selected_%d_%d" % (n_sents, n_context)
         )
         if not isdir(selected_dir):
             os.mkdir(selected_dir)
         reddit_dir = pjoin(
-            eli_path, 'processed_data/selected_%d_%d/%s' % (n_sents, n_context, reddit)
+            eli_path, "processed_data/selected_%d_%d/%s" % (n_sents, n_context, reddit)
         )
         if not isdir(reddit_dir):
             os.mkdir(reddit_dir)
         selected_slice_json = pjoin(
             eli_path,
-            'processed_data/selected_%d_%d/%s/selected_slice_%d.json'
+            "processed_data/selected_%d_%d/%s/selected_slice_%d.json"
             % (n_sents, n_context, reddit, n_slice),
         )
-        json.dump(processed, open(selected_slice_json, 'w'))
+        json.dump(processed, open(selected_slice_json, "w"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

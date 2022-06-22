@@ -20,9 +20,9 @@ from parlai.utils.io import PathManager
 
 RESOURCES = [
     DownloadableFile(
-        'https://object.pouta.csc.fi/OPUS-OpenSubtitles/v2018/xml/en.zip',
-        'OpenSubtitles2018.zip',
-        '917af90fcaa8b0ebb3d59d9f8d205f304f31bf92cbf15aa6e9ee030f6691755e',
+        "https://object.pouta.csc.fi/OPUS-OpenSubtitles/v2018/xml/en.zip",
+        "OpenSubtitles2018.zip",
+        "917af90fcaa8b0ebb3d59d9f8d205f304f31bf92cbf15aa6e9ee030f6691755e",
     )
 ]
 
@@ -35,13 +35,13 @@ MAX_WORD_LENGTH = 20
 
 # remove brackets
 CLEAN_BRACKETS_REGEX = re.compile(
-    r'<!--.*?-->|<[^>]*>|\([^\)]*\)|\[[^\]]*\]|\{[^\}]*\}|##|~'
+    r"<!--.*?-->|<[^>]*>|\([^\)]*\)|\[[^\]]*\]|\{[^\}]*\}|##|~"
 )
 # Usually, unbalanced brackets correspond to very noisy sentences
 # '#' is usually pretty bad and means lyrics of the song
-BRACKETS_CHARACTERS = ['[', ']', '(', ')', '{', '}', '<', '>', '#']
+BRACKETS_CHARACTERS = ["[", "]", "(", ")", "{", "}", "<", ">", "#"]
 
-MULTI_WHITESPACES_REGEX = re.compile(r'\s+')
+MULTI_WHITESPACES_REGEX = re.compile(r"\s+")
 
 # Existing apostrophe tokenization in Open Subtitles is not compatible with nltk
 APOSTROPHE_REPLACEMENT_REGEX = [
@@ -60,15 +60,15 @@ APOSTROPHE_REPLACEMENT_REGEX = [
 # Some cleaning steps are taken from
 CLEANUP_REGEX_RULES = [
     # remove speaker tag "xxx: "
-    (re.compile(r'^\s*[A-z]*\s*:'), ''),
+    (re.compile(r"^\s*[A-z]*\s*:"), ""),
     # remove unnecessary symbols
-    (re.compile(r"-{2,}"), ' '),
+    (re.compile(r"-{2,}"), " "),
     # delete a space right before a period for titles
-    (re.compile(r'(?<=( mr| jr| ms| dr| st|mrs)) \.'), '. '),
+    (re.compile(r"(?<=( mr| jr| ms| dr| st|mrs)) \."), ". "),
 ]
 
 CLEANUP_REPLACE_RULES = [
-    ('"', ' '),
+    ('"', " "),
     ("``", " "),
     ("''", " "),
     ("% %", " "),
@@ -90,9 +90,9 @@ def get_list_of_files(top_path):
     result = {}
     for path, _dirs, files in os.walk(top_path):
         for filename in files:
-            if filename.endswith('.xml'):
+            if filename.endswith(".xml"):
                 full_filename = os.path.realpath(os.path.join(path, filename))
-                assert PathManager.exists(full_filename), 'Bad file ' + full_filename
+                assert PathManager.exists(full_filename), "Bad file " + full_filename
                 movie_id = get_movie_id(full_filename)
                 if movie_id not in result:
                     result[movie_id] = []
@@ -102,15 +102,15 @@ def get_list_of_files(top_path):
 
 def parse_xml(filepath):
     extension = os.path.splitext(filepath)[1]
-    if extension == '.gz':
-        with gzip.open(filepath, 'r') as f:
+    if extension == ".gz":
+        with gzip.open(filepath, "r") as f:
             return ET.parse(f)
     else:
         return ET.parse(filepath)
 
 
 def normalize_whitespaces(sentence):
-    return MULTI_WHITESPACES_REGEX.sub(' ', sentence).strip()
+    return MULTI_WHITESPACES_REGEX.sub(" ", sentence).strip()
 
 
 def normalize_apostrophe(sentence):
@@ -121,15 +121,15 @@ def normalize_apostrophe(sentence):
 
 
 def clean_text(words):
-    if len(words) > 0 and words[-1] == ':':
+    if len(words) > 0 and words[-1] == ":":
         return None
-    sentence = ' '.join(words).strip(' -').lower()
+    sentence = " ".join(words).strip(" -").lower()
 
-    sentence = CLEAN_BRACKETS_REGEX.sub('', sentence)
+    sentence = CLEAN_BRACKETS_REGEX.sub("", sentence)
     if len([ch for ch in BRACKETS_CHARACTERS if ch in sentence]) > 0:
         return None
 
-    sentence = sentence.replace('\\\'', '\'')
+    sentence = sentence.replace("\\'", "'")
     if sentence.count('"') % 2 == 1:
         # There are unmatched double-quotes.
         # Usually, it means a quote got splitted into separate utterances,
@@ -147,11 +147,11 @@ def clean_text(words):
 
     if (
         len(words) > 0
-        and any(map(lambda k: re.search(r'\w', k) is not None, words))
+        and any(map(lambda k: re.search(r"\w", k) is not None, words))
         and len(words) >= MIN_WORD_LENGTH
         and len(words) <= MAX_WORD_LENGTH
     ):
-        return ' '.join(words)
+        return " ".join(words)
     else:
         return None
 
@@ -160,9 +160,9 @@ def parse_time_str(time_value_str):
     if not (
         time_value_str is not None
         and len(time_value_str) == 12
-        and time_value_str[2] == ':'
-        and time_value_str[5] == ':'
-        and time_value_str[8] == ','
+        and time_value_str[2] == ":"
+        and time_value_str[5] == ":"
+        and time_value_str[8] == ","
     ):
         return None
     try:
@@ -179,30 +179,30 @@ def extract_data_from_xml(xml_object):
     previous_end_time = -1000
     conversation = []
     for sentence_node in xml_object.getroot():
-        if sentence_node.tag != 's':
+        if sentence_node.tag != "s":
             continue
 
         words = []
         start_time, end_time = None, None
 
         for node in sentence_node:
-            if node.tag == 'time':
-                time_value = parse_time_str(node.get('value'))
+            if node.tag == "time":
+                time_value = parse_time_str(node.get("value"))
                 if time_value is None:
                     continue
-                if node.get('id')[-1] == 'S':
+                if node.get("id")[-1] == "S":
                     start_time = (
                         time_value
                         if start_time is None
                         else min(time_value, start_time)
                     )
-                elif node.get('id')[-1] == 'E':
+                elif node.get("id")[-1] == "E":
                     end_time = (
                         time_value if end_time is None else max(time_value, end_time)
                     )
                 else:
-                    raise Exception('Unknown time-id for node: %s' % node)
-            elif node.tag == 'w':
+                    raise Exception("Unknown time-id for node: %s" % node)
+            elif node.tag == "w":
                 if node.text is not None and len(node.text) > 0:
                     words.append(node.text)
             else:
@@ -235,11 +235,11 @@ def conversation_to_fb_format(conversation):
     for i in range(0, len(conversation), 2):
         if i + 1 < len(conversation):
             lines.append(
-                '%d %s\t%s' % (i / 2 + 1, conversation[i], conversation[i + 1])
+                "%d %s\t%s" % (i / 2 + 1, conversation[i], conversation[i + 1])
             )
         else:
-            lines.append('%d %s' % (i / 2 + 1, conversation[i]))
-    return '\n'.join(lines)
+            lines.append("%d %s" % (i / 2 + 1, conversation[i]))
+    return "\n".join(lines)
 
 
 def conversation_to_basic_format(conversation):
@@ -247,8 +247,8 @@ def conversation_to_basic_format(conversation):
     lines = []
     for i in range(len(conversation)):
         if i + 1 < len(conversation):
-            lines.append('1 %s\t%s' % (conversation[i], conversation[i + 1]))
-    return '\n'.join(lines)
+            lines.append("1 %s\t%s" % (conversation[i], conversation[i + 1]))
+    return "\n".join(lines)
 
 
 class DataProcessor(object):
@@ -272,32 +272,32 @@ class DataProcessor(object):
                 pass
             except Exception:
                 print(
-                    'Unexpected error for file %s:\n%s' % (filepath, sys.exc_info()[0]),
+                    "Unexpected error for file %s:\n%s" % (filepath, sys.exc_info()[0]),
                     file=sys.stderr,
                 )
                 raise
-        data_str = '\n'.join(data) + ('\n' if len(data) > 0 else '')
+        data_str = "\n".join(data) + ("\n" if len(data) > 0 else "")
         return data_str
 
 
 def create_fb_format(inpath, outpath, use_history):
-    print('[building fbformat]')
+    print("[building fbformat]")
     start_time = time.time()
 
-    ftrain = open(os.path.join(outpath, 'train.txt'), 'w')
-    fvalid = open(os.path.join(outpath, 'valid.txt'), 'w')
-    ftest = open(os.path.join(outpath, 'test.txt'), 'w')
+    ftrain = open(os.path.join(outpath, "train.txt"), "w")
+    fvalid = open(os.path.join(outpath, "valid.txt"), "w")
+    ftest = open(os.path.join(outpath, "test.txt"), "w")
 
     movie_dirs = get_list_of_files(inpath)
     total_movie_dirs = len(movie_dirs)
     total_files = sum([len(l) for l in movie_dirs.values()])
     print(
-        '[Found %d movie folders and %d subtitles within %s in %d seconds]'
+        "[Found %d movie folders and %d subtitles within %s in %d seconds]"
         % (total_movie_dirs, total_files, inpath, time.time() - start_time)
     )
 
-    assert total_movie_dirs == NUM_MOVIE_FOLDERS, 'Incorrect number of movies'
-    assert total_files == NUM_SUBTITLES_FILES, 'Incorrect number of files'
+    assert total_movie_dirs == NUM_MOVIE_FOLDERS, "Incorrect number of movies"
+    assert total_files == NUM_SUBTITLES_FILES, "Incorrect number of files"
 
     processor = DataProcessor(use_history)
 
@@ -316,27 +316,27 @@ def create_fb_format(inpath, outpath, use_history):
     ftest.close()
 
     print(
-        '[Data has been successfully extracted in %d seconds]'
+        "[Data has been successfully extracted in %d seconds]"
         % (time.time() - start_time,)
     )
 
 
 def build(datapath, use_history):
-    dpath = os.path.join(datapath, 'OpenSubtitles2018')
+    dpath = os.path.join(datapath, "OpenSubtitles2018")
     if not use_history:
-        dpath += '_no_history'
-    version = '1'
+        dpath += "_no_history"
+    version = "1"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)
         build_data.make_dir(dpath)
 
-        untar_path = os.path.join(dpath, 'OpenSubtitles', 'xml', 'en')
+        untar_path = os.path.join(dpath, "OpenSubtitles", "xml", "en")
 
-        if len(glob.glob(untar_path + '/*/*/*.xml')) != NUM_SUBTITLES_FILES:
+        if len(glob.glob(untar_path + "/*/*/*.xml")) != NUM_SUBTITLES_FILES:
             # Download the data.
             for downloadable_file in RESOURCES:
                 downloadable_file.download_file(dpath)

@@ -62,7 +62,7 @@ class TimeoutUtils(object):
         agent: Agent,
         world: World,
         timeout: int = DEFAULT_TIMEOUT,
-        timeout_msg: str = 'You have timed out',
+        timeout_msg: str = "You have timed out",
     ) -> Optional[Message]:
         """
         Get a response from the agent.

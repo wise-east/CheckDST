@@ -23,7 +23,7 @@ from collections import defaultdict
 
 def load_msr_corpus(fn: str):
     """
-    custom loading function for msr paraphrase corpus because read_csv complains for unidentified reasons for certain lines 
+    custom loading function for msr paraphrase corpus because read_csv complains for unidentified reasons for certain lines
     """
     # doesn't get the full list for some reason: the following ignores some lines
     # msr_df = pd.read_csv("/Users/justincho/tod/paraphrase_identification/dataset/msr-paraphrase-corpus/msr_paraphrase_test.txt", sep="\t", names=column_names, skiprows=[0])
@@ -35,24 +35,24 @@ def load_msr_corpus(fn: str):
     dd = defaultdict(list)
     for row in msr[1:]:
         split = row.split("\t")
-        dd['label'].append(split[0])
-        dd['id1'].append(split[1])
-        dd['id2'].append(split[2])
-        dd['str1'].append(split[3])
-        dd['str2'].append(split[4])
+        dd["label"].append(split[0])
+        dd["id1"].append(split[1])
+        dd["id2"].append(split[2])
+        dd["str1"].append(split[3])
+        dd["str2"].append(split[4])
 
     return pd.DataFrame(dd)
 
 
 def load_qqp(fn: str):
     """
-    load a subset of the qqp questions corpus 
+    load a subset of the qqp questions corpus
     """
 
     qqp = pd.read_csv(fn)
     qqp_filtered = qqp[
-        (qqp['question1'].str.split().str.len() > 4)
-        & (qqp['question2'].str.split().str.len() > 4)
+        (qqp["question1"].str.split().str.len() > 4)
+        & (qqp["question2"].str.split().str.len() > 4)
     ]
 
     return qqp_filtered
@@ -64,8 +64,8 @@ def normalize_df(df: pd.DataFrame):
     """
 
     if "question1" in df.columns:
-        df['str1'] = df["question1"]
-        df['str2'] = df["question2"]
+        df["str1"] = df["question1"]
+        df["str2"] = df["question2"]
         df.drop(["question1", "question2"], axis=1, inplace=True)
 
     if "is_duplicate" in df.columns:
@@ -82,50 +82,50 @@ class GenerativeParaphraseClassificationTeacher(FixedDialogTeacher):
 
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
-        self.id = 'generative paraphrase classification'
+        self.id = "generative paraphrase classification"
 
         # # # reading args
-        self.just_test = opt.get('just_test', False)
-        self.seed = opt.get('rand_seed', 0)
-        self.data_version = opt.get('data_version', "all")
+        self.just_test = opt.get("just_test", False)
+        self.seed = opt.get("rand_seed", 0)
+        self.data_version = opt.get("data_version", "all")
         self.val_reduced = opt.get("val_reduced", False)
         self.reduce_train_factor = opt.get("reduce_train_factor", 1)
         self.flag_compute = 0
         # # # set random seeds
         random.seed(self.seed)
 
-        opt['datafile'], data_dir = self._path(opt)
-        self._setup_data(opt['datafile'], data_dir)
+        opt["datafile"], data_dir = self._path(opt)
+        self._setup_data(opt["datafile"], data_dir)
 
         self.reset()
 
     @classmethod
     # def add_cmdline_args(cls, argparser):
     def add_cmdline_args(cls, argparser, partial_opt):
-        agent = argparser.add_argument_group('MultiWozDST Teacher Args')
+        agent = argparser.add_argument_group("MultiWozDST Teacher Args")
         agent.add_argument(
-            '-dv',
-            '--data_version',
+            "-dv",
+            "--data_version",
             type=str,
             default="all",
             help="one of ['all', 'msr', qq]",
         )
         agent.add_argument(
-            '--just_test',
-            type='bool',
+            "--just_test",
+            type="bool",
             default=False,
             help="True if one would like to test agents with small amount of data (default: False).",
         )
         agent.add_argument(
-            '--rand_seed',
+            "--rand_seed",
             type=int,
             default=0,
             help="specify to set random seed (default: 0).",
         )
 
         agent.add_argument(
-            '--val_reduced',
-            type='bool',
+            "--val_reduced",
+            type="bool",
             default=False,
             help="use smaller evaluation set.",
         )
@@ -134,7 +134,7 @@ class GenerativeParaphraseClassificationTeacher(FixedDialogTeacher):
 
     def _path(self, opt):
         # set up path to data (specific to each dataset)
-        data_dir = os.path.join(opt['datapath'], 'paraphrase')
+        data_dir = os.path.join(opt["datapath"], "paraphrase")
         # data_dir = os.path.join('/checkpoint/kunqian/multiwoz/data/MultiWOZ_2.1/')
 
         data_path = ""
@@ -164,8 +164,8 @@ class GenerativeParaphraseClassificationTeacher(FixedDialogTeacher):
         ]
         msr_test_df["dial_id"] = [f"msr-test-{idx}" for idx in range(len(msr_test_df))]
 
-        msr_train_data = msr_train_df.to_dict(orient='records')
-        msr_test_data = msr_test_df.to_dict(orient='records')
+        msr_train_data = msr_train_df.to_dict(orient="records")
+        msr_test_data = msr_test_df.to_dict(orient="records")
         qqp_data = qqp_df.to_dict(orient="records")
 
         # not necessary?
@@ -208,7 +208,7 @@ class GenerativeParaphraseClassificationTeacher(FixedDialogTeacher):
             self.messages = self.messages[:10]
 
         # shuffle for training only: important for invariance scoring
-        if self.datatype.startswith('train'):
+        if self.datatype.startswith("train"):
             random.shuffle(self.messages)
 
     def num_examples(self):
@@ -220,7 +220,7 @@ class GenerativeParaphraseClassificationTeacher(FixedDialogTeacher):
 
     def format_context_and_label(self, str1, str2, label):
         """
-        Transform task to include an instruction with custom labels that are all in natural text 
+        Transform task to include an instruction with custom labels that are all in natural text
         """
 
         qqp_templates = [
@@ -258,7 +258,7 @@ class GenerativeParaphraseClassificationTeacher(FixedDialogTeacher):
 
         if label:
             qqp_templates += [
-                (f'Paraphrase this question: {str1}', str2),
+                (f"Paraphrase this question: {str1}", str2),
                 (
                     f'Rephrase this question "{str1}" without changing what it is asking for.',
                     str2,
@@ -267,11 +267,11 @@ class GenerativeParaphraseClassificationTeacher(FixedDialogTeacher):
 
         msr_templates = [
             (
-                f'I want to know whether the following two sentences mean the same thing. {str1} {str2} Do they?',
+                f"I want to know whether the following two sentences mean the same thing. {str1} {str2} Do they?",
                 "Yes" if label else "No",
             ),
             (
-                f'Does the sentence {str1} parpahrase (that is, mean the same thing as) this sentence? {str2}',
+                f"Does the sentence {str1} parpahrase (that is, mean the same thing as) this sentence? {str2}",
                 "Yes" if label else "No",
             ),
             (
@@ -279,20 +279,20 @@ class GenerativeParaphraseClassificationTeacher(FixedDialogTeacher):
                 "equivalent" if label else "not equivalent",
             ),
             (
-                f'Can I replace the sentence {str1} with the sentence {str2} and have it mean the same thing?',
+                f"Can I replace the sentence {str1} with the sentence {str2} and have it mean the same thing?",
                 "Yes" if label else "No",
             ),
             (
-                f'Do the following sentences mean the same thing? {str1} {str2}',
+                f"Do the following sentences mean the same thing? {str1} {str2}",
                 "Yes" if label else "No",
             ),
         ]
 
         if label:
             msr_templates += [
-                (f'Paraphrase the following sentence: {str1}', str2),
+                (f"Paraphrase the following sentence: {str1}", str2),
                 (
-                    f'Generate a sentence that means the same thing as this one: {str1}',
+                    f"Generate a sentence that means the same thing as this one: {str1}",
                     str2,
                 ),
             ]
@@ -307,18 +307,18 @@ class GenerativeParaphraseClassificationTeacher(FixedDialogTeacher):
     def get(self, episode_idx, entry_idx=0):
         # log_idx = entry_idx
         context, label = self.format_context_and_label(
-            self.messages[episode_idx]['str1'],
-            self.messages[episode_idx]['str2'],
-            self.messages[episode_idx]['label'],
+            self.messages[episode_idx]["str1"],
+            self.messages[episode_idx]["str2"],
+            self.messages[episode_idx]["label"],
         )
         episode_done = True
         action = {
-            'id': self.id,
-            'text': context.lower(),
-            'episode_done': episode_done,
-            'labels': [label],
-            'dial_id': self.messages[episode_idx]['dial_id'],
-            'turn_num': 0,
+            "id": self.id,
+            "text": context.lower(),
+            "episode_done": episode_done,
+            "labels": [label],
+            "dial_id": self.messages[episode_idx]["dial_id"],
+            "turn_num": 0,
         }
 
         return action

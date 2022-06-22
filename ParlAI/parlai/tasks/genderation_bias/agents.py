@@ -51,62 +51,62 @@ class ControllableTaskTeacher(FixedDialogTeacher):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        flattened = parser.add_argument_group('ControllableTaskTeacher Flattening Args')
+        flattened = parser.add_argument_group("ControllableTaskTeacher Flattening Args")
         flattened.add_argument(
-            '--flatten-include-labels',
-            type='bool',
+            "--flatten-include-labels",
+            type="bool",
             default=True,
-            help='Include labels in the history when flattening an episode',
+            help="Include labels in the history when flattening an episode",
         )
         flattened.add_argument(
-            '--flatten-delimiter',
+            "--flatten-delimiter",
             type=str,
-            default='\n',
-            help='How to join the dialogue history from previous turns.',
+            default="\n",
+            help="How to join the dialogue history from previous turns.",
         )
         flattened.add_argument(
-            '--flatten-max-context-length',
+            "--flatten-max-context-length",
             type=int,
             default=-1,
-            help='Maximum number of utterances to include per episode. '
-            'Default -1 keeps all.',
+            help="Maximum number of utterances to include per episode. "
+            "Default -1 keeps all.",
         )
-        agent = parser.add_argument_group('ControllableTaskTeacher Args')
+        agent = parser.add_argument_group("ControllableTaskTeacher Args")
         agent.add_argument(
-            '--invalidate-cache',
-            type='bool',
+            "--invalidate-cache",
+            type="bool",
             default=False,
-            help='Set this to True to rebuild the data (may want to do this if '
-            'original data has changed or you want to rebuild with new options)',
+            help="Set this to True to rebuild the data (may want to do this if "
+            "original data has changed or you want to rebuild with new options)",
         )
         agent.add_argument(
-            '--max-examples',
+            "--max-examples",
             type=int,
             default=-1,
-            help='If greater than zero, will stop building after a certain num of exs',
+            help="If greater than zero, will stop building after a certain num of exs",
         )
         agent.add_argument(
-            '--fixed-control',
+            "--fixed-control",
             type=str,
-            default='',
-            help='Always append this fixed control string, good for deploy time.',
+            default="",
+            help="Always append this fixed control string, good for deploy time.",
         )
         # Add the arguments for the task teacher
         opt = parser.parse_and_process_known_args()[0]
         tasks = get_original_task_module(opt, multi_possible=True)
         for task in tasks:
-            if hasattr(task, 'add_cmdline_args'):
+            if hasattr(task, "add_cmdline_args"):
                 task.add_cmdline_args(parser, partial_opt=partial_opt)
         return parser
 
     def __init__(self, opt: Opt, shared: TShared = None):
-        assert opt['flatten_delimiter'] == opt.get(
-            'delimiter', '\n'
-        ), '--flatten-delimiter and --delimiter are set differently, please inspect and set to the same to avoid unexpected results'
+        assert opt["flatten_delimiter"] == opt.get(
+            "delimiter", "\n"
+        ), "--flatten-delimiter and --delimiter are set differently, please inspect and set to the same to avoid unexpected results"
         self.opt = opt
 
-        if shared and 'data' in shared:
-            self.data = shared['data']
+        if shared and "data" in shared:
+            self.data = shared["data"]
         else:
             self.word_lists = self.build_wordlists(opt)
             self.data = self._setup_data(opt)
@@ -146,15 +146,15 @@ class ControllableTaskTeacher(FixedDialogTeacher):
 
         Examples include brother, girl, actress, husbands, etc.
         """
-        build(opt['datapath'])
-        folder = os.path.join(opt['datapath'], 'genderation_bias')
-        male_words = os.path.join(folder, 'male_word_file.txt')
-        female_words = os.path.join(folder, 'female_word_file.txt')
+        build(opt["datapath"])
+        folder = os.path.join(opt["datapath"], "genderation_bias")
+        male_words = os.path.join(folder, "male_word_file.txt")
+        female_words = os.path.join(folder, "female_word_file.txt")
 
-        with open(male_words, 'r') as f:
+        with open(male_words, "r") as f:
             male = f.read().splitlines()
 
-        with open(female_words, 'r') as f:
+        with open(female_words, "r") as f:
             female = f.read().splitlines()
 
         return male, female
@@ -169,9 +169,9 @@ class ControllableTaskTeacher(FixedDialogTeacher):
             options dict.
         """
         # create save directory, if it does not already exist
-        self.original_task_name = ':'.join(opt['task'].split(':')[2:])
+        self.original_task_name = ":".join(opt["task"].split(":")[2:])
         self.save_dir = self._get_save_path(
-            opt['datapath'], str(datetime.datetime.today())
+            opt["datapath"], str(datetime.datetime.today())
         )
         os.makedirs(self.save_dir, exist_ok=True)
 
@@ -186,15 +186,15 @@ class ControllableTaskTeacher(FixedDialogTeacher):
         # build the original teacher
         original_task_module = get_original_task_module(opt)
         teacher_opt = deepcopy(opt)
-        teacher_opt['task'] = self.original_task_name
+        teacher_opt["task"] = self.original_task_name
         teacher = original_task_module(teacher_opt)
 
         total_exs = teacher.num_examples()
-        if self.opt['max_examples'] > 0:
-            total_exs = min(self.opt['max_examples'], total_exs)
+        if self.opt["max_examples"] > 0:
+            total_exs = min(self.opt["max_examples"], total_exs)
 
         progress_bar = tqdm(
-            total=total_exs, unit='ex', unit_scale=True, desc='Building flattened data'
+            total=total_exs, unit="ex", unit_scale=True, desc="Building flattened data"
         )
 
         all_episodes = []
@@ -206,15 +206,15 @@ class ControllableTaskTeacher(FixedDialogTeacher):
             while not episode_done:
                 action = Message(teacher.act())
                 current_episode.append(action)
-                episode_done = action.get('episode_done', False)
+                episode_done = action.get("episode_done", False)
                 num_exs += 1
 
             # flatten the episode into 1-example episodes with context
             flattened_ep = flatten_and_classify(
                 current_episode,
-                opt['flatten_max_context_length'],
-                include_labels=opt['flatten_include_labels'],
-                delimiter=opt['flatten_delimiter'],
+                opt["flatten_max_context_length"],
+                include_labels=opt["flatten_include_labels"],
+                delimiter=opt["flatten_delimiter"],
                 word_lists=self.word_lists,
             )
             all_episodes += flattened_ep
@@ -241,24 +241,24 @@ class ControllableTaskTeacher(FixedDialogTeacher):
             return list of episodes, if available
         """
         # first check for the most recent date
-        save_dir = self._get_save_path(opt['datapath'], '*')
+        save_dir = self._get_save_path(opt["datapath"], "*")
         all_dates = []
         for fname in glob.glob(os.path.join(save_dir, filename)):
-            date = os.path.split(fname)[0].split('_')[-1]
+            date = os.path.split(fname)[0].split("_")[-1]
             all_dates.append(date)
 
         if len(all_dates) > 0:
             most_recent = os.path.join(
-                self._get_save_path(opt['datapath'], sorted(all_dates)[-1]), filename
+                self._get_save_path(opt["datapath"], sorted(all_dates)[-1]), filename
             )
         else:
             # data has not been built yet
             return None
 
-        if opt['invalidate_cache']:
+        if opt["invalidate_cache"]:
             # invalidate the cache and remove the existing data
             logging.warning(
-                f' [ WARNING: invalidating cache at {self.save_path} and rebuilding the data. ]'
+                f" [ WARNING: invalidating cache at {self.save_path} and rebuilding the data. ]"
             )
             if self.save_path == most_recent:
                 os.remove(self.save_path)
@@ -266,8 +266,8 @@ class ControllableTaskTeacher(FixedDialogTeacher):
 
         # Loading from most recent date
         self.save_path = most_recent
-        logging.info(f' [ Data already exists. Loading from: {self.save_path} ]')
-        with PathManager.open(self.save_path, 'rb') as f:
+        logging.info(f" [ Data already exists. Loading from: {self.save_path} ]")
+        with PathManager.open(self.save_path, "rb") as f:
             data = json.load(f)
 
         return data
@@ -281,11 +281,11 @@ class ControllableTaskTeacher(FixedDialogTeacher):
         """
         try:
             json_data = json.dumps(data)
-            with PathManager.open(self.save_path, 'w') as f:
+            with PathManager.open(self.save_path, "w") as f:
                 f.write(json_data)
-            logging.info(f'[ Data successfully saved to path: {self.save_path} ]')
+            logging.info(f"[ Data successfully saved to path: {self.save_path} ]")
         except Exception:
-            logging.warning('Data is not json serializable; not saving')
+            logging.warning("Data is not json serializable; not saving")
 
     def get(self, episode_idx: int, entry_idx: int = 0) -> Message:
         """
@@ -303,16 +303,16 @@ class ControllableTaskTeacher(FixedDialogTeacher):
         """
         ex = Message(self.data[episode_idx])
 
-        if self.opt['fixed_control'] != '':
-            old_text = ' '.join(ex['text'].split(' ')[:-1])
+        if self.opt["fixed_control"] != "":
+            old_text = " ".join(ex["text"].split(" ")[:-1])
             text = f"{old_text} {self.opt['fixed_control']}"
-            ex.force_set('text', text)
+            ex.force_set("text", text)
 
         return ex
 
     def share(self):
         shared = super().share()
-        shared['data'] = self.data
+        shared["data"] = self.data
         return shared
 
 

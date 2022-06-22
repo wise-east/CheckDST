@@ -39,19 +39,19 @@ class NliTeacher(MultiTaskTeacher):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        parser = parser.add_argument_group('NLI Teacher Args')
+        parser = parser.add_argument_group("NLI Teacher Args")
         parser.add_argument(
-            '-dfm',
-            '--dialog-format',
-            type='bool',
+            "-dfm",
+            "--dialog-format",
+            type="bool",
             default=False,
             help="True if one would like to convert to a dialogue format without special tokens such as 'Premise'"
             " and 'Hypothesis' (default: False).",
         )
         parser.add_argument(
-            '-bcl',
-            '--binary-classes',
-            type='bool',
+            "-bcl",
+            "--binary-classes",
+            type="bool",
             default=False,
             help="True if label candidates are (contradiction, not_contradiction), and (entailment, contradiction, "
             "neutral) otherwise (default: False).",
@@ -60,15 +60,15 @@ class NliTeacher(MultiTaskTeacher):
 
     def __init__(self, opt, shared=None):
         nli_tasks = [
-            'anli:r1',
-            'anli:r2',
-            'anli:r3',
-            'multinli',
-            'snli',
-            'dialogue_nli',
+            "anli:r1",
+            "anli:r2",
+            "anli:r3",
+            "multinli",
+            "snli",
+            "dialogue_nli",
         ]
         opt = deepcopy(opt)
-        opt['task'] = ','.join(nli_tasks)
+        opt["task"] = ",".join(nli_tasks)
         super().__init__(opt, shared)
 
 

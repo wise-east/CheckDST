@@ -20,11 +20,11 @@ class TestMemEfficientFP16(unittest.TestCase):
     def test_adam(self):
         valid, _ = testing_utils.train_model(
             dict(
-                task='integration_tests:candidate',
-                model='transformer/ranker',
-                optimizer='adam',
+                task="integration_tests:candidate",
+                model="transformer/ranker",
+                optimizer="adam",
                 fp16=True,
-                fp16_impl='mem_efficient',
+                fp16_impl="mem_efficient",
                 learningrate=7e-3,
                 batchsize=32,
                 num_epochs=0.25,
@@ -33,21 +33,21 @@ class TestMemEfficientFP16(unittest.TestCase):
                 ffn_size=32,
                 embedding_size=32,
                 warmup_updates=1,
-                lr_scheduler='invsqrt',
+                lr_scheduler="invsqrt",
             )
         )
-        self.assertGreaterEqual(valid['hits@1'], 0.1)
+        self.assertGreaterEqual(valid["hits@1"], 0.1)
 
     def test_unsupported(self):
         with self.assertRaises(RuntimeError):
             # SGD unsupported currently
             testing_utils.train_model(
                 dict(
-                    task='integration_tests:candidate',
-                    model='transformer/ranker',
-                    optimizer='sgd',
+                    task="integration_tests:candidate",
+                    model="transformer/ranker",
+                    optimizer="sgd",
                     fp16=True,
-                    fp16_impl='mem_efficient',
+                    fp16_impl="mem_efficient",
                 )
             )
 
@@ -56,16 +56,16 @@ class TestMemEfficientFP16(unittest.TestCase):
         Test switching from safe fp16 to memory efficient fp16.
         """
         with testing_utils.tempdir() as tmpdir:
-            model_file = os.path.join(tmpdir, 'model')
+            model_file = os.path.join(tmpdir, "model")
 
             valid1, test1 = testing_utils.train_model(
                 dict(
                     model_file=model_file,
-                    task='integration_tests',
-                    model='transformer/generator',
-                    optimizer='adam',
+                    task="integration_tests",
+                    model="transformer/generator",
+                    optimizer="adam",
                     fp16=True,
-                    fp16_impl='safe',
+                    fp16_impl="safe",
                     learningrate=1e-3,
                     batchsize=32,
                     num_epochs=0.25,
@@ -74,7 +74,7 @@ class TestMemEfficientFP16(unittest.TestCase):
                     ffn_size=32,
                     embedding_size=32,
                     warmup_updates=100,
-                    lr_scheduler='invsqrt',
+                    lr_scheduler="invsqrt",
                     skip_generation=True,
                 )
             )
@@ -82,8 +82,8 @@ class TestMemEfficientFP16(unittest.TestCase):
             valid2, test2 = testing_utils.train_model(
                 dict(
                     model_file=model_file,
-                    task='integration_tests',
-                    fp16_impl='mem_efficient',
+                    task="integration_tests",
+                    fp16_impl="mem_efficient",
                     num_epochs=0.5,
                     fp16=True,
                 )
@@ -91,9 +91,9 @@ class TestMemEfficientFP16(unittest.TestCase):
 
             # make sure the number of updates is being tracked correctly
             self.assertGreater(
-                valid2['total_train_updates'],
-                valid1['total_train_updates'],
-                'Number of updates is not increasing',
+                valid2["total_train_updates"],
+                valid1["total_train_updates"],
+                "Number of updates is not increasing",
             )
 
     def test_resuming_memeff2safe(self):
@@ -101,16 +101,16 @@ class TestMemEfficientFP16(unittest.TestCase):
         Test switching from memory efficient fp16 to safe fp16.
         """
         with testing_utils.tempdir() as tmpdir:
-            model_file = os.path.join(tmpdir, 'model')
+            model_file = os.path.join(tmpdir, "model")
 
             valid1, test1 = testing_utils.train_model(
                 dict(
                     model_file=model_file,
-                    task='integration_tests',
-                    model='transformer/generator',
-                    optimizer='adam',
+                    task="integration_tests",
+                    model="transformer/generator",
+                    optimizer="adam",
                     fp16=True,
-                    fp16_impl='mem_efficient',
+                    fp16_impl="mem_efficient",
                     learningrate=1e-3,
                     batchsize=32,
                     num_epochs=0.25,
@@ -119,7 +119,7 @@ class TestMemEfficientFP16(unittest.TestCase):
                     ffn_size=32,
                     embedding_size=32,
                     warmup_updates=1,
-                    lr_scheduler='invsqrt',
+                    lr_scheduler="invsqrt",
                     skip_generation=True,
                 )
             )
@@ -127,18 +127,18 @@ class TestMemEfficientFP16(unittest.TestCase):
             valid2, test2 = testing_utils.train_model(
                 dict(
                     model_file=model_file,
-                    task='integration_tests',
-                    model='transformer/generator',
-                    fp16_impl='safe',
+                    task="integration_tests",
+                    model="transformer/generator",
+                    fp16_impl="safe",
                     num_epochs=0.5,
                 )
             )
 
             # make sure the number of updates is being tracked correctly
             self.assertGreater(
-                valid2['total_train_updates'],
-                valid1['total_train_updates'],
-                'Number of updates is not increasing',
+                valid2["total_train_updates"],
+                valid1["total_train_updates"],
+                "Number of updates is not increasing",
             )
 
     def test_resuming_adam(self):
@@ -146,16 +146,16 @@ class TestMemEfficientFP16(unittest.TestCase):
         Test resuming a memory efficient fp16 model from disk.
         """
         with testing_utils.tempdir() as tmpdir:
-            model_file = os.path.join(tmpdir, 'model')
+            model_file = os.path.join(tmpdir, "model")
 
             valid1, test1 = testing_utils.train_model(
                 dict(
                     model_file=model_file,
-                    task='integration_tests:candidate',
-                    model='transformer/ranker',
-                    optimizer='adam',
+                    task="integration_tests:candidate",
+                    model="transformer/ranker",
+                    optimizer="adam",
                     fp16=True,
-                    fp16_impl='mem_efficient',
+                    fp16_impl="mem_efficient",
                     learningrate=7e-3,
                     batchsize=32,
                     num_epochs=0.25,
@@ -164,15 +164,15 @@ class TestMemEfficientFP16(unittest.TestCase):
                     ffn_size=32,
                     embedding_size=32,
                     warmup_updates=1,
-                    lr_scheduler='invsqrt',
+                    lr_scheduler="invsqrt",
                 )
             )
 
             valid2, test2 = testing_utils.train_model(
                 dict(
                     model_file=model_file,
-                    task='integration_tests:candidate',
-                    model='transformer/ranker',
+                    task="integration_tests:candidate",
+                    model="transformer/ranker",
                     num_epochs=0.5,
                     fp16=True,
                 )
@@ -180,9 +180,9 @@ class TestMemEfficientFP16(unittest.TestCase):
 
             # make sure the number of updates is being tracked correctly
             self.assertGreater(
-                valid2['total_train_updates'],
-                valid1['total_train_updates'],
-                'Number of updates is not increasing',
+                valid2["total_train_updates"],
+                valid1["total_train_updates"],
+                "Number of updates is not increasing",
             )
 
     def test_resuming_fp32(self):
@@ -190,16 +190,16 @@ class TestMemEfficientFP16(unittest.TestCase):
         Test resuming without FP16.
         """
         with testing_utils.tempdir() as tmpdir:
-            model_file = os.path.join(tmpdir, 'model')
+            model_file = os.path.join(tmpdir, "model")
 
             valid1, test1 = testing_utils.train_model(
                 dict(
                     model_file=model_file,
-                    task='integration_tests:candidate',
-                    model='transformer/ranker',
-                    optimizer='adam',
+                    task="integration_tests:candidate",
+                    model="transformer/ranker",
+                    optimizer="adam",
                     fp16=True,
-                    fp16_impl='mem_efficient',
+                    fp16_impl="mem_efficient",
                     learningrate=7e-3,
                     batchsize=32,
                     num_epochs=0.1,
@@ -208,15 +208,15 @@ class TestMemEfficientFP16(unittest.TestCase):
                     ffn_size=32,
                     embedding_size=32,
                     warmup_updates=1,
-                    lr_scheduler='invsqrt',
+                    lr_scheduler="invsqrt",
                 )
             )
 
             valid2, test2 = testing_utils.train_model(
                 dict(
                     model_file=model_file,
-                    task='integration_tests:candidate',
-                    model='transformer/ranker',
+                    task="integration_tests:candidate",
+                    model="transformer/ranker",
                     num_epochs=0.25,
                     fp16=False,
                 )
@@ -224,7 +224,7 @@ class TestMemEfficientFP16(unittest.TestCase):
 
             # make sure the number of updates is being tracked correctly
             self.assertGreater(
-                valid2['total_train_updates'],
-                valid1['total_train_updates'],
-                'Number of updates is not increasing',
+                valid2["total_train_updates"],
+                valid1["total_train_updates"],
+                "Number of updates is not increasing",
             )

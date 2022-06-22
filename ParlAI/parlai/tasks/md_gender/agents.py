@@ -25,34 +25,34 @@ from parlai.core.teachers import create_task_agent_from_taskname
 
 # task string for multitasking
 MULTITASK_STR = (
-    'md_gender:convai2,'
-    'md_gender:funpedia,'
-    'md_gender:image_chat,'
-    'md_gender:light,'
-    'md_gender:opensubtitles,'
-    'md_gender:wikipedia,'
-    'md_gender:wizard,'
-    'md_gender:yelp'
+    "md_gender:convai2,"
+    "md_gender:funpedia,"
+    "md_gender:image_chat,"
+    "md_gender:light,"
+    "md_gender:opensubtitles,"
+    "md_gender:wikipedia,"
+    "md_gender:wizard,"
+    "md_gender:yelp"
 )
 
 # task string for multi-tasking all tasks for about data
 ABOUT_STR = (
-    'md_gender:funpedia,'
-    'md_gender:image_chat,'
-    'md_gender:wikipedia,'
-    'md_gender:wizard'
+    "md_gender:funpedia,"
+    "md_gender:image_chat,"
+    "md_gender:wikipedia,"
+    "md_gender:wizard"
 )
 
 
 class DefaultTeacher:
     def __init__(self, opt, shared):
         raise RuntimeError(
-            f'Default teacher does not exist. Please use one of the subteachers, for example: {MULTITASK_STR}'
+            f"Default teacher does not exist. Please use one of the subteachers, for example: {MULTITASK_STR}"
         )
 
 
 def create_agents(opt):
-    if not opt.get('interactive_task', False):
+    if not opt.get("interactive_task", False):
         return create_task_agent_from_taskname(opt)
     else:
         # interactive task has no task agents (they are attached as user agents)

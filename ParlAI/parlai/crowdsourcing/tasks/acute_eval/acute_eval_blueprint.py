@@ -33,7 +33,7 @@ class AcuteEvalBlueprintArgs(BlueprintArgs):
     _group: str = field(
         default="AcuteEvalBlueprint",
         metadata={
-            'help': """\
+            "help": """\
 Tasks launched from the ACUTE-Eval blueprint require sets of pairings for workers to \
 be able to compare to. These pairings should be provided as a .jsonl with \
 --pairings-filepath."""
@@ -67,7 +67,7 @@ be able to compare to. These pairings should be provided as a .jsonl with \
     randomize_conversations: bool = field(
         default=True,
         metadata={
-            'help': "Randomize conversations used for match-ups or take conversations in order"
+            "help": "Randomize conversations used for match-ups or take conversations in order"
         },
     )
     num_matchup_pairs: int = field(
@@ -82,7 +82,7 @@ be able to compare to. These pairings should be provided as a .jsonl with \
     )
     random_seed: int = field(default=42, metadata={"help": "seed for random"})
     additional_task_description: str = field(
-        default='', metadata={"help": "Additional text to show on the left pane"}
+        default="", metadata={"help": "Additional text to show on the left pane"}
     )
 
 
@@ -124,13 +124,13 @@ class AcuteEvalBlueprint(Blueprint):
                     "Must provide `block_qualification` to use `block_on_onboarding_fail`"
                 )
 
-        if args.task.get('maximum_units_per_worker', None) != 1:
+        if args.task.get("maximum_units_per_worker", None) != 1:
             warn_once(
-                'It is *strongly* recommended to use a '
-                'args.task.maximum_units_per_worker value of 1, as was done in the '
-                'ACUTE-Eval paper! Anything else will not provide consistent results '
-                'as quoted there. Go to ParlAI\'s GitHub Discussion page if you\'d '
-                'like to discuss further.'
+                "It is *strongly* recommended to use a "
+                "args.task.maximum_units_per_worker value of 1, as was done in the "
+                "ACUTE-Eval paper! Anything else will not provide consistent results "
+                "as quoted there. Go to ParlAI's GitHub Discussion page if you'd "
+                "like to discuss further."
             )
 
     def get_frontend_args(self) -> Dict[str, Any]:

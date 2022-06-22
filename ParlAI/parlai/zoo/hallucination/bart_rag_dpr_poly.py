@@ -12,12 +12,12 @@ import os.path
 
 
 def download(datapath):
-    ddir = os.path.join(get_model_dir(datapath), 'hallucination')
-    model_type = 'bart_rag_dpr_poly'
-    version = 'v1.0'
+    ddir = os.path.join(get_model_dir(datapath), "hallucination")
+    model_type = "bart_rag_dpr_poly"
+    version = "v1.0"
     if not built(os.path.join(ddir, model_type), version):
-        opt = {'datapath': datapath, 'model_type': model_type}
-        fnames = ['model.tgz']
+        opt = {"datapath": datapath, "model_type": model_type}
+        fnames = ["model.tgz"]
         download_models(
-            opt, fnames, 'hallucination', version=version, use_model_type=True
+            opt, fnames, "hallucination", version=version, use_model_type=True
         )

@@ -7,4 +7,4 @@ from .build import download as download_dodeca
 
 
 def download(datapath):
-    download_dodeca(datapath, 'all_tasks_mt')
+    download_dodeca(datapath, "all_tasks_mt")

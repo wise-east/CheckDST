@@ -15,27 +15,27 @@ from parlai.core.message import Message
 
 
 def load_openers(opt) -> Optional[List[str]]:
-    if opt['task'].startswith('internal:') or opt['task'].startswith('fb:'):
-        base_task = opt['task']
+    if opt["task"].startswith("internal:") or opt["task"].startswith("fb:"):
+        base_task = opt["task"]
     else:
-        base_task = opt['task'].split(':')[0]
+        base_task = opt["task"].split(":")[0]
 
-    if base_task == 'self_chat':
+    if base_task == "self_chat":
         # TODO(#2284): Load default openers from s3
         return None
 
-    print('[ loading conversation openers... ]')
+    print("[ loading conversation openers... ]")
     # create dummy task so we can get openers from the data
     task_opt = copy.deepcopy(opt)
-    task_opt['task'] = base_task
+    task_opt["task"] = base_task
 
     # default train will loop forever, but evalmode will stop after one epoch
-    datatype = task_opt['datatype']
-    if 'train' in datatype and 'evalmode' not in datatype:
-        task_opt['datatype'] = f'{datatype}:evalmode'
-    task_opt['interactive_task'] = False
-    task_opt['selfchat_task'] = False
-    task_opt['fixed_response'] = None
+    datatype = task_opt["datatype"]
+    if "train" in datatype and "evalmode" not in datatype:
+        task_opt["datatype"] = f"{datatype}:evalmode"
+    task_opt["interactive_task"] = False
+    task_opt["selfchat_task"] = False
+    task_opt["fixed_response"] = None
     task_agent = FixedResponseAgent(task_opt)
     task_world = create_task(task_opt, task_agent)
 
@@ -46,20 +46,20 @@ def load_openers(opt) -> Optional[List[str]]:
         task_world.parley()
         msg = task_world.get_acts()[0]
         # add only the first message in the episode
-        if is_first_turn and msg.get('text'):
-            openers.append(msg['text'])
-        is_first_turn = msg.get('episode_done', False)
+        if is_first_turn and msg.get("text"):
+            openers.append(msg["text"])
+        is_first_turn = msg.get("episode_done", False)
 
     # remove duplicates while preserving the ordering of the loaded openers
     openers = list(dict.fromkeys(openers))
 
-    print(f'[ loaded {len(openers)} openers ]')
+    print(f"[ loaded {len(openers)} openers ]")
     return openers
 
 
 def load_openers_from_file(filepath: str) -> List[str]:
     openers = []
-    with open(filepath, 'r') as f:
+    with open(filepath, "r") as f:
         openers = [l.strip() for l in f]
     return openers
 
@@ -70,7 +70,7 @@ class SelfChatWorld(DialogPartnerWorld):
         self.init_contexts(shared=shared)
         self._openers = None
         self.init_openers()
-        self.max_turn_cnt = self.opt.get('selfchat_max_turns', 10)
+        self.max_turn_cnt = self.opt.get("selfchat_max_turns", 10)
         self.turn_cnt = 0
         self.episode_cnt = 0
 
@@ -86,17 +86,17 @@ class SelfChatWorld(DialogPartnerWorld):
 
         This function will be called before the first turn of every episode.
         """
-        return ['Hi!', '']
+        return ["Hi!", ""]
 
     def init_openers(self) -> None:
         """
         Override to load or instantiate opening messages to be used to seed the self
         chat.
         """
-        if self.opt.get('seed_messages_from_task'):
+        if self.opt.get("seed_messages_from_task"):
             self._openers = load_openers(self.opt)
-        elif self.opt.get('seed_messages_from_file'):
-            self._openers = load_openers_from_file(self.opt['seed_messages_from_file'])
+        elif self.opt.get("seed_messages_from_file"):
+            self._openers = load_openers_from_file(self.opt["seed_messages_from_file"])
 
     def get_openers(self, episode_num: int) -> Optional[List[str]]:
         """
@@ -113,7 +113,7 @@ class SelfChatWorld(DialogPartnerWorld):
     def display(self):
         s = super().display()
         if self.turn_cnt == 0:
-            s += '\n==============================\n'
+            s += "\n==============================\n"
         return s
 
     def episode_done(self):
@@ -127,7 +127,7 @@ class SelfChatWorld(DialogPartnerWorld):
         """
 
         def make_agent_action(utterance: str, agent: Agent) -> Dict[str, Any]:
-            return {'text': utterance, 'episode_done': False, 'id': agent.id}
+            return {"text": utterance, "episode_done": False, "id": agent.id}
 
         if self.turn_cnt == 0:
             # Create the seed utterances from any openers
@@ -155,7 +155,7 @@ class SelfChatWorld(DialogPartnerWorld):
             # initial context
             for i in range(0, 2):
                 context = Message(
-                    {'text': self.contexts[i], 'episode_done': False, 'id': 'context'}
+                    {"text": self.contexts[i], "episode_done": False, "id": "context"}
                 )
                 self.acts[i] = context
                 self.agents[i].observe(validate(context))
@@ -170,8 +170,8 @@ class SelfChatWorld(DialogPartnerWorld):
                 # if we have a seed utterance, add it to the conversation
                 if len(utts) > i:
                     self.acts[i] = utts[i]
-                    if hasattr(self.agents[i], 'self_observe'):
-                        self.agents[i].observe({'episode_done': False})
+                    if hasattr(self.agents[i], "self_observe"):
+                        self.agents[i].observe({"episode_done": False})
                         self.agents[i].self_observe(self.acts[i])
                 else:
                     self.acts[i] = self.agents[i].act()

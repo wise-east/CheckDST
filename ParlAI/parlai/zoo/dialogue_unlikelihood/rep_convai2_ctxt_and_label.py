@@ -12,13 +12,13 @@ Context and label repetition unlikelihood on ConvAI2: please see.
 
 from .build import build
 
-VERSION = 'v1.0'
+VERSION = "v1.0"
 
 
 def download(datapath):
     build(
         datapath,
-        'rep_convai2_ctxt_and_label_v1.tgz',
-        model_type='rep_convai2_ctxt_and_label',
+        "rep_convai2_ctxt_and_label_v1.tgz",
+        model_type="rep_convai2_ctxt_and_label",
         version=VERSION,
     )

@@ -38,8 +38,8 @@ class CrossencoderAgent(TorchRankerAgent):
         """
         Add the start and end token to the text.
         """
-        kwargs['add_start'] = True
-        kwargs['add_end'] = True
+        kwargs["add_start"] = True
+        kwargs["add_end"] = True
         obs = super().vectorize(*args, **kwargs)
         return obs
 
@@ -48,17 +48,17 @@ class CrossencoderAgent(TorchRankerAgent):
         Add the start and end token to the text.
         """
         obs = super()._set_text_vec(*args, **kwargs)
-        if 'text_vec' in obs and 'added_start_end_tokens' not in obs:
+        if "text_vec" in obs and "added_start_end_tokens" not in obs:
             obs.force_set(
-                'text_vec', self._add_start_end_tokens(obs['text_vec'], True, True)
+                "text_vec", self._add_start_end_tokens(obs["text_vec"], True, True)
             )
-            obs['added_start_end_tokens'] = True
+            obs["added_start_end_tokens"] = True
         return obs
 
     def score_candidates(self, batch, cand_vecs, cand_encs=None):
         if cand_encs is not None:
             raise Exception(
-                'Candidate pre-computation is impossible on the ' 'crossencoder'
+                "Candidate pre-computation is impossible on the " "crossencoder"
             )
         num_cands_per_sample = cand_vecs.size(1)
         bsz = cand_vecs.size(0)
@@ -85,18 +85,18 @@ class CrossEncoderModule(torch.nn.Module):
     def __init__(self, opt, dict, null_idx):
         super(CrossEncoderModule, self).__init__()
         embeddings = torch.nn.Embedding(
-            len(dict), opt['embedding_size'], padding_idx=null_idx
+            len(dict), opt["embedding_size"], padding_idx=null_idx
         )
-        torch.nn.init.normal_(embeddings.weight, 0, opt['embedding_size'] ** -0.5)
+        torch.nn.init.normal_(embeddings.weight, 0, opt["embedding_size"] ** -0.5)
         self.encoder = TransformerEncoder(
             opt=opt,
             embedding=embeddings,
             vocabulary_size=len(dict),
             padding_idx=null_idx,
-            reduction_type=opt.get('reduction_type', 'first'),
+            reduction_type=opt.get("reduction_type", "first"),
             n_segments=2,
         )
-        self.linear_layer = torch.nn.Linear(opt['embedding_size'], 1)
+        self.linear_layer = torch.nn.Linear(opt["embedding_size"], 1)
 
     def forward(self, tokens, segments):
         """

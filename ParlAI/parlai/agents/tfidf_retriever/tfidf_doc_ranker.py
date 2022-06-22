@@ -31,14 +31,14 @@ class TfidfDocRanker(object):
             strict: fail on empty queries or continue (and return empty result)
         """
         # Load from disk
-        logger.info('Loading %s' % tfidf_path)
+        logger.info("Loading %s" % tfidf_path)
         matrix, metadata = utils.load_sparse_csr(tfidf_path)
         self.doc_mat = matrix
-        self.ngrams = metadata['ngram']
-        self.hash_size = metadata['hash_size']
-        self.tokenizer = tokenizers.get_class(metadata['tokenizer'])()
-        self.doc_freqs = metadata['doc_freqs'].squeeze()
-        self.doc_dict = metadata.get('doc_dict', None)
+        self.ngrams = metadata["ngram"]
+        self.hash_size = metadata["hash_size"]
+        self.tokenizer = tokenizers.get_class(metadata["tokenizer"])()
+        self.doc_freqs = metadata["doc_freqs"].squeeze()
+        self.doc_dict = metadata.get("doc_dict", None)
         self.num_docs = self.doc_mat.shape[1] - 1
         self.strict = strict
 
@@ -87,9 +87,9 @@ class TfidfDocRanker(object):
 
         if len(wids) == 0:
             if self.strict:
-                raise RuntimeError('No valid word in: %s' % query)
+                raise RuntimeError("No valid word in: %s" % query)
             else:
-                logger.warning('No valid word in: %s' % query)
+                logger.warning("No valid word in: %s" % query)
                 return sp.csr_matrix((1, self.hash_size))
 
         # Count TF

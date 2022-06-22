@@ -14,7 +14,7 @@ class CrowdDataWorld(World):
         worker perspectives.
         """
         custom_data = self.get_custom_task_data()
-        save_data = {'custom_data': custom_data, 'worker_data': {}}
+        save_data = {"custom_data": custom_data, "worker_data": {}}
         return save_data
 
     def get_custom_task_data(self):

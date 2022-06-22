@@ -29,8 +29,8 @@ class TurkLikeAgent:
         self.turn_idx = 0
         self.semaphore = semaphore
         self.worker_id = model_name
-        self.hit_id = 'none'
-        self.assignment_id = 'none'
+        self.hit_id = "none"
+        self.assignment_id = "none"
         self.some_agent_disconnected = False
         self.hit_is_abandoned = False
         self.hit_is_returned = False
@@ -46,16 +46,16 @@ class TurkLikeAgent:
             act_out = self.model_agent.act()
         act_out = Message(act_out).json_safe_payload()
 
-        if 'dict_lower' in self.opt and not self.opt['dict_lower']:
+        if "dict_lower" in self.opt and not self.opt["dict_lower"]:
             # model is cased so we don't want to normalize the reply like below
-            final_message_text = act_out['text']
+            final_message_text = act_out["text"]
         else:
-            final_message_text = normalize_reply(act_out['text'])
+            final_message_text = normalize_reply(act_out["text"])
 
-        act_out['text'] = final_message_text
-        assert ('episode_done' not in act_out) or (not act_out['episode_done'])
+        act_out["text"] = final_message_text
+        assert ("episode_done" not in act_out) or (not act_out["episode_done"])
         self.turn_idx += 1
-        return {**act_out, 'episode_done': False}
+        return {**act_out, "episode_done": False}
 
     def observe(self, observation, increment_turn: bool = True):
         """
@@ -63,7 +63,7 @@ class TurkLikeAgent:
         act() may be called within an observe()
         """
         logging.info(
-            f'{self.__class__.__name__}: In observe() before semaphore, self.turn_idx is {self.turn_idx} and observation is {observation}'
+            f"{self.__class__.__name__}: In observe() before semaphore, self.turn_idx is {self.turn_idx} and observation is {observation}"
         )
         new_ob = copy.deepcopy(observation)
         if self.semaphore:
@@ -97,14 +97,14 @@ class TurkLikeAgent:
         """
 
         # Set up overrides
-        model_overrides = {'model_parallel': args.blueprint.task_model_parallel}
+        model_overrides = {"model_parallel": args.blueprint.task_model_parallel}
         if no_cuda:
             # If we load many models at once, we have to keep it on CPU
-            model_overrides['no_cuda'] = no_cuda
+            model_overrides["no_cuda"] = no_cuda
         else:
             logging.warning(
-                'WARNING: MTurk task has no_cuda FALSE. Models will run on GPU. Will '
-                'not work if loading many models at once.'
+                "WARNING: MTurk task has no_cuda FALSE. Models will run on GPU. Will "
+                "not work if loading many models at once."
             )
 
         # Convert opt strings to Opt objects
@@ -116,12 +116,12 @@ class TurkLikeAgent:
 
         # Load and share all model agents
         logging.info(
-            f'Got {len(list(processed_opts.keys()))} models: {processed_opts.keys()}.'
+            f"Got {len(list(processed_opts.keys()))} models: {processed_opts.keys()}."
         )
         shared_bot_agents = {}
         for model_name, model_opt in processed_opts.items():
-            logging.info('\n\n--------------------------------')
-            logging.info(f'model_name: {model_name}, opt_dict: {model_opt}')
+            logging.info("\n\n--------------------------------")
+            logging.info(f"model_name: {model_name}, opt_dict: {model_opt}")
             model_agent = create_agent(model_opt, requireModelExists=True)
             shared_bot_agents[model_name] = model_agent.share()
         return shared_bot_agents

@@ -11,25 +11,25 @@ import parlai.utils.logging as logging
 
 RESOURCES = [
     DownloadableFile(
-        'https://raw.githubusercontent.com/uclanlp/gn_glove/master/wordlist/male_word_file.txt',
-        'male_word_file.txt',
-        'd431679ce3ef4134647e22cb5fd89e8dbee3f04636f1c7cbae5f28a369acf60f',
+        "https://raw.githubusercontent.com/uclanlp/gn_glove/master/wordlist/male_word_file.txt",
+        "male_word_file.txt",
+        "d431679ce3ef4134647e22cb5fd89e8dbee3f04636f1c7cbae5f28a369acf60f",
         zipped=False,
     ),
     DownloadableFile(
-        'https://raw.githubusercontent.com/uclanlp/gn_glove/master/wordlist/female_word_file.txt',
-        'female_word_file.txt',
-        '5f0803f056de3fbc459589bce26272d3c5453112a3a625fb8ee99c0fbbed5b35',
+        "https://raw.githubusercontent.com/uclanlp/gn_glove/master/wordlist/female_word_file.txt",
+        "female_word_file.txt",
+        "5f0803f056de3fbc459589bce26272d3c5453112a3a625fb8ee99c0fbbed5b35",
         zipped=False,
     ),
 ]
 
 
 def build(datapath):
-    version = 'v1.0'
-    dpath = os.path.join(datapath, 'genderation_bias')
+    version = "v1.0"
+    dpath = os.path.join(datapath, "genderation_bias")
     if not build_data.built(dpath, version):
-        logging.info('[building data: ' + dpath + ']')
+        logging.info("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

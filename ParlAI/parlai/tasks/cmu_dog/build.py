@@ -17,20 +17,20 @@ from parlai.utils.logging import logger
 
 RESOURCES = [
     DownloadableFile(
-        'https://github.com/festvox/datasets-CMU_DoG/archive/618a14f27546165859305649aa84e6ac8710bb63.zip',
-        'cmu_dog.zip',
-        'f8ba8820cf86ee1c196b237b0cde80edba940e4ddea28c582830f6d098b3c769',
+        "https://github.com/festvox/datasets-CMU_DoG/archive/618a14f27546165859305649aa84e6ac8710bb63.zip",
+        "cmu_dog.zip",
+        "f8ba8820cf86ee1c196b237b0cde80edba940e4ddea28c582830f6d098b3c769",
     )
 ]
 
-UNZIPPED_PARENT_DIR = 'datasets-CMU_DoG-618a14f27546165859305649aa84e6ac8710bb63'
+UNZIPPED_PARENT_DIR = "datasets-CMU_DoG-618a14f27546165859305649aa84e6ac8710bb63"
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'cmu_dog')
-    version = '1.2'
+    dpath = os.path.join(opt["datapath"], "cmu_dog")
+    version = "1.2"
     if not build_data.built(dpath, version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)
@@ -58,34 +58,34 @@ def move_unzipped_files_up(dpath: str):
 
 def consolidate_wiki_data(dpath: str):
     all_articles = {}
-    src_dir = os.path.join(dpath, 'WikiData')
+    src_dir = os.path.join(dpath, "WikiData")
     for f_name in tqdm(os.listdir(src_dir)):
         with open(os.path.join(src_dir, f_name)) as f:
             wiki_page = json.load(f)
-        idx = wiki_page['wikiDocumentIdx']
+        idx = wiki_page["wikiDocumentIdx"]
         all_articles[idx] = wiki_page
-    dest_path = os.path.join(dpath, 'wiki_data.json')
-    with open(dest_path, 'w') as d:
+    dest_path = os.path.join(dpath, "wiki_data.json")
+    with open(dest_path, "w") as d:
         json.dump(all_articles, d, indent=2)
     shutil.rmtree(src_dir)
 
 
 def consolidate_convos(dpath: str):
-    os.makedirs(os.path.join(dpath, 'conversations'), exist_ok=True)
-    for split in ['train', 'valid', 'test']:
+    os.makedirs(os.path.join(dpath, "conversations"), exist_ok=True)
+    for split in ["train", "valid", "test"]:
         consolidate_convo_split(dpath, split)
 
 
 def consolidate_convo_split(dpath: str, split: str):
     all_convos = {}
-    src_dir = os.path.join(dpath, 'Conversations', split)
+    src_dir = os.path.join(dpath, "Conversations", split)
     for f_name in tqdm(os.listdir(src_dir)):
         with open(os.path.join(src_dir, f_name)) as f:
             convo = json.load(f)
-        cid = f_name.split('.')[0]
+        cid = f_name.split(".")[0]
         all_convos[cid] = convo
-    dest_path = os.path.join(dpath, 'conversations', f"{split}.json")
-    with open(dest_path, 'w') as dest:
+    dest_path = os.path.join(dpath, "conversations", f"{split}.json")
+    with open(dest_path, "w") as dest:
         json.dump(all_convos, dest, indent=2)
     shutil.rmtree(src_dir)
 

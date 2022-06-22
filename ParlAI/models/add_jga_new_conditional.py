@@ -84,8 +84,8 @@ def get_jga_values(data):
     p_ct = 0
     o_ct = 0
     for idx, d in enumerate(data):
-        eval_str = d['dialog'][0][0]['eval_labels'][0]
-        pred_str = d['dialog'][0][1]['text']
+        eval_str = d["dialog"][0][0]["eval_labels"][0]
+        pred_str = d["dialog"][0][1]["text"]
 
         eval_labels = set(_extract_slot_from_string(eval_str)[0])
         pred_labels = set(_extract_slot_from_string(pred_str)[0])
@@ -111,13 +111,13 @@ def get_jga_values(data):
 
         prev_jga = jga
 
-        target_value = d['dialog'][0][1]['metrics'][metric]
+        target_value = d["dialog"][0][1]["metrics"][metric]
 
         # if "nandos" in eval_labels or "nandos ," in eval_str:
         #     print(d['dialog'])
         #     break
 
-        assert jga == target_value, (eval_labels, pred_labels, d['dialog'])
+        assert jga == target_value, (eval_labels, pred_labels, d["dialog"])
 
     assert p_ct == o_ct
 
@@ -168,9 +168,12 @@ for dir_ in fps:
         with open(wl_fn, "r") as f:
             data = [json.loads(l) for l in f.read().splitlines()]
 
-        jga_original, jga_perturbed, jga_conditional, jga_new_conditional = get_jga_values(
-            data
-        )
+        (
+            jga_original,
+            jga_perturbed,
+            jga_conditional,
+            jga_new_conditional,
+        ) = get_jga_values(data)
 
         try:
             with open(report_li[idx], "r") as f:
@@ -180,21 +183,21 @@ for dir_ in fps:
             print(report_li[idx])
             continue
 
-        assert report_data['report']['jga_original'] == jga_original, (
-            report_data['report']['jga_original'],
+        assert report_data["report"]["jga_original"] == jga_original, (
+            report_data["report"]["jga_original"],
             jga_original,
         )
-        assert report_data['report']['jga_perturbed'] == jga_perturbed, (
-            report_data['report']['jga_perturbed'],
+        assert report_data["report"]["jga_perturbed"] == jga_perturbed, (
+            report_data["report"]["jga_perturbed"],
             jga_perturbed,
         )
-        assert report_data['report']['jga_conditional'] == jga_conditional, (
-            report_data['report']['jga_conditional'],
+        assert report_data["report"]["jga_conditional"] == jga_conditional, (
+            report_data["report"]["jga_conditional"],
             jga_conditional,
         )
-        if 'jga_new_conditional' in report_data:
-            report_data.pop('jga_new_conditional')
-        report_data['report']['jga_new_conditional'] = jga_new_conditional
+        if "jga_new_conditional" in report_data:
+            report_data.pop("jga_new_conditional")
+        report_data["report"]["jga_new_conditional"] = jga_new_conditional
 
         with open(report_li[idx], "w") as f:
             json.dump(report_data, f, indent=4, sort_keys=True)

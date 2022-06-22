@@ -11,19 +11,19 @@ import os
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/dbll/dbll.tgz',
-        'dbll.tgz',
-        'd8c727dac498b652c7f5de6f72155dce711ff46c88401a303399d3fad4db1e68',
+        "http://parl.ai/downloads/dbll/dbll.tgz",
+        "dbll.tgz",
+        "d8c727dac498b652c7f5de6f72155dce711ff46c88401a303399d3fad4db1e68",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'DBLL')
+    dpath = os.path.join(opt["datapath"], "DBLL")
     version = None
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

@@ -29,7 +29,7 @@ try:
         """
 
         # Dictionary of cases to test, as well as flags to use with those cases
-        CASES = {'basic': '--problem-buckets None', 'with_personas_and_buckets': ''}
+        CASES = {"basic": "--problem-buckets None", "with_personas_and_buckets": ""}
 
         @pytest.fixture(scope="module")
         def setup_teardown(self):
@@ -46,17 +46,17 @@ try:
 
                 # Paths
                 analysis_samples_folder = os.path.join(
-                    os.path.dirname(os.path.abspath(__file__)), 'analysis_samples', case
+                    os.path.dirname(os.path.abspath(__file__)), "analysis_samples", case
                 )
                 analysis_outputs_folder = os.path.join(
                     os.path.dirname(os.path.abspath(__file__)),
-                    'test_model_chat_analysis',
+                    "test_model_chat_analysis",
                 )
-                outputs[f'{case}__expected_stdout_path'] = os.path.join(
-                    analysis_outputs_folder, f'{case}__test_stdout.txt'
+                outputs[f"{case}__expected_stdout_path"] = os.path.join(
+                    analysis_outputs_folder, f"{case}__test_stdout.txt"
                 )
 
-                prefixes = ['results', 'worker_results']
+                prefixes = ["results", "worker_results"]
 
                 with testing_utils.tempdir() as tmpdir:
 
@@ -73,22 +73,22 @@ try:
                         stdout = output.getvalue()
 
                     # Define output structure
-                    filtered_stdout = '\n'.join(
+                    filtered_stdout = "\n".join(
                         [
                             line
-                            for line in stdout.split('\n')
-                            if not line.endswith('.csv')
+                            for line in stdout.split("\n")
+                            if not line.endswith(".csv")
                         ]
                     )
                     # Don't track lines that record where a file was saved to, because
                     # filenames are timestamped
-                    outputs[f'{case}__stdout'] = filtered_stdout
+                    outputs[f"{case}__stdout"] = filtered_stdout
                     for prefix in prefixes:
                         results_path = list(
-                            glob.glob(os.path.join(tmpdir, f'{prefix}_*'))
+                            glob.glob(os.path.join(tmpdir, f"{prefix}_*"))
                         )[0]
                         with open(results_path) as f:
-                            outputs[f'{case}__{prefix}'] = f.read()
+                            outputs[f"{case}__{prefix}"] = f.read()
 
             yield outputs
             # All code after this will be run upon teardown
@@ -100,8 +100,8 @@ try:
             outputs = setup_teardown
             for case in self.CASES.keys():
                 check_stdout(
-                    actual_stdout=outputs[f'{case}__stdout'],
-                    expected_stdout_path=outputs[f'{case}__expected_stdout_path'],
+                    actual_stdout=outputs[f"{case}__stdout"],
+                    expected_stdout_path=outputs[f"{case}__expected_stdout_path"],
                 )
 
         def test_results_file(
@@ -114,7 +114,7 @@ try:
             non-numeric data.
             """
             for case in self.CASES.keys():
-                prefix = f'{case}__results'
+                prefix = f"{case}__results"
                 outputs = setup_teardown
                 file_regression.check(outputs[prefix], basename=prefix)
 
@@ -128,10 +128,9 @@ try:
             non-numeric data.
             """
             for case in self.CASES.keys():
-                prefix = f'{case}__worker_results'
+                prefix = f"{case}__worker_results"
                 outputs = setup_teardown
                 file_regression.check(outputs[prefix], basename=prefix)
-
 
 except ImportError:
     pass

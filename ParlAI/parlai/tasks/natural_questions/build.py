@@ -11,7 +11,7 @@ from tqdm import tqdm
 import parlai.core.build_data as build_data
 import parlai.utils.logging as logging
 
-DATASET_NAME_LOCAL = 'NaturalQuestions'
+DATASET_NAME_LOCAL = "NaturalQuestions"
 
 
 def _import_google_cloud_client():
@@ -19,10 +19,10 @@ def _import_google_cloud_client():
         from google.cloud import storage
     except ImportError:
         raise ImportError(
-            'Please install Google Cloud Storage API:\n'
-            '\tpip install --upgrade google-cloud-storage\n'
-            'Or follow the instruction at '
-            'https://cloud.google.com/storage/docs/reference/libraries'
+            "Please install Google Cloud Storage API:\n"
+            "\tpip install --upgrade google-cloud-storage\n"
+            "Or follow the instruction at "
+            "https://cloud.google.com/storage/docs/reference/libraries"
         )
     return storage
 
@@ -33,37 +33,37 @@ def _download_with_cloud_storage_client(dpath):
     storage_client = stm.Client.create_anonymous_client()
 
     def _download_blob(blob, target):
-        with open(target, 'wb') as fout:
+        with open(target, "wb") as fout:
             storage_client.download_blob_to_file(blob, fout)
 
     def _download_blobs_from_list(blobs_list, target_path):
         for blob in tqdm(blobs_list):
-            cloud_storage_fname = blob.name.split('/')[-1]
+            cloud_storage_fname = blob.name.split("/")[-1]
             downloaded_fname = os.path.join(target_path, cloud_storage_fname)
             _download_blob(blob, downloaded_fname)
 
     # Creating data storage directories
-    for dtype in ('train', 'valid'):
+    for dtype in ("train", "valid"):
         os.makedirs(os.path.join(dpath, dtype), exist_ok=True)
 
     # Populating a list of train and valid dataset blobs to download
     train_blobs = []
     valid_blobs = []
-    for blob in storage_client.list_blobs('natural_questions'):
+    for blob in storage_client.list_blobs("natural_questions"):
         blob_name = blob.name
-        if not blob_name.endswith('.gz'):  # Not a zipped file
+        if not blob_name.endswith(".gz"):  # Not a zipped file
             continue
 
-        if blob_name.startswith('v1.0/train'):
+        if blob_name.startswith("v1.0/train"):
             train_blobs.append(blob)
-        elif blob_name.startswith('v1.0/dev'):
+        elif blob_name.startswith("v1.0/dev"):
             valid_blobs.append(blob)
 
     # Downloading the blobs to their respective dtype directory
-    logging.info('Downloading train data ...')
-    _download_blobs_from_list(train_blobs, os.path.join(dpath, 'train'))
-    logging.info('Downloading valid data ...')
-    _download_blobs_from_list(valid_blobs, os.path.join(dpath, 'valid'))
+    logging.info("Downloading train data ...")
+    _download_blobs_from_list(train_blobs, os.path.join(dpath, "train"))
+    logging.info("Downloading valid data ...")
+    _download_blobs_from_list(valid_blobs, os.path.join(dpath, "valid"))
 
 
 def _untar_dir_files(dtype_path):
@@ -73,9 +73,9 @@ def _untar_dir_files(dtype_path):
 
 
 def _untar_dataset_files(dpath):
-    for dtype in ('train', 'valid'):
+    for dtype in ("train", "valid"):
         unzip_files_path = os.path.join(dpath, dtype)
-        logging.info(f'Unzipping {dtype} files at {unzip_files_path}')
+        logging.info(f"Unzipping {dtype} files at {unzip_files_path}")
         _untar_dir_files(unzip_files_path)
 
 
@@ -87,23 +87,23 @@ def _move_valid_files_from_dev_to_valid(dpath):
     The agent expects them to be stored at `nq-valid-00.jsonl`. This moves them over if
     need be.
     """
-    valid_path = os.path.join(dpath, 'valid')
+    valid_path = os.path.join(dpath, "valid")
     for f in os.listdir(valid_path):
         if "dev" in f:
-            new = f.replace('dev', 'valid')
+            new = f.replace("dev", "valid")
             os.rename(os.path.join(valid_path, f), os.path.join(valid_path, new))
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], DATASET_NAME_LOCAL)
-    version = 'v1.0'
+    dpath = os.path.join(opt["datapath"], DATASET_NAME_LOCAL)
+    version = "v1.0"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)
-            logging.info('Removed the existing data (old version).')
+            logging.info("Removed the existing data (old version).")
         build_data.make_dir(dpath)
         _download_with_cloud_storage_client(dpath)
         _untar_dataset_files(dpath)

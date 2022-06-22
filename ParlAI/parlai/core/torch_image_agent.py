@@ -34,46 +34,46 @@ class TorchImageAgent(TorchAgent):
         Add command-line arguments specifically for this agent.
         """
         super().add_cmdline_args(parser, partial_opt=partial_opt)
-        agent = parser.add_argument_group('Image args')
+        agent = parser.add_argument_group("Image args")
         agent.add_argument(
-            '--image-features-dim',
+            "--image-features-dim",
             type=int,
             default=2048,
-            help='Dimensionality of image features',
+            help="Dimensionality of image features",
         )
         agent.add_argument(
-            '--image-encoder-num-layers',
+            "--image-encoder-num-layers",
             type=int,
             default=1,
             recommended=1,
-            help='Number of linear layers to encode image features with',
+            help="Number of linear layers to encode image features with",
         )
         agent.add_argument(
-            '--n-image-tokens',
+            "--n-image-tokens",
             type=int,
             default=1,
             help=(
-                'Number of tokens that the image encoding will consist of. '
-                'Specify to spread image encoding over multiple tokens'
+                "Number of tokens that the image encoding will consist of. "
+                "Specify to spread image encoding over multiple tokens"
             ),
         )
         agent.add_argument(
-            '--n-image-channels',
+            "--n-image-channels",
             type=int,
             default=1,
             help=(
-                'Number of channels that the image encoding will consist of. '
-                'Specify if incoming image is multidimensional'
+                "Number of channels that the image encoding will consist of. "
+                "Specify if incoming image is multidimensional"
             ),
         )
         return agent
 
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
-        self.image_features_dim = opt['image_features_dim']
-        self.image_encoder_num_layers = opt['image_encoder_num_layers']
-        self.n_image_tokens = opt['n_image_tokens']
-        self.n_image_channels = opt['n_image_channels']
+        self.image_features_dim = opt["image_features_dim"]
+        self.image_encoder_num_layers = opt["image_encoder_num_layers"]
+        self.n_image_tokens = opt["n_image_tokens"]
+        self.n_image_channels = opt["n_image_channels"]
 
     def batchify(self, obs_batch: List[Message], sort: bool = False) -> Batch:
         """
@@ -91,7 +91,7 @@ class TorchImageAgent(TorchAgent):
         self._process_image_features() will likely be useful for this.
         """
         raise NotImplementedError(
-            'Subclasses must implement method for batching images!'
+            "Subclasses must implement method for batching images!"
         )
 
     def _process_image_features(self, features: torch.Tensor) -> torch.Tensor:
@@ -105,7 +105,7 @@ class TorchImageAgent(TorchAgent):
             features = features.cuda()
         else:
             features = features.cpu()
-        if self.opt.get('fp16'):
+        if self.opt.get("fp16"):
             features = features.half()
         else:
             features = features.float()

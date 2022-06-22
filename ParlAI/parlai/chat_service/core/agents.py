@@ -109,7 +109,7 @@ class ChatServiceAgent(Agent, ABC):
         Gets agent state data from manager.
         """
         agent_state = self.manager.get_agent_state(self.id)
-        if agent_state is not None and hasattr(agent_state, 'stored_data'):
+        if agent_state is not None and hasattr(agent_state, "stored_data"):
             self.stored_data = agent_state.stored_data
 
     def get_new_act_message(self):

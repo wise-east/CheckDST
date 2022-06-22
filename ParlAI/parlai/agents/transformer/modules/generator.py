@@ -48,7 +48,7 @@ class TransformerGeneratorModel(TorchGeneratorModel):
         dictionary,
         embedding=None,
         padding_idx=None,
-        reduction_type='mean',
+        reduction_type="mean",
         encoder_class: Type[TransformerEncoder] = TransformerEncoder,
         **kwargs,
     ) -> TransformerEncoder:
@@ -78,7 +78,7 @@ class TransformerGeneratorModel(TorchGeneratorModel):
         super().__init__(self.pad_idx, self.start_idx, self.end_idx, **kwargs)
         self.opt = opt
         self.embeddings = create_embeddings(
-            dictionary, opt['embedding_size'], self.pad_idx
+            dictionary, opt["embedding_size"], self.pad_idx
         )
 
         self.encoder = self.build_encoder(

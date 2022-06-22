@@ -11,19 +11,19 @@ import os
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/cbt/cbt.tar.gz',
-        'cbt.tar.gz',
-        '932df0cadc1337b2a12b4c696b1041c1d1c6d4b6bd319874c6288f02e4a61e92',
+        "http://parl.ai/downloads/cbt/cbt.tar.gz",
+        "cbt.tar.gz",
+        "932df0cadc1337b2a12b4c696b1041c1d1c6d4b6bd319874c6288f02e4a61e92",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'CBT')
+    dpath = os.path.join(opt["datapath"], "CBT")
     version = None
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

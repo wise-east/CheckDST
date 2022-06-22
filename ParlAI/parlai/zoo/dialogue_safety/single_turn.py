@@ -12,8 +12,8 @@ from parlai.core.build_data import download_models
 
 
 def download(datapath):
-    opt = {'datapath': datapath}  # for builder
-    fnames = ['safety_models_v1.tgz']
+    opt = {"datapath": datapath}  # for builder
+    fnames = ["safety_models_v1.tgz"]
     download_models(
-        opt, fnames, 'dialogue_safety', version='v0.5', use_model_type=False
+        opt, fnames, "dialogue_safety", version="v0.5", use_model_type=False
     )

@@ -13,19 +13,19 @@ import parlai.utils.logging as logging
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/convai2/convai2_fix_723.tgz',
-        'convai2_fix_723.tgz',
-        'd0ae89defe2fd0b0a4221eaa642a457d7d40cef475f54798119c7f3b8dd9361d',
+        "http://parl.ai/downloads/convai2/convai2_fix_723.tgz",
+        "convai2_fix_723.tgz",
+        "d0ae89defe2fd0b0a4221eaa642a457d7d40cef475f54798119c7f3b8dd9361d",
     )
 ]
 
 
 def build(opt):
-    version = 'v5.0'
-    dpath = os.path.join(opt['datapath'], 'ConvAI2')
+    version = "v5.0"
+    dpath = os.path.join(opt["datapath"], "ConvAI2")
 
     if not build_data.built(dpath, version):
-        logging.info('building data: ' + dpath)
+        logging.info("building data: " + dpath)
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

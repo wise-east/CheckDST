@@ -8,8 +8,8 @@ from parlai.utils.testing import AutoTeacherTest  # noqa: F401
 
 
 class TestDefaultTeacher(AutoTeacherTest):
-    task = 'cornell_movie'
+    task = "cornell_movie"
 
 
 class TestAll1kTeacher(AutoTeacherTest):
-    task = 'cornell_movie:double'
+    task = "cornell_movie:double"

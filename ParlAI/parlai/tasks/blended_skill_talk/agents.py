@@ -39,53 +39,53 @@ from .build import build
 def raw_data_path(opt: Opt) -> str:
     # Build the data if it doesn't exist.
     build(opt)
-    dt = opt['datatype'].split(':')[0]
-    return os.path.join(opt['datapath'], 'blended_skill_talk', dt + '.json')
+    dt = opt["datatype"].split(":")[0]
+    return os.path.join(opt["datapath"], "blended_skill_talk", dt + ".json")
 
 
 def _processed_data_path(opt: Opt) -> str:
     # Build the data if it doesn't exist.
     build(opt)
-    dt = opt['datatype'].split(':')[0]
-    return os.path.join(opt['datapath'], 'blended_skill_talk', dt + '.txt')
+    dt = opt["datatype"].split(":")[0]
+    return os.path.join(opt["datapath"], "blended_skill_talk", dt + ".txt")
 
 
 def _persona_list_path(opt: Opt) -> str:
     # Build the data if it doesn't exist.
     build(opt)
-    return os.path.join(opt['datapath'], 'blended_skill_talk', 'persona_list.txt')
+    return os.path.join(opt["datapath"], "blended_skill_talk", "persona_list.txt")
 
 
 def _topic_to_persona_path(opt: Opt) -> str:
     # Build the data if it doesn't exist.
     build(opt)
     return os.path.join(
-        opt['datapath'], 'blended_skill_talk', 'topic_to_persona_list.txt'
+        opt["datapath"], "blended_skill_talk", "topic_to_persona_list.txt"
     )
 
 
 def _cached_data_path(opt: Opt, experiencer_side_only: bool) -> str:
     # Build the data if it doesn't exist.
     build(opt)
-    dt = opt['datatype'].split(':')[0]
-    side_string = 'experiencer_only' if experiencer_side_only else 'both_sides'
+    dt = opt["datatype"].split(":")[0]
+    side_string = "experiencer_only" if experiencer_side_only else "both_sides"
     return os.path.join(
-        opt['datapath'],
-        'blended_skill_talk',
-        f'ed_persona_topicifier__{dt}__{side_string}.json',
+        opt["datapath"],
+        "blended_skill_talk",
+        f"ed_persona_topicifier__{dt}__{side_string}.json",
     )
 
 
 def safe_personas_path(opt: Opt) -> str:
     # Build the data if it doesn't exist.
     build(opt)
-    return os.path.join(opt['datapath'], 'blended_skill_talk', 'safe_personas.txt')
+    return os.path.join(opt["datapath"], "blended_skill_talk", "safe_personas.txt")
 
 
 class BlendedSkillTalkTeacher(ParlAIDialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        opt['parlaidialogteacher_datafile'] = _processed_data_path(opt)
+        opt["parlaidialogteacher_datafile"] = _processed_data_path(opt)
         super().__init__(opt, shared)
 
 
@@ -104,7 +104,7 @@ class DefaultTeacher(BlendedSkillTalkTeacher):
 
 
 def create_agents(opt):
-    if not opt.get('interactive_task', False):
+    if not opt.get("interactive_task", False):
         return create_task_agent_from_taskname(opt)
     else:
         # interactive task has no task agents (they are attached as user agents)
@@ -122,15 +122,15 @@ class ConvAI2PersonaTopicifierTeacher(Convai2DefaultTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        if 'stream' in opt['datatype']:
+        if "stream" in opt["datatype"]:
             warn_once(
-                'Warning: the BST Convai2 teacher is not compatible with '
-                'streaming datatypes. Switching to nonstreaming.'
+                "Warning: the BST Convai2 teacher is not compatible with "
+                "streaming datatypes. Switching to nonstreaming."
             )
             # StreamDialogData works by reading directly from a text file without any
             # alteration, but this teacher must append a WoW topic string to the context
             # of the first example of each episode.
-            opt['datatype'] = opt['datatype'].replace(':stream', '')
+            opt["datatype"] = opt["datatype"].replace(":stream", "")
         self.persona_topicifier = PersonaTopicifier(
             opt=opt, should_have_personas=True, should_have_topics=False
         )
@@ -139,8 +139,8 @@ class ConvAI2PersonaTopicifierTeacher(Convai2DefaultTeacher):
     def get(self, episode_idx, entry_idx=None):
         gotten = super().get(episode_idx, entry_idx=entry_idx)
         if entry_idx == 0:
-            modified_text = self.persona_topicifier.get_modified_text(gotten['text'])
-            gotten.force_set('text', modified_text)
+            modified_text = self.persona_topicifier.get_modified_text(gotten["text"])
+            gotten.force_set("text", modified_text)
         return gotten
 
 
@@ -158,8 +158,8 @@ class WoWPersonaTopicifierTeacher(WizardDialogKnowledgeTeacher):
     def get(self, episode_idx, entry_idx=None):
         gotten = super().get(episode_idx, entry_idx=entry_idx)
         if entry_idx == 0:
-            modified_text = self.persona_topicifier.get_modified_text(gotten['text'])
-            gotten['text'] = modified_text
+            modified_text = self.persona_topicifier.get_modified_text(gotten["text"])
+            gotten["text"] = modified_text
         return gotten
 
 
@@ -175,12 +175,12 @@ class EDPersonaTopicifierTeacher(EmpatheticDialoguesTeacher):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt=partial_opt)
-        agent = parser.add_argument_group('EDPersonaTopicifierTeacher arguments')
+        agent = parser.add_argument_group("EDPersonaTopicifierTeacher arguments")
         agent.add_argument(
-            '--recompile-persona-topic-data',
-            type='bool',
+            "--recompile-persona-topic-data",
+            type="bool",
             default=cls.RECOMPILE_DEFAULT,
-            help='Re-compile data with ConvAI2 personas and WoW topics added. Only useful for demonstrating how data was produced.',
+            help="Re-compile data with ConvAI2 personas and WoW topics added. Only useful for demonstrating how data was produced.",
         )
         return parser
 
@@ -192,43 +192,43 @@ class EDPersonaTopicifierTeacher(EmpatheticDialoguesTeacher):
 
         if (
             self.remove_political_convos is True
-            or self.opt.get('deepmoji') is not None
-            or self.opt.get('fasttextloc') is not None
-            or self.opt.get('prepend', -1) > 0
+            or self.opt.get("deepmoji") is not None
+            or self.opt.get("fasttextloc") is not None
+            or self.opt.get("prepend", -1) > 0
         ):
             raise NotImplementedError(
-                'Removing political conversations or using deepmoji, fasttextloc, or '
-                'prepend not supported with this teacher.'
+                "Removing political conversations or using deepmoji, fasttextloc, or "
+                "prepend not supported with this teacher."
             )
 
         # Running over all examples is really slow because the process of finding a WoW
         # topic is expensive, so let's load cached data with personas and topics unless
         # --recompile-persona-topic-data is True
-        if opt.get('recompile_persona_topic_data', self.RECOMPILE_DEFAULT):
+        if opt.get("recompile_persona_topic_data", self.RECOMPILE_DEFAULT):
             self.data_path = (
                 _cached_data_path(
                     opt=self.opt, experiencer_side_only=self.experiencer_side_only
                 )
-                + '.recompiled'
+                + ".recompiled"
             )
-            warn_once(f'Compiling data file for {self.data_path}.')
+            warn_once(f"Compiling data file for {self.data_path}.")
             self.persona_topic_data = self._compile_data()
-            warn_once(f'Saving data to {self.data_path}.')
-            with PathManager.open(self.data_path, 'w') as f_write:
+            warn_once(f"Saving data to {self.data_path}.")
+            with PathManager.open(self.data_path, "w") as f_write:
                 json.dump(self.persona_topic_data, f_write)
         else:
             self.data_path = _cached_data_path(
                 opt=self.opt, experiencer_side_only=self.experiencer_side_only
             )
-            warn_once(f'Loading cached data from {self.data_path}.')
-            with PathManager.open(self.data_path, 'r') as f_read:
+            warn_once(f"Loading cached data from {self.data_path}.")
+            with PathManager.open(self.data_path, "r") as f_read:
                 self.persona_topic_data = json.load(f_read)
 
     def _compile_data(self) -> List[List[dict]]:
         """
         Compile data to be saved for faster future use.
         """
-        warn_once(f'Starting to compile {self.num_episodes():d} episodes.')
+        warn_once(f"Starting to compile {self.num_episodes():d} episodes.")
         all_data = []
         for episode_idx in tqdm(range(self.num_episodes())):
             episode_data = []
@@ -238,7 +238,7 @@ class EDPersonaTopicifierTeacher(EmpatheticDialoguesTeacher):
                     episode_idx=episode_idx, entry_idx=entry_idx
                 )
                 episode_data.append(example_data)
-                if example_data['episode_done']:
+                if example_data["episode_done"]:
                     all_data.append(episode_data)
                     break
                 else:
@@ -252,8 +252,8 @@ class EDPersonaTopicifierTeacher(EmpatheticDialoguesTeacher):
         """
         gotten = super().get(episode_idx, entry_idx=entry_idx)
         if entry_idx == 0:
-            modified_text = self.persona_topicifier.get_modified_text(gotten['text'])
-            gotten['text'] = modified_text
+            modified_text = self.persona_topicifier.get_modified_text(gotten["text"])
+            gotten["text"] = modified_text
         return gotten
 
     def get(self, episode_idx: int, entry_idx: Optional[int] = None) -> dict:
@@ -286,8 +286,8 @@ class PersonaTopicifier:
             self.wow_topics_to_persona_strings_map,
             self.persona_strings_to_wow_topics_map,
         ) = self._setup_personas_to_wow_topics()
-        with PathManager.open(self.personas_file_path, 'r') as f:
-            self.personas = f.read().strip().split('||')
+        with PathManager.open(self.personas_file_path, "r") as f:
+            self.personas = f.read().strip().split("||")
             # There's an extra line at the end of the file which is ''
             self.personas = [p for p in self.personas if p]
 
@@ -296,9 +296,9 @@ class PersonaTopicifier:
     ) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:
         persona_strings_to_topics = defaultdict(list)
         topics_to_persona_strings = defaultdict(list)
-        with PathManager.open(self.topic_to_persona_path, 'r') as f:
+        with PathManager.open(self.topic_to_persona_path, "r") as f:
             for line in f:
-                match = re.fullmatch(r'([^[]+): (\[.+\])\n', line)
+                match = re.fullmatch(r"([^[]+): (\[.+\])\n", line)
                 topic = match.group(1)
                 persona_strings = eval(match.group(2))
                 assert isinstance(persona_strings, list)
@@ -307,7 +307,7 @@ class PersonaTopicifier:
                     persona_strings_to_topics[str_].append(topic)
 
         warn_once(
-            f'FINISHED MAPPING personas to topics, got: {len(list(persona_strings_to_topics.keys()))} persona strings to map to topics.'
+            f"FINISHED MAPPING personas to topics, got: {len(list(persona_strings_to_topics.keys()))} persona strings to map to topics."
         )
         return topics_to_persona_strings, persona_strings_to_topics
 
@@ -316,13 +316,13 @@ class PersonaTopicifier:
         Very rudimentary way to calculate word overlap.
         """
         score = 0
-        tokens_a = a.split(' ')
+        tokens_a = a.split(" ")
         tokens_a = [ta for ta in tokens_a if len(ta) >= 5]
         for ta in tokens_a:
             if ta in b:
                 score += 1
 
-        tokens_b = b.split(' ')
+        tokens_b = b.split(" ")
         tokens_b = [tb for tb in tokens_b if len(tb) >= 5]
         for tb in tokens_b:
             if tb in a:
@@ -341,7 +341,7 @@ class PersonaTopicifier:
                     best_persona = p
             if not best_persona:
                 raise Exception(
-                    f'No persona found for utterance: \"{utt}\". This should not happen.'
+                    f'No persona found for utterance: "{utt}". This should not happen.'
                 )
             self.utterance_to_persona_map[utt] = best_persona
             # Should have a \n at the end of it already
@@ -356,19 +356,19 @@ class PersonaTopicifier:
                 if p in persona:
                     return persona
         if self.no_persona_is_error:
-            raise ValueError(f'ERROR: Found no persona for topic: {topic}.')
+            raise ValueError(f"ERROR: Found no persona for topic: {topic}.")
         else:
-            warn_once(f'Found no persona for topic: {topic}. Returning first persona.')
+            warn_once(f"Found no persona for topic: {topic}. Returning first persona.")
             return self.personas[0]
 
     def __choose_topic(self, persona):
-        persona_lines = persona.strip().split('\n')
+        persona_lines = persona.strip().split("\n")
         for p in persona_lines:
-            p_str = p.replace('your persona:', '')
+            p_str = p.replace("your persona:", "")
             p_str = p_str.strip()
             if p_str in self.persona_strings_to_wow_topics_map:
                 topics = self.persona_strings_to_wow_topics_map[p_str]
-                topic = topics[0] + '\n'
+                topic = topics[0] + "\n"
                 return topic
 
         for utt, topics in self.persona_strings_to_wow_topics_map.items():
@@ -376,9 +376,9 @@ class PersonaTopicifier:
             utt_words_long = [utt for utt in utt_words if len(utt) > 6]
             for long_utt in utt_words_long:
                 if long_utt in persona:
-                    return topics[0] + '\n'
+                    return topics[0] + "\n"
 
-        return topics[0] + '\n'
+        return topics[0] + "\n"
 
     def get_modified_text(self, text):
         # Order should be <Persona> \n <Topic> \n <Utterance>
@@ -397,7 +397,7 @@ class PersonaTopicifier:
             self.should_have_topics and (has_neither or has_persona_only)
         ):
             raise Exception(
-                f'Malformed text: {text}, should_have_personas: {self.should_have_personas}, should_have_topics: {self.should_have_topics}, has_neither: {has_neither}, has_wow_topic_only: {has_wow_topic_only}, has_persona_only: {has_persona_only}'
+                f"Malformed text: {text}, should_have_personas: {self.should_have_personas}, should_have_topics: {self.should_have_topics}, has_neither: {has_neither}, has_wow_topic_only: {has_wow_topic_only}, has_persona_only: {has_persona_only}"
             )
 
         if has_neither:
@@ -407,24 +407,24 @@ class PersonaTopicifier:
             utt = text
         elif has_wow_topic_only:
             # Will occur with Wizard
-            parts = text.strip().split('\n')
+            parts = text.strip().split("\n")
             if len(parts) > 1:
-                topic = parts[0] + '\n'
+                topic = parts[0] + "\n"
                 utt = parts[1]
                 persona = self.__choose_persona_from_topic(topic)
             else:
                 # Only has a topic, no utterance
-                topic = parts[0] + '\n'
-                utt = ''
+                topic = parts[0] + "\n"
+                utt = ""
                 persona = self.__choose_persona_from_topic(topic)
         elif has_persona_only:
             # Will occur with Convai2
-            lines = text.strip().split('\n')
+            lines = text.strip().split("\n")
             utt = lines[-1]
-            persona = ''.join(l + '\n' for l in lines[:-1])
+            persona = "".join(l + "\n" for l in lines[:-1])
             topic = self.__choose_topic(persona)
         else:
-            raise Exception(f'Unknown structure of utterance: {text}')
+            raise Exception(f"Unknown structure of utterance: {text}")
 
         modified_utterance = persona + topic + utt
         return modified_utterance
@@ -437,13 +437,13 @@ class AllTeacher(MultiTaskTeacher):
 
     def __init__(self, opt, shared=None):
         topicifier_tasks = [
-            'blended_skill_talk:ConvAI2PersonaTopicifier',  # ConvAI2
-            'blended_skill_talk:EDPersonaTopicifier',  # Empathetic Dialogues
-            'blended_skill_talk:WoWPersonaTopicifier',  # Wizard of Wikipedia
-            'blended_skill_talk:BlendedSkillTalk',  # Blended Skill Talk
+            "blended_skill_talk:ConvAI2PersonaTopicifier",  # ConvAI2
+            "blended_skill_talk:EDPersonaTopicifier",  # Empathetic Dialogues
+            "blended_skill_talk:WoWPersonaTopicifier",  # Wizard of Wikipedia
+            "blended_skill_talk:BlendedSkillTalk",  # Blended Skill Talk
         ]
         opt = copy.deepcopy(opt)
-        opt['task'] = ','.join(topicifier_tasks)
+        opt["task"] = ",".join(topicifier_tasks)
         super().__init__(opt, shared)
 
 
@@ -461,7 +461,7 @@ class ContextGenerator:
     BST dataset.
     """
 
-    def __init__(self, opt, datatype: str = 'train', seed: Optional[int] = None):
+    def __init__(self, opt, datatype: str = "train", seed: Optional[int] = None):
         """
         Initialize the context generator.
 
@@ -473,21 +473,21 @@ class ContextGenerator:
         else:
             self.rng = random.Random()
 
-        convai2_opt = Opt({'datapath': opt['datapath'], 'datatype': datatype})
+        convai2_opt = Opt({"datapath": opt["datapath"], "datatype": datatype})
         self.convai2_teacher = BothTeacher(convai2_opt)
 
         ed_opt = Opt(
             {
-                'datapath': opt['datapath'],
-                'datatype': datatype,
-                'train_experiencer_only': True,
+                "datapath": opt["datapath"],
+                "datatype": datatype,
+                "train_experiencer_only": True,
             }
         )
         # Specify train_experiencer_only = True because we want to ensure that the text
         # will correspond to a Speaker utterance and the label to a Listener response
         self.ed_teacher = EmpatheticDialoguesTeacher(ed_opt)
 
-        wow_opt = Opt({'datapath': opt['datapath'], 'datatype': datatype})
+        wow_opt = Opt({"datapath": opt["datapath"], "datatype": datatype})
         self.wow_teacher = WizardDialogKnowledgeTeacher(wow_opt)
 
         self.topic_to_persona_path = _topic_to_persona_path(opt)
@@ -519,13 +519,13 @@ class ContextGenerator:
         # Determine which dataset we will show context for
         rand_value = self.rng.random()
         if rand_value < 1 / 3:
-            context_dataset = 'convai2'
+            context_dataset = "convai2"
         elif rand_value < 2 / 3:
-            context_dataset = 'empathetic_dialogues'
+            context_dataset = "empathetic_dialogues"
         else:
-            context_dataset = 'wizard_of_wikipedia'
+            context_dataset = "wizard_of_wikipedia"
 
-        if context_dataset == 'convai2':
+        if context_dataset == "convai2":
 
             # Select episode
             episode_idx = self.rng.randrange(self.convai2_teacher.num_episodes())
@@ -543,20 +543,20 @@ class ContextGenerator:
             # Don't select the first entry, which often doesn't include an apprentice
             # utterance
             chosen_entry = self.convai2_teacher.get(episode_idx, entry_idx=entry_idx)
-            person1_seed_utterance = chosen_entry['text']
-            assert len(chosen_entry['labels']) == 1
-            person2_seed_utterance = chosen_entry['labels'][0]
+            person1_seed_utterance = chosen_entry["text"]
+            assert len(chosen_entry["labels"]) == 1
+            person2_seed_utterance = chosen_entry["labels"][0]
 
             return {
-                'context_dataset': context_dataset,
-                'persona_1_strings': selected_persona_1_strings,
-                'persona_2_strings': selected_persona_2_strings,
-                'additional_context': None,
-                'person1_seed_utterance': person1_seed_utterance,
-                'person2_seed_utterance': person2_seed_utterance,
+                "context_dataset": context_dataset,
+                "persona_1_strings": selected_persona_1_strings,
+                "persona_2_strings": selected_persona_2_strings,
+                "additional_context": None,
+                "person1_seed_utterance": person1_seed_utterance,
+                "person2_seed_utterance": person2_seed_utterance,
             }
 
-        elif context_dataset == 'empathetic_dialogues':
+        elif context_dataset == "empathetic_dialogues":
 
             # Select episode
             persona_episode_idx = self.rng.randrange(
@@ -576,21 +576,21 @@ class ContextGenerator:
             episode_idx = self.rng.randrange(self.ed_teacher.num_episodes())
             entry_idx = 0  # We'll only use the first pair of utterances
             entry = self.ed_teacher.get(episode_idx, entry_idx=entry_idx)
-            situation = entry['situation']
-            speaker_utterance = entry['text']
-            assert len(entry['labels']) == 1
-            listener_response = entry['labels'][0]
+            situation = entry["situation"]
+            speaker_utterance = entry["text"]
+            assert len(entry["labels"]) == 1
+            listener_response = entry["labels"][0]
 
             return {
-                'context_dataset': context_dataset,
-                'persona_1_strings': selected_persona_1_strings,
-                'persona_2_strings': selected_persona_2_strings,
-                'additional_context': situation,
-                'person1_seed_utterance': speaker_utterance,
-                'person2_seed_utterance': listener_response,
+                "context_dataset": context_dataset,
+                "persona_1_strings": selected_persona_1_strings,
+                "persona_2_strings": selected_persona_2_strings,
+                "additional_context": situation,
+                "person1_seed_utterance": speaker_utterance,
+                "person2_seed_utterance": listener_response,
             }
 
-        elif context_dataset == 'wizard_of_wikipedia':
+        elif context_dataset == "wizard_of_wikipedia":
 
             # Pull different personas until you get a pair for which at least one
             # sentence has a WoW topic bound to it
@@ -619,8 +619,8 @@ class ContextGenerator:
                     break
 
             print(
-                f'{num_tries:d} try/tries needed to find a pair of personas with an '
-                f'associated WoW topic.'
+                f"{num_tries:d} try/tries needed to find a pair of personas with an "
+                f"associated WoW topic."
             )
 
             # Pick out the WoW topic and matching persona string
@@ -670,17 +670,17 @@ class ContextGenerator:
             # two valid utterances and which will not usually be so far along in the
             # conversation that the new Turkers will be confused
             entry = self.wow_teacher.get(episode_idx, entry_idx=entry_idx)
-            apprentice_utterance = entry['text']
-            assert len(entry['labels']) == 1
-            wizard_utterance = entry['labels'][0]
+            apprentice_utterance = entry["text"]
+            assert len(entry["labels"]) == 1
+            wizard_utterance = entry["labels"][0]
 
             return {
-                'context_dataset': context_dataset,
-                'persona_1_strings': selected_persona_1_strings,
-                'persona_2_strings': selected_persona_2_strings,
-                'additional_context': wow_topic,
-                'person1_seed_utterance': apprentice_utterance,
-                'person2_seed_utterance': wizard_utterance,
+                "context_dataset": context_dataset,
+                "persona_1_strings": selected_persona_1_strings,
+                "persona_2_strings": selected_persona_2_strings,
+                "additional_context": wow_topic,
+                "person1_seed_utterance": apprentice_utterance,
+                "person2_seed_utterance": wizard_utterance,
             }
 
     def _setup_personas_to_topics(self) -> Dict[str, List[str]]:
@@ -688,12 +688,12 @@ class ContextGenerator:
         Create a map from ConvAI2 personas to WoW topics that they correspond to.
         """
 
-        print('Starting to map personas to topics.')
+        print("Starting to map personas to topics.")
 
         persona_strings_to_topics = defaultdict(list)
-        with PathManager.open(self.topic_to_persona_path, 'r') as f:
+        with PathManager.open(self.topic_to_persona_path, "r") as f:
             for line in f:
-                match = re.fullmatch(r'([^[]+): (\[.+\])\n', line)
+                match = re.fullmatch(r"([^[]+): (\[.+\])\n", line)
                 topic = match.group(1)
                 if topic not in self.wow_topics_to_episode_idxes:
                     continue
@@ -702,7 +702,7 @@ class ContextGenerator:
                 for str_ in persona_strings:
                     persona_strings_to_topics[str_].append(topic)
 
-        print('Finished mapping personas to topics.')
+        print("Finished mapping personas to topics.")
 
         return persona_strings_to_topics
 
@@ -711,14 +711,14 @@ class ContextGenerator:
         Create a map from WoW topics to the indices of the WoW episodes that use them.
         """
 
-        print('Starting to map topics to episodes.')
+        print("Starting to map topics to episodes.")
 
         topics_to_episodes = defaultdict(list)
         for episode_idx in range(self.wow_teacher.num_episodes()):
-            topic = self.wow_teacher.get(episode_idx, entry_idx=0)['chosen_topic']
+            topic = self.wow_teacher.get(episode_idx, entry_idx=0)["chosen_topic"]
             topics_to_episodes[topic].append(episode_idx)
 
-        print('Finished mapping topics to episodes.')
+        print("Finished mapping topics to episodes.")
 
         return topics_to_episodes
 
@@ -727,14 +727,14 @@ class ContextGenerator:
         For the given ConvAI2 conversation, return strings of both speakers' personas.
         """
         first_entry = self.convai2_teacher.get(episode_idx, entry_idx=0)
-        first_text_strings = first_entry['text'].split('\n')
+        first_text_strings = first_entry["text"].split("\n")
         persona_1_strings = []
         persona_2_strings = []
         for str_ in first_text_strings[:-1]:  # The last string is the first utterance
-            if str_.startswith('your persona: '):  # Here, "you" are Person 2
-                persona_2_strings.append(str_[len('your persona: ') :])
+            if str_.startswith("your persona: "):  # Here, "you" are Person 2
+                persona_2_strings.append(str_[len("your persona: ") :])
             elif str_.startswith("partner's persona: "):
                 persona_1_strings.append(str_[len("partner's persona: ") :])
             else:
-                raise ValueError('Persona string cannot be parsed!')
+                raise ValueError("Persona string cannot be parsed!")
         return persona_1_strings, persona_2_strings

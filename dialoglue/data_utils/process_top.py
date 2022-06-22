@@ -1,10 +1,11 @@
-import os 
+import os
 import re
 import sys
 import numpy as np
 
+
 def read_data(data_file):
-    """ Reads all conversations ids in the given subset from the subset_list file"""
+    """Reads all conversations ids in the given subset from the subset_list file"""
     """ Arguments:
           data_file: original TSV file released by facebook.
         Returns:
@@ -12,7 +13,7 @@ def read_data(data_file):
     """
 
     annotated_data = list()
-    
+
     f = open(data_file)
     for line in f:
         line = line.strip()
@@ -23,7 +24,7 @@ def read_data(data_file):
 
 
 def process(utterance):
-    """ Reads all conversations ids in the given subset from the subset_list file"""
+    """Reads all conversations ids in the given subset from the subset_list file"""
     """ Arguments:
           utterance: utterance in the original annotation format
         Returns:
@@ -43,13 +44,15 @@ def process(utterance):
                 intent = token.strip("[").replace("IN:", "IN_")
             else:
                 # new tag seen in the input
-                tags.append(token.strip("[").replace("IN:", "IN_").replace("SL:", "SL_"))
+                tags.append(
+                    token.strip("[").replace("IN:", "IN_").replace("SL:", "SL_")
+                )
                 first_instance = True
-                #print(tags)
-                
+                # print(tags)
+
         elif token.startswith("]"):
             if len(tags) > 0:
-                tags.pop(len(tags)-1)
+                tags.pop(len(tags) - 1)
 
         else:
             current_tag = "O"
@@ -71,12 +74,12 @@ def process(utterance):
 
 
 def process_and_write(data, output_file):
-    """ Reads all conversations ids in the given subset from the subset_list file"""
+    """Reads all conversations ids in the given subset from the subset_list file"""
     """ Arguments:
           data: list of utterances in the original annotation format
           output_file: file where the reformatted output will be written
     """
-    
+
     f = open(output_file, "w")
 
     for utterance in data:
@@ -86,7 +89,7 @@ def process_and_write(data, output_file):
     return
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     data_dir = sys.argv[1]
     if not data_dir.endswith("/"):
         data_dir += "/"
@@ -97,21 +100,32 @@ if __name__ == '__main__':
         data = read_data(data_file)
         process_and_write(data, output_file)
 
-        if subset == 'train':
+        if subset == "train":
             np.random.seed(0)
             lines = open(output_file).readlines()
-            few_shot_lines = np.random.choice(lines, int(len(lines)/10))
-            open(data_dir+"train_10.txt", "w+").writelines(few_shot_lines)
+            few_shot_lines = np.random.choice(lines, int(len(lines) / 10))
+            open(data_dir + "train_10.txt", "w+").writelines(few_shot_lines)
 
     all_intents = set()
     all_slots = set()
     for subset in ["train", "eval", "test"]:
-        intents = set([l.split(" <=> ")[-1].strip() for l in open(data_dir + subset + ".txt").readlines()])
+        intents = set(
+            [
+                l.split(" <=> ")[-1].strip()
+                for l in open(data_dir + subset + ".txt").readlines()
+            ]
+        )
         all_intents.update(intents)
 
-        rows = [l.split(" <=> ")[0] for l in open(data_dir + subset + ".txt").readlines()]
+        rows = [
+            l.split(" <=> ")[0] for l in open(data_dir + subset + ".txt").readlines()
+        ]
         slots = set([w.split(":")[-1] for l in rows for w in l.split()])
         all_slots.update(slots)
 
-    open(data_dir + "vocab.intent", "w+").writelines([intent+"\n" for intent in sorted(list(all_intents))])
-    open(data_dir + "vocab.slot", "w+").writelines([slot+"\n" for slot in sorted(list(all_slots))])
+    open(data_dir + "vocab.intent", "w+").writelines(
+        [intent + "\n" for intent in sorted(list(all_intents))]
+    )
+    open(data_dir + "vocab.slot", "w+").writelines(
+        [slot + "\n" for slot in sorted(list(all_slots))]
+    )

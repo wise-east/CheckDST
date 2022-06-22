@@ -36,11 +36,11 @@ def reduce_ctxt(
     :return reduced:
         return reduced context tensor
     """
-    if reduction_type == 'first':
+    if reduction_type == "first":
         return ctxt[:, 0, :]
-    elif reduction_type == 'max':
+    elif reduction_type == "max":
         return ctxt.max(dim=1)[0]
-    elif reduction_type == 'mean':
+    elif reduction_type == "mean":
         divisor = mask.float().sum(dim=1).unsqueeze(-1).clamp(min=1).type_as(ctxt)
         output = ctxt.sum(dim=1) / divisor
         return output
@@ -60,34 +60,34 @@ class DropoutPolyAgent(PolyencoderAgent):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt=partial_opt)
-        agent = parser.add_argument_group('Dropout Polyencoder Arguments')
+        agent = parser.add_argument_group("Dropout Polyencoder Arguments")
         agent.add_argument(
-            '--poly-dropout-prob',
+            "--poly-dropout-prob",
             type=float,
             default=0.5,
-            help='How often to switch to a bi-encoder setup during training',
+            help="How often to switch to a bi-encoder setup during training",
         )
         agent.add_argument(
-            '--poly-dropout-reduction-type',
+            "--poly-dropout-reduction-type",
             type=str,
-            choices=['first', 'max', 'mean'],
-            default='first',
-            help='how to reduce output when ignoring poly-codes during training',
+            choices=["first", "max", "mean"],
+            default="first",
+            help="how to reduce output when ignoring poly-codes during training",
         )
         agent.add_argument(
-            '--poly-dropout-use-codes',
-            type='bool',
+            "--poly-dropout-use-codes",
+            type="bool",
             default=True,
-            help='Whether to attend over codes prior to dropout method.',
+            help="Whether to attend over codes prior to dropout method.",
         )
 
         return parser
 
     def __init__(self, opt: Opt, shared=None):
         super().__init__(opt, shared)
-        self.poly_dropout_reduction_type = opt['poly_dropout_reduction_type']
-        self.poly_dropout_prob = opt['poly_dropout_prob']
-        self.use_codes = opt.get('poly_dropout_use_codes', True)
+        self.poly_dropout_reduction_type = opt["poly_dropout_reduction_type"]
+        self.poly_dropout_prob = opt["poly_dropout_prob"]
+        self.use_codes = opt.get("poly_dropout_use_codes", True)
         assert 0 <= self.poly_dropout_prob <= 1
 
     def get_ctxt_rep(self, batch: Batch) -> Tuple[torch.Tensor, torch.BoolTensor]:
@@ -98,10 +98,10 @@ class DropoutPolyAgent(PolyencoderAgent):
             ctxt_rep, ctxt_rep_mask, _ = self.model(**self._model_context_input(batch))
         else:
             # In dataparallel, the model is the `model.module`
-            model = self.model.module if hasattr(self.model, 'module') else self.model
-            model.type = 'n_first'
+            model = self.model.module if hasattr(self.model, "module") else self.model
+            model.type = "n_first"
             ctxt_rep, ctxt_rep_mask, _ = self.model(**self._model_context_input(batch))
-            model.type = self.opt['polyencoder_type']
+            model.type = self.opt["polyencoder_type"]
 
         return ctxt_rep, ctxt_rep_mask
 

@@ -10,8 +10,8 @@
 
 from .build import build
 
-VERSION = 'v1.0'
+VERSION = "v1.0"
 
 
 def download(datapath):
-    build(datapath, 'BST9B.tgz', model_type='blender_9B', version=VERSION)
+    build(datapath, "BST9B.tgz", model_type="blender_9B", version=VERSION)

@@ -44,7 +44,7 @@ class TransformerEncoderLayer(nn.Module):
         attention_dropout: float = 0.0,
         relu_dropout: float = 0.0,
         dropout: float = 0.0,
-        activation: str = 'relu',
+        activation: str = "relu",
         variant: Optional[str] = None,
         **kwargs,
     ):
@@ -56,9 +56,9 @@ class TransformerEncoderLayer(nn.Module):
             """
             return val if val is not None else default
 
-        n_heads = _default(n_heads, opt['n_heads'])
-        embedding_size = _default(embedding_size, opt['embedding_size'])
-        ffn_size = _default(ffn_size, opt['ffn_size'])
+        n_heads = _default(n_heads, opt["n_heads"])
+        embedding_size = _default(embedding_size, opt["embedding_size"])
+        ffn_size = _default(ffn_size, opt["ffn_size"])
 
         self.opt = opt
         self.dim = embedding_size
@@ -89,17 +89,17 @@ class TransformerEncoderLayer(nn.Module):
         Forward pass.
         """
         residual = tensor
-        if self.variant == 'prelayernorm':
+        if self.variant == "prelayernorm":
             tensor = self.norm1(tensor)
         attended_tensor = self.attention(tensor, mask=mask)[0]
         tensor = residual + self.dropout(attended_tensor)
-        if self.variant == 'aiayn' or self.variant == 'xlm' or self.variant == 'bart':
+        if self.variant == "aiayn" or self.variant == "xlm" or self.variant == "bart":
             tensor = self.norm1(tensor)
         residual = tensor
-        if self.variant == 'prelayernorm':
+        if self.variant == "prelayernorm":
             tensor = self.norm2(tensor)
         tensor = residual + self.dropout(self.ffn(tensor))
-        if self.variant == 'aiayn' or self.variant == 'xlm' or self.variant == 'bart':
+        if self.variant == "aiayn" or self.variant == "xlm" or self.variant == "bart":
             tensor = self.norm2(tensor)
         tensor *= mask.unsqueeze(-1).type_as(tensor)
         return tensor
@@ -131,7 +131,7 @@ class TransformerEncoder(nn.Module):
         vocabulary_size: int,
         embedding: Optional[nn.Embedding] = None,
         padding_idx: int = 0,
-        reduction_type: str = 'mean',
+        reduction_type: str = "mean",
         n_positions: Optional[int] = None,
         n_segments: Optional[int] = None,
         embeddings_scale: Optional[bool] = None,
@@ -147,32 +147,32 @@ class TransformerEncoder(nn.Module):
             return val if val is not None else default
 
         self.opt = opt
-        self.embedding_size = opt['embedding_size']
-        self.ffn_size = opt['ffn_size']
+        self.embedding_size = opt["embedding_size"]
+        self.ffn_size = opt["ffn_size"]
         self.n_layers = (
-            opt['n_encoder_layers']
-            if opt.get('n_encoder_layers', -1) > 0
-            else opt['n_layers']
+            opt["n_encoder_layers"]
+            if opt.get("n_encoder_layers", -1) > 0
+            else opt["n_layers"]
         )
-        self.n_heads = opt['n_heads']
+        self.n_heads = opt["n_heads"]
         self.dim = self.embedding_size
         self.embeddings_scale = _default(
-            embeddings_scale, opt.get('embeddings_scale', False)
+            embeddings_scale, opt.get("embeddings_scale", False)
         )
         self.reduction_type = reduction_type
         self.padding_idx = padding_idx
         # this is --dropout, not --relu-dropout or --attention-dropout
-        self.dropout_frac = _default(dropout, opt.get('dropout', 0.0))
+        self.dropout_frac = _default(dropout, opt.get("dropout", 0.0))
         self.dropout = nn.Dropout(p=self.dropout_frac)
-        self.activation = _default(activation, opt.get('activation', 'relu'))
-        self.variant = _default(variant, opt.get('variant', 'aiayn'))
-        self.n_segments = _default(n_segments, opt.get('n_segments', 0))
+        self.activation = _default(activation, opt.get("activation", "relu"))
+        self.variant = _default(variant, opt.get("variant", "aiayn"))
+        self.n_segments = _default(n_segments, opt.get("n_segments", 0))
 
         self.n_positions = _default(n_positions, get_n_positions_from_options(opt))
         self.out_dim = self.embedding_size
         assert (
             self.embedding_size % self.n_heads == 0
-        ), 'Transformer embedding size must be a multiple of n_heads'
+        ), "Transformer embedding size must be a multiple of n_heads"
 
         # check input formats:
         if embedding is not None:
@@ -191,11 +191,11 @@ class TransformerEncoder(nn.Module):
             self.embeddings = nn.Embedding(
                 vocabulary_size, self.embedding_size, padding_idx=padding_idx
             )
-            nn.init.normal_(self.embeddings.weight, 0, self.embedding_size ** -0.5)
+            nn.init.normal_(self.embeddings.weight, 0, self.embedding_size**-0.5)
 
         # create the positional embeddings
         self.position_embeddings = nn.Embedding(self.n_positions, self.embedding_size)
-        if not opt.get('learn_positional_embeddings', False):
+        if not opt.get("learn_positional_embeddings", False):
             create_position_codes(
                 self.n_positions,
                 self.embedding_size,
@@ -203,41 +203,41 @@ class TransformerEncoder(nn.Module):
             )
         else:
             nn.init.normal_(
-                self.position_embeddings.weight, 0, self.embedding_size ** -0.5
+                self.position_embeddings.weight, 0, self.embedding_size**-0.5
             )
 
         # embedding normalization
         if (
-            self.variant == 'xlm'
-            or self.variant == 'prelayernorm'
-            or self.variant == 'bart'
+            self.variant == "xlm"
+            or self.variant == "prelayernorm"
+            or self.variant == "bart"
         ):
             self.norm_embeddings = torch.nn.LayerNorm(self.dim, eps=LAYER_NORM_EPS)
-        elif self.variant == 'aiayn':
+        elif self.variant == "aiayn":
             pass
         else:
             raise ValueError("Can't handle --variant {}".format(self.variant))
 
         if self.n_segments >= 1:
             self.segment_embeddings = nn.Embedding(self.n_segments, self.dim)
-            nn.init.normal_(self.segment_embeddings.weight, 0, self.dim ** -0.5)
+            nn.init.normal_(self.segment_embeddings.weight, 0, self.dim**-0.5)
 
         # build the model
         self.layers = self.build_layers()
-        self.output_scaling = _default(output_scaling, opt.get('output_scaling', 1.0))
+        self.output_scaling = _default(output_scaling, opt.get("output_scaling", 1.0))
 
     def build_layers(self) -> nn.ModuleList:
         layers = nn.ModuleList()
         for _ in range(self.n_layers):
             layer = self.swappables.layer(  # type: ignore
                 self.opt,
-                attention_dropout=self.opt.get('attention_dropout', 0.0),
-                relu_dropout=self.opt.get('relu_dropout', 0.0),
+                attention_dropout=self.opt.get("attention_dropout", 0.0),
+                relu_dropout=self.opt.get("relu_dropout", 0.0),
                 dropout=self.dropout_frac,
                 variant=self.variant,
                 activation=self.activation,
             )
-            if self.opt.get('checkpoint_activations'):
+            if self.opt.get("checkpoint_activations"):
                 layer = checkpoint_wrapper(layer)
             layers.append(fsdp_wrap(layer))
         return layers
@@ -270,8 +270,8 @@ class TransformerEncoder(nn.Module):
 
         if positions.max().item() > self.n_positions:
             warn_once(
-                'You are inputting a sequence of {x} length, but only have '
-                '--n-positions {y}. Set --truncate or increase --n-positions'.format(
+                "You are inputting a sequence of {x} length, but only have "
+                "--n-positions {y}. Set --truncate or increase --n-positions".format(
                     x=positions.max().item(), y=self.n_positions
                 )
             )
@@ -299,7 +299,7 @@ class TransformerEncoder(nn.Module):
         :return tensor:
             return embedding after applying transformer layers
         """
-        if getattr(self.layers, 'is_model_parallel', False):
+        if getattr(self.layers, "is_model_parallel", False):
             # factored out for readability. It is equivalent to the other
             # condition
             tensor = self._apply_model_parallel(tensor, mask)
@@ -324,15 +324,15 @@ class TransformerEncoder(nn.Module):
             returns the reduced tensor, and mask if appropriate
         """
         tensor *= self.output_scaling
-        if self.reduction_type == 'first':
+        if self.reduction_type == "first":
             return tensor[:, 0, :], None
-        elif self.reduction_type == 'max':
+        elif self.reduction_type == "max":
             return tensor.max(dim=1)[0], None
-        elif self.reduction_type == 'mean':
+        elif self.reduction_type == "mean":
             divisor = mask.float().sum(dim=1).unsqueeze(-1).clamp(min=1).type_as(tensor)
             output = tensor.sum(dim=1) / divisor
             return output, None
-        elif self.reduction_type is None or 'none' in self.reduction_type:
+        elif self.reduction_type is None or "none" in self.reduction_type:
             return tensor, mask
         else:
             raise ValueError(
@@ -359,7 +359,7 @@ class TransformerEncoder(nn.Module):
         # embed input
         tensor, mask = self.forward_embedding(input, positions, segments)
 
-        if self.variant == 'xlm' or self.variant == 'bart':
+        if self.variant == "xlm" or self.variant == "bart":
             tensor = self.norm_embeddings(tensor)
 
         # --dropout on the embeddings
@@ -370,7 +370,7 @@ class TransformerEncoder(nn.Module):
         # apply transformer layers
         tensor = self.forward_layers(tensor, mask)
 
-        if self.variant == 'prelayernorm':
+        if self.variant == "prelayernorm":
             tensor = self.norm_embeddings(tensor)
 
         # reduce output

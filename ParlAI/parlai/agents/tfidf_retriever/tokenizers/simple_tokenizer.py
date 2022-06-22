@@ -14,8 +14,8 @@ from parlai.utils.logging import logger
 
 
 class SimpleTokenizer(Tokenizer):
-    ALPHA_NUM = r'[\p{L}\p{N}\p{M}]+'
-    NON_WS = r'[^\p{Z}\p{C}]'
+    ALPHA_NUM = r"[\p{L}\p{N}\p{M}]+"
+    NON_WS = r"[^\p{Z}\p{C}]"
 
     def __init__(self, **kwargs):
         """
@@ -23,13 +23,13 @@ class SimpleTokenizer(Tokenizer):
             annotators: None or empty set (only tokenizes).
         """
         self._regexp = regex.compile(
-            '(%s)|(%s)' % (self.ALPHA_NUM, self.NON_WS),
+            "(%s)|(%s)" % (self.ALPHA_NUM, self.NON_WS),
             flags=regex.IGNORECASE + regex.UNICODE + regex.MULTILINE,
         )
-        if len(kwargs.get('annotators', {})) > 0:
+        if len(kwargs.get("annotators", {})) > 0:
             logger.warning(
-                '%s only tokenizes! Skipping annotators: %s'
-                % (type(self).__name__, kwargs.get('annotators'))
+                "%s only tokenizes! Skipping annotators: %s"
+                % (type(self).__name__, kwargs.get("annotators"))
             )
         self.annotators = set()
 

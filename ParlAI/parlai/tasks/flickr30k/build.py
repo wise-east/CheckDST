@@ -11,19 +11,19 @@ import os
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/flickr30k/flickr30k.tgz',
-        'flickr30k.tgz',
-        '932a43ea1ba0dafa5a533bee825dfc6b7cbcd94038b5addd6cdb6f7f2a8a229a',
+        "http://parl.ai/downloads/flickr30k/flickr30k.tgz",
+        "flickr30k.tgz",
+        "932a43ea1ba0dafa5a533bee825dfc6b7cbcd94038b5addd6cdb6f7f2a8a229a",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'Flickr30k')
-    version = '1.0'
+    dpath = os.path.join(opt["datapath"], "Flickr30k")
+    version = "1.0"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building image data: ' + dpath + ']')
+        print("[building image data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

@@ -14,7 +14,7 @@ from parlai.chat_service.services.terminal_chat.terminal_manager import Terminal
 import parlai.chat_service.utils.config as config_utils
 
 
-SERVICE_NAME = 'terminal'
+SERVICE_NAME = "terminal"
 
 
 def setup_args():
@@ -26,9 +26,9 @@ def setup_args():
     parser = ParlaiParser(False, False)
     parser.add_parlai_data_path()
     parser.add_chatservice_args()
-    parser_grp = parser.add_argument_group('Terminal Chat')
+    parser_grp = parser.add_argument_group("Terminal Chat")
     parser_grp.add_argument(
-        '--port', default=35496, type=int, help='Port to run the terminal chat server'
+        "--port", default=35496, type=int, help="Port to run the terminal chat server"
     )
     return parser.parse_args()
 
@@ -37,7 +37,7 @@ def run(opt):
     """
     Run TerminalManager.
     """
-    opt['service'] = SERVICE_NAME
+    opt["service"] = SERVICE_NAME
     manager = TerminalManager(opt)
     try:
         manager.start_task()
@@ -45,10 +45,10 @@ def run(opt):
         manager.shutdown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     opt = setup_args()
-    config_path = opt.get('config_path')
+    config_path = opt.get("config_path")
     config = config_utils.parse_configuration_file(config_path)
-    opt.update(config['world_opt'])
-    opt['config'] = config
+    opt.update(config["world_opt"])
+    opt["config"] = config
     run(opt)

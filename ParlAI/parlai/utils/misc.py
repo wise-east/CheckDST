@@ -33,28 +33,28 @@ except ImportError:
 
 
 SPECIAL_FORMATED_DISPLAY_MESSAGE_FIELDS = {
-    'episode_done',
-    'id',
-    'image',
-    'text',
-    'labels',
-    'eval_labels',
-    'label_candidates',
-    'text_candidates',
-    'reward',
-    'token_losses',
-    'metrics',
+    "episode_done",
+    "id",
+    "image",
+    "text",
+    "labels",
+    "eval_labels",
+    "label_candidates",
+    "text_candidates",
+    "reward",
+    "token_losses",
+    "metrics",
 }
 
-MUST_SHOW_MESSAGE_FIELDS = {'image', 'text', 'labels', 'eval_labels', 'reward'}
+MUST_SHOW_MESSAGE_FIELDS = {"image", "text", "labels", "eval_labels", "reward"}
 
 
 def maintain_dialog_history(
     history,
     observation,
-    reply='',
+    reply="",
     historyLength=1,
-    useReplies='label_else_model',
+    useReplies="label_else_model",
     dict=None,
     useStartEndIndices=True,
     splitSentences=False,
@@ -71,52 +71,52 @@ def maintain_dialog_history(
     def parse(txt, splitSentences):
         if dict is not None:
             if splitSentences:
-                vec = [dict.txt2vec(t) for t in txt.split('\n')]
+                vec = [dict.txt2vec(t) for t in txt.split("\n")]
             else:
                 vec = dict.txt2vec(txt)
             return vec
         else:
             return [txt]
 
-    if 'dialog' not in history:
-        history['dialog'] = deque(maxlen=historyLength)
-        history['episode_done'] = False
-        history['labels'] = []
+    if "dialog" not in history:
+        history["dialog"] = deque(maxlen=historyLength)
+        history["episode_done"] = False
+        history["labels"] = []
 
-    if history['episode_done']:
-        history['dialog'].clear()
-        history['labels'] = []
-        useReplies = 'none'
-        history['episode_done'] = False
+    if history["episode_done"]:
+        history["dialog"].clear()
+        history["labels"] = []
+        useReplies = "none"
+        history["episode_done"] = False
 
-    if useReplies != 'none':
-        if useReplies == 'model' or (
-            useReplies == 'label_else_model' and len(history['labels']) == 0
+    if useReplies != "none":
+        if useReplies == "model" or (
+            useReplies == "label_else_model" and len(history["labels"]) == 0
         ):
             if reply:
                 if useStartEndIndices:
-                    reply = dict.start_token + ' ' + reply
-                history['dialog'].extend(parse(reply, splitSentences))
-        elif len(history['labels']) > 0:
-            r = history['labels'][0]
-            history['dialog'].extend(parse(r, splitSentences))
+                    reply = dict.start_token + " " + reply
+                history["dialog"].extend(parse(reply, splitSentences))
+        elif len(history["labels"]) > 0:
+            r = history["labels"][0]
+            history["dialog"].extend(parse(r, splitSentences))
 
     obs = observation
-    if 'text' in obs:
+    if "text" in obs:
         if useStartEndIndices:
-            obs['text'] = dict.end_token + ' ' + obs['text']
-        history['dialog'].extend(parse(obs['text'], splitSentences))
+            obs["text"] = dict.end_token + " " + obs["text"]
+        history["dialog"].extend(parse(obs["text"], splitSentences))
 
-    history['episode_done'] = obs['episode_done']
+    history["episode_done"] = obs["episode_done"]
 
-    labels = obs.get('labels', obs.get('eval_labels', None))
+    labels = obs.get("labels", obs.get("eval_labels", None))
     if labels is not None:
         if useStartEndIndices:
-            history['labels'] = [dict.start_token + ' ' + l for l in labels]
+            history["labels"] = [dict.start_token + " " + l for l in labels]
         else:
-            history['labels'] = labels
+            history["labels"] = labels
 
-    return history['dialog']
+    return history["dialog"]
 
 
 def load_cands(path, lines_have_ids=False, cands_are_replies=False):
@@ -132,22 +132,22 @@ def load_cands(path, lines_have_ids=False, cands_are_replies=False):
     cnt = 0
     with PathManager.open(path) as read:
         for line in read:
-            line = line.strip().replace('\\n', '\n')
+            line = line.strip().replace("\\n", "\n")
             if len(line) > 0:
                 cnt = cnt + 1
                 # If lines are numbered we strip them of numbers.
-                if cnt == 1 and line[0:2] == '1 ':
+                if cnt == 1 and line[0:2] == "1 ":
                     lines_have_ids = True
                 # If tabs then the label_candidates are all the replies.
-                if '\t' in line and not cands_are_replies:
+                if "\t" in line and not cands_are_replies:
                     cands_are_replies = True
                     cands = []
                 if lines_have_ids:
-                    space_idx = line.find(' ')
+                    space_idx = line.find(" ")
                     line = line[space_idx + 1 :]
                     if cands_are_replies:
-                        sp = line.split('\t')
-                        if len(sp) > 1 and sp[1] != '':
+                        sp = line.split("\t")
+                        if len(sp) > 1 and sp[1] != "":
                             cands.append(sp[1])
                     else:
                         cands.append(line)
@@ -251,7 +251,7 @@ class TimeLogger:
         self.tot_time += self.timer.time()
         self.timer.reset()
         if report:
-            report['exs'] = done
+            report["exs"] = done
         if total > 0 and done > 0:
             progress = done / total
             seconds_left = max(0, self.tot_time / progress - self.tot_time)
@@ -262,12 +262,12 @@ class TimeLogger:
         elapsed = timedelta(seconds=int(self.tot_time))
 
         text = (
-            f'{progress:.1%} complete ({done:,d} / {total:,d}), '
-            f'{elapsed} elapsed, {eta} eta'
+            f"{progress:.1%} complete ({done:,d} / {total:,d}), "
+            f"{elapsed} elapsed, {eta} eta"
         )
         if report:
             report_s = nice_report(report)
-            text = f'{text}\n{report_s}'
+            text = f"{text}\n{report_s}"
         return text, report
 
 
@@ -320,8 +320,8 @@ def _report_sort_key(report_key: str) -> Tuple[str, str]:
     # filenames.
     fields = report_key.split("/")
     main_key = fields.pop(-1)
-    sub_key = '/'.join(fields)
-    return (sub_key or 'all', main_key)
+    sub_key = "/".join(fields)
+    return (sub_key or "all", main_key)
 
 
 def float_formatter(f: Union[float, int]) -> str:
@@ -336,26 +336,26 @@ def float_formatter(f: Union[float, int]) -> str:
         return str(f)
     if f >= 1000:
         # numbers > 1000 just round to the nearest integer
-        s = f'{f:.0f}'
+        s = f"{f:.0f}"
     else:
         # otherwise show 4 significant figures, regardless of decimal spot
-        s = f'{f:.4g}'
+        s = f"{f:.4g}"
     # replace leading 0's with blanks for easier reading
     # example:  -0.32 to -.32
-    s = s.replace('-0.', '-.')
-    if s.startswith('0.'):
+    s = s.replace("-0.", "-.")
+    if s.startswith("0."):
         s = s[1:]
     # Add the trailing 0's to always show 4 digits
     # example: .32 to .3200
-    if s[0] == '.' and len(s) < 5:
-        s += '0' * (5 - len(s))
+    if s[0] == "." and len(s) < 5:
+        s += "0" * (5 - len(s))
     return s
 
 
 def _line_width():
-    if os.environ.get('PARLAI_FORCE_WIDTH'):
+    if os.environ.get("PARLAI_FORCE_WIDTH"):
         try:
-            return int(os.environ['PARLAI_FORCE_WIDTH'])
+            return int(os.environ["PARLAI_FORCE_WIDTH"])
         except ValueError:
             pass
     try:
@@ -428,7 +428,7 @@ def nice_report(report) -> str:
         )
 
 
-def round_sigfigs(x: Union[float, 'torch.Tensor'], sigfigs=4) -> float:
+def round_sigfigs(x: Union[float, "torch.Tensor"], sigfigs=4) -> float:
     """
     Round value to specified significant figures.
 
@@ -448,7 +448,7 @@ def round_sigfigs(x: Union[float, 'torch.Tensor'], sigfigs=4) -> float:
             return 0
         return round(x_, -(math.floor(math.log10(abs(x_)) - sigfigs + 1)))
     except (ValueError, OverflowError) as ex:
-        if x_ in [float('inf'), float('-inf')] or x_ != x_:  # inf or nan
+        if x_ in [float("inf"), float("-inf")] or x_ != x_:  # inf or nan
             return x_
         else:
             raise ex
@@ -459,18 +459,18 @@ def clip_text(text, max_len):
     Clip text to max length, adding ellipses.
     """
     if len(text) > max_len:
-        begin_text = ' '.join(text[: math.floor(0.8 * max_len)].split(' ')[:-1])
-        end_text = ' '.join(
-            text[(len(text) - math.floor(0.2 * max_len)) :].split(' ')[1:]
+        begin_text = " ".join(text[: math.floor(0.8 * max_len)].split(" ")[:-1])
+        end_text = " ".join(
+            text[(len(text) - math.floor(0.2 * max_len)) :].split(" ")[1:]
         )
         if len(end_text) > 0:
-            text = begin_text + ' ...\n' + end_text
+            text = begin_text + " ...\n" + end_text
         else:
-            text = begin_text + ' ...'
+            text = begin_text + " ..."
     return text
 
 
-def _ellipse(lst: List[str], max_display: int = 5, sep: str = '|') -> str:
+def _ellipse(lst: List[str], max_display: int = 5, sep: str = "|") -> str:
     """
     Like join, but possibly inserts an ellipsis.
 
@@ -483,7 +483,7 @@ def _ellipse(lst: List[str], max_display: int = 5, sep: str = '|') -> str:
     choices = list(lst)
     # insert the ellipsis if necessary
     if max_display > 0 and len(choices) > max_display:
-        ellipsis = '... ({} of {} shown)'.format(max_display, len(choices))
+        ellipsis = "... ({} of {} shown)".format(max_display, len(choices))
         choices = choices[:max_display] + [ellipsis]
     return sep.join(str(c) for c in choices)
 
@@ -492,7 +492,7 @@ def display_messages(
     msgs: List[Dict[str, Any]],
     prettify: bool = False,
     ignore_agent_reply: bool = False,
-    add_fields: str = '',
+    add_fields: str = "",
     max_len: int = 1000,
     verbose: bool = False,
 ) -> Optional[str]:
@@ -512,48 +512,48 @@ def display_messages(
 
         See TorchGeneratorAgent._construct_token_losses for an example implementation.
         """
-        key = 'token_losses'
+        key = "token_losses"
         token_losses = msg.get(key, None)
         if key not in fields_to_show or not token_losses:
             return None
         # Reduce losses to 4 significant figures
-        formatted_tl = ' | '.join(
+        formatted_tl = " | ".join(
             [f"{tl[0]} {float('{:.4g}'.format(tl[1]))}" for tl in token_losses]
         )
-        return _pretty_lines(space, key, formatted_tl, 'text2')
+        return _pretty_lines(space, key, formatted_tl, "text2")
 
     def _pretty_lines(indent_space, field, value, style):
-        line = '{}{} {}'.format(
-            indent_space, colorize('[' + field + ']:', 'field'), colorize(value, style)
+        line = "{}{} {}".format(
+            indent_space, colorize("[" + field + "]:", "field"), colorize(value, style)
         )
         return line
 
     lines = []
     episode_done = False
-    extra_add_fields_ = add_fields.split(',')
+    extra_add_fields_ = add_fields.split(",")
     for index, msg in enumerate(msgs):
         if msg is None or (index == 1 and ignore_agent_reply):
             # We only display the first agent (typically the teacher) if we
             # are ignoring the agent reply.
             continue
 
-        if msg.get('episode_done'):
+        if msg.get("episode_done"):
             episode_done = True
         # Possibly indent the text (for the second speaker, if two).
-        space = ''
+        space = ""
         if len(msgs) == 2 and index == 1:
-            space = '   '
+            space = "   "
 
-        agent_id = msg.get('id', '[no id field]')
+        agent_id = msg.get("id", "[no id field]")
         if verbose:
             line = _pretty_lines(
-                indent_space=space, field='id', value=agent_id, style='id'
+                indent_space=space, field="id", value=agent_id, style="id"
             )
             lines.append(line)
 
         # Only display rewards !=0 as they are confusing in non-RL tasks.
-        if msg.get('reward', 0) != 0:
-            lines.append(space + '[reward: {r}]'.format(r=msg['reward']))
+        if msg.get("reward", 0) != 0:
+            lines.append(space + "[reward: {r}]".format(r=msg["reward"]))
 
         fields_to_show = []
         if verbose:
@@ -570,29 +570,29 @@ def display_messages(
         for field in fields_to_show:
             if field not in SPECIAL_FORMATED_DISPLAY_MESSAGE_FIELDS:
                 if type(msg[field]) is list:
-                    value = _ellipse(msg[field], sep='\n  ')
+                    value = _ellipse(msg[field], sep="\n  ")
                 else:
                     value = clip_text(str(msg.get(field)), max_len)
                 line = _pretty_lines(
-                    indent_space=space, field=field, value=value, style='text2'
+                    indent_space=space, field=field, value=value, style="text2"
                 )
                 lines.append(line)
 
         # Display fields WITH special format requirements
         # Display Image
-        if type(msg.get('image')) in [str, torch.Tensor]:
+        if type(msg.get("image")) in [str, torch.Tensor]:
             lines.append(f'[ image ]: {msg["image"]}')
         # Display Text
-        if msg.get('text', ''):
-            value = clip_text(msg['text'], max_len)
-            style = 'bold_text' if index == 0 else 'labels'
-            field = 'text' if verbose else agent_id
+        if msg.get("text", ""):
+            value = clip_text(msg["text"], max_len)
+            style = "bold_text" if index == 0 else "labels"
+            field = "text" if verbose else agent_id
             line = _pretty_lines(
                 indent_space=space, field=field, value=value, style=style
             )
             lines.append(line)
         # Display Label Fields
-        for field in {'labels', 'eval_labels', 'label_candidates', 'text_candidates'}:
+        for field in {"labels", "eval_labels", "label_candidates", "text_candidates"}:
             if msg.get(field) and field in fields_to_show:
                 line = _pretty_lines(
                     indent_space=space,
@@ -601,13 +601,13 @@ def display_messages(
                     style=field,
                 )
                 lines.append(line)
-        if msg.get('metrics') and verbose:
+        if msg.get("metrics") and verbose:
             lines.append(
                 _pretty_lines(
                     indent_space=space,
-                    field='metrics',
-                    value="\n" + nice_report(msg['metrics']),
-                    style='text',
+                    field="metrics",
+                    value="\n" + nice_report(msg["metrics"]),
+                    style="text",
                 )
             )
 
@@ -618,13 +618,13 @@ def display_messages(
 
     if episode_done:
         lines.append(
-            colorize('- - - - - - - END OF EPISODE - - - - - - - - - -', 'highlight')
+            colorize("- - - - - - - END OF EPISODE - - - - - - - - - -", "highlight")
         )
 
-    return '\n'.join(lines)
+    return "\n".join(lines)
 
 
-def str_to_msg(txt, ignore_fields=''):
+def str_to_msg(txt, ignore_fields=""):
     """
     Convert formatted string to ParlAI message dict.
 
@@ -638,53 +638,53 @@ def str_to_msg(txt, ignore_fields=''):
 
     def tostr(txt):
         txt = str(txt)
-        txt = txt.replace('\\t', '\t')
-        txt = txt.replace('\\n', '\n')
-        txt = txt.replace('__PIPE__', '|')
+        txt = txt.replace("\\t", "\t")
+        txt = txt.replace("\\n", "\n")
+        txt = txt.replace("__PIPE__", "|")
         return txt
 
     def tolist(txt):
-        vals = txt.split('|')
+        vals = txt.split("|")
         for i, v in enumerate(vals):
             v = tostr(v)
             vals[i] = v
         return vals
 
     def convert(key, value):
-        if key == 'text' or key == 'id':
+        if key == "text" or key == "id":
             return tostr(value)
         elif (
-            key == 'label_candidates'
-            or key == 'labels'
-            or key == 'eval_labels'
-            or key == 'text_candidates'
+            key == "label_candidates"
+            or key == "labels"
+            or key == "eval_labels"
+            or key == "text_candidates"
         ):
             return tolist(value)
-        elif key == 'reward':
+        elif key == "reward":
             try:
                 return int(value)
             except ValueError:
                 return float(value)
-        elif key == 'episode_done':
+        elif key == "episode_done":
             return bool(value)
         else:
             return tostr(value)
 
-    if txt == '' or txt is None:
+    if txt == "" or txt is None:
         return None
 
     msg = {}
-    for t in txt.split('\t'):
-        ind = t.find(':')
+    for t in txt.split("\t"):
+        ind = t.find(":")
         key = t[:ind]
         value = t[ind + 1 :]
-        if key not in ignore_fields.split(','):
+        if key not in ignore_fields.split(","):
             msg[key] = convert(key, value)
-    msg['episode_done'] = msg.get('episode_done', False)
+    msg["episode_done"] = msg.get("episode_done", False)
     return Message(msg)
 
 
-def msg_to_str(msg, ignore_fields=''):
+def msg_to_str(msg, ignore_fields=""):
     """
     Convert ParlAI message dict to string.
 
@@ -697,17 +697,17 @@ def msg_to_str(msg, ignore_fields=''):
 
     def filter(txt):
         txt = str(txt)
-        txt = txt.replace('\t', '\\t')
-        txt = txt.replace('\n', '\\n')
-        txt = txt.replace('|', '__PIPE__')
+        txt = txt.replace("\t", "\\t")
+        txt = txt.replace("\n", "\\n")
+        txt = txt.replace("|", "__PIPE__")
         return txt
 
     def add_field(name, data):
-        if name == 'reward' and data == 0:
-            return ''
-        if name == 'episode_done' and data is False:
-            return ''
-        txt = ''
+        if name == "reward" and data == 0:
+            return ""
+        if name == "episode_done" and data is False:
+            return ""
+        txt = ""
         if type(data) == tuple or type(data) == set or type(data) == list:
             # list entries
             for c in data:
@@ -716,25 +716,25 @@ def msg_to_str(msg, ignore_fields=''):
         else:
             # single fields
             txt = filter(data)
-        return name + ":" + txt + '\t'
+        return name + ":" + txt + "\t"
 
     default_fields = [
-        'id',
-        'text',
-        'labels',
-        'label_candidates',
-        'episode_done',
-        'reward',
+        "id",
+        "text",
+        "labels",
+        "label_candidates",
+        "episode_done",
+        "reward",
     ]
     txt = ""
-    ignore_fields = ignore_fields.split(',')
+    ignore_fields = ignore_fields.split(",")
     for f in default_fields:
         if f in msg and f not in ignore_fields:
             txt += add_field(f, msg[f])
     for f in msg.keys():
         if f not in default_fields and f not in ignore_fields:
             txt += add_field(f, msg[f])
-    return txt.rstrip('\t')
+    return txt.rstrip("\t")
 
 
 # DEPRECATION DAY: DELETE
@@ -794,4 +794,4 @@ def recursive_getattr(obj, attr, *args):
     def _getattr(obj, attr):
         return getattr(obj, attr, *args)
 
-    return functools.reduce(_getattr, [obj] + attr.split('.'))
+    return functools.reduce(_getattr, [obj] + attr.split("."))

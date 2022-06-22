@@ -13,16 +13,16 @@ import os
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/cornell_movie/cornell_movie_dialogs_corpus.tgz',
-        'cornell_movie_dialogs_corpus.tgz',
-        'ae77ab2e4743ce929087a4f529934059b920c4bdaa3143741b65b1e648ab45fd',
+        "http://parl.ai/downloads/cornell_movie/cornell_movie_dialogs_corpus.tgz",
+        "cornell_movie_dialogs_corpus.tgz",
+        "ae77ab2e4743ce929087a4f529934059b920c4bdaa3143741b65b1e648ab45fd",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'CornellMovie')
-    version = 'v1.01'
+    dpath = os.path.join(opt["datapath"], "CornellMovie")
+    version = "v1.01"
 
     if not build_data.built(dpath, version_string=version):
         if build_data.built(dpath):

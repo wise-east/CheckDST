@@ -12,9 +12,9 @@ import parlai.core.build_data as build_data
 
 RESOURCES = [
     DownloadableFile(
-        'http://lnsigo.mipt.ru/export/datasets/convai/convai2_wild_evaluation_0.2.tgz',
-        'convai2_wild_evaluation_0.2.tgz',
-        'd40ff70275c8d1939a8081707edcf4e71072097d18b9998100a1099d23e29801',
+        "http://lnsigo.mipt.ru/export/datasets/convai/convai2_wild_evaluation_0.2.tgz",
+        "convai2_wild_evaluation_0.2.tgz",
+        "d40ff70275c8d1939a8081707edcf4e71072097d18b9998100a1099d23e29801",
     )
 ]
 
@@ -37,30 +37,30 @@ def make_parlai_format(data: list, dpath: str):
     data_valid = data[first_valid:first_test]
     data_test = data[first_test:]
 
-    data_train_txt = '\n'.join(data_train)
-    data_valid_txt = '\n'.join(data_valid)
-    data_test_txt = '\n'.join(data_test)
+    data_train_txt = "\n".join(data_train)
+    data_valid_txt = "\n".join(data_valid)
+    data_test_txt = "\n".join(data_test)
 
-    path_train = os.path.join(dpath, 'train.txt')
-    path_valid = os.path.join(dpath, 'valid.txt')
-    path_test = os.path.join(dpath, 'test.txt')
+    path_train = os.path.join(dpath, "train.txt")
+    path_valid = os.path.join(dpath, "valid.txt")
+    path_test = os.path.join(dpath, "test.txt")
 
-    with PathManager.open(path_train, 'w') as f_train:
+    with PathManager.open(path_train, "w") as f_train:
         f_train.write(data_train_txt)
 
-    with PathManager.open(path_valid, 'w') as f_valid:
+    with PathManager.open(path_valid, "w") as f_valid:
         f_valid.write(data_valid_txt)
 
-    with PathManager.open(path_test, 'w') as f_test:
+    with PathManager.open(path_test, "w") as f_test:
         f_test.write(data_test_txt)
 
 
 def build(opt):
-    version = '0.2'
-    dpath = os.path.join(opt['datapath'], 'ConvAI2_wild_evaluation')
+    version = "0.2"
+    dpath = os.path.join(opt["datapath"], "ConvAI2_wild_evaluation")
 
     if not build_data.built(dpath, version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
 
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
@@ -71,10 +71,10 @@ def build(opt):
         for downloadable_file in RESOURCES:
             downloadable_file.download_file(dpath)
 
-        output_fname = 'convai2_wild_evaluation.json'
+        output_fname = "convai2_wild_evaluation.json"
         output_path = os.path.join(dpath, output_fname)
 
-        with PathManager.open(output_path, 'r') as data_f:
+        with PathManager.open(output_path, "r") as data_f:
             data = json.load(data_f)
 
         make_parlai_format(data, dpath)

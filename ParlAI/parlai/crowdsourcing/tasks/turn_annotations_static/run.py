@@ -27,10 +27,10 @@ TASK_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 # python turn_annotations_static/run.py conf=<conf name sans yaml> --config-dir <path to directory with a conf/ folder>
 
 defaults = [
-    {'mephisto/blueprint': STATIC_BLUEPRINT_TYPE},
+    {"mephisto/blueprint": STATIC_BLUEPRINT_TYPE},
     {"mephisto/architect": "local"},
     {"mephisto/provider": "mock"},
-    {"conf": 'example'},
+    {"conf": "example"},
 ]
 
 
@@ -41,12 +41,12 @@ class ScriptConfig(MTurkRunScriptConfig):
     monitoring_log_rate: int = field(
         default=30,
         metadata={
-            'help': 'Frequency in seconds of logging the monitoring of the crowdsourcing task'
+            "help": "Frequency in seconds of logging the monitoring of the crowdsourcing task"
         },
     )
 
 
-register_script_config(name='scriptconfig', module=ScriptConfig)
+register_script_config(name="scriptconfig", module=ScriptConfig)
 
 
 @hydra.main(config_path="hydra_configs", config_name="scriptconfig")

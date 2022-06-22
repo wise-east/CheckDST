@@ -10,20 +10,20 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        'https://storage.googleapis.com/airdialogue/airdialogue_data.tar.gz',
-        'airdialogue.tar.gz',
-        '7d2130cdde73a59afd6ad6c463a25453d8ed677c1b3a4a4aaa2406db9c9712cb',
+        "https://storage.googleapis.com/airdialogue/airdialogue_data.tar.gz",
+        "airdialogue.tar.gz",
+        "7d2130cdde73a59afd6ad6c463a25453d8ed677c1b3a4a4aaa2406db9c9712cb",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'])
-    airdialogue_path = os.path.join(dpath, 'airdialogue_data')
-    version = '1.0'
+    dpath = os.path.join(opt["datapath"])
+    airdialogue_path = os.path.join(dpath, "airdialogue_data")
+    version = "1.0"
 
     if not build_data.built(airdialogue_path, version_string=version):
-        print('[building data: ' + airdialogue_path + ']')
+        print("[building data: " + airdialogue_path + "]")
         if build_data.built(airdialogue_path):
             build_data.remove_dir(airdialogue_path)
 

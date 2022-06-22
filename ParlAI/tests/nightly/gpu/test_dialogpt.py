@@ -17,30 +17,30 @@ class TestDialogptModel(unittest.TestCase):
 
     def _test_batchsize(self, batchsize, add_start_token):
         utterances = [
-            'How is your day so far?',
-            'I hope you you have a good day.',
+            "How is your day so far?",
+            "I hope you you have a good day.",
             "Nice to meet you. My name is John. ",
             "I've got a feeling we're not in Kansas anymore.",
         ]
         opt = {
-            'model': 'hugging_face/dialogpt',
-            'gpt2_size': 'small',
-            'text_truncate': 100,
-            'label_truncate': 20,
-            'beam_min_length': 1,
-            'inference': 'beam',
-            'beam_size': 1,
-            'add_special_tokens': True,
-            'batchsize': batchsize,
-            'add_start_token': add_start_token,
+            "model": "hugging_face/dialogpt",
+            "gpt2_size": "small",
+            "text_truncate": 100,
+            "label_truncate": 20,
+            "beam_min_length": 1,
+            "inference": "beam",
+            "beam_size": 1,
+            "add_special_tokens": True,
+            "batchsize": batchsize,
+            "add_start_token": add_start_token,
         }
         dialogpt = create_agent(opt)
 
         results_single = []
         agents = [dialogpt.clone() for _ in utterances]
         for u, a in zip(utterances, agents):
-            a.observe({'text': u, 'episode_done': True})
-            generation = a.act()['text']
+            a.observe({"text": u, "episode_done": True})
+            generation = a.act()["text"]
             results_single.append(generation)
 
         results_batched = []
@@ -49,8 +49,8 @@ class TestDialogptModel(unittest.TestCase):
             batch = utterances[idx * batchsize : (idx + 1) * batchsize]
             obs = []
             for i, a in enumerate(agents):
-                obs.append(a.observe({'text': batch[i], 'episode_done': True}))
-            generations = [x['text'] for x in dialogpt.batch_act(obs)]
+                obs.append(a.observe({"text": batch[i], "episode_done": True}))
+            generations = [x["text"] for x in dialogpt.batch_act(obs)]
             results_batched += generations
 
         assert results_single == results_batched
@@ -63,16 +63,16 @@ class TestDialogptModel(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             create_agent(
                 {
-                    'model': 'hugging_face/dialogpt',
-                    'add_special_tokens': False,
-                    'batchsize': 2,
+                    "model": "hugging_face/dialogpt",
+                    "add_special_tokens": False,
+                    "batchsize": 2,
                 }
             )
 
         for batchsize in [1, 2, 4]:
             for add_start_token in [True, False]:
                 with self.subTest(
-                    f'test_batchsize with bs={batchsize} and add_start_token={add_start_token}'
+                    f"test_batchsize with bs={batchsize} and add_start_token={add_start_token}"
                 ):
                     self._test_batchsize(batchsize, add_start_token)
 
@@ -83,9 +83,9 @@ class TestDialogptModel(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             create_agent(
                 {
-                    'model': 'hugging_face/dialogpt',
-                    'add_special_tokens': False,
-                    'add_start_token': True,
+                    "model": "hugging_face/dialogpt",
+                    "add_special_tokens": False,
+                    "add_start_token": True,
                 }
             )
 
@@ -98,21 +98,21 @@ class TestDialogptModel(unittest.TestCase):
             ("Nice to meet you!", "Hello! I'm from the future!"),
         ]
         opt = {
-            'model': 'hugging_face/dialogpt',
-            'gpt2_size': 'small',
-            'text_truncate': 100,
-            'label_truncate': 20,
-            'beam_min_length': 1,
-            'inference': 'beam',
-            'beam_size': 1,
-            'add_special_tokens': False,
-            'batchsize': 1,
+            "model": "hugging_face/dialogpt",
+            "gpt2_size": "small",
+            "text_truncate": 100,
+            "label_truncate": 20,
+            "beam_min_length": 1,
+            "inference": "beam",
+            "beam_size": 1,
+            "add_special_tokens": False,
+            "batchsize": 1,
         }
         dialogpt = create_agent(opt)
         for text, label in test_cases:
-            dialogpt.observe({'text': text, 'episode_done': True})
+            dialogpt.observe({"text": text, "episode_done": True})
             response = dialogpt.act()
-            assert response['text'] == label
+            assert response["text"] == label
 
     def test_dialogpt(self):
         """
@@ -120,24 +120,24 @@ class TestDialogptModel(unittest.TestCase):
         """
         valid, test = testing_utils.train_model(
             dict(
-                task='integration_tests:overfit',
-                model='hugging_face/dialogpt',
+                task="integration_tests:overfit",
+                model="hugging_face/dialogpt",
                 add_special_tokens=True,
                 add_start_token=True,
-                optimizer='adam',
+                optimizer="adam",
                 learningrate=1e-3,
                 batchsize=1,
                 num_epochs=100,
                 validation_every_n_epochs=5,
-                validation_metric='ppl',
+                validation_metric="ppl",
                 short_final_eval=True,
                 skip_generation=True,
             )
         )
 
-        self.assertLessEqual(valid['ppl'], 4.0)
-        self.assertLessEqual(test['ppl'], 4.0)
+        self.assertLessEqual(valid["ppl"], 4.0)
+        self.assertLessEqual(test["ppl"], 4.0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

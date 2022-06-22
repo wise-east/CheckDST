@@ -124,7 +124,7 @@ def simplify_nq_example(nq_example):
         Returns:
           String token.
         """
-        return re.sub(u" ", "_", token["token"])
+        return re.sub(" ", "_", token["token"])
 
     text = " ".join([_clean_token(t) for t in nq_example["document_tokens"]])
 

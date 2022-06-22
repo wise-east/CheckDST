@@ -25,10 +25,10 @@ class TestLightTeacher(unittest.TestCase):
             proportions = [0.1, 0.5, 1.0]
             for proportion in proportions:
                 all_kwargs = {
-                    'datatype': 'train',
-                    'task': 'light_dialog',
-                    'datapath': tmpdir,
-                    'light_percent_train_exs': proportion,
+                    "datatype": "train",
+                    "task": "light_dialog",
+                    "datapath": tmpdir,
+                    "light_percent_train_exs": proportion,
                 }
                 parser = setup_args()
                 parser.set_defaults(**all_kwargs)
@@ -38,5 +38,5 @@ class TestLightTeacher(unittest.TestCase):
                 self.assertEqual(teacher.num_episodes(), int(NUM_EPS * proportion))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

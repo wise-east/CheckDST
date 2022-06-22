@@ -14,30 +14,30 @@ class Starspace(nn.Module):
         super().__init__()
         self.lt = nn.Embedding(
             num_features,
-            opt['embeddingsize'],
+            opt["embeddingsize"],
             0,
             sparse=True,
-            max_norm=opt['embeddingnorm'],
+            max_norm=opt["embeddingnorm"],
         )
-        if not opt['tfidf']:
+        if not opt["tfidf"]:
             dict = None
         self.encoder = Encoder(self.lt, dict)
-        if not opt['share_embeddings']:
+        if not opt["share_embeddings"]:
             self.lt2 = nn.Embedding(
                 num_features,
-                opt['embeddingsize'],
+                opt["embeddingsize"],
                 0,
                 sparse=True,
-                max_norm=opt['embeddingnorm'],
+                max_norm=opt["embeddingnorm"],
             )
             self.encoder2 = Encoder(self.lt2, dict)
         else:
             self.encoder2 = self.encoder
         self.opt = opt
-        self.lin = nn.Linear(opt['embeddingsize'], opt['embeddingsize'], bias=False)
+        self.lin = nn.Linear(opt["embeddingsize"], opt["embeddingsize"], bias=False)
         self.lins = 0
-        if 'lins' in opt:
-            self.lins = opt['lins']
+        if "lins" in opt:
+            self.lins = opt["lins"]
 
     def forward(self, xs, ys=None, cands=None):
         xs_enc = []

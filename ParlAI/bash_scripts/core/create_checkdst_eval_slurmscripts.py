@@ -5,7 +5,7 @@ import re
 import shlex
 import subprocess
 
-PATH="/data/home/justincho/CheckDST/ParlAI/models/bart_scratch_multiwoz2.3"
+PATH = "/data/home/justincho/CheckDST/ParlAI/models/bart_scratch_multiwoz2.3"
 # PATH = "/data/home/justincho/CheckDST/ParlAI/models/bart_pft_multiwoz2.3"
 
 runs = Path(PATH).glob("*sd[0-9]")
@@ -15,7 +15,7 @@ def find_step(fn):
     if step:
         step = int(step)
     else:
-        step = float('inf')
+        step = float("inf")
     return step
 
 
@@ -52,10 +52,10 @@ for run in runs:
 
     CMD = ""
     seed = find_seed(run)
-    
-    if seed != "4": 
-        continue 
-    
+
+    if seed != "4":
+        continue
+
     print(run, seed)
     checkpoints = [
         fn
@@ -68,7 +68,7 @@ for run in runs:
     # pprint(list(checkpoints))
     for ckpt in checkpoints:
 
-        trainstat_fn = ckpt.parent / (ckpt.name + '.trainstats')
+        trainstat_fn = ckpt.parent / (ckpt.name + ".trainstats")
         # print(trainstat_fn)
 
         with trainstat_fn.open("r") as f:
@@ -142,7 +142,7 @@ parlai eval_model \
         f.write(CMD)
 
     # run the command
-    full_cmd = f'sbatch -J {JOBNAME} {str(new_script_fn)}'
+    full_cmd = f"sbatch -J {JOBNAME} {str(new_script_fn)}"
     subprocess.run(shlex.split(full_cmd))
 
     # delete file

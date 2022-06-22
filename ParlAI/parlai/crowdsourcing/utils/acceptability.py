@@ -13,11 +13,11 @@ from parlai.utils.safety import OffensiveStringMatcher
 class AcceptabilityChecker:
 
     ALL_VIOLATION_TYPES = [
-        'min_words',
-        'penalize_greetings',
-        'all_caps',
-        'exact_match',
-        'safety',
+        "min_words",
+        "penalize_greetings",
+        "all_caps",
+        "exact_match",
+        "safety",
     ]
     DEFAULT_MIN_WORDS_THRESHOLD = 3
 
@@ -50,36 +50,36 @@ class AcceptabilityChecker:
                 for violation_type in violation_types
             ]
         ):
-            raise ValueError('One or more violation types are unrecognized!')
+            raise ValueError("One or more violation types are unrecognized!")
 
         if len(messages) == 0:
             # There may have been a disconnect, so in this case let's give them a pass
-            return ''
+            return ""
 
         violations = []
 
         # Do messages have the minimum acceptable average number of words?
-        if 'min_words' in violation_types:
+        if "min_words" in violation_types:
             total_num_words = sum([len(message.split()) for message in messages])
             if total_num_words / len(messages) < self.min_words_violation_threshold:
-                violations.append('under_min_length')
+                violations.append("under_min_length")
 
         # Does the first message start with a greeting, indicating that the Turker
         # hasn't understood the directions (i.e. continue along with the previous lines
         # of conversation)? Only penalize the worker who speaks first for this, because
         # the worker who speaks second should not be at fault if the first worker does
         # this and the second just follows along.
-        if 'penalize_greetings' in violation_types:
+        if "penalize_greetings" in violation_types:
             greetings = [
-                'hi',
-                'hii',
-                'hiii',
-                'hiiii',
-                'hai',
-                'hello',
-                'hey',
-                'howdy',
-                'greetings',
+                "hi",
+                "hii",
+                "hiii",
+                "hiiii",
+                "hai",
+                "hello",
+                "hey",
+                "howdy",
+                "greetings",
             ]
             if is_worker_0 and (
                 sum(
@@ -90,46 +90,46 @@ class AcceptabilityChecker:
                 )
                 > 0
             ):
-                violations.append('starts_with_greeting')
+                violations.append("starts_with_greeting")
 
         # Does the Turker tend to speak in all caps?
-        if 'all_caps' in violation_types:
+        if "all_caps" in violation_types:
             num_all_caps = sum([message == message.upper() for message in messages])
             if num_all_caps >= 2 or (num_all_caps == 1 and len(messages) == 1):
-                violations.append('too_much_all_caps')
+                violations.append("too_much_all_caps")
 
         # Are later messages an exact match of the first one?
-        if 'exact_match' in violation_types:
+        if "exact_match" in violation_types:
             if len(messages) >= 2:
                 c = messages[0]
                 if exact_match(c, messages[1:]):
-                    violations.append('exact_match')
+                    violations.append("exact_match")
 
         # Do the messages not pass the safety classifier?
-        if 'safety' in violation_types:
+        if "safety" in violation_types:
             for idx, message in enumerate(messages):
                 if self.offensive_lang_detector.contains_offensive_language(message):
-                    violations.append(f'unsafe:{idx+1:d}')
+                    violations.append(f"unsafe:{idx+1:d}")
                     # The messages are 1-indexed
 
-        return ','.join(violations)
+        return ",".join(violations)
 
 
 def normalize_answer(s):
     """
     Lower text and remove punctuation, articles and extra whitespace.
     """
-    re_art = re.compile(r'\b(a|an|the)\b')
+    re_art = re.compile(r"\b(a|an|the)\b")
     re_punc = re.compile(r'[!"#$%&()*+,-./:;<=>?@\[\]\\^`{|}~_\']')
 
     def remove_articles(text):
-        return re_art.sub(' ', text)
+        return re_art.sub(" ", text)
 
     def white_space_fix(text):
-        return ' '.join(text.split())
+        return " ".join(text.split())
 
     def remove_punc(text):
-        return re_punc.sub(' ', text)  # convert punctuation to spaces
+        return re_punc.sub(" ", text)  # convert punctuation to spaces
 
     def lower(text):
         return text.lower()

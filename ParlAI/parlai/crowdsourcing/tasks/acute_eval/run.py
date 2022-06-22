@@ -45,18 +45,18 @@ class ScriptConfig(MTurkRunScriptConfig):
     monitoring_log_rate: int = field(
         default=30,
         metadata={
-            'help': 'Frequency in seconds of logging the monitoring of the crowdsourcing task'
+            "help": "Frequency in seconds of logging the monitoring of the crowdsourcing task"
         },
     )
 
 
-register_script_config(name='scriptconfig', module=ScriptConfig)
+register_script_config(name="scriptconfig", module=ScriptConfig)
 
 
 @hydra.main(config_path="hydra_configs", config_name="scriptconfig")
 def main(cfg: DictConfig) -> None:
     db, cfg = load_db_and_process_config(cfg)
-    print(f'*** RUN ID: {cfg.mephisto.task.task_name} ***')
+    print(f"*** RUN ID: {cfg.mephisto.task.task_name} ***")
     operator = Operator(db)
     operator.validate_and_run_config(run_config=cfg.mephisto, shared_state=None)
     operator.wait_for_runs_then_shutdown(

@@ -20,12 +20,12 @@ class BiasAgentTrait(object):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         grp = super().add_cmdline_args(parser, partial_opt=partial_opt)
-        grp.add_argument('--bias-class', type=str, default='f0m0')
+        grp.add_argument("--bias-class", type=str, default="f0m0")
         return parser
 
     def get_temp_history(self, observation):
         _ = observation  # Unused
-        return ' ' + self.opt['bias_class']
+        return " " + self.opt["bias_class"]
 
 
 class BiasAgent(BiasAgentTrait, TransformerGeneratorAgent):

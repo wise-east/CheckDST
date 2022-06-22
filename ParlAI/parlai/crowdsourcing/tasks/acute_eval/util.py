@@ -46,9 +46,9 @@ def get_hashed_combo_path(
         root_dir,
         subdir,
         hashlib.sha1(
-            '___and___'.join(
+            "___and___".join(
                 [f"{m1}vs{m2}.{task.replace(':', '_')}" for m1, m2 in sorted_combos]
-            ).encode('utf-8')
+            ).encode("utf-8")
         ).hexdigest()[:10],
     )
     return path
@@ -60,8 +60,8 @@ class AbstractFastAcuteTest(AbstractOneTurnCrowdsourcingTest):
     """
 
     TASK_DIRECTORY = TASK_DIRECTORY
-    MODELS = ['model1', 'model2']
-    MODEL_STRING = ','.join(MODELS)
+    MODELS = ["model1", "model2"]
+    MODEL_STRING = ",".join(MODELS)
     TASK_DATA = {
         "final_data": [
             {"speakerChoice": "human_as_model", "textReason": "Makes more sense"},
@@ -78,36 +78,36 @@ class AbstractFastAcuteTest(AbstractOneTurnCrowdsourcingTest):
         """
         # TODO: clean this up when Hydra has support for recursive defaults
         return [
-            '+mephisto.blueprint.acute_eval_type=engaging',
-            'mephisto.blueprint.block_on_onboarding_fail=False',
-            '+mephisto.blueprint.matchups_per_pair=60',
-            '+mephisto.blueprint.num_self_chats=5',
-            f'+mephisto.blueprint.onboarding_path={self.TASK_DIRECTORY}/task_config/onboarding.json',
-            f'+mephisto.blueprint.root_dir={root_dir}',
-            '+mephisto.blueprint.sufficient_matchups_multiplier=2',
-            '+mephisto.blueprint.task=blended_skill_talk',
-            'mephisto.task.task_name=acute_eval_test',
+            "+mephisto.blueprint.acute_eval_type=engaging",
+            "mephisto.blueprint.block_on_onboarding_fail=False",
+            "+mephisto.blueprint.matchups_per_pair=60",
+            "+mephisto.blueprint.num_self_chats=5",
+            f"+mephisto.blueprint.onboarding_path={self.TASK_DIRECTORY}/task_config/onboarding.json",
+            f"+mephisto.blueprint.root_dir={root_dir}",
+            "+mephisto.blueprint.sufficient_matchups_multiplier=2",
+            "+mephisto.blueprint.task=blended_skill_talk",
+            "mephisto.task.task_name=acute_eval_test",
         ]
 
     def test_agent_state(self, setup_teardown, data_regression: DataRegressionFixture):
         outputs = setup_teardown
-        self._check_agent_state(state=outputs['state'], data_regression=data_regression)
+        self._check_agent_state(state=outputs["state"], data_regression=data_regression)
 
     def test_all_convo_pairs_txt(
         self, setup_teardown, file_regression: FileRegressionFixture
     ):
         outputs = setup_teardown
         self._check_file_contents(
-            results_folder=outputs['results_folder'],
-            file_suffix='all_convo_pairs.txt',
+            results_folder=outputs["results_folder"],
+            file_suffix="all_convo_pairs.txt",
             file_regression=file_regression,
         )
 
     def test_all_html(self, setup_teardown, file_regression: FileRegressionFixture):
         outputs = setup_teardown
         self._check_file_contents(
-            results_folder=outputs['results_folder'],
-            file_suffix='all.html',
+            results_folder=outputs["results_folder"],
+            file_suffix="all.html",
             file_regression=file_regression,
         )
 
@@ -116,8 +116,8 @@ class AbstractFastAcuteTest(AbstractOneTurnCrowdsourcingTest):
     ):
         outputs = setup_teardown
         self._check_dataframe(
-            results_folder=outputs['results_folder'],
-            file_suffix='full.csv',
+            results_folder=outputs["results_folder"],
+            file_suffix="full.csv",
             dataframe_regression=dataframe_regression,
         )
 
@@ -126,8 +126,8 @@ class AbstractFastAcuteTest(AbstractOneTurnCrowdsourcingTest):
     ):
         outputs = setup_teardown
         self._check_dataframe(
-            results_folder=outputs['results_folder'],
-            file_suffix='grid.csv',
+            results_folder=outputs["results_folder"],
+            file_suffix="grid.csv",
             dataframe_regression=dataframe_regression,
         )
 
@@ -136,8 +136,8 @@ class AbstractFastAcuteTest(AbstractOneTurnCrowdsourcingTest):
     ):
         outputs = setup_teardown
         self._check_dataframe(
-            results_folder=outputs['results_folder'],
-            file_suffix='grid.winners_as_rows.csv',
+            results_folder=outputs["results_folder"],
+            file_suffix="grid.winners_as_rows.csv",
             dataframe_regression=dataframe_regression,
         )
 
@@ -146,16 +146,16 @@ class AbstractFastAcuteTest(AbstractOneTurnCrowdsourcingTest):
     ):
         outputs = setup_teardown
         self._check_dataframe(
-            results_folder=outputs['results_folder'],
-            file_suffix='ratings_per_worker.csv',
+            results_folder=outputs["results_folder"],
+            file_suffix="ratings_per_worker.csv",
             dataframe_regression=dataframe_regression,
         )
 
     def test_reason_html(self, setup_teardown, file_regression: FileRegressionFixture):
         outputs = setup_teardown
         self._check_file_contents(
-            results_folder=outputs['results_folder'],
-            file_suffix='reason.html',
+            results_folder=outputs["results_folder"],
+            file_suffix="reason.html",
             file_regression=file_regression,
         )
 
@@ -164,8 +164,8 @@ class AbstractFastAcuteTest(AbstractOneTurnCrowdsourcingTest):
     ):
         outputs = setup_teardown
         self._check_dataframe(
-            results_folder=outputs['results_folder'],
-            file_suffix='significance.csv',
+            results_folder=outputs["results_folder"],
+            file_suffix="significance.csv",
             dataframe_regression=dataframe_regression,
         )
 
@@ -193,7 +193,7 @@ class AbstractFastAcuteTest(AbstractOneTurnCrowdsourcingTest):
         with open(file_path) as f:
             # correct whitespace to deal with fbcode demanding disk files not
             # have many trailing newlines
-            contents = f.read().rstrip('\n') + '\n'
+            contents = f.read().rstrip("\n") + "\n"
         file_regression.check(contents=contents)
 
     def _get_matching_file_path(self, results_folder: str, file_suffix: str) -> str:

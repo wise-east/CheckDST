@@ -46,8 +46,8 @@ def on_message(ws, message):
         return
     incoming_message = json.loads(message)
     print("\033[0m\n")
-    print("Bot: " + incoming_message['text'])
-    quick_replies = incoming_message.get('quick_replies')
+    print("Bot: " + incoming_message["text"])
+    quick_replies = incoming_message.get("quick_replies")
     if quick_replies is not None and len(quick_replies) > 0:
         print(f"\nOptions: [{'|'.join(quick_replies)}]")
     print("\033[44m\n")
@@ -85,8 +85,8 @@ def _run(ws, id):
         x = input("\033[44m Me: ")
         print("\033[0m", end="")
         data = {}
-        data['id'] = id
-        data['text'] = x
+        data["id"] = id
+        data["text"] = x
         if x == "[DONE]":
             RUNNING = False
         json_data = json.dumps(data)
@@ -94,7 +94,7 @@ def _run(ws, id):
         time.sleep(1)
         if x == "[DONE]":
             time.sleep(1)
-            data['text'] = 'EXIT'
+            data["text"] = "EXIT"
             ws.send(json.dumps(data))
             break
     ws.close()
@@ -117,16 +117,16 @@ def setup_args():
     :return: A parser that parses the port from commandline arguments.
     """
     parser = ParlaiParser(False, False)
-    parser_grp = parser.add_argument_group('Terminal Chat')
+    parser_grp = parser.add_argument_group("Terminal Chat")
     parser_grp.add_argument(
-        '--port', default=35496, type=int, help='Port to run the terminal chat server'
+        "--port", default=35496, type=int, help="Port to run the terminal chat server"
     )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     opt = setup_args()
-    port = opt.get('port', 34596)
+    port = opt.get("port", 34596)
     print("Connecting to port: ", port)
     ws = websocket.WebSocketApp(
         "ws://localhost:{}/websocket".format(port),

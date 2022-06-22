@@ -23,8 +23,8 @@ from .build import build
 
 def _path(opt):
     # set up path to data (specific to each dataset)
-    data_dir = os.path.join(opt['datapath'], 'google_sgd_dst')
-    data_path = os.path.join(data_dir, 'data_reformat.json')
+    data_dir = os.path.join(opt["datapath"], "google_sgd_dst")
+    data_path = os.path.join(data_dir, "data_reformat.json")
 
     # build the data if it does not exist
     build(opt)
@@ -42,20 +42,20 @@ class Google_SGD_DST_Teacher(FixedDialogTeacher):
 
     def __init__(self, opt: Opt, shared=None):
         super().__init__(opt, shared)
-        opt['datafile'], jsons_path = _path(opt)
-        self.id = 'google_sgd_dst'
+        opt["datafile"], jsons_path = _path(opt)
+        self.id = "google_sgd_dst"
         # import pdb; pdb.set_trace()
-        self.seed = opt.get('rand_seed', 0)
+        self.seed = opt.get("rand_seed", 0)
         # # # reading args
-        self.decode_all = opt.get('decode_all', False)
-        self.just_test = opt.get('just_test', False)
-        self.val_reduced = opt.get('val_reduced', True)
-        self.test_reduced = opt.get('test_reduced', True)
-        self.use_prompts = opt.get('use_prompts', True)
+        self.decode_all = opt.get("decode_all", False)
+        self.just_test = opt.get("just_test", False)
+        self.val_reduced = opt.get("val_reduced", True)
+        self.test_reduced = opt.get("test_reduced", True)
+        self.use_prompts = opt.get("use_prompts", True)
 
         random.seed(self.seed)
 
-        self._setup_data(opt['datafile'], jsons_path)
+        self._setup_data(opt["datafile"], jsons_path)
         self.reset()
 
     def _load_json(self, file_path):
@@ -65,33 +65,33 @@ class Google_SGD_DST_Teacher(FixedDialogTeacher):
 
     @classmethod
     def add_cmdline_args(cls, argparser, partial_opt):
-        agent = argparser.add_argument_group('Google SGD DST Teacher Args')
+        agent = argparser.add_argument_group("Google SGD DST Teacher Args")
         agent.add_argument(
-            '--just_test',
+            "--just_test",
             type=bool,
             default=False,
             help="True if one would like to test agents with small amount of data (default: False).",
         )
         agent.add_argument(
-            '--val_reduced',
+            "--val_reduced",
             type=bool,
             default=False,
             help="True if one would like to validate on limited set: 1000 episodes",
         )
         agent.add_argument(
-            '--test_reduced',
+            "--test_reduced",
             type=bool,
             default=False,
             help="True if one would like to validate on limited set: 10000 episodes",
         )
         agent.add_argument(
-            '--rand_seed',
+            "--rand_seed",
             type=int,
             default=0,
             help="specify to set random seed (default: 0).",
         )
         agent.add_argument(
-            '--use_prompts',
+            "--use_prompts",
             type=bool,
             default=True,
             help="add natural text instructions for the DST task.",
@@ -102,13 +102,13 @@ class Google_SGD_DST_Teacher(FixedDialogTeacher):
         # print('loading: ' + data_path)
 
         # # # loading directly from test file or val file
-        if self.datatype.startswith('test'):
+        if self.datatype.startswith("test"):
             test_path = data_path.replace(".json", "_test.json")
             test_data = self._load_json(test_path)
             self.messages = list(test_data.values())
             if self.test_reduced:
                 self.messages = self.messages[:10000]
-        elif self.datatype.startswith('valid'):
+        elif self.datatype.startswith("valid"):
             valid_path = data_path.replace(".json", "_dev.json")
             valid_data = self._load_json(valid_path)
             self.messages = list(valid_data.values())
@@ -140,7 +140,7 @@ class Google_SGD_DST_Teacher(FixedDialogTeacher):
 
     def format_context_and_label(self, context, label):
         """
-        Transform task to include an instruction with custom labels that are all in natural text 
+        Transform task to include an instruction with custom labels that are all in natural text
         """
 
         templates = [
@@ -199,8 +199,8 @@ class Google_SGD_DST_Teacher(FixedDialogTeacher):
 
     def get(self, episode_idx, entry_idx=0):
         # log_idx = entry_idx
-        entry = self.messages[episode_idx]['context']
-        label = self.messages[episode_idx]['slots_inf']
+        entry = self.messages[episode_idx]["context"]
+        label = self.messages[episode_idx]["slots_inf"]
         # entry = self.messages[episode_idx][entry_idx]['context']
         # episode_done = entry_idx == len(self.messages[episode_idx]) - 1
         if self.use_prompts:
@@ -209,11 +209,11 @@ class Google_SGD_DST_Teacher(FixedDialogTeacher):
             context, label = entry, label
         episode_done = True
         action = {
-            'id': self.id,
-            'text': context,
-            'episode_done': episode_done,
-            'labels': [label],
-            'turn_num': self.messages[episode_idx]['turn_num'],
+            "id": self.id,
+            "text": context,
+            "episode_done": episode_done,
+            "labels": [label],
+            "turn_num": self.messages[episode_idx]["turn_num"],
             # 'labels': [self.messages[episode_idx][entry_idx]['slots_inf']],
         }
         return action
@@ -238,7 +238,7 @@ class Google_SGD_DST_Teacher(FixedDialogTeacher):
     def custom_evaluation(
         self, teacher_action: Message, labels, model_response: Message
     ):
-        resp = model_response.get('text')
+        resp = model_response.get("text")
         if not resp:
             return
 
@@ -249,7 +249,7 @@ class Google_SGD_DST_Teacher(FixedDialogTeacher):
         slots_pred = self._extract_slot_from_string(resp)
 
         self.metrics.add(
-            'joint goal acc', AverageMetric(set(slots_truth) == set(slots_pred))
+            "joint goal acc", AverageMetric(set(slots_truth) == set(slots_pred))
         )
         if set(slots_truth) != set(slots_pred):
             logging.info(f"slots_truth: {slots_truth}\nslots_pred: {slots_pred}")

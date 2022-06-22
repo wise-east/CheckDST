@@ -8,12 +8,12 @@ from parlai.utils.testing import AutoTeacherTest
 
 
 class TestDefaultTeacher(AutoTeacherTest):
-    task = 'babi'
+    task = "babi"
 
 
 class TestAll1kTeacher(AutoTeacherTest):
-    task = 'babi:all1k'
+    task = "babi:all1k"
 
 
 class TestAll10kTeacher(AutoTeacherTest):
-    task = 'babi:all10k'
+    task = "babi:all10k"

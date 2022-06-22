@@ -17,7 +17,7 @@ from parlai.core.opt import Opt
 from parlai.utils import logging
 
 
-CONTENT = 'content'
+CONTENT = "content"
 DEFAULT_NUM_TO_RETRIEVE = 5
 
 
@@ -29,7 +29,7 @@ class RetrieverAPI(ABC):
     """
 
     def __init__(self, opt: Opt):
-        self.skip_query_token = opt['skip_retrieval_token']
+        self.skip_query_token = opt["skip_retrieval_token"]
 
     @abstractmethod
     def retrieve(
@@ -62,8 +62,8 @@ class SearchEngineRetrieverMock(RetrieverAPI):
                 for idx in range(num_ret):
                     doc = self.create_content_dict(
                         f'content {idx} for query "{query}"',
-                        url=f'url_{idx}',
-                        title=f'title_{idx}',
+                        url=f"url_{idx}",
+                        title=f"title_{idx}",
                     )
                     docs.append(doc)
             all_docs.append(docs)
@@ -80,28 +80,28 @@ class SearchEngineRetriever(RetrieverAPI):
 
     def __init__(self, opt: Opt):
         super().__init__(opt=opt)
-        self.server_address = self._validate_server(opt.get('search_server'))
+        self.server_address = self._validate_server(opt.get("search_server"))
 
     def _query_search_server(self, query_term, n):
         server = self.server_address
-        req = {'q': query_term, 'n': n}
-        logging.debug(f'sending search request to {server}')
+        req = {"q": query_term, "n": n}
+        logging.debug(f"sending search request to {server}")
         server_response = requests.post(server, data=req)
         resp_status = server_response.status_code
         if resp_status == 200:
-            return server_response.json().get('response', None)
+            return server_response.json().get("response", None)
         logging.error(
-            f'Failed to retrieve data from server! Search server returned status {resp_status}'
+            f"Failed to retrieve data from server! Search server returned status {resp_status}"
         )
 
     def _validate_server(self, address):
         if not address:
-            raise ValueError('Must provide a valid server for search')
-        if address.startswith('http://') or address.startswith('https://'):
+            raise ValueError("Must provide a valid server for search")
+        if address.startswith("http://") or address.startswith("https://"):
             return address
-        PROTOCOL = 'http://'
+        PROTOCOL = "http://"
         logging.warning(f'No portocol provided, using "{PROTOCOL}"')
-        return f'{PROTOCOL}{address}'
+        return f"{PROTOCOL}{address}"
 
     def _retrieve_single(self, search_query: str, num_ret: int):
         if search_query == self.skip_query_token:
@@ -112,14 +112,14 @@ class SearchEngineRetriever(RetrieverAPI):
         if not search_server_resp:
             logging.warning(
                 f'Server search did not produce any results for "{search_query}" query.'
-                ' returning an empty set of results for this query.'
+                " returning an empty set of results for this query."
             )
             return retrieved_docs
 
         for rd in search_server_resp:
-            url = rd.get('url', '')
-            title = rd.get('title', '')
-            sentences = [s.strip() for s in rd[CONTENT].split('\n') if s and s.strip()]
+            url = rd.get("url", "")
+            title = rd.get("title", "")
+            sentences = [s.strip() for s in rd[CONTENT].split("\n") if s and s.strip()]
             retrieved_docs.append(
                 self.create_content_dict(url=url, title=title, content=sentences)
             )

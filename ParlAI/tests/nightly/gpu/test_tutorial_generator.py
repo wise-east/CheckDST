@@ -12,14 +12,14 @@ class TestTutorialTransformerGenerator(unittest.TestCase):
     def test_ppl(self):
         valid, _ = testing_utils.eval_model(
             {
-                'model': 'transformer/generator',
-                'model_file': 'zoo:tutorial_transformer_generator/model',
-                'task': 'dailydialog',
-                'skip_generation': 'true',
-                'num_examples': 512,
-                'batchsize': 32,
+                "model": "transformer/generator",
+                "model_file": "zoo:tutorial_transformer_generator/model",
+                "task": "dailydialog",
+                "skip_generation": "true",
+                "num_examples": 512,
+                "batchsize": 32,
             },
             skip_test=True,
         )
-        self.assertAlmostEqual(valid['ppl'], 19.59, places=2)
-        self.assertAlmostEqual(valid['token_acc'], 0.4235, places=4)
+        self.assertAlmostEqual(valid["ppl"], 19.59, places=2)
+        self.assertAlmostEqual(valid["token_acc"], 0.4235, places=4)

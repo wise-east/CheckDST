@@ -16,33 +16,33 @@ import json
 class MWSCTeacher(DialogTeacher):
     def __init__(self, opt, shared=None):
         # store datatype
-        self.dt = opt['datatype'].split(':')[0]
+        self.dt = opt["datatype"].split(":")[0]
 
         # store identifier for the teacher in the dialog
-        self.id = 'mwsc'
+        self.id = "mwsc"
 
         build(opt)
-        self.datapath = os.path.join(opt['datapath'], 'MWSC')
-        opt['datafile'] = self._path(opt)
+        self.datapath = os.path.join(opt["datapath"], "MWSC")
+        opt["datafile"] = self._path(opt)
 
         super().__init__(opt, shared)
 
     def _path(self, opt):
         build(opt)
-        dt = opt['datatype'].split(':')[0]
-        return os.path.join(self.datapath, dt + '.json')
+        dt = opt["datatype"].split(":")[0]
+        return os.path.join(self.datapath, dt + ".json")
 
     def setup_data(self, input_path):
-        print('loading: ' + input_path)
+        print("loading: " + input_path)
         new_episode = True
 
         with PathManager.open(input_path) as file:
             for l in file:
                 schema_line = json.loads(l.strip())
-                answer = schema_line.get('answer')
-                question = schema_line.get('question')
-                context = schema_line.get('context')
-                yield (context + '\n' + question, [answer], None, None), new_episode
+                answer = schema_line.get("answer")
+                question = schema_line.get("question")
+                context = schema_line.get("context")
+                yield (context + "\n" + question, [answer], None, None), new_episode
 
 
 class DefaultTeacher(MWSCTeacher):

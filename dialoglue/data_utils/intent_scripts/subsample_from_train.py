@@ -17,15 +17,9 @@ _HEADER = ["text", "category"]
 
 def _get_script_flags():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--train_file", help="Path to train.csv", required=True)
     parser.add_argument(
-        "--train_file",
-        help="Path to train.csv",
-        required=True
-    )
-    parser.add_argument(
-        "--n_per_class",
-        help="Number of examples subsample per class",
-        required=True
+        "--n_per_class", help="Number of examples subsample per class", required=True
     )
     return parser.parse_args()
 
@@ -56,16 +50,13 @@ def _main():
         assert n_this_label >= n
 
         label_subsample = np.random.choice(
-            label_indicies.flatten(),
-            replace=False,
-            size=n
+            label_indicies.flatten(), replace=False, size=n
         )
         total_subsample = np.hstack((total_subsample, label_subsample))
 
     new_dataset = np.vstack((np.array(_HEADER), data[total_subsample]))
     _write_data_into_file(
-        path=fname.replace("train.csv", "train_{}.csv".format(n)),
-        rows=new_dataset
+        path=fname.replace("train.csv", "train_{}.csv".format(n)), rows=new_dataset
     )
 
 

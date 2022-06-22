@@ -18,7 +18,7 @@ import parlai.utils.io as io_utils
 try:
     import torch
 except ImportError:
-    raise ImportError('Parlai requires pytorch. Go to http://pytorch.org to install.')
+    raise ImportError("Parlai requires pytorch. Go to http://pytorch.org to install.")
 
 import torch.optim
 
@@ -298,11 +298,11 @@ def trainable_parameters(model: torch.nn.Module) -> int:
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
-Chunk = TypeVar('Chunk')
+Chunk = TypeVar("Chunk")
 
 
 PipelineWorkItem = namedtuple(
-    'PipelineWorkItem', ['chunk_idx', 'layer_nos', 'next_device']
+    "PipelineWorkItem", ["chunk_idx", "layer_nos", "next_device"]
 )
 
 
@@ -325,7 +325,7 @@ class PipelineHelper(object):
         self.num_devices = torch.cuda.device_count()
         self.devices = []
         for i in range(self.num_devices):
-            d = f'cuda:{i}'
+            d = f"cuda:{i}"
             self.devices.append(d)
             self.__device_allocations[d] = 0
 
@@ -336,7 +336,7 @@ class PipelineHelper(object):
         Really just used to raise an error message if the user mixes multiprocessing and
         model parallelism.
         """
-        if opt.get('multiprocessing') and not os.environ.get('PARLAI_FORCE_MP'):
+        if opt.get("multiprocessing") and not os.environ.get("PARLAI_FORCE_MP"):
             raise RuntimeError(
                 "It looks like you are trying to mix multiprocessing data "
                 "parallelism (multiprocessing_train or multiprocessing_eval) "
@@ -365,15 +365,15 @@ class PipelineHelper(object):
         # activations (which scale via batchsize), Empirically, I found this
         # heuristic works well enough. The weighting factor of 3 is more or
         # less made up.
-        self.__device_allocations['cuda:0'] += trainable_parameters(model) * 3
+        self.__device_allocations["cuda:0"] += trainable_parameters(model) * 3
 
         model.apply(self._place_modulelist)
         model._apply(self._move_rest_to_cuda0)  # type: ignore
         return model
 
     def _move_rest_to_cuda0(self, parameter: torch.Tensor):
-        if parameter.device.type == 'cpu':
-            return parameter.to('cuda:0')
+        if parameter.device.type == "cpu":
+            return parameter.to("cuda:0")
         else:
             return parameter
 
@@ -381,7 +381,7 @@ class PipelineHelper(object):
         if not isinstance(submodule, torch.nn.ModuleList):
             # not a ModuleList, leave it untouched
             return
-        if getattr(submodule, 'model_parallel_exempt', False):
+        if getattr(submodule, "model_parallel_exempt", False):
             return
 
         assert isinstance(submodule, torch.nn.ModuleList)  # for typechecker
@@ -398,7 +398,7 @@ class PipelineHelper(object):
         for layer_no, layer in enumerate(layers):
             if layer_no == 0:
                 # hard code the first layer to be 0.
-                mostfree = 'cuda:0'
+                mostfree = "cuda:0"
             else:
                 # otherwise dynamic allocation
                 mostfree = min(self.devices, key=keyfunc)
@@ -441,7 +441,7 @@ class PipelineHelper(object):
             return PipelineHelper.guess_split_size(item[0], num_gpus)
         elif isinstance(item, dict):
             return PipelineHelper.guess_split_size(list(item.values())[0], num_gpus)
-        raise TypeError(f'Cannot determine split size for {type(item)}')
+        raise TypeError(f"Cannot determine split size for {type(item)}")
 
     @staticmethod
     def split(item: Chunk, split_size: Optional[int] = None, dim=0) -> List[Chunk]:
@@ -479,11 +479,11 @@ class PipelineHelper(object):
             # comparing tensors to dicts.
             if {} in [x for x in item.values() if isinstance(x, dict)]:
                 raise ValueError(
-                    'Cannot handle a dictionary with an empty dictionary inside.'
+                    "Cannot handle a dictionary with an empty dictionary inside."
                 )
             if () in [x for x in item.values() if isinstance(x, tuple)]:
                 raise ValueError(
-                    'Cannot handle a dictionary with an empty tuple inside.'
+                    "Cannot handle a dictionary with an empty tuple inside."
                 )
 
             # we start with Dict[key,tensor]
@@ -525,7 +525,7 @@ class PipelineHelper(object):
                 for k in keys
             }
         else:
-            raise TypeError(f'Cannot join list of type {type(item0)}')
+            raise TypeError(f"Cannot join list of type {type(item0)}")
 
     @staticmethod
     def chunk_to(chunk: Chunk, device: str) -> Chunk:
@@ -545,7 +545,7 @@ class PipelineHelper(object):
                 k: PipelineHelper.chunk_to(v, device) for k, v in chunk.items()
             }  # type: ignore
         else:
-            raise TypeError('chunk_to only compatible with tensors, tuples or dicts.')
+            raise TypeError("chunk_to only compatible with tensors, tuples or dicts.")
 
     @staticmethod
     def schedule_work_items(layers: torch.nn.ModuleList, chunks: List[Chunk]):
@@ -580,10 +580,10 @@ class PipelineHelper(object):
         # time.
         num_chunks = len(chunks)
         for l in layers:
-            if not hasattr(l, '_mp_gpu'):
+            if not hasattr(l, "_mp_gpu"):
                 raise RuntimeError(
-                    'You must run PipelineHelper.make_parallel on the ModuleList '
-                    'before you can use iterate_layers_chunks.'
+                    "You must run PipelineHelper.make_parallel on the ModuleList "
+                    "before you can use iterate_layers_chunks."
                 )
 
         # devices maps device_idx -> (device, [layer_idx, layer_idx, ...])

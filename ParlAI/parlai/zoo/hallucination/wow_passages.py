@@ -12,11 +12,11 @@ import os.path
 
 
 def download(datapath):
-    ddir = os.path.join(get_model_dir(datapath), 'hallucination')
-    version = 'v1.0'
+    ddir = os.path.join(get_model_dir(datapath), "hallucination")
+    version = "v1.0"
     if not built(ddir, version):
-        opt = {'datapath': datapath, 'model_type': 'wow_passages'}
-        fnames = ['wow_articles.paragraphs.tgz', 'exact.tgz', 'compressed.tgz']
+        opt = {"datapath": datapath, "model_type": "wow_passages"}
+        fnames = ["wow_articles.paragraphs.tgz", "exact.tgz", "compressed.tgz"]
         download_models(
-            opt, fnames, 'hallucination', version=version, use_model_type=True
+            opt, fnames, "hallucination", version=version, use_model_type=True
         )

@@ -24,17 +24,17 @@ class FastAcuteBlueprintArgs(AcuteEvalBlueprintArgs):
     _group: str = field(
         default="FastAcuteBlueprint",
         metadata={
-            'help': """Run all the steps of ACUTE-Eval with one simple command"""
+            "help": """Run all the steps of ACUTE-Eval with one simple command"""
         },
     )
     config_path: str = field(
         default=MISSING,
-        metadata={'help': 'Path to JSON of model types and their parameters'},
+        metadata={"help": "Path to JSON of model types and their parameters"},
     )
-    root_dir: str = field(default=MISSING, metadata={'help': 'Root save folder'})
+    root_dir: str = field(default=MISSING, metadata={"help": "Root save folder"})
     onboarding_path: Optional[str] = field(
         default=None,
-        metadata={'help': 'Path to JSON file of settings for running onboarding'},
+        metadata={"help": "Path to JSON file of settings for running onboarding"},
     )
     models: Optional[str] = field(
         default=None,
@@ -49,42 +49,42 @@ class FastAcuteBlueprintArgs(AcuteEvalBlueprintArgs):
         },
     )
     acute_eval_type: str = field(
-        default='engaging', metadata={"help": "Which evaluation to run for ACUTEs"}
+        default="engaging", metadata={"help": "Which evaluation to run for ACUTEs"}
     )
     matchups_per_pair: int = field(
         default=60,
         metadata={"help": "How many matchups to generate for each pair of models"},
     )
     task: Optional[str] = field(
-        default=None, metadata={'help': 'The ParlAI task used for self-chat'}
+        default=None, metadata={"help": "The ParlAI task used for self-chat"}
     )
     sufficient_matchups_multiplier: int = field(
         default=2,
         metadata={
-            'help': "Multiplier on how many conversation pairs to build. Probably doesn't need to be changed"
+            "help": "Multiplier on how many conversation pairs to build. Probably doesn't need to be changed"
         },
     )
     num_self_chats: int = field(
-        default=100, metadata={'help': "Number of self-chats to run per model"}
+        default=100, metadata={"help": "Number of self-chats to run per model"}
     )
     num_task_data_episodes: int = field(
         default=500,
         metadata={
-            'help': "Number of episodes to save if running ACUTEs on a ParlAI task"
+            "help": "Number of episodes to save if running ACUTEs on a ParlAI task"
         },
     )
     selfchat_max_turns: int = field(
         default=6,
-        metadata={'help': "The number of dialogue turns before self chat ends"},
+        metadata={"help": "The number of dialogue turns before self chat ends"},
     )
     use_existing_self_chat_files: bool = field(
         default=False,
-        metadata={'help': "Use any existing self-chat files without prompting"},
+        metadata={"help": "Use any existing self-chat files without prompting"},
     )
     randomize_conversations: bool = field(
         default=True,
         metadata={
-            'help': "Randomize conversations used for match-ups or take conversations in order"
+            "help": "Randomize conversations used for match-ups or take conversations in order"
         },
     )
 

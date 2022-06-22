@@ -14,38 +14,38 @@ import os
 
 def _path(opt):
     build(opt)
-    dt = opt['datatype'].split(':')[0]
+    dt = opt["datatype"].split(":")[0]
 
-    if dt == 'valid':
-        dt = 'val'
-    elif dt != 'train' and dt != 'test':
-        raise RuntimeError('Not valid datatype.')
+    if dt == "valid":
+        dt = "val"
+    elif dt != "train" and dt != "test":
+        raise RuntimeError("Not valid datatype.")
 
-    prefix = os.path.join(opt['datapath'], 'CLEVR', 'CLEVR_v1.0')
+    prefix = os.path.join(opt["datapath"], "CLEVR", "CLEVR_v1.0")
     questions_path = os.path.join(
-        prefix, 'questions', 'CLEVR_' + dt + '_questions.json'
+        prefix, "questions", "CLEVR_" + dt + "_questions.json"
     )
-    images_path = os.path.join(prefix, 'images', dt)
+    images_path = os.path.join(prefix, "images", dt)
 
     return questions_path, images_path
 
 
 counts = [str(i) for i in range(11)]
-materials = ['metal', 'rubber']
-sizes = ['small', 'large']
-shapes = ['cube', 'sphere', 'cylinder']
-colors = ['gray', 'blue', 'brown', 'yellow', 'red', 'green', 'purple', 'cyan']
+materials = ["metal", "rubber"]
+sizes = ["small", "large"]
+shapes = ["cube", "sphere", "cylinder"]
+colors = ["gray", "blue", "brown", "yellow", "red", "green", "purple", "cyan"]
 
 
 class DefaultTeacher(DialogTeacher):
     # all possile answers for the questions
-    cands = ['yes', 'no'] + counts + materials + sizes + shapes + colors
+    cands = ["yes", "no"] + counts + materials + sizes + shapes + colors
 
     def __init__(self, opt, shared=None):
-        self.datatype = opt['datatype']
+        self.datatype = opt["datatype"]
         data_path, self.images_path = _path(opt)
-        opt['datafile'] = data_path
-        self.id = 'clevr'
+        opt["datafile"] = data_path
+        self.id = "clevr"
 
         super().__init__(opt, shared)
 
@@ -53,21 +53,21 @@ class DefaultTeacher(DialogTeacher):
         return self.cands
 
     def setup_data(self, path):
-        print('loading: ' + path)
+        print("loading: " + path)
         with PathManager.open(path) as data_file:
             clevr = json.load(data_file)
 
         image_file = None
-        for ques in clevr['questions']:
+        for ques in clevr["questions"]:
             # episode done if first question or image changed
-            new_episode = ques['image_filename'] != image_file
+            new_episode = ques["image_filename"] != image_file
 
             # only show image at beginning of episode
-            image_file = ques['image_filename']
+            image_file = ques["image_filename"]
             img_path = None
             if new_episode:
                 img_path = os.path.join(self.images_path, image_file)
 
-            question = ques['question']
-            answer = [ques['answer']] if ques['split'] != 'test' else None
+            question = ques["question"]
+            answer = [ques["answer"]] if ques["split"] != "test" else None
             yield (question, answer, None, None, img_path), new_episode

@@ -66,7 +66,7 @@ def build_offensive_strings(datapath: str) -> List[str]:
     """
 
     def build():
-        version = 'v1.0'
+        version = "v1.0"
         dpath = os.path.join(datapath, "persona_biases_categories")
         if not build_data.built(dpath, version):
             logging.info(f"building data: {dpath}")

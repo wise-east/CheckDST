@@ -22,7 +22,7 @@ class TestHuggingFaceDict(unittest.TestCase):
         parser.set_defaults(gpt2_size="small", add_special_tokens=True, fp16=True)
         Gpt2DictionaryAgent.add_cmdline_args(parser, partial_opt=None)
         with testing_utils.tempdir() as tmpdir:
-            opt = parser.parse_kwargs(dict_file=os.path.join(tmpdir, 'dict'))
+            opt = parser.parse_kwargs(dict_file=os.path.join(tmpdir, "dict"))
             dict_agent = Gpt2DictionaryAgent(opt)
             oldtokens = dict_agent.txt2vec("Hi VOLDEMORT")
             prevlen = len(dict_agent)
@@ -39,30 +39,30 @@ class TestGpt2(unittest.TestCase):
 
     def _test_batchsize(self, batchsize, add_start_token):
         utterances = [
-            'Just keep swimming -',
-            'I wish I knew how to quit you. -',
+            "Just keep swimming -",
+            "I wish I knew how to quit you. -",
             "I'm going to make him an offer he can't refuse. -",
             "Toto, I've got a feeling we're not in Kansas anymore. -",
         ]
         opt = {
-            'model': 'hugging_face/gpt2',
-            'gpt2_size': 'small',
-            'text_truncate': 16,
-            'label_truncate': 8,
-            'beam_min_length': 8,
-            'inference': 'beam',
-            'beam_size': 1,
-            'add_special_tokens': True,
-            'batchsize': batchsize,
-            'add_start_token': add_start_token,
+            "model": "hugging_face/gpt2",
+            "gpt2_size": "small",
+            "text_truncate": 16,
+            "label_truncate": 8,
+            "beam_min_length": 8,
+            "inference": "beam",
+            "beam_size": 1,
+            "add_special_tokens": True,
+            "batchsize": batchsize,
+            "add_start_token": add_start_token,
         }
         gpt2 = create_agent(opt)
 
         results_single = []
         agents = [gpt2.clone() for _ in utterances]
         for u, a in zip(utterances, agents):
-            a.observe({'text': u, 'episode_done': True})
-            generation = a.act()['text']
+            a.observe({"text": u, "episode_done": True})
+            generation = a.act()["text"]
             results_single.append(generation)
 
         results_batched = []
@@ -71,8 +71,8 @@ class TestGpt2(unittest.TestCase):
             batch = utterances[idx * batchsize : (idx + 1) * batchsize]
             obs = []
             for i, a in enumerate(agents):
-                obs.append(a.observe({'text': batch[i], 'episode_done': True}))
-            generations = [x['text'] for x in gpt2.batch_act(obs)]
+                obs.append(a.observe({"text": batch[i], "episode_done": True}))
+            generations = [x["text"] for x in gpt2.batch_act(obs)]
             results_batched += generations
 
         assert results_single == results_batched
@@ -81,9 +81,9 @@ class TestGpt2(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             create_agent(
                 {
-                    'model': 'hugging_face/gpt2',
-                    'add_special_tokens': False,
-                    'add_start_token': True,
+                    "model": "hugging_face/gpt2",
+                    "add_special_tokens": False,
+                    "add_start_token": True,
                 }
             )
 
@@ -94,7 +94,7 @@ class TestGpt2(unittest.TestCase):
         for add_start_token in [True, False]:
             for batchsize in [1, 2, 4]:
                 with self.subTest(
-                    f'test_batchsize with bs={batchsize} and ast={add_start_token}'
+                    f"test_batchsize with bs={batchsize} and ast={add_start_token}"
                 ):
                     self._test_batchsize(batchsize, add_start_token)
 
@@ -102,49 +102,49 @@ class TestGpt2(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             create_agent(
                 {
-                    'model': 'hugging_face/gpt2',
-                    'add_special_tokens': False,
-                    'batchsize': 2,
+                    "model": "hugging_face/gpt2",
+                    "add_special_tokens": False,
+                    "batchsize": 2,
                 }
             )
 
         opt = {
-            'model': 'hugging_face/gpt2',
-            'gpt2_size': 'small',
-            'text_truncate': 16,
-            'label_truncate': 8,
-            'beam_min_length': 8,
-            'inference': 'beam',
-            'beam_size': 1,
-            'batchsize': 1,
-            'add_special_tokens': False,
-            'fp16': True,
+            "model": "hugging_face/gpt2",
+            "gpt2_size": "small",
+            "text_truncate": 16,
+            "label_truncate": 8,
+            "beam_min_length": 8,
+            "inference": "beam",
+            "beam_size": 1,
+            "batchsize": 1,
+            "add_special_tokens": False,
+            "fp16": True,
         }
         gpt2 = create_agent(opt)
-        gpt2.observe({'text': 'My name is', 'episode_done': True})
+        gpt2.observe({"text": "My name is", "episode_done": True})
         response = gpt2.act()
-        assert response['text'] == " John. I'm a man of"
+        assert response["text"] == " John. I'm a man of"
 
 
 @testing_utils.skipUnlessGPU
 class TestDistributed(unittest.TestCase):
     _base_config = {
-        'task': 'integration_tests:overfit',
-        'model': 'hugging_face/gpt2',
-        'gpt2_size': 'small',
-        'text_truncate': 16,
-        'label_truncate': 8,
-        'beam_min_length': 8,
-        'inference': 'beam',
-        'beam_size': 1,
-        'batchsize': 2,
-        'add_special_tokens': True,
-        'validation_metric': 'ppl',
-        'fp16': True,
+        "task": "integration_tests:overfit",
+        "model": "hugging_face/gpt2",
+        "gpt2_size": "small",
+        "text_truncate": 16,
+        "label_truncate": 8,
+        "beam_min_length": 8,
+        "inference": "beam",
+        "beam_size": 1,
+        "batchsize": 2,
+        "add_special_tokens": True,
+        "validation_metric": "ppl",
+        "fp16": True,
     }
 
     def setUp(self):
-        print(f'[Setting up test {self._testMethodName}]')
+        print(f"[Setting up test {self._testMethodName}]")
 
     def _forced_parse(self, parser, opt):
         # TODO: Kill this after dictionaries build correctly
@@ -160,10 +160,10 @@ class TestDistributed(unittest.TestCase):
 
     def _distributed_train_model(self, opt):
         with testing_utils.tempdir() as tmpdir:
-            if 'model_file' not in opt:
-                opt['model_file'] = os.path.join(tmpdir, 'model')
-            if 'dict_file' not in opt:
-                opt['dict_file'] = os.path.join(tmpdir, 'model.dict')
+            if "model_file" not in opt:
+                opt["model_file"] = os.path.join(tmpdir, "model")
+            if "dict_file" not in opt:
+                opt["dict_file"] = os.path.join(tmpdir, "model.dict")
 
             parser = mp_train.setup_args()
             # TODO: Kill this after dictionaries build correctly
@@ -180,16 +180,16 @@ class TestDistributed(unittest.TestCase):
     @testing_utils.retry()
     def test_distributed(self):
         config = copy.deepcopy(self._base_config)
-        config['num_epochs'] = 50
-        config['task'] = 'integration_tests:overfit'
-        config['batchsize'] = 2
-        config['dropout'] = 0.0
-        config['attention_dropout'] = 0.0
-        config['learningrate'] = 1.0
-        config['momentum'] = 0.90
-        config['skip_generation'] = True
-        config['fp16'] = True
+        config["num_epochs"] = 50
+        config["task"] = "integration_tests:overfit"
+        config["batchsize"] = 2
+        config["dropout"] = 0.0
+        config["attention_dropout"] = 0.0
+        config["learningrate"] = 1.0
+        config["momentum"] = 0.90
+        config["skip_generation"] = True
+        config["fp16"] = True
         valid, test = self._distributed_train_model(config)
 
-        self.assertLessEqual(valid['ppl'], 10)
-        self.assertLessEqual(test['ppl'], 10)
+        self.assertLessEqual(valid["ppl"], 10)
+        self.assertLessEqual(test["ppl"], 10)

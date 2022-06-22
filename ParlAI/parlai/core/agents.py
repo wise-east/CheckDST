@@ -54,8 +54,8 @@ from parlai.utils.io import PathManager
 
 
 NOCOPY_ARGS = [
-    'datapath',  # never use the datapath from an opt dump
-    'batchindex',  # this saved variable can cause trouble if we switch to BS=1 at test time
+    "datapath",  # never use the datapath from an opt dump
+    "batchindex",  # this saved variable can cause trouble if we switch to BS=1 at test time
 ]
 
 
@@ -65,9 +65,9 @@ class Agent(object):
     """
 
     def __init__(self, opt: Opt, shared=None):
-        if not hasattr(self, 'id'):
-            self.id = 'agent'
-        if not hasattr(self, 'opt'):
+        if not hasattr(self, "id"):
+            self.id = "agent"
+        if not hasattr(self, "opt"):
             self.opt = copy.deepcopy(opt)
         self.observation = None
 
@@ -82,12 +82,12 @@ class Agent(object):
         """
         Return an observation/action dict based upon given observation.
         """
-        if hasattr(self, 'observation') and self.observation is not None:
-            logging.info(f'agent received observation:\n{self.observation}')
+        if hasattr(self, "observation") and self.observation is not None:
+            logging.info(f"agent received observation:\n{self.observation}")
 
         t = {}
-        t['text'] = 'hello, teacher!'
-        logging.info(f'agent sending message:\n{t}')
+        t["text"] = "hello, teacher!"
+        logging.info(f"agent sending message:\n{t}")
         return t
 
     def getID(self):
@@ -146,8 +146,8 @@ class Agent(object):
         avoiding providing pointers to large objects to all agents in a batch.
         """
         shared = {}
-        shared['class'] = type(self)
-        shared['opt'] = self.opt
+        shared["class"] = type(self)
+        shared["opt"] = self.opt
         return shared
 
     def shutdown(self):
@@ -177,15 +177,15 @@ class Agent(object):
             observation = Message(text=text_or_message, **other_message_fields)
         else:
             observation = Message(**text_or_message, **other_message_fields)
-            if 'text' not in observation:
-                raise RuntimeError('The agent needs a \'text\' field in the message.')
+            if "text" not in observation:
+                raise RuntimeError("The agent needs a 'text' field in the message.")
 
-        if 'episode_done' not in observation:
-            observation['episode_done'] = True
+        if "episode_done" not in observation:
+            observation["episode_done"] = True
         agent = self.clone()
         agent.observe(observation)
         response = agent.act()
-        return response['text']
+        return response["text"]
 
     def batch_respond(self, messages: List[Message]) -> List[str]:
         """
@@ -203,12 +203,12 @@ class Agent(object):
         observations = []
         agents = []
         for i, message in enumerate(messages):
-            if 'text' not in message:
+            if "text" not in message:
                 raise RuntimeError(
-                    'The agent needs a \'text\' field in the {}th message.'.format(i)
+                    "The agent needs a 'text' field in the {}th message.".format(i)
                 )
-            if 'episode_done' not in message:
-                message['episode_done'] = True
+            if "episode_done" not in message:
+                message["episode_done"] = True
             agent = self.clone()
             agents.append(agent)
             observations.append(agent.observe(message))
@@ -217,7 +217,7 @@ class Agent(object):
         for agent, resp in zip(agents, agent_acts):
             if hasattr(agent, "self_observe"):
                 agent.self_observe(resp)
-            response.append(resp['text'])
+            response.append(resp["text"])
         return response
 
     @classmethod
@@ -268,10 +268,10 @@ def compare_init_model_opts(opt: Opt, curr_opt: Opt):
     """
     Print loud warning when `init_model` opts differ from previous configuration.
     """
-    if opt.get('init_model') is None:
+    if opt.get("init_model") is None:
         return
-    opt['init_model'] = modelzoo_path(opt['datapath'], opt['init_model'])
-    optfile = opt['init_model'] + '.opt'
+    opt["init_model"] = modelzoo_path(opt["datapath"], opt["init_model"])
+    optfile = opt["init_model"] + ".opt"
     if not PathManager.exists(optfile):
         return
     init_model_opt = Opt.load(optfile)
@@ -279,12 +279,12 @@ def compare_init_model_opts(opt: Opt, curr_opt: Opt):
     extra_opts = {}
     different_opts = {}
     exempt_opts = [
-        'model_file',
-        'dict_file',
-        'override',
-        'starttime',
-        'init_model',
-        'batchindex',
+        "model_file",
+        "dict_file",
+        "override",
+        "starttime",
+        "init_model",
+        "batchindex",
     ]
 
     # search through init model opts
@@ -296,7 +296,7 @@ def compare_init_model_opts(opt: Opt, curr_opt: Opt):
         ):
             if isinstance(v, list):
                 if init_model_opt[k] != list(curr_opt.get(k, [])):
-                    different_opts[k] = ','.join([str(x) for x in v])
+                    different_opts[k] = ",".join([str(x) for x in v])
             else:
                 different_opts[k] = v
 
@@ -304,28 +304,28 @@ def compare_init_model_opts(opt: Opt, curr_opt: Opt):
     for k, v in curr_opt.items():
         if k not in exempt_opts and k not in init_model_opt:
             if isinstance(v, list):
-                extra_opts[k] = ','.join([str(x) for x in v])
+                extra_opts[k] = ",".join([str(x) for x in v])
             else:
                 extra_opts[k] = v
 
     # print warnings
-    extra_strs = ['{}: {}'.format(k, v) for k, v in extra_opts.items()]
+    extra_strs = ["{}: {}".format(k, v) for k, v in extra_opts.items()]
     if extra_strs:
         logging.warning(
-            'your model is being loaded with opts that do not '
-            'exist in the model you are initializing the weights with: '
-            '{}'.format(','.join(extra_strs))
+            "your model is being loaded with opts that do not "
+            "exist in the model you are initializing the weights with: "
+            "{}".format(",".join(extra_strs))
         )
 
     different_strs = [
-        '--{} {}'.format(k.replace('_', '-'), v) for k, v in different_opts.items()
+        "--{} {}".format(k.replace("_", "-"), v) for k, v in different_opts.items()
     ]
     if different_strs:
         logging.warning(
-            'your model is being loaded with opts that differ '
-            'from the model you are initializing the weights with. Add the '
-            'following args to your run command to change this: \n'
-            '{}'.format(' '.join(different_strs))
+            "your model is being loaded with opts that differ "
+            "from the model you are initializing the weights with. Add the "
+            "following args to your run command to change this: \n"
+            "{}".format(" ".join(different_strs))
         )
 
 
@@ -340,10 +340,10 @@ def create_agent_from_model_file(model_file, opt_overrides=None):
     """
     opt = {}
     add_datapath_and_model_args(opt)
-    opt['model_file'] = modelzoo_path(opt.get('datapath'), model_file)
+    opt["model_file"] = modelzoo_path(opt.get("datapath"), model_file)
     if opt_overrides is None:
         opt_overrides = {}
-    opt['override'] = opt_overrides
+    opt["override"] = opt_overrides
     return create_agent_from_opt_file(opt)
 
 
@@ -358,8 +358,8 @@ def create_agent_from_opt_file(opt: Opt):
 
     If that file does not exist, return None.
     """
-    model_file = opt['model_file']
-    optfile = model_file + '.opt'
+    model_file = opt["model_file"]
+    optfile = model_file + ".opt"
 
     if not PathManager.exists(optfile):
         return None
@@ -372,17 +372,17 @@ def create_agent_from_opt_file(opt: Opt):
             del opt_from_file[arg]
 
     # only override opts specified in 'override' dict
-    if opt.get('override'):
-        for k, v in opt['override'].items():
+    if opt.get("override"):
+        for k, v in opt["override"].items():
             if k in opt_from_file and str(v) != str(opt_from_file.get(k)):
                 logging.warning(
                     f'Overriding opt["{k}"] to {v} (previously: {opt_from_file.get(k)})'
                 )
             opt_from_file[k] = v
 
-    model_class = load_agent_module(opt_from_file['model'])
+    model_class = load_agent_module(opt_from_file["model"])
 
-    if hasattr(model_class, 'upgrade_opt'):
+    if hasattr(model_class, "upgrade_opt"):
         opt_from_file = model_class.upgrade_opt(opt_from_file)
 
     # add model arguments to opt_from_file if they aren't in opt_from_file already
@@ -391,28 +391,28 @@ def create_agent_from_opt_file(opt: Opt):
             opt_from_file[k] = v
 
     # update model file path to the one set by opt
-    opt_from_file['model_file'] = model_file
+    opt_from_file["model_file"] = model_file
     # update init model path to the one set by opt
     # NOTE: this step is necessary when for example the 'init_model' is
     # set by the Train Loop (as is the case when loading from checkpoint)
-    if opt.get('init_model') is not None and opt['init_model']:
-        opt_from_file['init_model'] = opt['init_model']
+    if opt.get("init_model") is not None and opt["init_model"]:
+        opt_from_file["init_model"] = opt["init_model"]
 
     # update dict file path
-    if not opt_from_file.get('dict_file'):
+    if not opt_from_file.get("dict_file"):
         old_dict_file = None
-        opt_from_file['dict_file'] = model_file + '.dict'
-    elif opt_from_file.get('dict_file') and not PathManager.exists(
-        opt_from_file['dict_file']
+        opt_from_file["dict_file"] = model_file + ".dict"
+    elif opt_from_file.get("dict_file") and not PathManager.exists(
+        opt_from_file["dict_file"]
     ):
-        old_dict_file = opt_from_file['dict_file']
-        opt_from_file['dict_file'] = model_file + '.dict'
-    if not PathManager.exists(opt_from_file['dict_file']):
+        old_dict_file = opt_from_file["dict_file"]
+        opt_from_file["dict_file"] = model_file + ".dict"
+    if not PathManager.exists(opt_from_file["dict_file"]):
         warn_once(
-            'WARNING: Neither the specified dict file ({}) nor the '
-            '`model_file`.dict file ({}) exists, check to make sure either '
-            'is correct. This may manifest as a shape mismatch later '
-            'on.'.format(old_dict_file, opt_from_file['dict_file'])
+            "WARNING: Neither the specified dict file ({}) nor the "
+            "`model_file`.dict file ({}) exists, check to make sure either "
+            "is correct. This may manifest as a shape mismatch later "
+            "on.".format(old_dict_file, opt_from_file["dict_file"])
         )
 
     # if we want to load weights from --init-model, compare opts with
@@ -453,15 +453,15 @@ def create_agent(opt: Opt, requireModelExists=False):
     opt['model_file'] + '.opt' must exist and contain a pickled or json dict
     containing the model's options).
     """
-    if opt.get('datapath', None) is None:
+    if opt.get("datapath", None) is None:
         add_datapath_and_model_args(opt)
 
-    if opt.get('model_file'):
-        opt['model_file'] = modelzoo_path(opt.get('datapath'), opt['model_file'])
-        if requireModelExists and not PathManager.exists(opt['model_file']):
+    if opt.get("model_file"):
+        opt["model_file"] = modelzoo_path(opt.get("datapath"), opt["model_file"])
+        if requireModelExists and not PathManager.exists(opt["model_file"]):
             raise RuntimeError(
-                'WARNING: Model file does not exist, check to make '
-                'sure it is correct: {}'.format(opt['model_file'])
+                "WARNING: Model file does not exist, check to make "
+                "sure it is correct: {}".format(opt["model_file"])
             )
         # Attempt to load the model from the model file first (this way we do
         # not even have to specify the model name as a parameter)
@@ -471,18 +471,18 @@ def create_agent(opt: Opt, requireModelExists=False):
         else:
             logging.info(f"No model with opt yet at: {opt['model_file']}(.opt)")
 
-    if opt.get('model'):
-        model_class = load_agent_module(opt['model'])
+    if opt.get("model"):
+        model_class = load_agent_module(opt["model"])
         # if we want to load weights from --init-model, compare opts with
         # loaded ones
         compare_init_model_opts(opt, opt)
         model = model_class(opt)
-        if requireModelExists and hasattr(model, 'load') and not opt.get('model_file'):
+        if requireModelExists and hasattr(model, "load") and not opt.get("model_file"):
             # double check that we didn't forget to set model_file on loadable model
-            logging.warning('model_file unset but model has a `load` function.')
+            logging.warning("model_file unset but model has a `load` function.")
         return model
     else:
-        raise RuntimeError('Need to set `model` argument to use create_agent.')
+        raise RuntimeError("Need to set `model` argument to use create_agent.")
 
 
 # Helper functions to create agent/agents given shared parameters
@@ -495,8 +495,8 @@ def create_agent_from_shared(shared_agent):
         should include an `opt` dictionary and agent `class`, along with
         whatever other parameters the agent needs to instantiate.
     """
-    opt = copy.deepcopy(shared_agent['opt'])
-    a = shared_agent['class'](opt, shared_agent)
+    opt = copy.deepcopy(shared_agent["opt"])
+    a = shared_agent["class"](opt, shared_agent)
     return a
 
 

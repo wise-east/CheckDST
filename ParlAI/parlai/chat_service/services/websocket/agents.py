@@ -38,11 +38,11 @@ class WebsocketAgent(ChatServiceAgent):
                 replies for any message
         """
         logging.info(f"Sending new message: {act}")
-        quick_replies = act.get('quick_replies', None)
-        if act.get('payload', None):
-            self.manager.observe_payload(self.id, act['payload'], quick_replies)
+        quick_replies = act.get("quick_replies", None)
+        if act.get("payload", None):
+            self.manager.observe_payload(self.id, act["payload"], quick_replies)
         else:
-            self.manager.observe_message(self.id, act['text'], quick_replies)
+            self.manager.observe_message(self.id, act["text"], quick_replies)
 
     def put_data(self, message):
         """
@@ -54,9 +54,9 @@ class WebsocketAgent(ChatServiceAgent):
         """
         logging.info(f"Received new message: {message}")
         action = {
-            'episode_done': False,
-            'text': message.get('text', ''),
-            'payload': message.get('payload'),
+            "episode_done": False,
+            "text": message.get("text", ""),
+            "payload": message.get("payload"),
         }
 
         self._queue_action(action, self.action_id)

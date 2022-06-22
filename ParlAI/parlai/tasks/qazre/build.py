@@ -12,20 +12,20 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        'http://nlp.cs.washington.edu/zeroshot/relation_splits.tar.bz2',
-        'relation_splits.tar.bz2',
-        'e33d0e367b6e837370da17a2d09d217e0a92f8d180f7abb3fd543a2d1726b2b4',
+        "http://nlp.cs.washington.edu/zeroshot/relation_splits.tar.bz2",
+        "relation_splits.tar.bz2",
+        "e33d0e367b6e837370da17a2d09d217e0a92f8d180f7abb3fd543a2d1726b2b4",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'QA-ZRE')
+    dpath = os.path.join(opt["datapath"], "QA-ZRE")
     version = None
 
     if not build_data.built(dpath, version_string=version):
 
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
 
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.

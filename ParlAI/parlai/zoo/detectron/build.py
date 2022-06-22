@@ -16,25 +16,25 @@ for more details.
 import os
 from parlai.core.build_data import download_models, built
 
-BASE_PATH = 'https://dl.fbaipublicfiles.com/vilbert-multi-task'
+BASE_PATH = "https://dl.fbaipublicfiles.com/vilbert-multi-task"
 DETECTRON_MODEL_URL = (
-    'https://dl.fbaipublicfiles.com/vilbert-multi-task/detectron_model.pth'
+    "https://dl.fbaipublicfiles.com/vilbert-multi-task/detectron_model.pth"
 )
 DETECTRON_CONFIG_URL = (
-    'https://dl.fbaipublicfiles.com/vilbert-multi-task/detectron_config.yaml'
+    "https://dl.fbaipublicfiles.com/vilbert-multi-task/detectron_config.yaml"
 )
 
 
 def build(datapath):
-    opt = {'datapath': datapath}
-    dpath = os.path.join(datapath, 'models', 'detectron')
-    fnames = ['detectron_model.pth', 'detectron_config.yaml']
-    version = '1.0'
+    opt = {"datapath": datapath}
+    dpath = os.path.join(datapath, "models", "detectron")
+    fnames = ["detectron_model.pth", "detectron_config.yaml"]
+    version = "1.0"
     if not built(dpath, version):
         download_models(
             opt,
             fnames,
-            'detectron',
+            "detectron",
             path=BASE_PATH,
             version=version,
             use_model_type=False,

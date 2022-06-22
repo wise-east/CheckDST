@@ -50,97 +50,97 @@ class TfidfRetrieverAgent(Agent):
     def add_cmdline_args(
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
-        parser = parser.add_argument_group('Retriever Arguments')
+        parser = parser.add_argument_group("Retriever Arguments")
         parser.add_argument(
-            '--retriever-numworkers',
+            "--retriever-numworkers",
             type=int,
             default=None,
-            help='Number of CPU processes (for tokenizing, etc)',
+            help="Number of CPU processes (for tokenizing, etc)",
         )
         parser.add_argument(
-            '--retriever-ngram',
+            "--retriever-ngram",
             type=int,
             default=2,
-            help='Use up to N-size n-grams (e.g. 2 = unigrams + bigrams)',
+            help="Use up to N-size n-grams (e.g. 2 = unigrams + bigrams)",
         )
         parser.add_argument(
-            '--retriever-hashsize',
+            "--retriever-hashsize",
             type=int,
             default=int(math.pow(2, 24)),
-            help='Number of buckets to use for hashing ngrams',
+            help="Number of buckets to use for hashing ngrams",
         )
         parser.add_argument(
-            '--retriever-tokenizer',
+            "--retriever-tokenizer",
             type=str,
-            default='simple',
-            help='String option specifying tokenizer type to use.',
+            default="simple",
+            help="String option specifying tokenizer type to use.",
         )
         parser.add_argument(
-            '--retriever-num-retrieved',
+            "--retriever-num-retrieved",
             default=5,
             type=int,
-            help='How many docs to retrieve.',
+            help="How many docs to retrieve.",
         )
         parser.add_argument(
-            '--remove-title',
-            type='bool',
+            "--remove-title",
+            type="bool",
             default=False,
-            help='Whether to remove the title from the retrieved passage',
+            help="Whether to remove the title from the retrieved passage",
         )
         parser.add_argument(
-            '--retriever-mode',
-            choices=['keys', 'values'],
-            default='values',
-            help='Whether to retrieve the stored key or the stored value. For '
-            'example, if you want to return the text of an example, use '
-            'keys here; if you want to return the label, use values here.',
+            "--retriever-mode",
+            choices=["keys", "values"],
+            default="values",
+            help="Whether to retrieve the stored key or the stored value. For "
+            "example, if you want to return the text of an example, use "
+            "keys here; if you want to return the label, use values here.",
         )
         parser.add_argument(
-            '--index-by-int-id',
-            type='bool',
+            "--index-by-int-id",
+            type="bool",
             default=True,
             help=(
-                'Whether to index into database by doc id as an integer. This '
-                'defaults to true for DBs built using ParlAI.'
+                "Whether to index into database by doc id as an integer. This "
+                "defaults to true for DBs built using ParlAI."
             ),
         )
         parser.add_argument(
-            '--tfidf-context-length',
+            "--tfidf-context-length",
             default=-1,
             type=int,
-            help='Number of past utterances to remember when '
-            'building flattened batches of data in multi-'
-            'example episodes.',
+            help="Number of past utterances to remember when "
+            "building flattened batches of data in multi-"
+            "example episodes.",
         )
         parser.add_argument(
-            '--tfidf-include-labels',
+            "--tfidf-include-labels",
             default=True,
-            type='bool',
-            help='Specifies whether or not to include labels '
-            'as past utterances when building flattened '
-            'batches of data in multi-example episodes.',
+            type="bool",
+            help="Specifies whether or not to include labels "
+            "as past utterances when building flattened "
+            "batches of data in multi-example episodes.",
         )
 
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
-        self.id = 'SparseTfidfRetrieverAgent'
-        if not opt.get('model_file') or opt['model_file'] == '':
-            raise RuntimeError('Must set --model_file')
+        self.id = "SparseTfidfRetrieverAgent"
+        if not opt.get("model_file") or opt["model_file"] == "":
+            raise RuntimeError("Must set --model_file")
 
-        opt['retriever_dbpath'] = opt['model_file'] + '.db'
-        opt['retriever_tfidfpath'] = opt['model_file'] + '.tfidf'
+        opt["retriever_dbpath"] = opt["model_file"] + ".db"
+        opt["retriever_tfidfpath"] = opt["model_file"] + ".tfidf"
 
-        self.db_path = opt['retriever_dbpath']
-        self.tfidf_path = opt['retriever_tfidfpath']
+        self.db_path = opt["retriever_dbpath"]
+        self.tfidf_path = opt["retriever_tfidfpath"]
 
         self.tfidf_args = AttrDict(
             {
-                'db_path': opt['retriever_dbpath'],
-                'out_dir': opt['retriever_tfidfpath'],
-                'ngram': opt['retriever_ngram'],
-                'hash_size': opt['retriever_hashsize'],
-                'tokenizer': opt['retriever_tokenizer'],
-                'num_workers': opt['retriever_numworkers'],
+                "db_path": opt["retriever_dbpath"],
+                "out_dir": opt["retriever_tfidfpath"],
+                "ngram": opt["retriever_ngram"],
+                "hash_size": opt["retriever_hashsize"],
+                "tokenizer": opt["retriever_tokenizer"],
+                "num_workers": opt["retriever_numworkers"],
             }
         )
 
@@ -148,31 +148,31 @@ class TfidfRetrieverAgent(Agent):
             conn = sqlite3.connect(self.db_path)
             c = conn.cursor()
             c.execute(
-                'CREATE TABLE documents ' '(id INTEGER PRIMARY KEY, text, value);'
+                "CREATE TABLE documents " "(id INTEGER PRIMARY KEY, text, value);"
             )
             conn.commit()
             conn.close()
 
-        self.db = DocDB(db_path=opt['retriever_dbpath'])
-        if os.path.exists(self.tfidf_path + '.npz'):
+        self.db = DocDB(db_path=opt["retriever_dbpath"])
+        if os.path.exists(self.tfidf_path + ".npz"):
             if shared is None:
                 self.ranker = TfidfDocRanker(
-                    tfidf_path=opt['retriever_tfidfpath'], strict=False
+                    tfidf_path=opt["retriever_tfidfpath"], strict=False
                 )
             else:
-                self.ranker = shared['doc_ranker']
-        self.ret_mode = opt['retriever_mode']
+                self.ranker = shared["doc_ranker"]
+        self.ret_mode = opt["retriever_mode"]
         self.cands_hash = {}  # cache for candidates
         self.triples_to_add = []  # in case we want to add more entries
 
-        clen = opt.get('tfidf_context_length', -1)
+        clen = opt.get("tfidf_context_length", -1)
         self.context_length = clen if clen >= 0 else None
-        self.include_labels = opt.get('tfidf_include_labels', True)
+        self.include_labels = opt.get("tfidf_include_labels", True)
         self.reset()
 
     def share(self):
         shared = super().share()
-        shared['doc_ranker'] = self.ranker
+        shared["doc_ranker"] = self.ranker
         return shared
 
     def reset(self):
@@ -182,15 +182,15 @@ class TfidfRetrieverAgent(Agent):
         self.context = deque(maxlen=self.context_length)
 
     def doc2txt(self, docid):
-        if not self.opt.get('index_by_int_id', True):
+        if not self.opt.get("index_by_int_id", True):
             docid = self.ranker.get_doc_id(docid)
-        if self.ret_mode == 'keys':
+        if self.ret_mode == "keys":
             return self.db.get_doc_text(docid)
-        elif self.ret_mode == 'values':
+        elif self.ret_mode == "values":
             return self.db.get_doc_value(docid)
         else:
             raise RuntimeError(
-                'Retrieve mode {} not yet supported.'.format(self.ret_mode)
+                "Retrieve mode {} not yet supported.".format(self.ret_mode)
             )
 
     def rebuild(self):
@@ -203,34 +203,34 @@ class TfidfRetrieverAgent(Agent):
 
     def save(self, path=None):
         self.rebuild()
-        with PathManager.open(self.opt['model_file'] + '.opt', 'w') as handle:
+        with PathManager.open(self.opt["model_file"] + ".opt", "w") as handle:
             json.dump(self.opt, handle)
-        with PathManager.open(self.opt['model_file'], 'w') as f:
-            f.write('\n')
+        with PathManager.open(self.opt["model_file"], "w") as f:
+            f.write("\n")
 
     def train_act(self):
         if (
-            'ordered' not in self.opt.get('datatype', 'train:ordered')
-            or self.opt.get('batchsize', 1) != 1
-            or self.opt.get('num_epochs', 1) != 1
+            "ordered" not in self.opt.get("datatype", "train:ordered")
+            or self.opt.get("batchsize", 1) != 1
+            or self.opt.get("num_epochs", 1) != 1
         ):
             raise RuntimeError(
-                'Need to set --batchsize 1, --datatype train:ordered, --num_epochs 1'
+                "Need to set --batchsize 1, --datatype train:ordered, --num_epochs 1"
             )
         obs = self.observation
         self.current.append(obs)
-        self.episode_done = obs.get('episode_done', False)
+        self.episode_done = obs.get("episode_done", False)
 
         if self.episode_done:
             for ex in self.current:
-                if 'text' in ex:
-                    text = ex['text']
+                if "text" in ex:
+                    text = ex["text"]
                     self.context.append(text)
                     if len(self.context) > 1:
-                        text = '\n'.join(self.context)
+                        text = "\n".join(self.context)
 
                 # add labels to context
-                labels = ex.get('labels', ex.get('eval_labels'))
+                labels = ex.get("labels", ex.get("eval_labels"))
                 label = None
                 if labels is not None:
                     label = random.choice(labels)
@@ -244,30 +244,30 @@ class TfidfRetrieverAgent(Agent):
             self.current.clear()
             self.context.clear()
 
-        return {'id': self.getID(), 'text': obs.get('labels', ['I don\'t know'])[0]}
+        return {"id": self.getID(), "text": obs.get("labels", ["I don't know"])[0]}
 
     def act(self):
         obs = self.observation
         reply = {}
-        reply['id'] = self.getID()
-        if 'labels' in obs:
+        reply["id"] = self.getID()
+        if "labels" in obs:
             return self.train_act()
-        if 'text' in obs:
+        if "text" in obs:
             self.rebuild()  # no-op if nothing has been queued to store
             doc_ids, doc_scores = self.ranker.closest_docs(
-                obs['text'], self.opt.get('retriever_num_retrieved', 5)
+                obs["text"], self.opt.get("retriever_num_retrieved", 5)
             )
             if len(doc_ids) > 0:
                 picks = [self.doc2txt(int(did)) for did in doc_ids]
                 pick = self.doc2txt(int(doc_ids[0]))  # select best response
 
-                if self.opt.get('remove_title', False):
-                    picks = ['\n'.join(p.split('\n')[1:]) for p in picks]
-                    pick = '\n'.join(pick.split('\n')[1:])
-                reply['text_candidates'] = picks
-                reply['candidate_scores'] = doc_scores.tolist()
+                if self.opt.get("remove_title", False):
+                    picks = ["\n".join(p.split("\n")[1:]) for p in picks]
+                    pick = "\n".join(pick.split("\n")[1:])
+                reply["text_candidates"] = picks
+                reply["candidate_scores"] = doc_scores.tolist()
 
-                reply['text'] = pick
-                reply['candidate_ids'] = doc_ids.tolist()
+                reply["text"] = pick
+                reply["candidate_ids"] = doc_ids.tolist()
 
         return reply

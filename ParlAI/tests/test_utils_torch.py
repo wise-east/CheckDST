@@ -99,8 +99,8 @@ class TestPipelineHelper(unittest.TestCase):
 
         # dict
         t = torch.randn(128, 5)
-        assert PipelineHelper.guess_split_size({'x': t, 'y': t}, 8) == 8
-        assert PipelineHelper.guess_split_size({'x': t, 'y': t}, 1) == 128
+        assert PipelineHelper.guess_split_size({"x": t, "y": t}, 8) == 8
+        assert PipelineHelper.guess_split_size({"x": t, "y": t}, 1) == 128
 
         with self.assertRaises(TypeError):
             t = torch.randn(128, 5)
@@ -125,17 +125,17 @@ class TestPipelineHelper(unittest.TestCase):
 
     def test_split_dict(self):
         t = torch.randn(32, 5)
-        d = {'x': t, 'y': t}
+        d = {"x": t, "y": t}
         for sd in PipelineHelper.split(d, 8):
             assert isinstance(sd, dict)
-            assert 'x' in sd
-            assert 'y' in sd
-            assert sd['x'].shape == (8, 5)
-            assert sd['y'].shape == (8, 5)
+            assert "x" in sd
+            assert "y" in sd
+            assert sd["x"].shape == (8, 5)
+            assert sd["y"].shape == (8, 5)
 
     def test_split_complex(self):
         t = torch.randn(32, 5)
-        item = (t, {'x': t, 'y': t})
+        item = (t, {"x": t, "y": t})
         for sitem in PipelineHelper.split(item, 8):
             assert isinstance(sitem, tuple)
             assert len(sitem) == 2
@@ -143,10 +143,10 @@ class TestPipelineHelper(unittest.TestCase):
             assert isinstance(left, torch.Tensor)
             assert left.shape == (8, 5)
             assert isinstance(right, dict)
-            assert 'x' in right
-            assert 'y' in right
-            assert right['x'].shape == (8, 5)
-            assert right['y'].shape == (8, 5)
+            assert "x" in right
+            assert "y" in right
+            assert right["x"].shape == (8, 5)
+            assert right["y"].shape == (8, 5)
 
     def test_split_emptydict(self):
         # test a horrible edge case where d is an empty dict, and we need to
@@ -168,9 +168,9 @@ class TestPipelineHelper(unittest.TestCase):
         # test some cases that cause infinite loops if we don't catch them.
         t = torch.randn(32, 5)
         with self.assertRaises(ValueError):
-            PipelineHelper.split((t, {'x': {}}), 8)
+            PipelineHelper.split((t, {"x": {}}), 8)
         with self.assertRaises(ValueError):
-            PipelineHelper.split((t, {'y': ()}), 8)
+            PipelineHelper.split((t, {"y": ()}), 8)
 
     def test_join_tensor(self):
         t = torch.randn(8, 5)
@@ -193,20 +193,20 @@ class TestPipelineHelper(unittest.TestCase):
         assert b.shape == (16, 2)
 
     def test_join_dict(self):
-        chunk = {'x': torch.randn(8, 5), 'y': torch.randn(8, 2)}
+        chunk = {"x": torch.randn(8, 5), "y": torch.randn(8, 2)}
         chunks = [chunk, chunk]
         j = PipelineHelper.join(chunks)
         assert isinstance(j, dict)
         assert len(j) == 2
-        assert 'x' in j
-        assert 'y' in j
-        assert isinstance(j['x'], torch.Tensor)
-        assert isinstance(j['y'], torch.Tensor)
-        assert j['x'].shape == (16, 5)
-        assert j['y'].shape == (16, 2)
+        assert "x" in j
+        assert "y" in j
+        assert isinstance(j["x"], torch.Tensor)
+        assert isinstance(j["y"], torch.Tensor)
+        assert j["x"].shape == (16, 5)
+        assert j["y"].shape == (16, 2)
 
     def test_join_complex(self):
-        d = {'x': torch.randn(8, 5), 'y': torch.randn(8, 2)}
+        d = {"x": torch.randn(8, 5), "y": torch.randn(8, 2)}
         t = torch.Tensor(8, 3)
         tup = (t, d)
         chunks = [tup, tup]
@@ -218,10 +218,10 @@ class TestPipelineHelper(unittest.TestCase):
         assert left.shape == (16, 3)
         assert isinstance(right, dict)
         assert len(right) == 2
-        assert 'x' in right
-        assert 'y' in right
-        assert right['x'].shape == (16, 5)
-        assert right['y'].shape == (16, 2)
+        assert "x" in right
+        assert "y" in right
+        assert right["x"].shape == (16, 5)
+        assert right["y"].shape == (16, 2)
 
     def test_schedule_work_items(self):
         # test that we schedule things correctly
@@ -230,13 +230,13 @@ class TestPipelineHelper(unittest.TestCase):
         for i in range(8):
             layer = IdentityLayer()
             if i == 0:
-                layer._mp_gpu = 'cuda:0'
+                layer._mp_gpu = "cuda:0"
             elif i in (1, 2, 3):
-                layer._mp_gpu = 'cuda:1'
+                layer._mp_gpu = "cuda:1"
             elif i in (4, 5):
-                layer._mp_gpu = 'cuda:2'
+                layer._mp_gpu = "cuda:2"
             elif i in (6, 7):
-                layer._mp_gpu = 'cuda:3'
+                layer._mp_gpu = "cuda:3"
             model.append(layer)
 
         # there are 2 chunks, each 16 x 7 in size
@@ -265,14 +265,14 @@ class TestPipelineHelper(unittest.TestCase):
 
         pipeline = PipelineHelper()
         pipeline.num_devices = 8
-        pipeline.devices = [f'cuda:{i}' for i in range(8)]
+        pipeline.devices = [f"cuda:{i}" for i in range(8)]
         pipeline._PipelineHelper__device_allocations = {d: 0 for d in pipeline.devices}
 
         model1 = _get_model()
         model1 = pipeline.make_parallel(model1)
-        assert getattr(model1.layers, 'is_model_parallel', False)
+        assert getattr(model1.layers, "is_model_parallel", False)
 
         model2 = _get_model()
         model2.apply(_exempt_mp)
         model2 = pipeline.make_parallel(model2)
-        assert not getattr(model2.layers, 'is_model_parallel', False)
+        assert not getattr(model2.layers, "is_model_parallel", False)

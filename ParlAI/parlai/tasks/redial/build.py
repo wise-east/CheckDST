@@ -10,19 +10,19 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        'https://github.com/ReDialData/website/raw/data/redial_dataset.zip',
-        'redial.zip',
-        'b48756681ec6f84e0af36979c5e9baa21ea8d9e7036b8764ea9b787bb0baf69b',
+        "https://github.com/ReDialData/website/raw/data/redial_dataset.zip",
+        "redial.zip",
+        "b48756681ec6f84e0af36979c5e9baa21ea8d9e7036b8764ea9b787bb0baf69b",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'redial')
-    version = '1.0'
+    dpath = os.path.join(opt["datapath"], "redial")
+    version = "1.0"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             build_data.remove_dir(dpath)
         build_data.make_dir(dpath)

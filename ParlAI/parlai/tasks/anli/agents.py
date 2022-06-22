@@ -21,32 +21,32 @@ from parlai.tasks.multinli.agents import (
 
 from .build import build
 
-ANLI = 'ANLI'
-ANLI_PREFIX = 'anli_'
-ANLI_VERSION = 'v0.1'
-ANLI_LABEL_DICT = {'e': 'entailment', 'c': 'contradiction', 'n': 'neutral'}
-ANLI_PREMISE_KEY = 'context'
-ANLI_HYPO_KEY = 'hypothesis'
-ANLI_ANSWER_KEY = 'label'
-ANLI_ROUNDS = ['R1', 'R2', 'R3']
+ANLI = "ANLI"
+ANLI_PREFIX = "anli_"
+ANLI_VERSION = "v0.1"
+ANLI_LABEL_DICT = {"e": "entailment", "c": "contradiction", "n": "neutral"}
+ANLI_PREMISE_KEY = "context"
+ANLI_HYPO_KEY = "hypothesis"
+ANLI_ANSWER_KEY = "label"
+ANLI_ROUNDS = ["R1", "R2", "R3"]
 
 
 def _path(opt, anli_round):
     build(opt)
 
-    dt = opt['datatype'].split(':')[0]
+    dt = opt["datatype"].split(":")[0]
 
-    if dt == 'train':
-        suffix = 'train'
-    elif dt == 'valid':
-        suffix = 'dev'
-    elif dt == 'test':
-        suffix = 'test'
+    if dt == "train":
+        suffix = "train"
+    elif dt == "valid":
+        suffix = "dev"
+    elif dt == "test":
+        suffix = "test"
     else:
-        raise RuntimeError('Not valid datatype.')
+        raise RuntimeError("Not valid datatype.")
 
     data_path = os.path.join(
-        opt['datapath'], ANLI, ANLI_PREFIX + ANLI_VERSION, anli_round, suffix + '.jsonl'
+        opt["datapath"], ANLI, ANLI_PREFIX + ANLI_VERSION, anli_round, suffix + ".jsonl"
     )
 
     return data_path
@@ -70,19 +70,19 @@ class RoundBaseTeacher(DialogTeacher):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        parser = parser.add_argument_group('RoundBase Teacher Args')
+        parser = parser.add_argument_group("RoundBase Teacher Args")
         parser.add_argument(
-            '-dfm',
-            '--dialog-format',
-            type='bool',
+            "-dfm",
+            "--dialog-format",
+            type="bool",
             default=False,
             help="True if one would like to convert to a dialogue format without special tokens such as 'Premise'"
             " and 'Hypothesis' (default: False).",
         )
         parser.add_argument(
-            '-bcl',
-            '--binary-classes',
-            type='bool',
+            "-bcl",
+            "--binary-classes",
+            type="bool",
             default=False,
             help="True if label candidates are (contradiction, not_contradiction), and (entailment, contradiction, "
             "neutral) otherwise (default: False).",
@@ -92,17 +92,17 @@ class RoundBaseTeacher(DialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
         self.anli_round = (
-            opt['task'].split(':')[1] if len(opt['task'].split(':')) > 1 else None
+            opt["task"].split(":")[1] if len(opt["task"].split(":")) > 1 else None
         )
         self.anli_round = self.anli_round.upper()
         if self.anli_round not in ANLI_ROUNDS:
             raise KeyError(f"Undefined task round: {self.anli_round}.")
 
         data_path = _path(opt, self.anli_round)
-        opt['datafile'] = data_path
-        self.dialog_format = opt.get('dialog_format', False)
-        self.binary_classes = opt.get('binary_classes', False)
-        self.id = opt['task'].upper()
+        opt["datafile"] = data_path
+        self.dialog_format = opt.get("dialog_format", False)
+        self.binary_classes = opt.get("binary_classes", False)
+        self.id = opt["task"].upper()
         super().__init__(opt, shared)
 
     def label_candidates(self):
@@ -111,11 +111,11 @@ class RoundBaseTeacher(DialogTeacher):
         return MULTINLI_LABELS
 
     def setup_data(self, path):
-        print('loading: ' + path)
-        with PathManager.open(path, 'r') as data_file:
+        print("loading: " + path)
+        with PathManager.open(path, "r") as data_file:
             for pair_line in data_file:
                 pair = json.loads(pair_line)
-                if pair[ANLI_ANSWER_KEY] == '-':
+                if pair[ANLI_ANSWER_KEY] == "-":
                     continue
 
                 label_raw = pair[ANLI_ANSWER_KEY]
@@ -151,19 +151,19 @@ class DefaultTeacher(MultiTaskTeacher):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        parser = parser.add_argument_group('ANLI Teacher Args')
+        parser = parser.add_argument_group("ANLI Teacher Args")
         parser.add_argument(
-            '-dfm',
-            '--dialog-format',
-            type='bool',
+            "-dfm",
+            "--dialog-format",
+            type="bool",
             default=False,
             help="True if one would like to convert to a dialogue format without special tokens such as 'Premise'"
             " and 'Hypothesis' (default: False).",
         ),
         parser.add_argument(
-            '-bcl',
-            '--binary-classes',
-            type='bool',
+            "-bcl",
+            "--binary-classes",
+            type="bool",
             default=False,
             help="True if label candidates are (contradiction, not_contradiction), and (entailment, contradiction, "
             "neutral) otherwise (default: False).",
@@ -171,7 +171,7 @@ class DefaultTeacher(MultiTaskTeacher):
         return parser
 
     def __init__(self, opt, shared=None):
-        anli_tasks = ['anli:r1', 'anli:r2', 'anli:r3']
+        anli_tasks = ["anli:r1", "anli:r2", "anli:r3"]
         opt = copy.deepcopy(opt)
-        opt['task'] = ','.join(anli_tasks)
+        opt["task"] = ",".join(anli_tasks)
         super().__init__(opt, shared)

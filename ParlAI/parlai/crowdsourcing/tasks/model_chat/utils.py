@@ -37,23 +37,23 @@ class Compatibility(object):
         elif isinstance(act, dict):
             act[key] = value
         else:
-            raise Exception(f'Unknown type of act: {type(act)}')
+            raise Exception(f"Unknown type of act: {type(act)}")
         return act
 
     @staticmethod
     def maybe_fix_act(incompatible_act):
-        if 'id' not in incompatible_act:
+        if "id" not in incompatible_act:
             new_act = Compatibility.backward_compatible_force_set(
-                incompatible_act, 'id', 'NULL_ID'
+                incompatible_act, "id", "NULL_ID"
             )
             return new_act
         return incompatible_act
 
     @staticmethod
     def serialize_bot_message(bot_message):
-        if 'metrics' in bot_message:
-            metric_report = bot_message['metrics']
-            bot_message['metrics'] = {
+        if "metrics" in bot_message:
+            metric_report = bot_message["metrics"]
+            bot_message["metrics"] = {
                 k: v.value() if isinstance(v, Metric) else v
                 for k, v in metric_report.items()
             }
@@ -72,14 +72,14 @@ class ImageStack:
     def __init__(self, opt):
 
         # Input params
-        self.num_images = opt['num_images']
-        self.models = opt['models']
-        self.evals_per_combo = opt.get('evals_per_image_model_combo', 1)
+        self.num_images = opt["num_images"]
+        self.models = opt["models"]
+        self.evals_per_combo = opt.get("evals_per_image_model_combo", 1)
 
         # Paths
-        self.save_folder = opt['stack_folder']
-        self.save_name = 'stack.json'
-        self.backup_save_folder = os.path.join(self.save_folder, '_stack_backups')
+        self.save_folder = opt["stack_folder"]
+        self.save_name = "stack.json"
+        self.backup_save_folder = os.path.join(self.save_folder, "_stack_backups")
         for folder in [self.save_folder, self.backup_save_folder]:
             os.makedirs(folder, exist_ok=True)
         self.save_path = os.path.join(self.save_folder, self.save_name)
@@ -98,8 +98,8 @@ class ImageStack:
         self.conditionally_save_stack()
 
     def load_stack(self) -> int:
-        print(f'[ Loading stack from file... {self.save_path}]')
-        with open(self.save_path, 'r') as f:
+        print(f"[ Loading stack from file... {self.save_path}]")
+        with open(self.save_path, "r") as f:
             self.stack = json.load(f)
 
         pointer = self.get_pointer()
@@ -107,8 +107,8 @@ class ImageStack:
         # Check that the number of images is the same as before
         if len(self.stack) != self.num_images:
             raise ValueError(
-                f'The loaded stack has {len(self.stack):d} images instead of the '
-                f'desired {self.num_images:d}!'
+                f"The loaded stack has {len(self.stack):d} images instead of the "
+                f"desired {self.num_images:d}!"
             )
 
         # Make sure that the set of models is correct (i.e. in case we are loading in an
@@ -117,16 +117,16 @@ class ImageStack:
             return pointer
         else:
             input_ = input(
-                '\n\nWARNING: the currently saved stack has a different set of test '
-                'cases than what is currently being used. Do you want to back up this '
-                'stack file and stretch the stack to fit the new set of models? '
-                '(y/n) '
+                "\n\nWARNING: the currently saved stack has a different set of test "
+                "cases than what is currently being used. Do you want to back up this "
+                "stack file and stretch the stack to fit the new set of models? "
+                "(y/n) "
             )
-            if input_.lower().strip() == 'y':
+            if input_.lower().strip() == "y":
                 self.save_stack_backup()
                 return self.stretch_stack()
             else:
-                raise ValueError('Mismatch in set of models in stack!')
+                raise ValueError("Mismatch in set of models in stack!")
 
     def get_pointer(self) -> int:
         """
@@ -161,9 +161,9 @@ class ImageStack:
         new_models = set(self.models)
         models_to_add = new_models.difference(existing_models)
         models_to_remove = existing_models.difference(new_models)
-        print('\nStarting to stretch the stack.')
-        print('Models to add: ', models_to_add)
-        print('Models to remove: ', models_to_remove)
+        print("\nStarting to stretch the stack.")
+        print("Models to add: ", models_to_add)
+        print("Models to remove: ", models_to_remove)
         models_to_add_list = sorted(list(models_to_add))
         for stack_idx, orig_workers_by_model in enumerate(self.stack):
             surviving_workers_by_model = {
@@ -199,9 +199,9 @@ class ImageStack:
         """
         Save a backup copy of the stack to a path with a datetime suffix.
         """
-        suffix = datetime.datetime.now().strftime('%Y_%m_%d__%H_%M_%S')
+        suffix = datetime.datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
         backup_path = os.path.join(
-            self.backup_save_folder, f'{self.save_name}.{suffix}'
+            self.backup_save_folder, f"{self.save_name}.{suffix}"
         )
         self._save_stack_to_path(backup_path)
 
@@ -210,9 +210,9 @@ class ImageStack:
         Save stack to the specified path.
         """
         with self.save_lock:
-            print(f'Saving all data to {path}.')
+            print(f"Saving all data to {path}.")
             data = json.dumps(self.stack)
-            with open(path, 'w') as f:
+            with open(path, "w") as f:
                 f.write(data)
 
     def _need_more_convos(self, workers_by_model: Dict[str, list]) -> bool:
@@ -225,7 +225,7 @@ class ImageStack:
         )
 
     def build_stack(self) -> int:
-        print('[ Building stack... ]')
+        print("[ Building stack... ]")
         self.stack = [
             {model: [] for model in self.models} for _ in range(self.num_images)
         ]
@@ -267,7 +267,7 @@ class ImageStack:
                 workers_by_model
             ):
                 self.pointer += 1
-                print(f'Pointer at {self.pointer}')
+                print(f"Pointer at {self.pointer}")
                 workers_by_model = self._get_stack_entry(self.pointer)
 
             # Find the next entry in the stack that the worker hasn't completed before
@@ -276,13 +276,13 @@ class ImageStack:
                 any(worker in workers for workers in workers_by_model.values())
                 or not self._need_more_convos(workers_by_model)
             ):
-                print(f'Pointer for worker {worker} at {self.pointer}')
+                print(f"Pointer for worker {worker} at {self.pointer}")
                 worker_pointer += 1
                 workers_by_model = self._get_stack_entry(worker_pointer)
 
             # Deal with the case in which no entry is suitable for the worker
             if workers_by_model is None:
-                print(f'WARNING: getting a random stack for worker {worker}.')
+                print(f"WARNING: getting a random stack for worker {worker}.")
                 worker_pointer = random.randrange(len(self.stack))
                 workers_by_model = self.stack[worker_pointer]
                 no_more_work = True
@@ -299,16 +299,16 @@ class ImageStack:
             ]
             if len(available_models) == 0:
                 print(
-                    f'WARNING: no more convos needed for any model for '
-                    f'{worker_pointer:d}. Picking a random model for worker '
-                    f'{worker}.'
+                    f"WARNING: no more convos needed for any model for "
+                    f"{worker_pointer:d}. Picking a random model for worker "
+                    f"{worker}."
                 )
                 available_models = list(workers_by_model.keys())
-            print(f'Available models: ' + ', '.join(available_models))
+            print(f"Available models: " + ", ".join(available_models))
             chosen_model = random.choice(available_models)
             print(
-                f'Retrieving stack {worker_pointer:d} for worker {worker} and test '
-                f'case {chosen_model}.'
+                f"Retrieving stack {worker_pointer:d} for worker {worker} and test "
+                f"case {chosen_model}."
             )
             workers_by_model[chosen_model].append(worker)
 
@@ -317,17 +317,17 @@ class ImageStack:
     def remove_worker_from_stack(self, worker: str, stack_idx: int):
         if any(worker in workers for workers in self.stack[stack_idx].values()):
             removed = False
-            print(f'Removing worker {worker} from stack {stack_idx:d}.')
+            print(f"Removing worker {worker} from stack {stack_idx:d}.")
             for this_models_workers in self.stack[stack_idx].values():
                 if worker in this_models_workers:
                     this_models_workers.remove(worker)
                     removed = True
             assert removed is True
             if stack_idx < self.pointer:
-                print(f'Moving pointer from {self.pointer:d} to {stack_idx:d}.')
+                print(f"Moving pointer from {self.pointer:d} to {stack_idx:d}.")
                 self.pointer = stack_idx
         else:
-            raise ValueError(f'Worker {worker} not found in stack {stack_idx:d}!')
+            raise ValueError(f"Worker {worker} not found in stack {stack_idx:d}!")
 
 
 class AbstractModelChatTest(AbstractParlAIChatTest, unittest.TestCase):
@@ -339,10 +339,10 @@ class AbstractModelChatTest(AbstractParlAIChatTest, unittest.TestCase):
         # TODO: in `self._check_output_key()`, there is other logic for ignoring
         #  keys with non-deterministic values. Consolidate all of that logic here!
         custom_data = self._get_custom_data(actual_state)
-        for key in ['datapath', 'parlai_home', 'starttime']:
+        for key in ["datapath", "parlai_home", "starttime"]:
             # The 'datapath' and 'parlai_home' keys will change depending on where
             # the test is run
-            del custom_data['task_description']['model_opt'][key]
+            del custom_data["task_description"]["model_opt"][key]
         return actual_state
 
     def _get_custom_data(self, actual_state: dict) -> dict:
@@ -352,15 +352,15 @@ class AbstractModelChatTest(AbstractParlAIChatTest, unittest.TestCase):
         The second-to-last message contains the custom data saved by the model-chat
         task code.
         """
-        return actual_state['outputs']['messages'][-2]['data']['WORLD_DATA'][
-            'custom_data'
+        return actual_state["outputs"]["messages"][-2]["data"]["WORLD_DATA"][
+            "custom_data"
         ]
 
     def _check_output_key(self, key: str, actual_value: Any, expected_value: Any):
         """
         Special logic for handling the 'final_chat_data' key.
         """
-        if key == 'final_chat_data':
+        if key == "final_chat_data":
             self._check_final_chat_data(
                 actual_value=actual_value, expected_value=expected_value
             )
@@ -376,33 +376,33 @@ class AbstractModelChatTest(AbstractParlAIChatTest, unittest.TestCase):
         Check the actual and expected values of the final chat data.
         """
         for key_inner, expected_value_inner in expected_value.items():
-            if key_inner == 'dialog':
+            if key_inner == "dialog":
                 assert len(actual_value[key_inner]) == len(expected_value_inner)
                 for actual_message, expected_message in zip(
                     actual_value[key_inner], expected_value_inner
                 ):
                     self.assertEqual(
-                        {k: v for k, v in actual_message.items() if k != 'message_id'},
+                        {k: v for k, v in actual_message.items() if k != "message_id"},
                         {
                             k: v
                             for k, v in expected_message.items()
-                            if k != 'message_id'
+                            if k != "message_id"
                         },
                     )
-            elif key_inner == 'task_description':
+            elif key_inner == "task_description":
                 for (key_inner2, expected_value_inner2) in expected_value_inner.items():
-                    if key_inner2 == 'model_file':
+                    if key_inner2 == "model_file":
                         pass
                         # The path to the model file depends on the random
                         # tmpdir
-                    elif key_inner2 == 'model_opt':
+                    elif key_inner2 == "model_opt":
                         keys_to_ignore = [
-                            'datapath',
-                            'dict_file',
-                            'model_file',
-                            'override',
-                            'parlai_home',
-                            'starttime',
+                            "datapath",
+                            "dict_file",
+                            "model_file",
+                            "override",
+                            "parlai_home",
+                            "starttime",
                         ]
                         # These paths depend on the random tmpdir and the host
                         # machine
@@ -416,25 +416,25 @@ class AbstractModelChatTest(AbstractParlAIChatTest, unittest.TestCase):
                                 self.assertEqual(
                                     actual_value[key_inner][key_inner2][key_inner3],
                                     expected_value_inner3,
-                                    f'Error in key {key_inner3}!',
+                                    f"Error in key {key_inner3}!",
                                 )
                     else:
                         self.assertEqual(
                             actual_value[key_inner][key_inner2],
                             expected_value_inner2,
-                            f'Error in key {key_inner2}!',
+                            f"Error in key {key_inner2}!",
                         )
             else:
                 self.assertEqual(
                     actual_value[key_inner],
                     expected_value_inner,
-                    f'Error in key {key_inner}!',
+                    f"Error in key {key_inner}!",
                 )
 
 
 def get_context_generator(
     override_opt: Optional[Dict[str, Any]] = None,
-    task: Optional[str] = 'blended_skill_talk',
+    task: Optional[str] = "blended_skill_talk",
     **kwargs,
 ) -> ContextGenerator:
     """
@@ -446,8 +446,8 @@ def get_context_generator(
         argparser.set_params(**override_opt)
     opt = argparser.parse_args([])
     task_module = load_task_module(task)
-    context_generator_class = getattr(task_module, 'ContextGenerator', None)
-    context_generator = context_generator_class(opt, datatype='test', seed=0, **kwargs)
+    context_generator_class = getattr(task_module, "ContextGenerator", None)
+    context_generator = context_generator_class(opt, datatype="test", seed=0, **kwargs)
     # We pull from the test set so that the model can't regurgitate
     # memorized conversations
     return context_generator
@@ -462,9 +462,9 @@ def get_image_src(
     """
     if image is None:
         image = Image.open(path)
-    rgb_image = image.convert('RGB')
+    rgb_image = image.convert("RGB")
     buffered = BytesIO()
-    rgb_image.save(buffered, format='JPEG')
-    encoded = str(base64.b64encode(buffered.getvalue()).decode('ascii'))
-    image_src = 'data:image/jpeg;base64,' + encoded
+    rgb_image.save(buffered, format="JPEG")
+    encoded = str(base64.b64encode(buffered.getvalue()).decode("ascii"))
+    image_src = "data:image/jpeg;base64," + encoded
     return image_src

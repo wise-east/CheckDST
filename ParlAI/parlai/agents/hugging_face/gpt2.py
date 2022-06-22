@@ -267,7 +267,7 @@ class Gpt2Agent(TorchGeneratorAgent):
         return agent
 
     def __init__(self, opt, shared=None):
-        if not opt["add_special_tokens"] and opt.get('batchsize', 1) > 1:
+        if not opt["add_special_tokens"] and opt.get("batchsize", 1) > 1:
             # *** STOP ***
             # You may be a future researcher who has stumbled upon this odd
             # restriction, and is tempted to comment this out. After all, the
@@ -328,6 +328,6 @@ class Gpt2Agent(TorchGeneratorAgent):
         current_sd = self.model.state_dict()
         missing = set(current_sd.keys()) - set(state_dict.keys())
         for m in missing:
-            if 'masked_bias' in m:
+            if "masked_bias" in m:
                 state_dict[m] = current_sd[m]
         return super().load_state_dict(state_dict)

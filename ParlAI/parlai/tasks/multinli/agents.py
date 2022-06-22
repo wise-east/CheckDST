@@ -16,44 +16,44 @@ from parlai.core.teachers import DialogTeacher
 
 from .build import build
 
-MULTINLI = 'MultiNLI'
-MULTINLI_VERSION = '1.0'
-MULTINLI_PREFIX = 'multinli_'
-MULTINLI_PREMISE_PREFIX = 'Premise: '
-MULTINLI_HYPO_PREFIX = 'Hypothesis: '
-MULTINLI_LABELS = ['entailment', 'contradiction', 'neutral']
-MULTINLI_PREMISE_KEY = 'sentence1'
-MULTINLI_HYPO_KEY = 'sentence2'
-MULTINLI_ANSWER_KEY = 'gold_label'
-NOT_CONTRADICT = 'not_contradiction'
+MULTINLI = "MultiNLI"
+MULTINLI_VERSION = "1.0"
+MULTINLI_PREFIX = "multinli_"
+MULTINLI_PREMISE_PREFIX = "Premise: "
+MULTINLI_HYPO_PREFIX = "Hypothesis: "
+MULTINLI_LABELS = ["entailment", "contradiction", "neutral"]
+MULTINLI_PREMISE_KEY = "sentence1"
+MULTINLI_HYPO_KEY = "sentence2"
+MULTINLI_ANSWER_KEY = "gold_label"
+NOT_CONTRADICT = "not_contradiction"
 BICLASS_DICT = {
-    'contradiction': 'contradiction',
-    'entailment': NOT_CONTRADICT,
-    'neutral': NOT_CONTRADICT,
+    "contradiction": "contradiction",
+    "entailment": NOT_CONTRADICT,
+    "neutral": NOT_CONTRADICT,
 }
-BICLASS_LABELS = ['contradiction', NOT_CONTRADICT]
+BICLASS_LABELS = ["contradiction", NOT_CONTRADICT]
 
 
 def _path(opt):
     build(opt)
 
-    dt = opt['datatype'].split(':')[0]
+    dt = opt["datatype"].split(":")[0]
 
-    if dt == 'train':
-        suffix = 'train'
+    if dt == "train":
+        suffix = "train"
     # Using matched set as valid and mismatched set as test
-    elif dt == 'valid':
-        suffix = 'dev_matched'
-    elif dt == 'test':
-        suffix = 'dev_mismatched'
+    elif dt == "valid":
+        suffix = "dev_matched"
+    elif dt == "test":
+        suffix = "dev_mismatched"
     else:
-        raise RuntimeError('Not valid datatype.')
+        raise RuntimeError("Not valid datatype.")
 
     data_path = os.path.join(
-        opt['datapath'],
+        opt["datapath"],
         MULTINLI,
         MULTINLI_PREFIX + MULTINLI_VERSION,
-        MULTINLI_PREFIX + MULTINLI_VERSION + '_' + suffix + '.jsonl',
+        MULTINLI_PREFIX + MULTINLI_VERSION + "_" + suffix + ".jsonl",
     )
     return data_path
 
@@ -69,12 +69,12 @@ def setup_data(path, dialog_format=False, binary_classes=False):
             is the query/question and ``y`` is the answer/label, ``clas`` represents the ``c`` the avaiable choices.
             ``new_episode`` is set True in any NLI teacher.
     """
-    print('loading: ' + path)
+    print("loading: " + path)
 
-    with PathManager.open(path, 'r') as data_file:
+    with PathManager.open(path, "r") as data_file:
         for pair_line in data_file:
             pair = json.loads(pair_line)
-            if pair[MULTINLI_ANSWER_KEY] == '-':
+            if pair[MULTINLI_ANSWER_KEY] == "-":
                 continue
 
             question, answers, clas = convert_to_dialogData(
@@ -104,8 +104,8 @@ def convert_to_dialogData(
         - ``answers`` (iter) is an iterable of label(s) for that query
         - ``clas`` (iter) is an iterable of label candidates that the student can choose from
     """
-    premise_raw = premise_raw.strip('\n').strip('\t')
-    hypo_raw = hypo_raw.strip('\n').strip('\t')
+    premise_raw = premise_raw.strip("\n").strip("\t")
+    hypo_raw = hypo_raw.strip("\n").strip("\t")
     clas = MULTINLI_LABELS
 
     if binary_classes:
@@ -115,7 +115,7 @@ def convert_to_dialogData(
         premise_raw = MULTINLI_PREMISE_PREFIX + premise_raw
         hypo_raw = MULTINLI_HYPO_PREFIX + hypo_raw
 
-    question = premise_raw + '\n' + hypo_raw
+    question = premise_raw + "\n" + hypo_raw
     answers = [answer_raw]
 
     return question, answers, clas
@@ -127,19 +127,19 @@ class DefaultTeacher(DialogTeacher):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        parser = parser.add_argument_group('MNLI Teacher Args')
+        parser = parser.add_argument_group("MNLI Teacher Args")
         parser.add_argument(
-            '-dfm',
-            '--dialog-format',
-            type='bool',
+            "-dfm",
+            "--dialog-format",
+            type="bool",
             default=False,
             help="True if one would like to convert to a dialogue format without special tokens such as 'Premise'"
             " and 'Hypothesis' (default: False).",
         )
         parser.add_argument(
-            '-bcl',
-            '--binary-classes',
-            type='bool',
+            "-bcl",
+            "--binary-classes",
+            type="bool",
             default=False,
             help="True if label candidates are (contradiction, not_contradiction), and (entailment, contradiction, "
             "neutral) otherwise (default: False).",
@@ -149,10 +149,10 @@ class DefaultTeacher(DialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
         data_path = _path(opt)
-        opt['datafile'] = data_path
-        self.id = 'MultiNLI'
-        self.dialog_format = opt.get('dialog_format', False)
-        self.binary_classes = opt.get('binary_classes', False)
+        opt["datafile"] = data_path
+        self.id = "MultiNLI"
+        self.dialog_format = opt.get("dialog_format", False)
+        self.binary_classes = opt.get("binary_classes", False)
         super().__init__(opt, shared)
 
     def setup_data(self, path):

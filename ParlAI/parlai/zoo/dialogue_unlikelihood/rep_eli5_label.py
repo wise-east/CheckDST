@@ -12,10 +12,10 @@ Label repetition unlikelihood on ELI5: please see.
 
 from .build import build
 
-VERSION = 'v1.0'
+VERSION = "v1.0"
 
 
 def download(datapath):
     build(
-        datapath, 'rep_eli5_label_v1.tgz', model_type='rep_eli5_label', version=VERSION
+        datapath, "rep_eli5_label_v1.tgz", model_type="rep_eli5_label", version=VERSION
     )

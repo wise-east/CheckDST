@@ -17,23 +17,23 @@ def test_exported_model(scripted_model_file: str, inputs: List[str]):
     with PathManager.open(scripted_model_file, "rb") as f:
         scripted_module = torch.jit.load(f)
 
-    print('\nGenerating given the scripted module:')
+    print("\nGenerating given the scripted module:")
     context = []
     for input_ in inputs:
-        print(' TEXT: ' + input_)
+        print(" TEXT: " + input_)
         context.append(input_)
-        label = scripted_module('\n'.join(context))
+        label = scripted_module("\n".join(context))
         print("LABEL: " + label)
         context.append(label)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '-smf',
-        '--scripted-model-file',
+        "-smf",
+        "--scripted-model-file",
         type=str,
-        help='Where to load the scripted model checkpoint from',
+        help="Where to load the scripted model checkpoint from",
     )
     parser.add_argument(
         "-i",
@@ -44,5 +44,5 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
     test_exported_model(
-        scripted_model_file=args.scripted_model_file, inputs=args.input.split('|')
+        scripted_model_file=args.scripted_model_file, inputs=args.input.split("|")
     )

@@ -72,8 +72,8 @@ class ChatServiceMessageSocket:
         self._safe_send(
             json.dumps(
                 {
-                    'type': 'world_alive',
-                    'content': {'id': 'WORLD_ALIVE', 'sender_id': 'world'},
+                    "type": "world_alive",
+                    "content": {"id": "WORLD_ALIVE", "sender_id": "world"},
                 }
             ),
             force=True,
@@ -85,7 +85,7 @@ class ChatServiceMessageSocket:
         """
 
         def on_socket_open(*args):
-            log_utils.print_and_log(logging.DEBUG, 'Socket open: {}'.format(args))
+            log_utils.print_and_log(logging.DEBUG, "Socket open: {}".format(args))
             self._send_world_alive()
 
         def on_error(ws, error):
@@ -96,14 +96,14 @@ class ChatServiceMessageSocket:
                     raise Exception("Socket refused connection, cancelling")
                 else:
                     log_utils.print_and_log(
-                        logging.WARN, 'Socket logged error: {}'.format(repr(error))
+                        logging.WARN, "Socket logged error: {}".format(repr(error))
                     )
             except BaseException:
                 if type(error) is websocket.WebSocketConnectionClosedException:
                     return  # Connection closed is noop
                 log_utils.print_and_log(
                     logging.WARN,
-                    'Socket logged error: {} Restarting'.format(repr(error)),
+                    "Socket logged error: {} Restarting".format(repr(error)),
                 )
                 self._ensure_closed()
 
@@ -113,7 +113,7 @@ class ChatServiceMessageSocket:
             on a retry.
             """
             log_utils.print_and_log(
-                logging.INFO, 'World server disconnected: {}'.format(args)
+                logging.INFO, "World server disconnected: {}".format(args)
             )
             self.alive = False
             self._ensure_closed()
@@ -123,22 +123,22 @@ class ChatServiceMessageSocket:
             Incoming message handler for messages from the FB user.
             """
             packet_dict = json.loads(args[1])
-            if packet_dict['type'] == 'conn_success':
+            if packet_dict["type"] == "conn_success":
                 self.alive = True
                 return  # No action for successful connection
-            if packet_dict['type'] == 'pong':
+            if packet_dict["type"] == "pong":
                 self.last_pong = time.time()
                 return  # No further action for pongs
-            message_data = packet_dict['content']
+            message_data = packet_dict["content"]
             log_utils.print_and_log(
-                logging.DEBUG, 'Message data received: {}'.format(message_data)
+                logging.DEBUG, "Message data received: {}".format(message_data)
             )
-            for message_packet in message_data['entry']:
-                for message in message_packet['messaging']:
+            for message_packet in message_data["entry"]:
+                for message in message_packet["messaging"]:
                     self.message_callback(message)
 
         def run_socket(*args):
-            url_base_name = self.server_url.split('https://')[1]
+            url_base_name = self.server_url.split("https://")[1]
             while self.keep_running:
                 try:
                     sock_addr = "wss://{}/".format(url_base_name)
@@ -153,13 +153,13 @@ class ChatServiceMessageSocket:
                 except Exception as e:
                     log_utils.print_and_log(
                         logging.WARN,
-                        'Socket error {}, attempting restart'.format(repr(e)),
+                        "Socket error {}, attempting restart".format(repr(e)),
                     )
                 time.sleep(0.2)
 
         # Start listening thread
         self.listen_thread = threading.Thread(
-            target=run_socket, name='Main-Socket-Thread'
+            target=run_socket, name="Main-Socket-Thread"
         )
         self.listen_thread.daemon = True
         self.listen_thread.start()

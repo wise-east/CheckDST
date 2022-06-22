@@ -31,18 +31,18 @@ from parlai.core.script import ParlaiScript, register_script
 
 
 def multiprocess_eval(
-    rank, opt, port=61337, rank_offset=0, gpu=None, hostname='localhost'
+    rank, opt, port=61337, rank_offset=0, gpu=None, hostname="localhost"
 ):
     """
     Run a multiprocessing evaluation.
 
     Invoked by launch_and_eval, not instantiated directly.
     """
-    init_method = f'tcp://{hostname}:{port}'
+    init_method = f"tcp://{hostname}:{port}"
     with distributed_utils.distributed_context(
         rank, opt, rank_offset, gpu, init_method=init_method
     ) as opt:
-        opt['multiprocessing'] = True
+        opt["multiprocessing"] = True
         return eval_model.eval_model(opt)
 
 
@@ -56,9 +56,9 @@ def launch_and_eval(opt, port):
         # need to give rank offset as 1 to cover the fact that the main
         # process is rank 0, but that spawn() doesn't let you control rank
         args=(opt, port, 1),
-        nprocs=opt['distributed_world_size'] - 1,  # main proc will also run loop
+        nprocs=opt["distributed_world_size"] - 1,  # main proc will also run loop
         join=False,
-        start_method='spawn',  # never fork, or will cause hangs with chunkteacher
+        start_method="spawn",  # never fork, or will cause hangs with chunkteacher
     )
 
     try:
@@ -91,5 +91,5 @@ class MultiProcessEval(ParlaiScript):
         return launch_and_eval(self.opt, port)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     MultiProcessEval.main()

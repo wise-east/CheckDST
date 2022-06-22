@@ -25,11 +25,11 @@ class WordShuffleMutator(MessageMutator):
         self.rng = random.Random(42)
 
     def message_mutation(self, message: Message) -> Message:
-        texts = message.pop('text').split('\n')
+        texts = message.pop("text").split("\n")
         output_texts = []
         for text in texts:
-            words = text.split(' ')
+            words = text.split(" ")
             self.rng.shuffle(words)
-            output_texts.append(' '.join(words))
-        message['text'] = '\n'.join(output_texts)
+            output_texts.append(" ".join(words))
+        message["text"] = "\n".join(output_texts)
         return message

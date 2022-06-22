@@ -13,9 +13,9 @@ import copy
 
 
 COPA = "COPA"
-COPA_RESOURCES_FOLDER_NAME = 'COPA-resources'
-COPA_DATASETS_FOLDER_NAME = 'datasets'
-COPA_DATASET_PREFIX = 'copa-'
+COPA_RESOURCES_FOLDER_NAME = "COPA-resources"
+COPA_DATASETS_FOLDER_NAME = "datasets"
+COPA_DATASET_PREFIX = "copa-"
 COPA_CAUSE_SUFFIX = "What was the CAUSE for this?"
 COPA_RESULT_SUFFIX = "What happened as a RESULT?"
 
@@ -23,21 +23,21 @@ COPA_RESULT_SUFFIX = "What happened as a RESULT?"
 def _path(opt):
     build(opt)
 
-    dt = opt['datatype'].split(':')[0]
+    dt = opt["datatype"].split(":")[0]
 
-    if dt == 'train' or dt == 'valid':
-        suffix = 'dev'
-    elif dt == 'test':
-        suffix = 'test'
+    if dt == "train" or dt == "valid":
+        suffix = "dev"
+    elif dt == "test":
+        suffix = "test"
     else:
-        raise RuntimeError('Not valid datatype.')
+        raise RuntimeError("Not valid datatype.")
 
     data_path = os.path.join(
-        opt['datapath'],
+        opt["datapath"],
         COPA,
         COPA_RESOURCES_FOLDER_NAME,
         COPA_DATASETS_FOLDER_NAME,
-        COPA_DATASET_PREFIX + suffix + '.xml',
+        COPA_DATASET_PREFIX + suffix + ".xml",
     )
 
     return data_path
@@ -47,20 +47,20 @@ class DefaultTeacher(DialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
         data_path = _path(opt)
-        opt['datafile'] = data_path
-        self.id = 'COPA'
+        opt["datafile"] = data_path
+        self.id = "COPA"
 
         super().__init__(opt, shared)
 
     def setup_data(self, path):
-        print('loading: ' + path)
+        print("loading: " + path)
 
         tree = ET.parse(path)
         root = tree.getroot()
 
         for child in root:
-            asks_for = child.attrib['asks-for']
-            answer = child.attrib['most-plausible-alternative']
+            asks_for = child.attrib["asks-for"]
+            answer = child.attrib["most-plausible-alternative"]
 
             premise = child[0].text
             alternative_one = child[1].text

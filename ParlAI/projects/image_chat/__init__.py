@@ -6,4 +6,4 @@
 import sys
 
 if sys.version_info < (3, 0):
-    raise RuntimeError('ParlAI requires Python 3.')
+    raise RuntimeError("ParlAI requires Python 3.")

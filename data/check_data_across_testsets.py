@@ -51,7 +51,7 @@ for aug in augs:
             if official[k][key] != laug_orig[k][laug_key]:
                 count += 1
                 if key == "context":
-                    logger.info(f'ID: {k}')
+                    logger.info(f"ID: {k}")
                     logger.info(f'Official labels: \n\t {official[k]["slots_inf"]}')
                     logger.info(f'LAUG labels: \n\t {laug_orig[k]["slots_inf"]}')
                     for idx in range(len(official[k][key])):

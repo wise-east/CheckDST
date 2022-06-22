@@ -15,16 +15,16 @@ def _path(task, opt, dt):
     # Build the data if it doesn't exist.
     build(opt)
     return os.path.join(
-        opt['datapath'], 'wmt', '{task}_{type}.txt'.format(task=task, type=dt)
+        opt["datapath"], "wmt", "{task}_{type}.txt".format(task=task, type=dt)
     )
 
 
 class EnDeTeacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        self.task_name = 'en_de'
-        dt = opt['datatype'].split(':')[0]
-        opt['datafile'] = _path(self.task_name, opt, dt)
+        self.task_name = "en_de"
+        dt = opt["datatype"].split(":")[0]
+        opt["datafile"] = _path(self.task_name, opt, dt)
         super().__init__(opt, shared)
 
 

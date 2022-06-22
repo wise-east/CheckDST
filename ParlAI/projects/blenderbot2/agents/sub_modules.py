@@ -28,17 +28,17 @@ import parlai.utils.logging as logging
 
 # The below are the classification outputs mapping to either
 # retrieving from memory, or not retrieving at all.
-MEMORY_STRINGS = ['convai2', 'personal_knowledge']
+MEMORY_STRINGS = ["convai2", "personal_knowledge"]
 NONE_STRINGS = [
-    'blended_skill_talk',
-    'empathetic_dialogues',
-    'dummy',
-    'no_passages_used',
+    "blended_skill_talk",
+    "empathetic_dialogues",
+    "dummy",
+    "no_passages_used",
 ]
 
 
 def strip_punc(s):
-    return s.translate(str.maketrans('', '', string.punctuation.replace('_', '')))
+    return s.translate(str.maketrans("", "", string.punctuation.replace("_", "")))
 
 
 def clean_vec_with_dict(dict: DictionaryAgent, vec: torch.LongTensor) -> List[int]:
@@ -83,11 +83,11 @@ class KnowledgeAccessMethod(Enum):
     none => do not retrieve anything.
     """
 
-    CLASSIFY = 'classify'
-    MEMORY_ONLY = 'memory_only'
-    SEARCH_ONLY = 'search_only'
-    ALL = 'all'
-    NONE = 'none'
+    CLASSIFY = "classify"
+    MEMORY_ONLY = "memory_only"
+    SEARCH_ONLY = "search_only"
+    ALL = "all"
+    NONE = "none"
 
 
 class BB2SubmoduleMixin:
@@ -139,12 +139,12 @@ class BB2SubmoduleMixin:
         start = time.time()
         active_agents = self.agents[: len(texts)]
         for agent_i, t_i in zip(active_agents, texts):
-            agent_i.observe(Message({'text': t_i, 'episode_done': True}))
+            agent_i.observe(Message({"text": t_i, "episode_done": True}))
         agent_replies = self.agents[0].batch_act([a.observation for a in active_agents])
-        logging.debug(f'Generated: {time.time() - start:.2f}')
+        logging.debug(f"Generated: {time.time() - start:.2f}")
         for agent_i, reply_i in zip(active_agents, agent_replies):
             agent_i.self_observe(reply_i)
-        self.generations = [r.get('text', 'dummy') for r in agent_replies]
+        self.generations = [r.get("text", "dummy") for r in agent_replies]
         return self.generations
 
 
@@ -161,28 +161,28 @@ class QueryGenerator(BB2SubmoduleMixin):
         self.agents = []
         self.agent_dict = None
         self.generations = []
-        self.input_type = 'Search'
+        self.input_type = "Search"
         self.knowledge_access_method = KnowledgeAccessMethod(
-            opt['knowledge_access_method']
+            opt["knowledge_access_method"]
         )
-        model_file = modelzoo_path(opt['datapath'], opt['query_generator_model_file'])
+        model_file = modelzoo_path(opt["datapath"], opt["query_generator_model_file"])
         if model_file and os.path.exists(model_file):
-            logging.info(f'Building Query Generator from file: {model_file}')
+            logging.info(f"Building Query Generator from file: {model_file}")
             logging.disable()
-            overrides: Dict[str, Any] = {'skip_generation': False}
-            overrides['inference'] = opt['query_generator_inference']
-            overrides['beam_size'] = opt.get('query_generator_beam_size', 3)
-            overrides['beam_min_length'] = opt.get('query_generator_beam_min_length', 2)
-            if self.opt['query_generator_truncate'] > 0:
-                overrides['text_truncate'] = self.opt['query_generator_truncate']
-                overrides['truncate'] = self.opt['query_generator_truncate']
+            overrides: Dict[str, Any] = {"skip_generation": False}
+            overrides["inference"] = opt["query_generator_inference"]
+            overrides["beam_size"] = opt.get("query_generator_beam_size", 3)
+            overrides["beam_min_length"] = opt.get("query_generator_beam_min_length", 2)
+            if self.opt["query_generator_truncate"] > 0:
+                overrides["text_truncate"] = self.opt["query_generator_truncate"]
+                overrides["truncate"] = self.opt["query_generator_truncate"]
             base_agent = create_agent_from_model_file(
                 model_file, opt_overrides=overrides
             )
             assert isinstance(base_agent, TorchAgent)
             self.agents = [base_agent]
-            bsz = opt.get('batchsize', 1)
-            rag_turn_n_turns = opt.get('rag_turn_n_turns', 1)
+            bsz = opt.get("batchsize", 1)
+            rag_turn_n_turns = opt.get("rag_turn_n_turns", 1)
             if bsz > 1 or rag_turn_n_turns > 1:
                 self.agents += [
                     create_agent_from_shared(self.agents[0].share())
@@ -226,8 +226,8 @@ class QueryGenerator(BB2SubmoduleMixin):
             search_queries = [MEMORY_STRINGS[-1]] * len(texts)
         else:
             search_queries = self._batch_generate(texts)
-        logging.debug(f'search queries: {search_queries}')
-        logging.verbose(f'Search: {search_queries[0]}')
+        logging.debug(f"search queries: {search_queries}")
+        logging.verbose(f"Search: {search_queries[0]}")
         searches = []
         if not generated_memories:
             generated_memories = [[] for _ in range(input.size(0))]
@@ -261,30 +261,30 @@ class MemoryDecoder(BB2SubmoduleMixin):
         self.agents = []
         self.agent_dict = None
         self.generations = []
-        self.input_type = 'Memory'
-        self.delimiter = opt.get('memory_decoder_delimiter', '\n')
-        self.one_line_memories = opt.get('memory_decoder_one_line_memories', False)
-        model_file = modelzoo_path(opt['datapath'], opt['memory_decoder_model_file'])
+        self.input_type = "Memory"
+        self.delimiter = opt.get("memory_decoder_delimiter", "\n")
+        self.one_line_memories = opt.get("memory_decoder_one_line_memories", False)
+        model_file = modelzoo_path(opt["datapath"], opt["memory_decoder_model_file"])
         if model_file and os.path.exists(model_file):
-            logging.info(f'Building Memory Decoder from file: {model_file}')
+            logging.info(f"Building Memory Decoder from file: {model_file}")
             logging.disable()
             overrides = {
-                'skip_generation': False,
-                'inference': 'beam',
-                'beam_size': opt.get('memory_decoder_beam_size', 3),
-                'beam_min_length': opt.get('memory_decoder_beam_min_length', 10),
-                'beam_block_ngram': 3,
+                "skip_generation": False,
+                "inference": "beam",
+                "beam_size": opt.get("memory_decoder_beam_size", 3),
+                "beam_min_length": opt.get("memory_decoder_beam_min_length", 10),
+                "beam_block_ngram": 3,
             }
-            if self.opt.get('memory_decoder_truncate', -1) > 0:
-                overrides['text_truncate'] = self.opt['memory_decoder_truncate']
-                overrides['truncate'] = self.opt['memory_decoder_truncate']
+            if self.opt.get("memory_decoder_truncate", -1) > 0:
+                overrides["text_truncate"] = self.opt["memory_decoder_truncate"]
+                overrides["truncate"] = self.opt["memory_decoder_truncate"]
             base_agent = create_agent_from_model_file(
                 model_file, opt_overrides=overrides
             )
             assert isinstance(base_agent, TorchAgent)
             self.agents = [base_agent]
             assert isinstance(self.agents[0], TorchAgent)
-            copies = max(100, (opt['batchsize'] * opt.get('rag_turn_n_turns', 1)))
+            copies = max(100, (opt["batchsize"] * opt.get("rag_turn_n_turns", 1)))
             self.agents += [
                 create_agent_from_shared(self.agents[0].share()) for _ in range(copies)
             ]
@@ -320,11 +320,11 @@ class MemoryDecoder(BB2SubmoduleMixin):
                 self.agent_dict.vec2txt(self.clean_input(j)) for j in context_lines_vec
             ]
             raw_memories_i = list(reversed(self._batch_generate(context_lines)))
-            logging.debug(f'raw memories: {raw_memories_i}')
+            logging.debug(f"raw memories: {raw_memories_i}")
             memories_i = self._extract_from_raw_memories(raw_memories_i)
-            logging.debug(f'memories to write: {memories_i}')
-            mem_string = '\n'.join(memories_i)
-            logging.verbose(f'Writing memories: {mem_string}')
+            logging.debug(f"memories to write: {memories_i}")
+            mem_string = "\n".join(memories_i)
+            logging.verbose(f"Writing memories: {mem_string}")
             memories.append(memories_i)
         return memories
 
@@ -341,8 +341,8 @@ class MemoryDecoder(BB2SubmoduleMixin):
         :return memories:
             return prefixed and filtered memories
         """
-        partner_prefix = 'partner\'s persona:'
-        self_prefix = 'your persona:'
+        partner_prefix = "partner's persona:"
+        self_prefix = "your persona:"
         num_ctxt = len(raw_memories)
         memories = []
         partner_memories = []
@@ -357,7 +357,7 @@ class MemoryDecoder(BB2SubmoduleMixin):
                 self_memories.append(raw_memories[idx])
                 prefix = self_prefix
             if not self.one_line_memories:
-                memories.append(f'{prefix} {raw_memories[idx]}')
+                memories.append(f"{prefix} {raw_memories[idx]}")
         if self.one_line_memories:
             if partner_memories:
                 memories.append(f"{partner_prefix} {' '.join(partner_memories)}")

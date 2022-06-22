@@ -17,9 +17,9 @@ from pytest_regressions.data_regression import DataRegressionFixture
 
 
 TASK_CONFIG_FOLDER = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), 'task_config'
+    os.path.dirname(os.path.abspath(__file__)), "task_config"
 )
-TASK_DATA_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'task_data')
+TASK_DATA_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "task_data")
 
 
 try:
@@ -57,12 +57,12 @@ try:
             self.operator = setup_teardown
 
             overrides = [
-                '+mephisto.blueprint.annotation_indices_jsonl=null',
-                f'mephisto.blueprint.data_jsonl={TASK_CONFIG_FOLDER}/sample_conversations.jsonl',
+                "+mephisto.blueprint.annotation_indices_jsonl=null",
+                f"mephisto.blueprint.data_jsonl={TASK_CONFIG_FOLDER}/sample_conversations.jsonl",
             ]
             self._test_turn_annotations_static_task(
                 blueprint_type=STATIC_BLUEPRINT_TYPE,
-                task_data_path=os.path.join(TASK_DATA_FOLDER, 'no_in_flight_qa.json'),
+                task_data_path=os.path.join(TASK_DATA_FOLDER, "no_in_flight_qa.json"),
                 overrides=overrides,
                 data_regression=data_regression,
             )
@@ -77,13 +77,13 @@ try:
             self.operator = setup_teardown
 
             overrides = [
-                '+mephisto.blueprint.annotation_indices_jsonl=null',
-                f'mephisto.blueprint.data_jsonl={TASK_CONFIG_FOLDER}/sample_conversations.jsonl',
-                f'+mephisto.blueprint.onboarding_in_flight_data={TASK_DIRECTORY}/task_config/onboarding_in_flight.jsonl',
+                "+mephisto.blueprint.annotation_indices_jsonl=null",
+                f"mephisto.blueprint.data_jsonl={TASK_CONFIG_FOLDER}/sample_conversations.jsonl",
+                f"+mephisto.blueprint.onboarding_in_flight_data={TASK_DIRECTORY}/task_config/onboarding_in_flight.jsonl",
             ]
             self._test_turn_annotations_static_task(
                 blueprint_type=STATIC_IN_FLIGHT_QA_BLUEPRINT_TYPE,
-                task_data_path=os.path.join(TASK_DATA_FOLDER, 'in_flight_qa.json'),
+                task_data_path=os.path.join(TASK_DATA_FOLDER, "in_flight_qa.json"),
                 overrides=overrides,
                 data_regression=data_regression,
             )
@@ -101,15 +101,15 @@ try:
             self.operator = setup_teardown
 
             overrides = [
-                f'+mephisto.blueprint.annotation_indices_jsonl={TASK_DIRECTORY}/task_config/annotation_indices_example.jsonl',
-                f'mephisto.blueprint.data_jsonl={TASK_CONFIG_FOLDER}/sample_conversations_annotation_file.jsonl',
-                f'+mephisto.blueprint.onboarding_in_flight_data={TASK_DIRECTORY}/task_config/onboarding_in_flight.jsonl',
-                'mephisto.blueprint.subtasks_per_unit=4',
+                f"+mephisto.blueprint.annotation_indices_jsonl={TASK_DIRECTORY}/task_config/annotation_indices_example.jsonl",
+                f"mephisto.blueprint.data_jsonl={TASK_CONFIG_FOLDER}/sample_conversations_annotation_file.jsonl",
+                f"+mephisto.blueprint.onboarding_in_flight_data={TASK_DIRECTORY}/task_config/onboarding_in_flight.jsonl",
+                "mephisto.blueprint.subtasks_per_unit=4",
             ]
             self._test_turn_annotations_static_task(
                 blueprint_type=STATIC_IN_FLIGHT_QA_BLUEPRINT_TYPE,
                 task_data_path=os.path.join(
-                    TASK_DATA_FOLDER, 'in_flight_qa_annotation_file.json'
+                    TASK_DATA_FOLDER, "in_flight_qa_annotation_file.json"
                 ),
                 overrides=overrides,
                 data_regression=data_regression,
@@ -139,11 +139,11 @@ try:
 
             # Set up the config and database
             overrides += [
-                '+mephisto.blueprint.annotation_last_only=False',
-                '+mephisto.blueprint.conversation_count=null',
-                'mephisto.blueprint.onboarding_qualification=null',
-                '+mephisto.blueprint.random_seed=42',
-                'mephisto.task.assignment_duration_in_seconds=1800',
+                "+mephisto.blueprint.annotation_last_only=False",
+                "+mephisto.blueprint.conversation_count=null",
+                "mephisto.blueprint.onboarding_qualification=null",
+                "+mephisto.blueprint.random_seed=42",
+                "mephisto.task.assignment_duration_in_seconds=1800",
             ]
             # TODO: remove all of these params once Hydra 1.1 is released with support
             #  for recursive defaults
@@ -159,7 +159,6 @@ try:
             self._set_up_server()
 
             self._test_agent_state(task_data=task_data, data_regression=data_regression)
-
 
 except ImportError:
     pass

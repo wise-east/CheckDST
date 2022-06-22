@@ -74,8 +74,8 @@ class CandidateBaseTeacher(Teacher, ABC):
             size of the valid/test sets
         """
         self.opt = opt
-        opt['datafile'] = opt['datatype'].split(':')[0]
-        self.datafile = opt['datafile']
+        opt["datafile"] = opt["datatype"].split(":")[0]
+        self.datafile = opt["datafile"]
 
         self.vocab_size = vocab_size
         self.example_size = example_size
@@ -94,7 +94,7 @@ class CandidateBaseTeacher(Teacher, ABC):
         return [list(x) for x in itertools.permutations(self.words, self.example_size)]
 
     def num_episodes(self) -> int:
-        if self.datafile == 'train':
+        if self.datafile == "train":
             return self.num_train
         else:
             return self.num_test
@@ -130,7 +130,7 @@ class CandidateBaseTeacher(Teacher, ABC):
             self.corpus = self.test
 
         # make sure the corpus is actually text strings
-        self.corpus = [' '.join(x) for x in self.corpus]
+        self.corpus = [" ".join(x) for x in self.corpus]
 
 
 class FixedDialogCandidateTeacher(CandidateBaseTeacher, FixedDialogTeacher):
@@ -146,19 +146,19 @@ class FixedDialogCandidateTeacher(CandidateBaseTeacher, FixedDialogTeacher):
         """
         super().__init__(*args, **kwargs)
         opt = args[0]
-        if 'shared' not in kwargs:
-            self._setup_data(opt['datatype'].split(':')[0])
+        if "shared" not in kwargs:
+            self._setup_data(opt["datatype"].split(":")[0])
             self._build_candidates()
         else:
-            shared = kwargs['shared']
-            self.corpus = shared['corpus']
-            self.cands = shared['cands']
+            shared = kwargs["shared"]
+            self.corpus = shared["corpus"]
+            self.cands = shared["cands"]
         self.reset()
 
     def share(self):
         shared = super().share()
-        shared['corpus'] = self.corpus
-        shared['cands'] = self.cands
+        shared["corpus"] = self.corpus
+        shared["cands"] = self.cands
         return shared
 
     def _build_candidates(self):
@@ -172,10 +172,10 @@ class FixedDialogCandidateTeacher(CandidateBaseTeacher, FixedDialogTeacher):
 
     def get(self, episode_idx: int, entry_idx: int = 0):
         return {
-            'text': self.corpus[episode_idx],
-            'episode_done': True,
-            'labels': [self.corpus[episode_idx]],
-            'label_candidates': self.cands[episode_idx],
+            "text": self.corpus[episode_idx],
+            "episode_done": True,
+            "labels": [self.corpus[episode_idx]],
+            "label_candidates": self.cands[episode_idx],
         }
 
 
@@ -203,15 +203,15 @@ class OverfitTeacher(CandidateTeacher, DialogTeacher):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        parser.add_argument('--corpus-size', default=4, type=int)
+        parser.add_argument("--corpus-size", default=4, type=int)
         return parser
 
     def __init__(self, opt, shared=None):
-        self.corpussize = opt.get('corpus_size', 4)
+        self.corpussize = opt.get("corpus_size", 4)
         super().__init__(opt, shared)
 
     def setup_data(self, fold):
-        super()._setup_data('train')
+        super()._setup_data("train")
         for i, text in enumerate(self.corpus[: self.corpussize]):
             cands = []
             for j in range(NUM_CANDIDATES):
@@ -232,19 +232,19 @@ class OverfitMultiturnTeacher(CandidateTeacher, DialogTeacher):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt)
-        parser.add_argument('--corpus-size', default=4, type=int)
+        parser.add_argument("--corpus-size", default=4, type=int)
         return parser
 
     def __init__(self, opt, shared=None):
-        self.corpussize = opt.get('corpus_size', 4)
+        self.corpussize = opt.get("corpus_size", 4)
         super().__init__(opt, shared)
 
     def setup_data(self, fold):
-        super()._setup_data('train')
+        super()._setup_data("train")
         for text in self.corpus[: self.corpussize]:
-            words = text.split(' ')
+            words = text.split(" ")
             for j in range(1, len(words) + 1):
-                real_text = ' '.join(words[:j])
+                real_text = " ".join(words[:j])
                 yield (real_text, text), True
 
     def num_examples(self):
@@ -273,16 +273,16 @@ class MultiturnCandidateTeacher(CandidateTeacher):
     def setup_data(self, fold):
         raw = super().setup_data(fold)
         for (t, a, r, cs), _e in raw:
-            split_t = t.split(' ')
-            split_a = a[0].split(' ')
-            split_cs = [c.split(' ') for c in cs]
+            split_t = t.split(" ")
+            split_a = a[0].split(" ")
+            split_cs = [c.split(" ") for c in cs]
             for i in range(len(split_t)):
                 yield (
                     (
                         split_t[i],
-                        [' '.join(split_a[: i + 1])],
+                        [" ".join(split_a[: i + 1])],
                         r,
-                        [' '.join(c[: i + 1]) for c in split_cs],
+                        [" ".join(c[: i + 1]) for c in split_cs],
                     ),
                     i == 0,
                 )
@@ -321,8 +321,8 @@ class RepeatWordsTeacher(NocandidateTeacher):
 
     def __init__(self, *args, **kwargs):
         # Set sizes so that we have appropriate number of examples (700)
-        kwargs['vocab_size'] = 70
-        kwargs['example_size'] = 11
+        kwargs["vocab_size"] = 70
+        kwargs["example_size"] = 11
         super().__init__(*args, **kwargs)
 
     def build_corpus(self):
@@ -359,12 +359,12 @@ class ClassifierTeacher(CandidateTeacher):
     def setup_data(self, fold):
         raw = super().setup_data(fold)
         for (t, _a, _r, _c), e in raw:
-            letters = t.split(' ')
+            letters = t.split(" ")
             # everything starts with 0 or 1
             letters[0] = str(int(int(t[0]) % 2))
-            label = 'one' if letters[0] == '1' else 'zero'
-            text = ' '.join(letters)
-            yield (text, [label], 0, ['one', 'zero']), e
+            label = "one" if letters[0] == "1" else "zero"
+            text = " ".join(letters)
+            yield (text, [label], 0, ["one", "zero"]), e
 
 
 class ReverseTeacher(CandidateTeacher):
@@ -393,8 +393,8 @@ class ImageTeacher(AbstractImageTeacher):
         super().__init__(opt, shared)
 
     def _setup_test_data(self, opt):
-        datapath = os.path.join(opt['datapath'], 'ImageTeacher')
-        imagepath = os.path.join(datapath, 'images')
+        datapath = os.path.join(opt["datapath"], "ImageTeacher")
+        imagepath = os.path.join(datapath, "images")
         PathManager.mkdirs(imagepath)
 
         self.image_features_path = os.path.join(
@@ -402,20 +402,20 @@ class ImageTeacher(AbstractImageTeacher):
         )
 
         # Create fake images and features
-        imgs = [f'img_{i}' for i in range(10)]
+        imgs = [f"img_{i}" for i in range(10)]
         for i, img in enumerate(imgs):
-            image = Image.new('RGB', (16, 16), color=i)
-            with PathManager.open(os.path.join(imagepath, f'{img}.jpg'), 'wb') as fp:
-                image.save(fp, 'JPEG')
+            image = Image.new("RGB", (16, 16), color=i)
+            with PathManager.open(os.path.join(imagepath, f"{img}.jpg"), "wb") as fp:
+                image.save(fp, "JPEG")
 
         # write out fake data
-        for dt in ['train', 'valid', 'test']:
+        for dt in ["train", "valid", "test"]:
             random.seed(42)
             data = [
-                {'image_id': img, 'text': string.ascii_uppercase[i]}
+                {"image_id": img, "text": string.ascii_uppercase[i]}
                 for i, img in enumerate(imgs)
             ]
-            with PathManager.open(os.path.join(datapath, f'{dt}.json'), 'w') as f:
+            with PathManager.open(os.path.join(datapath, f"{dt}.json"), "w") as f:
                 json.dump(data, f)
 
     def get_image_features_path(self, task, image_model_name, dt):
@@ -429,17 +429,17 @@ class ImageTeacher(AbstractImageTeacher):
         Return path to image on disk.
         """
         return os.path.join(
-            self.opt['datapath'], 'ImageTeacher/images', f'{image_id}.jpg'
+            self.opt["datapath"], "ImageTeacher/images", f"{image_id}.jpg"
         )
 
 
 class RepeatTeacher(DialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        opt['datafile'] = 'unused_path'
-        task = opt.get('task', 'integration_tests:RepeatTeacher:50')
+        opt["datafile"] = "unused_path"
+        task = opt.get("task", "integration_tests:RepeatTeacher:50")
         try:
-            self.data_length = int(task.split(':')[-1])
+            self.data_length = int(task.split(":")[-1])
         except ValueError:
             self.data_length = 10
         super().__init__(opt, shared)
@@ -460,21 +460,21 @@ class ChunkyTeacher(ChunkTeacher):
         return None
 
     def get_num_samples(self, opt) -> Tuple[int, int]:
-        datatype = opt['datatype']
-        if 'train' in datatype:
+        datatype = opt["datatype"]
+        if "train" in datatype:
             return NUM_TRAIN, NUM_TRAIN
-        elif 'valid' in datatype:
+        elif "valid" in datatype:
             return NUM_TEST, NUM_TEST
-        elif 'test' in datatype:
+        elif "test" in datatype:
             return NUM_TEST, NUM_TEST
 
     def get_fold_chunks(self, opt) -> List[int]:
-        datatype = opt['datatype']
-        if 'train' in datatype:
+        datatype = opt["datatype"]
+        if "train" in datatype:
             return list(range(50))
-        elif 'valid' in datatype:
+        elif "valid" in datatype:
             return list(range(50, 60))
-        elif 'test' in datatype:
+        elif "test" in datatype:
             return list(range(60, 70))
 
     def load_from_chunk(self, chunk_idx: int):
@@ -487,7 +487,7 @@ class ChunkyTeacher(ChunkTeacher):
 
     def create_message(self, sample_item, entry_idx=0):
         text, label = sample_item
-        return Message({'text': text, 'labels': [label], 'episode_done': True})
+        return Message({"text": text, "labels": [label], "episode_done": True})
 
 
 class WrongExamplesChunkyTeacher(ChunkyTeacher):
@@ -540,11 +540,11 @@ class InfiniteTrainTeacher(FixedDialogTeacher):
 
     def get(self, episode_idx=0, entry_idx=0):
         field = (
-            'labels'
-            if DatatypeHelper.is_training(self.opt['datatype'])
-            else 'eval_labels'
+            "labels"
+            if DatatypeHelper.is_training(self.opt["datatype"])
+            else "eval_labels"
         )
-        return Message({'text': '1 2 3 4', field: ['1 2 3 4'], 'episode_done': True})
+        return Message({"text": "1 2 3 4", field: ["1 2 3 4"], "episode_done": True})
 
 
 class ChunkySlowTeacher(ChunkyTeacher):
@@ -577,8 +577,8 @@ class TinyTeacher(DialogTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        opt['datafile'] = 'tiny_data'
+        opt["datafile"] = "tiny_data"
         super().__init__(opt, shared)
 
     def setup_data(self, _):
-        yield {'text': 'hi', 'label': 'there'}, True
+        yield {"text": "hi", "label": "there"}, True

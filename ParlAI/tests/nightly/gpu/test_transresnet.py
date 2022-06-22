@@ -13,11 +13,11 @@ import parlai.utils.testing as testing_utils
 
 
 MODEL_OPTIONS = {
-    'task': 'personality_captions:PersonalityCaptionsTestTeacher',
-    'model_file': 'models:personality_captions/transresnet/model',
-    'datatype': 'test',
-    'yfcc_path': 'temp',
-    'num_test_labels': 5,
+    "task": "personality_captions:PersonalityCaptionsTestTeacher",
+    "model_file": "models:personality_captions/transresnet/model",
+    "datatype": "test",
+    "yfcc_path": "temp",
+    "num_test_labels": 5,
 }
 
 
@@ -35,7 +35,7 @@ class TestTransresnet(unittest.TestCase):
         parser = display_data.setup_args()
         parser.set_defaults(**MODEL_OPTIONS)
         opt = parser.parse_args([])
-        opt['num_examples'] = 1
+        opt["num_examples"] = 1
         display_data.display_data(opt)
 
     def test_transresnet(self):
@@ -43,11 +43,11 @@ class TestTransresnet(unittest.TestCase):
         Test pretrained model.
         """
         _, test = testing_utils.eval_model(MODEL_OPTIONS, skip_valid=True)
-        self.assertAlmostEqual(test['accuracy'], 0.4, places=4)
-        self.assertAlmostEqual(test['hits@5'], 0.9, places=4)
-        self.assertAlmostEqual(test['hits@10'], 0.9, places=4)
-        self.assertAlmostEqual(test['med_rank'], 2.0, places=4)
+        self.assertAlmostEqual(test["accuracy"], 0.4, places=4)
+        self.assertAlmostEqual(test["hits@5"], 0.9, places=4)
+        self.assertAlmostEqual(test["hits@10"], 0.9, places=4)
+        self.assertAlmostEqual(test["med_rank"], 2.0, places=4)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

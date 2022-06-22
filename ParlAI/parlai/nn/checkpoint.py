@@ -13,6 +13,6 @@ except ImportError:
         Dummy checkpoint wrapper that raises an error.
         """
         raise ImportError(
-            'Please install fairscale with `pip install fairscale` to use '
-            '--checkpoint-activations true.'
+            "Please install fairscale with `pip install fairscale` to use "
+            "--checkpoint-activations true."
         )

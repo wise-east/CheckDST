@@ -12,10 +12,10 @@ import os.path
 
 
 def download(datapath):
-    ddir = os.path.join(get_model_dir(datapath), 'msc')
-    model_type = 'summsc_fidrag3B'
-    version = 'v0.1'
+    ddir = os.path.join(get_model_dir(datapath), "msc")
+    model_type = "summsc_fidrag3B"
+    version = "v0.1"
     if not built(os.path.join(ddir, model_type), version):
-        opt = {'datapath': datapath, 'model_type': model_type}
-        fnames = [f'model_{version}.tar.gz']
-        download_models(opt, fnames, 'msc', version=version, use_model_type=True)
+        opt = {"datapath": datapath, "model_type": model_type}
+        fnames = [f"model_{version}.tar.gz"]
+        download_models(opt, fnames, "msc", version=version, use_model_type=True)

@@ -124,52 +124,52 @@ class AbstractDistillTransformerAgentMixin(ABC):
     def add_cmdline_args(
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
-        agent = parser.add_argument_group('AbstractDistillTransformer arguments')
-        agent.add_argument('--teacher-model', help='The teacher model file')
+        agent = parser.add_argument_group("AbstractDistillTransformer arguments")
+        agent.add_argument("--teacher-model", help="The teacher model file")
         agent.add_argument(
-            '--task-loss-coeff',
+            "--task-loss-coeff",
             type=float,
             default=1,
-            help='Coefficient on MLE loss on task',
+            help="Coefficient on MLE loss on task",
         )
         agent.add_argument(
-            '--encoder-loss-coeff',
+            "--encoder-loss-coeff",
             type=float,
             default=0,
-            help='Coefficient on teacher loss on encoder output',
+            help="Coefficient on teacher loss on encoder output",
         )
         agent.add_argument(
-            '--hidden-loss-coeff',
+            "--hidden-loss-coeff",
             type=float,
             default=0,
-            help='Coefficient on teacher loss on encoder/decoder hidden layers',
+            help="Coefficient on teacher loss on encoder/decoder hidden layers",
         )
         agent.add_argument(
-            '--pred-loss-coeff',
+            "--pred-loss-coeff",
             type=float,
             default=0,
-            help='Coefficient on KL teacher loss on prediction layer',
+            help="Coefficient on KL teacher loss on prediction layer",
         )
         return agent
 
     def __init__(self, opt, shared=None):
 
         # Define coefficients
-        self.task_loss_coeff = opt['task_loss_coeff']
-        self.encoder_loss_coeff = opt['encoder_loss_coeff']
-        self.hidden_loss_coeff = opt['hidden_loss_coeff']
-        self.pred_loss_coeff = opt['pred_loss_coeff']
+        self.task_loss_coeff = opt["task_loss_coeff"]
+        self.encoder_loss_coeff = opt["encoder_loss_coeff"]
+        self.hidden_loss_coeff = opt["hidden_loss_coeff"]
+        self.pred_loss_coeff = opt["pred_loss_coeff"]
 
         assert (
-            opt.get('model_parallel', False) is False
-        ), 'model_parallel is not currently supported for distillation!'
+            opt.get("model_parallel", False) is False
+        ), "model_parallel is not currently supported for distillation!"
 
         # Create teacher model
         if shared is None:
-            to_copy = {'no_cuda', 'model_parallel', 'fp16', 'fp16_impl', 'gpu'}
+            to_copy = {"no_cuda", "model_parallel", "fp16", "fp16_impl", "gpu"}
             override = {k: opt[k] for k in to_copy}
-            override['datatype'] = 'train:evalmode'  # Don't initialize the optimizer
-            teacher_agent = create_agent_from_model_file(opt['teacher_model'], override)
+            override["datatype"] = "train:evalmode"  # Don't initialize the optimizer
+            teacher_agent = create_agent_from_model_file(opt["teacher_model"], override)
             self.teacher_agent_opt = teacher_agent.opt
             self.teacher_model = teacher_agent.model
             self.teacher_model.eval()
@@ -202,27 +202,27 @@ class AbstractDistillTransformerAgentMixin(ABC):
 
         # Register hooks to record outputs
         encoder_module_map = {
-            'layers': TransformerEncoderLayer,
-            'attentions': MultiHeadAttention,
+            "layers": TransformerEncoderLayer,
+            "attentions": MultiHeadAttention,
         }
         decoder_module_map = {
-            'layers': TransformerDecoderLayer,
-            'attentions': MultiHeadAttention,
+            "layers": TransformerDecoderLayer,
+            "attentions": MultiHeadAttention,
         }
         self.hooks = {
-            'teacher': {
-                'encoder': self._register_series_of_hooks(
+            "teacher": {
+                "encoder": self._register_series_of_hooks(
                     model=teacher_model.encoder, module_map=encoder_module_map
                 ),
-                'decoder': self._register_series_of_hooks(
+                "decoder": self._register_series_of_hooks(
                     model=teacher_model.decoder, module_map=decoder_module_map
                 ),
             },
-            'student': {
-                'encoder': self._register_series_of_hooks(
+            "student": {
+                "encoder": self._register_series_of_hooks(
                     model=student_model.encoder, module_map=encoder_module_map
                 ),
-                'decoder': self._register_series_of_hooks(
+                "decoder": self._register_series_of_hooks(
                     model=student_model.decoder, module_map=decoder_module_map
                 ),
             },
@@ -230,13 +230,13 @@ class AbstractDistillTransformerAgentMixin(ABC):
 
         # Separately register hooks for the token embeddings, which are the same for
         # the encoder and decoder
-        self.hooks['teacher']['embeddings'] = OutputRecorder()
+        self.hooks["teacher"]["embeddings"] = OutputRecorder()
         teacher_model.embeddings.register_forward_hook(
-            self.hooks['teacher']['embeddings']
+            self.hooks["teacher"]["embeddings"]
         )
-        self.hooks['student']['embeddings'] = OutputRecorder()
+        self.hooks["student"]["embeddings"] = OutputRecorder()
         student_model.embeddings.register_forward_hook(
-            self.hooks['student']['embeddings']
+            self.hooks["student"]["embeddings"]
         )
 
         return student_model
@@ -248,7 +248,7 @@ class AbstractDistillTransformerAgentMixin(ABC):
         This logic is needed because the teacher model may be wrapped by
         torch.nn.parallel.DistributedDataParallel.
         """
-        if hasattr(self.teacher_model, 'module'):
+        if hasattr(self.teacher_model, "module"):
             return self.teacher_model.module
         else:
             return self.teacher_model
@@ -305,28 +305,28 @@ class AbstractDistillTransformerAgentMixin(ABC):
 
         # Compile all outputs given the hooks
         teacher_embedding_outputs = self._extract_embedding_outputs(
-            hooks=self.hooks['teacher']
+            hooks=self.hooks["teacher"]
         )
         student_embedding_outputs = self._extract_embedding_outputs(
-            hooks=self.hooks['student']
+            hooks=self.hooks["student"]
         )
         teacher_hidden_states = self._extract_hidden_states(
-            hooks=self.hooks['teacher'],
+            hooks=self.hooks["teacher"],
             num_enc_layers=self.teacher_num_enc_layers,
             num_dec_layers=self.teacher_num_dec_layers,
         )
         student_hidden_states = self._extract_hidden_states(
-            hooks=self.hooks['student'],
+            hooks=self.hooks["student"],
             num_enc_layers=self.student_num_enc_layers,
             num_dec_layers=self.student_num_dec_layers,
         )
         teacher_attention_matrices = self._extract_attention_matrices(
-            hooks=self.hooks['teacher'],
+            hooks=self.hooks["teacher"],
             num_enc_layers=self.teacher_num_enc_layers,
             num_dec_layers=self.teacher_num_dec_layers,
         )
         student_attention_matrices = self._extract_attention_matrices(
-            hooks=self.hooks['student'],
+            hooks=self.hooks["student"],
             num_enc_layers=self.student_num_enc_layers,
             num_dec_layers=self.student_num_dec_layers,
         )
@@ -349,7 +349,7 @@ class AbstractDistillTransformerAgentMixin(ABC):
         teacher_acc = ((student_preds == teacher_preds) * mask).sum(dim=-1)
         # Sum over tokens
         self.record_local_metric(
-            'teacher_acc', AverageMetric.many(teacher_acc, tokens_per_example)
+            "teacher_acc", AverageMetric.many(teacher_acc, tokens_per_example)
         )
 
         return ForwardPassOutputs(
@@ -382,7 +382,7 @@ class AbstractDistillTransformerAgentMixin(ABC):
 
         Needed for BART-based student models to add in an extra start token.
         """
-        if hasattr(super(), '_manipulate_mask'):
+        if hasattr(super(), "_manipulate_mask"):
             # Defer to any agent-specific method for manipulating the mask
             return super()._manipulate_mask(
                 mask=mask, student_scores=student_scores, batch=batch
@@ -396,10 +396,10 @@ class AbstractDistillTransformerAgentMixin(ABC):
         """
         Extract out the encoder and decoder embedding outputs.
         """
-        assert len(hooks['embeddings'].outputs) == 2
+        assert len(hooks["embeddings"].outputs) == 2
         return {
-            'encoder': hooks['embeddings'].outputs[0],
-            'decoder': hooks['embeddings'].outputs[1],
+            "encoder": hooks["embeddings"].outputs[0],
+            "decoder": hooks["embeddings"].outputs[1],
         }
 
     def _extract_hidden_states(
@@ -411,11 +411,11 @@ class AbstractDistillTransformerAgentMixin(ABC):
         """
         Extract out encoder/decoder hidden states per layer.
         """
-        assert len(hooks['encoder']['layers'].outputs) == num_enc_layers
-        assert len(hooks['decoder']['layers'].outputs) == num_dec_layers
+        assert len(hooks["encoder"]["layers"].outputs) == num_enc_layers
+        assert len(hooks["decoder"]["layers"].outputs) == num_dec_layers
         return {
-            'encoder': hooks['encoder']['layers'].outputs,
-            'decoder': [out_[0] for out_ in hooks['decoder']['layers'].outputs],
+            "encoder": hooks["encoder"]["layers"].outputs,
+            "decoder": [out_[0] for out_ in hooks["decoder"]["layers"].outputs],
         }
 
     def _extract_attention_matrices(
@@ -427,24 +427,24 @@ class AbstractDistillTransformerAgentMixin(ABC):
         """
         Extract out encoder/decoder attention matrices per layer and attention type.
         """
-        assert len(hooks['encoder']['attentions'].outputs) == num_enc_layers
-        assert len(hooks['decoder']['attentions'].outputs) == 2 * num_dec_layers
+        assert len(hooks["encoder"]["attentions"].outputs) == num_enc_layers
+        assert len(hooks["decoder"]["attentions"].outputs) == 2 * num_dec_layers
         output_idx = 2  # The position of the attention matrix among the outputs
         return {
-            'encoder': [
+            "encoder": [
                 {
-                    'self_attn': hooks['encoder']['attentions'].outputs[layer_idx][
+                    "self_attn": hooks["encoder"]["attentions"].outputs[layer_idx][
                         output_idx
                     ]
                 }
                 for layer_idx in range(num_enc_layers)
             ],
-            'decoder': [
+            "decoder": [
                 {
-                    'self_attn': hooks['decoder']['attentions'].outputs[2 * layer_idx][
+                    "self_attn": hooks["decoder"]["attentions"].outputs[2 * layer_idx][
                         output_idx
                     ],
-                    'encoder_attn': hooks['decoder']['attentions'].outputs[
+                    "encoder_attn": hooks["decoder"]["attentions"].outputs[
                         2 * layer_idx + 1
                     ][output_idx],
                 }
@@ -472,12 +472,12 @@ class AbstractDistillTransformerAgentMixin(ABC):
         encoder_loss = F.mse_loss(
             input=fwd_pass.student_enc_output,
             target=fwd_pass.teacher_enc_output,
-            reduction='none',
+            reduction="none",
         )
         encoder_loss = encoder_loss.mean(dim=-1) * fwd_pass.context_mask
         # Avg over embedding dim
         self.record_local_metric(
-            'enc_loss',
+            "enc_loss",
             AverageMetric.many(
                 encoder_loss.sum(dim=-1), fwd_pass.context_tokens_per_example
             ),
@@ -495,25 +495,25 @@ class AbstractDistillTransformerAgentMixin(ABC):
         assert isinstance(self, TorchGeneratorAgent)
         # Code relies on methods
         enc_emb_loss, enc_emb_loss_per_example = self._get_component_embedding_loss(
-            student_emb_output=fwd_pass.student_embedding_outputs['encoder'],
-            teacher_emb_output=fwd_pass.teacher_embedding_outputs['encoder'],
+            student_emb_output=fwd_pass.student_embedding_outputs["encoder"],
+            teacher_emb_output=fwd_pass.teacher_embedding_outputs["encoder"],
             mask=fwd_pass.context_mask,
             num_tokens=fwd_pass.num_context_tokens,
         )
         self.record_local_metric(
-            'enc_emb_loss',
+            "enc_emb_loss",
             AverageMetric.many(
                 enc_emb_loss_per_example, fwd_pass.context_tokens_per_example
             ),
         )
         dec_emb_loss, dec_emb_loss_per_example = self._get_component_embedding_loss(
-            student_emb_output=fwd_pass.student_embedding_outputs['decoder'],
-            teacher_emb_output=fwd_pass.teacher_embedding_outputs['decoder'],
+            student_emb_output=fwd_pass.student_embedding_outputs["decoder"],
+            teacher_emb_output=fwd_pass.teacher_embedding_outputs["decoder"],
             mask=fwd_pass.decoder_mask,
             num_tokens=fwd_pass.num_tokens,
         )
         self.record_local_metric(
-            'dec_emb_loss',
+            "dec_emb_loss",
             AverageMetric.many(dec_emb_loss_per_example, fwd_pass.tokens_per_example),
         )
         return enc_emb_loss, dec_emb_loss
@@ -531,7 +531,7 @@ class AbstractDistillTransformerAgentMixin(ABC):
         assert isinstance(self, TorchGeneratorAgent)
         # Code relies on methods
         raw_loss = F.mse_loss(
-            input=student_emb_output, target=teacher_emb_output, reduction='none'
+            input=student_emb_output, target=teacher_emb_output, reduction="none"
         )
         clamped_loss = torch.clamp(raw_loss, min=0, max=NEAR_INF_FP16)
         # Prevent infs from appearing in the loss term. Especially important with fp16
@@ -551,27 +551,27 @@ class AbstractDistillTransformerAgentMixin(ABC):
         assert isinstance(self, TorchGeneratorAgent)
         # Code relies on methods
         enc_hidden_loss, enc_hidden_loss_per_example = self._get_component_hidden_loss(
-            student_hidden_states=fwd_pass.student_hidden_states['encoder'],
-            teacher_hidden_states=fwd_pass.teacher_hidden_states['encoder'],
+            student_hidden_states=fwd_pass.student_hidden_states["encoder"],
+            teacher_hidden_states=fwd_pass.teacher_hidden_states["encoder"],
             mask=fwd_pass.context_mask,
             num_tokens=fwd_pass.num_context_tokens,
             mapped_layers=self.mapped_enc_layers,
         )
         self.record_local_metric(
-            'enc_hid_loss',
+            "enc_hid_loss",
             AverageMetric.many(
                 enc_hidden_loss_per_example, fwd_pass.context_tokens_per_example
             ),
         )
         dec_hidden_loss, dec_hidden_loss_per_example = self._get_component_hidden_loss(
-            student_hidden_states=fwd_pass.student_hidden_states['decoder'],
-            teacher_hidden_states=fwd_pass.teacher_hidden_states['decoder'],
+            student_hidden_states=fwd_pass.student_hidden_states["decoder"],
+            teacher_hidden_states=fwd_pass.teacher_hidden_states["decoder"],
             mask=fwd_pass.decoder_mask,
             num_tokens=fwd_pass.num_tokens,
             mapped_layers=self.mapped_dec_layers,
         )
         self.record_local_metric(
-            'dec_hid_loss',
+            "dec_hid_loss",
             AverageMetric.many(
                 dec_hidden_loss_per_example, fwd_pass.tokens_per_example
             ),
@@ -598,7 +598,7 @@ class AbstractDistillTransformerAgentMixin(ABC):
             raw_layer_loss = F.mse_loss(
                 input=student_hidden_states[student_layer_idx],
                 target=teacher_hidden_states[teacher_layer_idx],
-                reduction='none',
+                reduction="none",
             )
             clamped_layer_loss = torch.clamp(raw_layer_loss, min=0, max=NEAR_INF_FP16)
             # Prevent infs from appearing in the loss term. Especially important with
@@ -626,34 +626,34 @@ class AbstractDistillTransformerAgentMixin(ABC):
         enc/dec attention.
         """
         enc_self_attn_loss = self._get_and_record_component_attention_loss(
-            student_attention_matrices=fwd_pass.student_attention_matrices['encoder'],
-            teacher_attention_matrices=fwd_pass.teacher_attention_matrices['encoder'],
+            student_attention_matrices=fwd_pass.student_attention_matrices["encoder"],
+            teacher_attention_matrices=fwd_pass.teacher_attention_matrices["encoder"],
             mask=fwd_pass.context_mask,
             tokens_per_example=fwd_pass.context_tokens_per_example,
             num_tokens=fwd_pass.num_context_tokens,
             mapped_layers=self.mapped_enc_layers,
-            attn_type='self_attn',
-            metric_name='enc_self_attn_loss',
+            attn_type="self_attn",
+            metric_name="enc_self_attn_loss",
         )
         dec_self_attn_loss = self._get_and_record_component_attention_loss(
-            student_attention_matrices=fwd_pass.student_attention_matrices['decoder'],
-            teacher_attention_matrices=fwd_pass.teacher_attention_matrices['decoder'],
+            student_attention_matrices=fwd_pass.student_attention_matrices["decoder"],
+            teacher_attention_matrices=fwd_pass.teacher_attention_matrices["decoder"],
             mask=fwd_pass.decoder_mask,
             tokens_per_example=fwd_pass.tokens_per_example,
             num_tokens=fwd_pass.num_tokens,
             mapped_layers=self.mapped_dec_layers,
-            attn_type='self_attn',
-            metric_name='dec_self_attn_loss',
+            attn_type="self_attn",
+            metric_name="dec_self_attn_loss",
         )
         enc_dec_attn_loss = self._get_and_record_component_attention_loss(
-            student_attention_matrices=fwd_pass.student_attention_matrices['decoder'],
-            teacher_attention_matrices=fwd_pass.teacher_attention_matrices['decoder'],
+            student_attention_matrices=fwd_pass.student_attention_matrices["decoder"],
+            teacher_attention_matrices=fwd_pass.teacher_attention_matrices["decoder"],
             mask=fwd_pass.decoder_mask,
             tokens_per_example=fwd_pass.tokens_per_example,
             num_tokens=fwd_pass.num_tokens,
             mapped_layers=self.mapped_dec_layers,
-            attn_type='encoder_attn',
-            metric_name='enc_dec_attn_loss',
+            attn_type="encoder_attn",
+            metric_name="enc_dec_attn_loss",
         )
         return enc_self_attn_loss, dec_self_attn_loss, enc_dec_attn_loss
 
@@ -690,7 +690,7 @@ class AbstractDistillTransformerAgentMixin(ABC):
             raw_layer_loss = F.mse_loss(
                 input=selected_student_attn_matrices[student_layer_idx],
                 target=selected_teacher_attn_matrices[teacher_layer_idx],
-                reduction='none',
+                reduction="none",
             )
             clamped_layer_loss = torch.clamp(raw_layer_loss, min=0, max=NEAR_INF_FP16)
             # Prevent infs from appearing in the loss term. Especially important with
@@ -731,16 +731,16 @@ class AbstractDistillTransformerAgentMixin(ABC):
         pred_loss = F.kl_div(
             F.log_softmax(fwd_pass.student_scores, dim=-1, dtype=torch.float),
             F.softmax(fwd_pass.teacher_scores, dim=-1, dtype=torch.float),
-            reduction='none',
+            reduction="none",
         ).type_as(fwd_pass.student_scores)
         pred_loss = pred_loss.sum(dim=-1) * fwd_pass.mask
         # Sum over dictionary
         self.record_local_metric(
-            'pred_ppl',
+            "pred_ppl",
             PPLMetric.many(pred_loss.sum(dim=-1), fwd_pass.tokens_per_example),
         )  # Sum over tokens
         self.record_local_metric(
-            'pred_loss',
+            "pred_loss",
             AverageMetric.many(pred_loss.sum(dim=-1), fwd_pass.tokens_per_example),
         )  # Sum over tokens
         pred_loss = pred_loss.sum() / fwd_pass.num_tokens
@@ -753,20 +753,20 @@ class DistillTransformerAgentMixin(AbstractDistillTransformerAgentMixin):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt=partial_opt)
-        agent = parser.add_argument_group('DistillTransformer arguments')
+        agent = parser.add_argument_group("DistillTransformer arguments")
         agent.add_argument(
-            '--copy-teacher-weights',
-            type='bool',
+            "--copy-teacher-weights",
+            type="bool",
             default=True,
-            help='Copy weights from the teacher model to the student model',
+            help="Copy weights from the teacher model to the student model",
         )
         return agent
 
     def __init__(self, opt, shared=None):
-        self.copy_teacher_weights = opt['copy_teacher_weights']
+        self.copy_teacher_weights = opt["copy_teacher_weights"]
         if (
-            opt.get('init_model')
-            and os.path.isfile(opt['init_model'])
+            opt.get("init_model")
+            and os.path.isfile(opt["init_model"])
             and self.copy_teacher_weights
         ):
             raise Exception(
@@ -775,7 +775,7 @@ class DistillTransformerAgentMixin(AbstractDistillTransformerAgentMixin):
             )
         super().__init__(opt, shared)
         if shared is None:
-            assert self.teacher_agent_opt['n_heads'] == opt['n_heads']
+            assert self.teacher_agent_opt["n_heads"] == opt["n_heads"]
 
     def build_model(self):
 
@@ -843,36 +843,36 @@ class DistillNarrowTransformerAgentMixin(AbstractDistillTransformerAgentMixin):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         super().add_cmdline_args(parser, partial_opt=partial_opt)
-        agent = parser.add_argument_group('DistillNarrowTransformer arguments')
+        agent = parser.add_argument_group("DistillNarrowTransformer arguments")
         agent.add_argument(
-            '--embedding-loss-coeff',
+            "--embedding-loss-coeff",
             type=float,
             default=0,
-            help='Coefficient on teacher loss on embedding-layer output',
+            help="Coefficient on teacher loss on embedding-layer output",
         )
         agent.add_argument(
-            '--self-attn-loss-coeff',
+            "--self-attn-loss-coeff",
             type=float,
             default=0,
-            help='Coefficient on teacher loss on self-attention matrices',
+            help="Coefficient on teacher loss on self-attention matrices",
         )
         agent.add_argument(
-            '--enc-dec-attn-loss-coeff',
+            "--enc-dec-attn-loss-coeff",
             type=float,
             default=0,
-            help='Coefficient on teacher loss on enc/dec attention matrices',
+            help="Coefficient on teacher loss on enc/dec attention matrices",
         )
         return agent
 
     def __init__(self, opt, shared=None):
-        self.embedding_loss_coeff = opt['embedding_loss_coeff']
-        self.self_attn_loss_coeff = opt['self_attn_loss_coeff']
-        self.enc_dec_attn_loss_coeff = opt['enc_dec_attn_loss_coeff']
+        self.embedding_loss_coeff = opt["embedding_loss_coeff"]
+        self.self_attn_loss_coeff = opt["self_attn_loss_coeff"]
+        self.enc_dec_attn_loss_coeff = opt["enc_dec_attn_loss_coeff"]
         super().__init__(opt, shared)
         if shared is None:
-            assert self.teacher_agent_opt['n_heads'] == opt['n_heads'] or (
+            assert self.teacher_agent_opt["n_heads"] == opt["n_heads"] or (
                 self.self_attn_loss_coeff == 0 and self.enc_dec_attn_loss_coeff == 0
-            ), 'The number of attention heads can only differ between the student and teacher models if both attention loss coefficients are 0!'
+            ), "The number of attention heads can only differ between the student and teacher models if both attention loss coefficients are 0!"
 
     def build_model(self):
         student_model = super().build_model()
@@ -881,19 +881,19 @@ class DistillNarrowTransformerAgentMixin(AbstractDistillTransformerAgentMixin):
         student_model.encoder_proj_layer = self._get_projection_layer(student_model)
         student_model.embedding_proj_layers = nn.ModuleDict(
             {
-                'encoder': self._get_projection_layer(student_model),
-                'decoder': self._get_projection_layer(student_model),
+                "encoder": self._get_projection_layer(student_model),
+                "decoder": self._get_projection_layer(student_model),
             }
         )
         student_model.hidden_proj_layers = nn.ModuleDict(
             {
-                'encoder': nn.ModuleList(
+                "encoder": nn.ModuleList(
                     [
                         self._get_projection_layer(student_model)
                         for _ in student_model.encoder.layers
                     ]
                 ),
-                'decoder': nn.ModuleList(
+                "decoder": nn.ModuleList(
                     [
                         self._get_projection_layer(student_model)
                         for _ in student_model.decoder.layers
@@ -933,7 +933,7 @@ class DistillNarrowTransformerAgentMixin(AbstractDistillTransformerAgentMixin):
 
         # Access the student model, which may be wrapped by
         # `torch.nn.parallel.DistributedDataParallel`
-        if hasattr(self.model, 'module'):
+        if hasattr(self.model, "module"):
             student_model = self.model.module
         else:
             student_model = self.model

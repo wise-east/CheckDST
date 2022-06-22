@@ -34,7 +34,7 @@ def organize_results(fps):
         #     break
 
         if len(reports) != 3:
-            reports_str = '\n\t'.join(reports)
+            reports_str = "\n\t".join(reports)
             logger.info(
                 f"There are more or fewer than 3 reports in this dir: {dir}\n\t {reports_str}\n Passing this directory."
             )

@@ -21,7 +21,7 @@ class TestSelfChat(unittest.TestCase):
         parser = setup_args()
         parser.set_defaults(
             interactive_mode=True,
-            task='self_chat',
+            task="self_chat",
             selfchat_task=True,
             selfchat_max_turns=1,
         )
@@ -43,11 +43,11 @@ class TestSelfChat(unittest.TestCase):
             # Run a self chat
             self.world.parley()
             acts = self.world.get_acts()
-            utterances = [a['text'] for a in acts]
+            utterances = [a["text"] for a in acts]
             self.assertListEqual(seed_utts, utterances[: len(seed_utts)])
 
-        assert_seed_utts_match(['hey'])
-        assert_seed_utts_match(['hey', 'hi'])
+        assert_seed_utts_match(["hey"])
+        assert_seed_utts_match(["hey", "hi"])
 
     def test_contexts(self):
         def assert_contexts_match(contexts):
@@ -59,19 +59,19 @@ class TestSelfChat(unittest.TestCase):
             # Run a self chat
             self.world.parley()
             acts = self.world.get_acts()
-            utterances = [a['text'] for a in acts]
+            utterances = [a["text"] for a in acts]
             self.assertSetEqual(set(contexts), set(utterances[: len(contexts)]))
 
-        assert_contexts_match(['you are a seal', 'you are an ostrich'])
+        assert_contexts_match(["you are a seal", "you are an ostrich"])
         assert_contexts_match([])
 
     def test_load_openers_from_file(self):
         with NamedTemporaryFile() as tmpfile:
-            tmpfile.write(b'hey\nhowdy')
+            tmpfile.write(b"hey\nhowdy")
             tmpfile.seek(0)
             op = load_openers_from_file(tmpfile.name)
-        self.assertListEqual(op, ['hey', 'howdy'])
+        self.assertListEqual(op, ["hey", "howdy"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

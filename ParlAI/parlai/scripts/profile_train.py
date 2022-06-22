@@ -28,42 +28,42 @@ import pstats
 try:
     import torch
 except ImportError:
-    logging.error('Torch not found -- only cProfile allowed with this tool.')
+    logging.error("Torch not found -- only cProfile allowed with this tool.")
 
 
 def setup_args(parser=None):
     if parser is None:
-        parser = ParlaiParser(True, True, 'cProfile a training run')
+        parser = ParlaiParser(True, True, "cProfile a training run")
     parser = train_args(parser)
-    profile = parser.add_argument_group('Profiler Arguments')
+    profile = parser.add_argument_group("Profiler Arguments")
     profile.add_argument(
-        '--torch',
-        type='bool',
+        "--torch",
+        type="bool",
         default=False,
-        help='If true, use the torch profiler. Otherwise use cProfile.',
+        help="If true, use the torch profiler. Otherwise use cProfile.",
     )
     profile.add_argument(
-        '--torch-cuda',
-        type='bool',
+        "--torch-cuda",
+        type="bool",
         default=False,
-        help='If true, use the torch cuda profiler. Otherwise use cProfile.',
+        help="If true, use the torch cuda profiler. Otherwise use cProfile.",
     )
     profile.add_argument(
-        '--debug',
-        type='bool',
+        "--debug",
+        type="bool",
         default=False,
-        help='If true, enter debugger at end of run.',
+        help="If true, enter debugger at end of run.",
     )
     profile.set_defaults(num_epochs=1)
     return parser
 
 
 def profile(opt):
-    if opt['torch'] or opt['torch_cuda']:
-        with torch.autograd.profiler.profile(use_cuda=opt['torch_cuda']) as prof:
+    if opt["torch"] or opt["torch_cuda"]:
+        with torch.autograd.profiler.profile(use_cuda=opt["torch_cuda"]) as prof:
             TrainLoop(opt).train()
 
-        key = 'cpu_time_total' if opt['torch'] else 'cuda_time_total'
+        key = "cpu_time_total" if opt["torch"] else "cuda_time_total"
         print(prof.key_averages().table(sort_by=key, row_limit=25))
 
         return prof
@@ -73,13 +73,13 @@ def profile(opt):
         TrainLoop(opt).train()
         pr.disable()
         s = io.StringIO()
-        sortby = 'cumulative'
+        sortby = "cumulative"
         ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
         ps.print_stats()
         print(s.getvalue())
 
 
-@register_script('profile_train', hidden=True)
+@register_script("profile_train", hidden=True)
 class ProfileTrain(ParlaiScript):
     @classmethod
     def setup_args(cls):
@@ -89,5 +89,5 @@ class ProfileTrain(ParlaiScript):
         return profile(self.opt)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     ProfileTrain.main()

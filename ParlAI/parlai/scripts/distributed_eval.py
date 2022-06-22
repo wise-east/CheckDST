@@ -40,7 +40,7 @@ import parlai.utils.distributed as distributed_utils
 def setup_args():
     parser = eval_model.setup_args()
     parser.add_distributed_training_args()
-    parser.add_argument('--port', type=int, default=61337, help='TCP port number')
+    parser.add_argument("--port", type=int, default=61337, help="TCP port number")
     return parser
 
 
@@ -54,5 +54,5 @@ class DistributedEval(ParlaiScript):
             return eval_model.eval_model(opt)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     DistributedEval.main()

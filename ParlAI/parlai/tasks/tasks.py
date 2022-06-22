@@ -13,7 +13,7 @@ from collections import defaultdict
 
 
 def _preprocess(name):
-    return name.lower().replace('-', '')
+    return name.lower().replace("-", "")
 
 
 def _build(task_list):
@@ -21,12 +21,12 @@ def _build(task_list):
     tags = defaultdict(list)
 
     for t in task_list:
-        task = _preprocess(t['id'])
+        task = _preprocess(t["id"])
         tasks[task] = [t]
-        for j in t['tags']:
+        for j in t["tags"]:
             tag = _preprocess(j)
             if tag in tasks:
-                raise RuntimeError('tag ' + tag + ' is the same as a task name')
+                raise RuntimeError("tag " + tag + " is the same as a task name")
             tags[tag].append(t)
     return tasks, tags
 
@@ -41,13 +41,13 @@ def _id_to_task_data(t_id):
         return tags[t_id]
     else:
         # should already be in task form
-        raise RuntimeError('could not find tag/task id')
+        raise RuntimeError("could not find tag/task id")
 
 
 def _id_to_task(t_id):
-    if t_id[0] == '#':
+    if t_id[0] == "#":
         # this is a tag, so return all the tasks for this tag
-        return ','.join((d['task'] for d in _id_to_task_data(t_id[1:])))
+        return ",".join((d["task"] for d in _id_to_task_data(t_id[1:])))
     else:
         # this should already be in task form
         return t_id
@@ -56,9 +56,9 @@ def _id_to_task(t_id):
 def ids_to_tasks(ids):
     if ids is None:
         raise RuntimeError(
-            'No task specified. Please select a task with ' + '--task {task_name}.'
+            "No task specified. Please select a task with " + "--task {task_name}."
         )
-    return ','.join((_id_to_task(i) for i in ids.split(',') if len(i) > 0))
+    return ",".join((_id_to_task(i) for i in ids.split(",") if len(i) > 0))
 
 
 # Build the task list from the json file.

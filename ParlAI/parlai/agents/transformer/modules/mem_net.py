@@ -24,7 +24,7 @@ class TransformerMemNetModel(nn.Module):
 
     @classmethod
     def build_context_encoder(
-        cls, opt, dictionary, embedding=None, padding_idx=None, reduction_type='mean'
+        cls, opt, dictionary, embedding=None, padding_idx=None, reduction_type="mean"
     ):
         return cls.build_encoder(
             opt, dictionary, embedding, padding_idx, reduction_type
@@ -32,7 +32,7 @@ class TransformerMemNetModel(nn.Module):
 
     @classmethod
     def build_candidate_encoder(
-        cls, opt, dictionary, embedding=None, padding_idx=None, reduction_type='mean'
+        cls, opt, dictionary, embedding=None, padding_idx=None, reduction_type="mean"
     ):
         return cls.build_encoder(
             opt, dictionary, embedding, padding_idx, reduction_type
@@ -40,7 +40,7 @@ class TransformerMemNetModel(nn.Module):
 
     @classmethod
     def build_encoder(
-        cls, opt, dictionary, embedding=None, padding_idx=None, reduction_type='mean'
+        cls, opt, dictionary, embedding=None, padding_idx=None, reduction_type="mean"
     ):
         return TransformerEncoder(
             opt=opt,
@@ -57,21 +57,21 @@ class TransformerMemNetModel(nn.Module):
 
         # set up embeddings
         self.embeddings = create_embeddings(
-            dictionary, opt['embedding_size'], self.pad_idx
+            dictionary, opt["embedding_size"], self.pad_idx
         )
 
-        self.share_word_embedding = opt.get('share_word_embeddings', True)
+        self.share_word_embedding = opt.get("share_word_embeddings", True)
         if not self.share_word_embedding:
             self.cand_embeddings = create_embeddings(
-                dictionary, opt['embedding_size'], self.pad_idx
+                dictionary, opt["embedding_size"], self.pad_idx
             )
 
-        if not opt.get('learn_embeddings'):
+        if not opt.get("learn_embeddings"):
             self.embeddings.weight.requires_grad = False
             if not self.share_word_embedding:
                 self.cand_embeddings.weight.requires_grad = False
 
-        self.reduction_type = opt.get('reduction_type', 'mean')
+        self.reduction_type = opt.get("reduction_type", "mean")
 
         self.context_encoder = self.build_context_encoder(
             opt,
@@ -81,7 +81,7 @@ class TransformerMemNetModel(nn.Module):
             reduction_type=self.reduction_type,
         )
 
-        if opt.get('share_encoders'):
+        if opt.get("share_encoders"):
             self.cand_encoder = TransformerResponseWrapper(
                 self.context_encoder, self.context_encoder.out_dim
             )
@@ -99,7 +99,7 @@ class TransformerMemNetModel(nn.Module):
             )
 
         # build memory encoder
-        if opt.get('wrap_memory_encoder', False):
+        if opt.get("wrap_memory_encoder", False):
             self.memory_transformer = TransformerResponseWrapper(
                 self.context_encoder, self.context_encoder.out_dim
             )
@@ -107,7 +107,7 @@ class TransformerMemNetModel(nn.Module):
             self.memory_transformer = self.context_encoder
 
         self.attender = BasicAttention(
-            dim=2, attn=opt['memory_attention'], residual=True
+            dim=2, attn=opt["memory_attention"], residual=True
         )
 
     def encode_cand(self, words):
@@ -180,7 +180,7 @@ class TransformerMemNetModel(nn.Module):
         cands_h = self.encode_cand(cands)
 
         # possibly normalize the context and candidate representations
-        if self.opt['normalize_sent_emb']:
+        if self.opt["normalize_sent_emb"]:
             context_h = context_h / context_h.norm(2, dim=1, keepdim=True)
             cands_h = cands_h / cands_h.norm(2, dim=1, keepdim=True)
 

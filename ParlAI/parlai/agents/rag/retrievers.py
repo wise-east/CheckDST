@@ -70,16 +70,16 @@ def load_passage_reader(
     :return reader:
         return a reader over the passages
     """
-    logging.info(f'Reading data from: {ctx_file}')
+    logging.info(f"Reading data from: {ctx_file}")
     f_open = gzip.open if ctx_file.endswith(".gz") else open
     try:
         passages = {} if return_dict else []
         with f_open(ctx_file) as tsvfile:
-            _reader = csv.reader(tsvfile, delimiter='\t')  # type: ignore
+            _reader = csv.reader(tsvfile, delimiter="\t")  # type: ignore
             ids = []
             for idx, row in tqdm(enumerate(_reader)):
                 if idx == 0:
-                    assert row[0] == 'id'
+                    assert row[0] == "id"
                     ids.append(-1)
                 elif idx <= 1:
                     ids.append(row[0])
@@ -99,15 +99,15 @@ def load_passage_reader(
         del ids
     except (csv.Error, AssertionError) as e:
         passages = {} if return_dict else []
-        logging.error(f'Exception: {e}')
-        logging.warning('Error in loading csv; loading via readlines')
+        logging.error(f"Exception: {e}")
+        logging.warning("Error in loading csv; loading via readlines")
         with f_open(ctx_file) as tsvfile:
             for idx, l in tqdm(enumerate(tsvfile.readlines())):
-                line = l.replace('\n', '').split('\t')  # type: ignore
+                line = l.replace("\n", "").split("\t")  # type: ignore
                 assert len(line) == 3
                 if idx == 0:
-                    assert line[0] == 'id'
-                if line[0] != 'id':
+                    assert line[0] == "id"
+                if line[0] != "id":
                     if return_dict:
                         passages[row[0]] = (row[1], row[2])  # type: ignore
                     else:
@@ -150,8 +150,8 @@ class Document:
     A Document used in retrieval.
     """
 
-    TITLE_DELIM = ' / '
-    PASSAGE_DELIM = ' // '
+    TITLE_DELIM = " / "
+    PASSAGE_DELIM = " // "
 
     def __init__(self, title: str, text: str, docid: Union[int, str]):
         assert all(isinstance(t, str) for t in [title, text])
@@ -181,7 +181,7 @@ class Document:
         return f"{self._title.strip()}{self.TITLE_DELIM}{self._text.strip()}"
 
 
-BLANK_DOC = Document('', '', '')
+BLANK_DOC = Document("", "", "")
 
 
 def argsort_scores_and_docs(
@@ -227,7 +227,7 @@ class RagRetrieverTokenizer:
     Wrapper for various tokenizers used by RAG Query Model.
     """
 
-    VOCAB_PATH = 'vocab.txt'
+    VOCAB_PATH = "vocab.txt"
 
     def __init__(
         self,
@@ -235,7 +235,7 @@ class RagRetrieverTokenizer:
         query_model: str,
         dictionary: DictionaryAgent,
         max_length: int = 256,
-        delimiter='\n',
+        delimiter="\n",
     ):
         """
         :param query_model:
@@ -264,9 +264,9 @@ class RagRetrieverTokenizer:
         :param dictionary:
             ParlAI dictionary agent
         """
-        if self.query_model in ['bert', 'bert_from_parlai_rag']:
+        if self.query_model in ["bert", "bert_from_parlai_rag"]:
             try:
-                return BertTokenizer.from_pretrained('bert-base-uncased')
+                return BertTokenizer.from_pretrained("bert-base-uncased")
             except (ImportError, OSError):
                 vocab_path = PathManager.get_local_path(
                     os.path.join(self.datapath, "bert_base_uncased", self.VOCAB_PATH)
@@ -279,7 +279,7 @@ class RagRetrieverTokenizer:
         """
         Return pad token idx.
         """
-        if self.query_model in ['bert', 'bert_from_parlai_rag']:
+        if self.query_model in ["bert", "bert_from_parlai_rag"]:
             return self.tokenizer.pad_token_id
         else:
             return self.tokenizer[self.tokenizer.null_token]
@@ -294,7 +294,7 @@ class RagRetrieverTokenizer:
         """
         Return start token idx.
         """
-        if self.query_model in ['bert', 'bert_from_parlai_rag']:
+        if self.query_model in ["bert", "bert_from_parlai_rag"]:
             return self.tokenizer.bos_token_id or 1
         else:
             return self.tokenizer[self.tokenizer.start_token]
@@ -303,7 +303,7 @@ class RagRetrieverTokenizer:
         """
         Return start token idx.
         """
-        if self.query_model in ['bert', 'bert_from_parlai_rag']:
+        if self.query_model in ["bert", "bert_from_parlai_rag"]:
             return self.tokenizer.eos_token_id or 2
         else:
             return self.tokenizer[self.tokenizer.end_token]
@@ -321,7 +321,7 @@ class RagRetrieverTokenizer:
         :return encoding:
             return encoded text.
         """
-        if self.query_model in ['bert', 'bert_from_parlai_rag']:
+        if self.query_model in ["bert", "bert_from_parlai_rag"]:
             txt = txt.lower().strip()
             if txt_pair:
                 txt_pair = txt_pair.lower().strip()
@@ -331,7 +331,7 @@ class RagRetrieverTokenizer:
                 add_special_tokens=True,
                 max_length=self.max_length,
                 pad_to_max_length=False,
-                truncation='longest_first',
+                truncation="longest_first",
             )
         else:
             return self.tokenizer.txt2vec(txt)
@@ -340,7 +340,7 @@ class RagRetrieverTokenizer:
         """
         Decode a token vector into a string.
         """
-        if self.query_model in ['bert', 'bert_from_parlai_rag']:
+        if self.query_model in ["bert", "bert_from_parlai_rag"]:
             return self.tokenizer.decode(
                 clean_vec(vec, self.get_eos_idx()), skip_special_tokens=True
             )
@@ -367,31 +367,31 @@ class RagRetriever(torch.nn.Module, ABC):
 
     def __init__(self, opt: Opt, dictionary: DictionaryAgent, shared: TShared = None):
         super().__init__()
-        self.retriever_type = RetrieverType(opt['rag_retriever_type'])
+        self.retriever_type = RetrieverType(opt["rag_retriever_type"])
         if not (
             (self.retriever_type == RetrieverType.SEARCH_ENGINE)
-            or (opt.get('retriever_debug_index') in [None, 'none'])
+            or (opt.get("retriever_debug_index") in [None, "none"])
         ):
-            if opt.get('retriever_debug_index') == 'exact':
-                opt['path_to_index'] = WOW_INDEX_PATH
+            if opt.get("retriever_debug_index") == "exact":
+                opt["path_to_index"] = WOW_INDEX_PATH
             else:
-                opt['path_to_index'] = WOW_COMPRESSED_INDEX_PATH
-            opt['path_to_dpr_passages'] = WOW_PASSAGES_PATH
+                opt["path_to_index"] = WOW_COMPRESSED_INDEX_PATH
+            opt["path_to_dpr_passages"] = WOW_PASSAGES_PATH
         self.opt = opt
-        self.print_docs = opt.get('print_docs', False)
-        self.max_doc_len = opt['max_doc_token_length']
-        self.max_query_len = opt['rag_query_truncate'] or 1024
+        self.print_docs = opt.get("print_docs", False)
+        self.max_doc_len = opt["max_doc_token_length"]
+        self.max_query_len = opt["rag_query_truncate"] or 1024
         self.end_idx = dictionary[dictionary.end_token]
         self._tokenizer = RagRetrieverTokenizer(
-            datapath=opt['datapath'],
-            query_model=opt['query_model'],
+            datapath=opt["datapath"],
+            query_model=opt["query_model"],
             dictionary=dictionary,
-            delimiter=opt.get('delimiter', '\n') or '\n',
+            delimiter=opt.get("delimiter", "\n") or "\n",
         )
         self.fp16 = (
-            not opt['no_cuda']
+            not opt["no_cuda"]
             and torch.cuda.is_available()
-            and self.opt.get('fp16', False)
+            and self.opt.get("fp16", False)
         )
 
     @final
@@ -507,7 +507,7 @@ class RagRetrieverReranker(RagRetriever, ABC):
 
     def __init__(self, opt: Opt, dictionary: DictionaryAgent, shared: TShared = None):
         super().__init__(opt, dictionary, shared=shared)
-        self.n_final_docs = opt['n_docs']
+        self.n_final_docs = opt["n_docs"]
 
     @final
     def retrieve_and_score(
@@ -595,34 +595,34 @@ class DPRRetriever(RagRetriever):
         """
         super().__init__(opt, dictionary, shared=shared)
         self.load_index(opt, shared)
-        self.n_docs = opt['n_docs']
+        self.n_docs = opt["n_docs"]
         self.query_encoder = DprQueryEncoder(
-            opt, dpr_model=opt['query_model'], pretrained_path=opt['dpr_model_file']
+            opt, dpr_model=opt["query_model"], pretrained_path=opt["dpr_model_file"]
         )
 
     def load_index(self, opt, shared):
         if not shared:
             self.indexer = indexer_factory(opt)
-            index_path = modelzoo_path(opt['datapath'], opt['path_to_index'])
-            passages_path = modelzoo_path(opt['datapath'], opt['path_to_dpr_passages'])
+            index_path = modelzoo_path(opt["datapath"], opt["path_to_index"])
+            passages_path = modelzoo_path(opt["datapath"], opt["path_to_dpr_passages"])
             embeddings_path = None
-            if opt['path_to_dense_embeddings'] is not None:
+            if opt["path_to_dense_embeddings"] is not None:
                 embeddings_path = modelzoo_path(
-                    opt['datapath'], opt['path_to_dense_embeddings']
+                    opt["datapath"], opt["path_to_dense_embeddings"]
                 )
             self.indexer.deserialize_from(index_path, embeddings_path)
             self.passages = load_passages_dict(passages_path)
         elif shared:
-            self.indexer = shared['indexer']
-            self.passages = shared['passages']
+            self.indexer = shared["indexer"]
+            self.passages = shared["passages"]
 
     def share(self) -> TShared:
         """
         Share FAISS retriever and passages.
         """
         shared = super().share()
-        shared['indexer'] = self.indexer
-        shared['passages'] = self.passages
+        shared["indexer"] = self.indexer
+        shared["passages"] = self.passages
         return shared
 
     def index_retrieve(
@@ -655,10 +655,10 @@ class DPRRetriever(RagRetriever):
         scores = torch.bmm(query.unsqueeze(1), vectors.transpose(1, 2)).squeeze(1)
         if torch.isnan(scores).sum().item():
             raise RuntimeError(
-                '\n[ Document scores are NaN; please look into the built index. ]\n'
-                '[ This generally happens if FAISS cannot separate vectors appropriately. ]\n'
-                '[ If using a compressed index, try building an exact index: ]\n'
-                '[ $ python index_dense_embeddings --indexer-type exact... ]'
+                "\n[ Document scores are NaN; please look into the built index. ]\n"
+                "[ This generally happens if FAISS cannot separate vectors appropriately. ]\n"
+                "[ If using a compressed index, try building an exact index: ]\n"
+                "[ $ python index_dense_embeddings --indexer-type exact... ]"
             )
         ids = torch.tensor([[int(s) for s in ss] for ss in ids])
 
@@ -705,27 +705,27 @@ class TFIDFRetriever(RagRetriever):
         """
         Init a TFIDFRetrieverAgent.
         """
-        opt['query_model'] = 'tfidf'
+        opt["query_model"] = "tfidf"
         super().__init__(opt, dictionary, shared=shared)
         tfidf_opt = {
-            'model': 'rag_tfidf_retriever',
-            'model_file': (opt['tfidf_model_path']),
-            'tfidf_model_path': opt['tfidf_model_path'],
-            'retriever_num_retrieved': opt['n_docs'],
-            'retriever_mode': 'keys',
-            'override': {'model': 'rag_tfidf_retriever', 'remove_title': False},
+            "model": "rag_tfidf_retriever",
+            "model_file": (opt["tfidf_model_path"]),
+            "tfidf_model_path": opt["tfidf_model_path"],
+            "retriever_num_retrieved": opt["n_docs"],
+            "retriever_mode": "keys",
+            "override": {"model": "rag_tfidf_retriever", "remove_title": False},
         }
-        self.n_docs = opt['n_docs']
-        self.max_doc_paragraphs = opt['tfidf_max_doc_paragraphs']
+        self.n_docs = opt["n_docs"]
+        self.max_doc_paragraphs = opt["tfidf_max_doc_paragraphs"]
         assert self.max_doc_paragraphs != 0
         if not shared:
             self.tfidf_retriever = create_agent(tfidf_opt)
         else:
-            self.tfidf_retriever = shared['tfidf_retriever']
+            self.tfidf_retriever = shared["tfidf_retriever"]
 
     def share(self) -> TShared:
         shared = super().share()
-        shared['tfidf_retriever'] = self.tfidf_retriever
+        shared["tfidf_retriever"] = self.tfidf_retriever
         return shared
 
     def retrieve_and_score(
@@ -743,35 +743,35 @@ class TFIDFRetriever(RagRetriever):
         """
 
         def _build_doc(idx, cand):
-            title = cand.split('\n\n')[0]
-            paragraphs = cand.split('\n\n')[1:]
+            title = cand.split("\n\n")[0]
+            paragraphs = cand.split("\n\n")[1:]
             if self.max_doc_paragraphs > 0:
                 paragraphs = paragraphs[: self.max_doc_paragraphs]
-            return Document(title=title, text=' '.join(paragraphs), docid=ids_i[idx])
+            return Document(title=title, text=" ".join(paragraphs), docid=ids_i[idx])
 
         docs = []
         scores = []
 
         for q in query:
             query_text = self._tokenizer.decode(q)
-            self.tfidf_retriever.observe({'text': query_text, 'episode_done': True})
+            self.tfidf_retriever.observe({"text": query_text, "episode_done": True})
             act = self.tfidf_retriever.act()
-            if 'candidate_scores' not in act:
+            if "candidate_scores" not in act:
                 scores_i = [0] * self.n_docs
                 docs_i = [BLANK_DOC] * self.n_docs
             else:
-                scores_i = act['candidate_scores']
-                candidate_docs = act['text_candidates']
-                ids_i = act['candidate_ids']
+                scores_i = act["candidate_scores"]
+                candidate_docs = act["text_candidates"]
+                ids_i = act["candidate_ids"]
                 candidate_docs = [
-                    _build_doc(j, c) for j, c in enumerate(act['text_candidates'])
+                    _build_doc(j, c) for j, c in enumerate(act["text_candidates"])
                 ]
                 docs_i = candidate_docs[: self.n_docs]
                 scores_i = scores_i[: self.n_docs]
                 if len(docs_i) < self.n_docs:
                     # Something went wrong with TFIDF here; need to add null docs
                     logging.warning(
-                        f'Ex has less than {self.n_docs} TFIDF docs: {len(docs_i)}'
+                        f"Ex has less than {self.n_docs} TFIDF docs: {len(docs_i)}"
                     )
                     num_null = self.n_docs - len(docs_i)
                     docs_i += [BLANK_DOC] * num_null
@@ -797,10 +797,10 @@ class DPRThenTorchReranker(RagRetrieverReranker, DPRRetriever, ABC):
         It is up to subclasses to initialize rerankers.
         """
         RagRetrieverReranker.__init__(self, opt, dictionary, shared=shared)
-        self.dpr_num_docs = opt['dpr_num_docs']
+        self.dpr_num_docs = opt["dpr_num_docs"]
         assert self.dpr_num_docs
         dpr_opt = copy.deepcopy(opt)
-        dpr_opt['n_docs'] = self.dpr_num_docs
+        dpr_opt["n_docs"] = self.dpr_num_docs
         DPRRetriever.__init__(self, dpr_opt, dictionary, shared=shared)
 
     def get_reranker_opts(self, opt: Opt) -> Dict[str, Any]:
@@ -817,10 +817,10 @@ class DPRThenTorchReranker(RagRetrieverReranker, DPRRetriever, ABC):
             return a dictionary mapping options to values.
         """
         return {
-            'no_cuda': opt['no_cuda'],
-            'fp16': opt['fp16'],
-            'model_parallel': opt['model_parallel'],
-            'data_parallel': opt['data_parallel'],
+            "no_cuda": opt["no_cuda"],
+            "fp16": opt["fp16"],
+            "model_parallel": opt["model_parallel"],
+            "data_parallel": opt["data_parallel"],
         }
 
     def _build_reranker(
@@ -845,7 +845,7 @@ class DPRThenTorchReranker(RagRetrieverReranker, DPRRetriever, ABC):
 
         return (
             agent.model,
-            RagRetrieverTokenizer(opt['datapath'], '', agent.dict, max_length=360),
+            RagRetrieverTokenizer(opt["datapath"], "", agent.dict, max_length=360),
         )
 
     def _retrieve_initial(
@@ -887,7 +887,7 @@ class DPRThenPolyRetriever(DPRThenTorchReranker):
         self.polyencoder, self.poly_tokenizer = self._build_reranker(opt)
         self.register_parameter(
             "poly_score_lambda",
-            torch.nn.Parameter(torch.tensor([float(opt['poly_score_initial_lambda'])])),
+            torch.nn.Parameter(torch.tensor([float(opt["poly_score_initial_lambda"])])),
         )
 
     def _get_new_score_lambda(self) -> torch.nn.Parameter:
@@ -908,21 +908,21 @@ class DPRThenPolyRetriever(DPRThenTorchReranker):
         """
         from parlai.agents.rag.args import PRETRAINED_RANKER_TYPES
 
-        init_path = opt['polyencoder_init_model']
+        init_path = opt["polyencoder_init_model"]
         if init_path in PRETRAINED_RANKER_TYPES:
             init_model = f"zoo:pretrained_transformers/poly_model_huge_{opt['polyencoder_init_model']}/model"
             dict_file = f"zoo:pretrained_transformers/poly_model_huge_{opt['polyencoder_init_model']}/model.dict"
         else:
             assert os.path.exists(init_path)
             init_model = init_path
-            dict_file = f'{init_path}.dict'
+            dict_file = f"{init_path}.dict"
 
         return {
-            'model': 'transformer/polyencoder',
-            'init_model': init_model,
-            'dict_file': dict_file,
+            "model": "transformer/polyencoder",
+            "init_model": init_model,
+            "dict_file": dict_file,
             # necessary opt args
-            'multitask_weights': [1],
+            "multitask_weights": [1],
             **{k: opt[k] for k in POLYENCODER_OPT_KEYS},
             **super().get_reranker_opts(opt),
         }
@@ -977,18 +977,18 @@ class PolyFaissRetriever(DPRThenPolyRetriever):
     """
 
     def __init__(self, opt: Opt, dictionary: DictionaryAgent, shared: TShared = None):
-        assert opt['query_model'] == 'dropout_poly'
+        assert opt["query_model"] == "dropout_poly"
         super().__init__(opt, dictionary, shared=shared)
         self.dropout_poly = RagDropoutPolyWrapper(opt)
         self.polyencoder = self.dropout_poly.model
 
         self.poly_tokenizer = RagRetrieverTokenizer(
-            opt['datapath'], opt['query_model'], self.dropout_poly.dict, max_length=360
+            opt["datapath"], opt["query_model"], self.dropout_poly.dict, max_length=360
         )
 
         model = (
             self.polyencoder.module
-            if hasattr(self.polyencoder, 'module')
+            if hasattr(self.polyencoder, "module")
             else self.polyencoder
         )
         for param in model.encoder_cand.parameters():  # type: ignore
@@ -1007,11 +1007,11 @@ class RagTfidfRetrieverAgent(TfidfRetrieverAgent):
         if not shared:
             self.docid_to_text = {}
         else:
-            self.docid_to_text = shared.get('docid_to_text', {})
+            self.docid_to_text = shared.get("docid_to_text", {})
 
     def share(self) -> TShared:
         shared = super().share()
-        shared['docid_to_text'] = self.docid_to_text
+        shared["docid_to_text"] = self.docid_to_text
         return shared
 
     def doc2txt(self, docid):
@@ -1026,20 +1026,20 @@ class RagTfidfRetrieverAgent(TfidfRetrieverAgent):
         return text
 
 
-BLANK_SEARCH_DOC = {'url': None, 'content': '', 'title': ''}
-NO_SEARCH_QUERY = 'no_passages_used'
+BLANK_SEARCH_DOC = {"url": None, "content": "", "title": ""}
+NO_SEARCH_QUERY = "no_passages_used"
 
 
 class SearchQueryRetriever(RagRetriever):
     def __init__(self, opt: Opt, dictionary: DictionaryAgent, shared: TShared):
         RagRetriever.__init__(self, opt, dictionary, shared=shared)
-        opt['skip_retrieval_token'] = NO_SEARCH_QUERY
-        self.n_docs = opt['n_docs']
-        self.len_chunk = opt['splitted_chunk_length']
-        self.doc_chunk_split_mode = opt['doc_chunk_split_mode']
-        n_doc_chunks = opt['n_ranked_doc_chunks']
-        chunk_ranker_type = opt['doc_chunks_ranker']
-        if chunk_ranker_type == 'tfidf':
+        opt["skip_retrieval_token"] = NO_SEARCH_QUERY
+        self.n_docs = opt["n_docs"]
+        self.len_chunk = opt["splitted_chunk_length"]
+        self.doc_chunk_split_mode = opt["doc_chunk_split_mode"]
+        n_doc_chunks = opt["n_ranked_doc_chunks"]
+        chunk_ranker_type = opt["doc_chunks_ranker"]
+        if chunk_ranker_type == "tfidf":
             self.chunk_reranker = TfidfChunkRanker(n_doc_chunks)
         else:
             self.chunk_reranker = HeadChunkRanker(n_doc_chunks)
@@ -1047,31 +1047,31 @@ class SearchQueryRetriever(RagRetriever):
         if not shared:
             self.query_generator = self.init_search_query_generator(opt)
         else:
-            self.query_generator = shared['query_generator']
+            self.query_generator = shared["query_generator"]
         self.dict = dictionary
         self.init_query_encoder(opt)
 
     def share(self) -> TShared:
         shared = super().share()
-        shared['query_generator'] = self.query_generator
+        shared["query_generator"] = self.query_generator
         return shared
 
     def init_search_query_generator(self, opt) -> TorchGeneratorAgent:
-        model_file = opt['search_query_generator_model_file']
-        logging.info('Loading search generator model')
+        model_file = opt["search_query_generator_model_file"]
+        logging.info("Loading search generator model")
         logging.disable()
         search_query_gen_agent = create_agent_from_model_file(
             model_file,
             opt_overrides={
-                'skip_generation': False,
-                'inference': opt['search_query_generator_inference'],
-                'beam_min_length': opt['search_query_generator_beam_min_length'],
-                'beam_size': opt['search_query_generator_beam_size'],
-                'text_truncate': opt['search_query_generator_text_truncate'],
+                "skip_generation": False,
+                "inference": opt["search_query_generator_inference"],
+                "beam_min_length": opt["search_query_generator_beam_min_length"],
+                "beam_size": opt["search_query_generator_beam_size"],
+                "text_truncate": opt["search_query_generator_text_truncate"],
             },
         )
         logging.enable()
-        logging.info('Search query generator model loading completed!')
+        logging.info("Search query generator model loading completed!")
         return search_query_gen_agent
 
     def generate_search_query(self, query: torch.LongTensor) -> List[str]:
@@ -1081,30 +1081,30 @@ class SearchQueryRetriever(RagRetriever):
         texts = [self._tokenizer.decode(q) for q in query]
         obs_list = []
         for t in texts:
-            msg = Message({'text': t, 'episode_done': True})
+            msg = Message({"text": t, "episode_done": True})
             obs_list.append(self.query_generator.observe(msg))
             self.query_generator.reset()  # Erase the history
-        search_quries = [r['text'] for r in self.query_generator.batch_act(obs_list)]
-        logging.debug(f'Generated search queries {search_quries}')
+        search_quries = [r["text"] for r in self.query_generator.batch_act(obs_list)]
+        logging.debug(f"Generated search queries {search_quries}")
         return search_quries
 
     def init_query_encoder(self, opt):
-        if hasattr(self, 'query_encoder'):
+        if hasattr(self, "query_encoder"):
             # It is already instantiated
             return
         self.query_encoder = DprQueryEncoder(
-            opt, dpr_model=opt['query_model'], pretrained_path=opt['dpr_model_file']
+            opt, dpr_model=opt["query_model"], pretrained_path=opt["dpr_model_file"]
         )
 
     def text2tokens(self, txt: str):
-        if self.doc_chunk_split_mode == 'word':
-            return txt.split(' ')
+        if self.doc_chunk_split_mode == "word":
+            return txt.split(" ")
         else:
             return self.dict.txt2vec(txt)
 
     def tokens2text(self, tokens: List[int]):
-        if self.doc_chunk_split_mode == 'word':
-            return ' '.join(tokens)
+        if self.doc_chunk_split_mode == "word":
+            return " ".join(tokens)
         else:
             return self.dict.vec2txt(tokens)
 
@@ -1139,15 +1139,15 @@ class SearchQuerySearchEngineRetriever(SearchQueryRetriever):
         if not shared:
             self.search_client = self.initiate_retriever_api(opt)
         else:
-            self.search_client = shared['search_client']
+            self.search_client = shared["search_client"]
 
     def share(self) -> TShared:
         shared = super().share()
-        shared['search_client'] = self.search_client
+        shared["search_client"] = self.search_client
         return shared
 
     def initiate_retriever_api(self, opt) -> SearchEngineRetriever:
-        logging.info('Creating the search engine retriever.')
+        logging.info("Creating the search engine retriever.")
         return SearchEngineRetriever(opt)
 
     def _empty_docs(self, num: int):
@@ -1169,7 +1169,7 @@ class SearchQuerySearchEngineRetriever(SearchQueryRetriever):
         """
         Generates a string that lists retrieved URLs (document IDs).
         """
-        return '\n'.join([d['url'] for d in search_results if d['url']])
+        return "\n".join([d["url"] for d in search_results if d["url"]])
 
     def retrieve_and_score(
         self, query: torch.LongTensor
@@ -1203,23 +1203,23 @@ class SearchQuerySearchEngineRetriever(SearchQueryRetriever):
             docs_i = []
             scors_i = []
             # Change this debug later
-            logging.debug(f'URLS:\n{self._display_urls(search_results)}')
+            logging.debug(f"URLS:\n{self._display_urls(search_results)}")
             for i, doc in enumerate(search_results):
-                url = doc['url']
-                title = doc['title']
-                dcontent = doc['content']
+                url = doc["url"]
+                title = doc["title"]
+                dcontent = doc["content"]
                 assert type(dcontent) in (
                     str,
                     list,
-                ), f'Unrecognized retrieved doc: {dcontent}'
+                ), f"Unrecognized retrieved doc: {dcontent}"
                 full_text = (
-                    dcontent if isinstance(dcontent, str) else '\n'.join(doc['content'])
+                    dcontent if isinstance(dcontent, str) else "\n".join(doc["content"])
                 )
                 doc_chunks = [dc[0] for dc in self.pick_chunk(sq, full_text)]
                 for splt_id, splt_content in enumerate(doc_chunks):
                     docs_i.append(
                         Document(
-                            docid=url, text=splt_content, title=f'{title}_{splt_id}'
+                            docid=url, text=splt_content, title=f"{title}_{splt_id}"
                         )
                     )
                     scors_i.append(self.rank_score(i))
@@ -1325,10 +1325,10 @@ def retriever_factory(
     :return retriever:
         return a retriever for RAG.
     """
-    if opt.get('converting'):
+    if opt.get("converting"):
         return None
     # only build retriever when not converting a BART model
-    retriever = RetrieverType(opt['rag_retriever_type'])
+    retriever = RetrieverType(opt["rag_retriever_type"])
     if retriever is RetrieverType.DPR:
         return DPRRetriever(opt, dictionary, shared=shared)
     elif retriever is RetrieverType.TFIDF:

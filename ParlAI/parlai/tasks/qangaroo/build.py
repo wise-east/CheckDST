@@ -12,20 +12,20 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        '1ytVZ4AhubFDOEL7o7XrIRIyhU8g9wvKA',
-        'qangaroo.zip',
-        '2f512869760cdad76a022a1465f025b486ae79dc5b8f0bf3ad901a4caf2d3050',
+        "1ytVZ4AhubFDOEL7o7XrIRIyhU8g9wvKA",
+        "qangaroo.zip",
+        "2f512869760cdad76a022a1465f025b486ae79dc5b8f0bf3ad901a4caf2d3050",
         from_google=True,
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'qangaroo')
-    version = 'v1.1'
+    dpath = os.path.join(opt["datapath"], "qangaroo")
+    version = "v1.1"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

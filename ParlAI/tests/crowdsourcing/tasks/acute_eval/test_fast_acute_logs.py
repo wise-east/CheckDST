@@ -44,12 +44,12 @@ try:
             root_dir = tempfile.mkdtemp()
 
             # Params
-            config_path = os.path.join(root_dir, 'config.json')
+            config_path = os.path.join(root_dir, "config.json")
 
             # Copy over expected self-chat files
             shutil.copytree(
-                os.path.join(self.TASK_DIRECTORY, 'task_config', 'self_chats'),
-                os.path.join(root_dir, 'self_chats'),
+                os.path.join(self.TASK_DIRECTORY, "task_config", "self_chats"),
+                os.path.join(root_dir, "self_chats"),
             )
 
             # Define output structure
@@ -60,9 +60,9 @@ try:
             # Set up config
             assert len(self.MODELS) == 2
             test_overrides = [
-                f'+mephisto.blueprint.config_path={config_path}',
+                f"+mephisto.blueprint.config_path={config_path}",
                 '+mephisto.blueprint.models=""',
-                f'+mephisto.blueprint.model_pairs={self.MODELS[0]}:{self.MODELS[1]}',
+                f"+mephisto.blueprint.model_pairs={self.MODELS[0]}:{self.MODELS[1]}",
             ]
             # TODO: clean this up when Hydra has support for recursive defaults
             self._set_up_config(
@@ -78,14 +78,14 @@ try:
             config = {}
             for model in self.MODELS:
                 config[model] = {
-                    'log_path': FastAcuteExecutor.get_relative_selfchat_log_path(
+                    "log_path": FastAcuteExecutor.get_relative_selfchat_log_path(
                         root_dir=self.config.mephisto.blueprint.root_dir,
                         model=model,
                         task=self.config.mephisto.blueprint.task,
                     ),
-                    'is_selfchat': True,
+                    "is_selfchat": True,
                 }
-            with open(config_path, 'w') as f:
+            with open(config_path, "w") as f:
                 json.dump(config, f)
 
             # Run Fast ACUTEs
@@ -94,11 +94,11 @@ try:
             runner.set_up_acute_eval()
             self.config.mephisto.blueprint = runner.fast_acute_args
             self._set_up_server()
-            outputs['state'] = self._get_agent_state(task_data=self.TASK_DATA)
+            outputs["state"] = self._get_agent_state(task_data=self.TASK_DATA)
 
             # Run analysis
-            runner.analyze_results(args=f'--mephisto-root {self.database_path}')
-            outputs['results_folder'] = runner.results_path
+            runner.analyze_results(args=f"--mephisto-root {self.database_path}")
+            outputs["results_folder"] = runner.results_path
 
             yield outputs
             # All code after this will be run upon teardown
@@ -107,7 +107,6 @@ try:
 
             # Tear down temp file
             shutil.rmtree(root_dir)
-
 
 except ImportError:
     pass

@@ -48,31 +48,31 @@ class Generator(ParlaiScript):
         """
         File in/out args, and sharding args.
         """
-        parser = ParlaiParser(True, True, 'Generate Dense Embs')
+        parser = ParlaiParser(True, True, "Generate Dense Embs")
         parser.add_argument(
-            '--passages-file',
+            "--passages-file",
             type=str,
-            help='file containing passages to encode. file should be a tsv file.',
+            help="file containing passages to encode. file should be a tsv file.",
         )
         parser.add_argument(
-            '--outfile', type=str, help='where to save the passage embeddings'
+            "--outfile", type=str, help="where to save the passage embeddings"
         )
         parser.add_argument(
-            '--num-shards',
+            "--num-shards",
             type=int,
             default=1,
-            help='how many workers to use to split up the work',
+            help="how many workers to use to split up the work",
         )
         parser.add_argument(
-            '--shard-id',
+            "--shard-id",
             type=int,
-            help='shard id for this worker. should be between 0 and num_shards',
+            help="shard id for this worker. should be between 0 and num_shards",
         )
         parser.add_argument(
-            '--dpr-model',
-            type='bool',
+            "--dpr-model",
+            type="bool",
             default=False,
-            help='Specify True to indicate that the provided model file is a DPR Model',
+            help="Specify True to indicate that the provided model file is a DPR Model",
         )
         return parser
 
@@ -80,26 +80,26 @@ class Generator(ParlaiScript):
         """
         1) load model 2) generate embeddings 3) save embeddings.
         """
-        self.use_cuda = not self.opt.get('no_cuda') and torch.cuda.is_available()
-        overrides = {'interactive_mode': True, 'interactive_candidates': 'inline'}
-        if self.opt['dpr_model']:
+        self.use_cuda = not self.opt.get("no_cuda") and torch.cuda.is_available()
+        overrides = {"interactive_mode": True, "interactive_candidates": "inline"}
+        if self.opt["dpr_model"]:
             overrides.update(
                 {
-                    'model': 'dpr_agent',
-                    'model_file': self.opt['model_file'],
-                    'share_encoders': False,
-                    'override': {
-                        'model': 'dpr_agent',
-                        'interactive_candidates': 'inline',
-                        'share_encoders': False,
+                    "model": "dpr_agent",
+                    "model_file": self.opt["model_file"],
+                    "share_encoders": False,
+                    "override": {
+                        "model": "dpr_agent",
+                        "interactive_candidates": "inline",
+                        "share_encoders": False,
                     },
                 }
             )
             agent = create_agent(Opt(overrides))
         else:
-            agent = create_agent_from_model_file(self.opt['model_file'], overrides)
-        model = agent.model.module if hasattr(agent.model, 'module') else agent.model
-        assert hasattr(model, 'encoder_cand') or hasattr(model, 'cand_encoder')
+            agent = create_agent_from_model_file(self.opt["model_file"], overrides)
+        model = agent.model.module if hasattr(agent.model, "module") else agent.model
+        assert hasattr(model, "encoder_cand") or hasattr(model, "cand_encoder")
         assert isinstance(agent, TorchRankerAgent)
         passages = self.load_passages()
         data = self.encode_passages(agent, passages)
@@ -121,7 +121,7 @@ class Generator(ParlaiScript):
         """
         agent.model.eval()
         n = len(passages)
-        bsz = self.opt['batchsize']
+        bsz = self.opt["batchsize"]
         total_enc = 0
         results: List[torch.Tensor] = []
         results_ids: List[str] = []
@@ -132,7 +132,7 @@ class Generator(ParlaiScript):
                 Message(
                     {
                         "text_vec": agent._check_truncate(
-                            agent.dict.txt2vec(f'{title} {text}'), agent.text_truncate
+                            agent.dict.txt2vec(f"{title} {text}"), agent.text_truncate
                         )
                     }
                 )
@@ -141,7 +141,7 @@ class Generator(ParlaiScript):
             # we call batchify here rather than _pad_tensor directly.
             batch = agent.batchify(batch_msgs)
             if self.use_cuda:
-                batch = batch.to('cuda')
+                batch = batch.to("cuda")
             with torch.no_grad():
                 if isinstance(agent, TransformerRankerAgent):
                     _, encoding = agent.model(None, None, batch.text_vec)
@@ -161,7 +161,7 @@ class Generator(ParlaiScript):
 
             total_enc += len(ids)
             if total_enc % (10 * bsz) == 0:
-                logging.info(f'Encoded {total_enc} out of {n} passages')
+                logging.info(f"Encoded {total_enc} out of {n} passages")
 
         return torch.cat(results).cpu(), results_ids
 
@@ -177,10 +177,10 @@ class Generator(ParlaiScript):
         logging.info(f"Loading {self.opt['passages_file']}")
         rows = load_passages_list(
             modelzoo_path(
-                self.opt['datapath'], self.opt['passages_file']
+                self.opt["datapath"], self.opt["passages_file"]
             )  # type: ignore
         )
-        shard_id, num_shards = self.opt['shard_id'], self.opt['num_shards']
+        shard_id, num_shards = self.opt["shard_id"], self.opt["num_shards"]
         shard_size = int(len(rows) / num_shards)
         if shard_id < len(rows) % num_shards:
             # don't forget the remainder!
@@ -188,8 +188,8 @@ class Generator(ParlaiScript):
         start_idx = shard_id * shard_size
         end_idx = start_idx + shard_size
         logging.info(
-            f'Shard {shard_id} of {num_shards} encoding psg index '
-            f'{start_idx} to {end_idx}, out of {len(rows)}'
+            f"Shard {shard_id} of {num_shards} encoding psg index "
+            f"{start_idx} to {end_idx}, out of {len(rows)}"
         )
         return rows[start_idx:end_idx]
 
@@ -203,11 +203,11 @@ class Generator(ParlaiScript):
         encoding, ids = data
         assert len(ids) == encoding.size(0)
         embs_outfile = f"{self.opt['outfile']}_{self.opt['shard_id']}.pt"
-        logging.info(f'Writing results to {embs_outfile}')
+        logging.info(f"Writing results to {embs_outfile}")
         torch.save(encoding, embs_outfile)
-        outdir = os.path.split(self.opt['outfile'])[0]
+        outdir = os.path.split(self.opt["outfile"])[0]
         ids_outfile = os.path.join(outdir, f"ids_{self.opt['shard_id']}")
-        logging.info(f'Writing ids to {ids_outfile}')
+        logging.info(f"Writing ids to {ids_outfile}")
         torch.save(ids, ids_outfile)
 
 

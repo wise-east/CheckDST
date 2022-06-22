@@ -14,10 +14,10 @@ class TestApprenticeDialogTeacher(unittest.TestCase):
         parser = setup_args()
         opt = parser.parse_args(
             [
-                '--task',
-                'wizard_of_internet:ApprenticeDialogTeacher',
-                '--num-examples',
-                '100000',
+                "--task",
+                "wizard_of_internet:ApprenticeDialogTeacher",
+                "--num-examples",
+                "100000",
             ]
         )
         display_data(opt)
@@ -26,13 +26,13 @@ class TestApprenticeDialogTeacher(unittest.TestCase):
 class TestWizardDialogTeacher(unittest.TestCase):
     def test_display_data(self):
         parser = setup_args()
-        opt = parser.parse_args(['--task', 'wizard_of_internet'])
+        opt = parser.parse_args(["--task", "wizard_of_internet"])
         display_data(opt)
 
     def test_display_data_with_prepend_gold(self):
         parser = setup_args()
         opt = parser.parse_args(
-            ['--task', 'wizard_of_internet:WizardDialogGoldKnowledgeTeacher']
+            ["--task", "wizard_of_internet:WizardDialogGoldKnowledgeTeacher"]
         )
         for out_type in display_data(opt):
             started_knowledge_span = False
@@ -52,14 +52,14 @@ class TestSearchQueryTeacher(unittest.TestCase):
         parser = setup_args()
         opt = parser.parse_args(
             [
-                '--task',
-                'wizard_of_internet:QueryTeacher',
-                '--dialog-history',
-                'onlylast',
-                '--include-persona',
-                'true',
-                '--num-examples',
-                '100000',
+                "--task",
+                "wizard_of_internet:QueryTeacher",
+                "--dialog-history",
+                "onlylast",
+                "--include-persona",
+                "true",
+                "--num-examples",
+                "100000",
             ]
         )
         display_data(opt)
@@ -70,14 +70,14 @@ class TestKnowledgeTeachers(unittest.TestCase):
         parser = setup_args()
         opt = parser.parse_args(
             [
-                '--task',
-                'wizard_of_internet:GoldKnowledgeTeacher',
-                '--dialog-history',
-                'onlylast',
-                '--include-persona',
-                'true',
-                '--num-examples',
-                '100000',
+                "--task",
+                "wizard_of_internet:GoldKnowledgeTeacher",
+                "--dialog-history",
+                "onlylast",
+                "--include-persona",
+                "true",
+                "--num-examples",
+                "100000",
             ]
         )
         display_data(opt)
@@ -86,14 +86,14 @@ class TestKnowledgeTeachers(unittest.TestCase):
         parser = setup_args()
         opt = parser.parse_args(
             [
-                '--task',
-                'wizard_of_internet:GoldDocsTeacher',
-                '--dialog-history',
-                'full',
-                '--include-persona',
-                'false',
-                '--num-examples',
-                '100000',
+                "--task",
+                "wizard_of_internet:GoldDocsTeacher",
+                "--dialog-history",
+                "full",
+                "--include-persona",
+                "false",
+                "--num-examples",
+                "100000",
             ]
         )
         display_data(opt)
@@ -102,18 +102,18 @@ class TestKnowledgeTeachers(unittest.TestCase):
         parser = setup_args()
         opt = parser.parse_args(
             [
-                '--task',
-                'wizard_of_internet:GoldDocTitlesTeacher',
-                '--dialog-history',
-                'full',
-                '--include-persona',
-                'false',
-                '--num-examples',
-                '100000',
+                "--task",
+                "wizard_of_internet:GoldDocTitlesTeacher",
+                "--dialog-history",
+                "full",
+                "--include-persona",
+                "false",
+                "--num-examples",
+                "100000",
             ]
         )
         display_data(opt)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

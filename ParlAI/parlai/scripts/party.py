@@ -20,19 +20,19 @@ from parlai.core.script import ParlaiScript, register_script
 from parlai.core.params import ParlaiParser
 
 DELAY = 75 / 1000
-RESET = '\u001b[0m'
+RESET = "\u001b[0m"
 CLEAR_SCREEN = "\u001b[2J\u001b[H"
 COLORS = [
-    '\033[1;38;5;210m',  # peach
-    '\033[1;38;5;222m',  # orange
-    '\033[1;38;5;120m',  # green
-    '\033[1;38;5;123m',  # cyan
-    '\033[1;38;5;111m',  # blue
-    '\033[1;38;5;134m',  # purple
-    '\033[1;38;5;177m',  # pink
-    '\033[1;38;5;207m',  # fuschia
-    '\033[1;38;5;206m',  # magenta
-    '\033[1;38;5;204m',  # red
+    "\033[1;38;5;210m",  # peach
+    "\033[1;38;5;222m",  # orange
+    "\033[1;38;5;120m",  # green
+    "\033[1;38;5;123m",  # cyan
+    "\033[1;38;5;111m",  # blue
+    "\033[1;38;5;134m",  # purple
+    "\033[1;38;5;177m",  # pink
+    "\033[1;38;5;207m",  # fuschia
+    "\033[1;38;5;206m",  # magenta
+    "\033[1;38;5;204m",  # red
 ]
 
 # Frames from https://github.com/jmhobbs/terminal-parrot/blob/main/data.go,
@@ -250,22 +250,22 @@ Z
 ,dl::,..,cccccccccccccccccccccccccccccccc:;':xx,
 cNd.........................................;lOc
 """.split(
-    'Z'
+    "Z"
 )
 
 
-@register_script('party', hidden=True, aliases=['parrot'])
+@register_script("party", hidden=True, aliases=["parrot"])
 class Party(ParlaiScript):
     @classmethod
     def setup_args(cls):
-        parser = ParlaiParser(False, False, 'Throw a party!')
+        parser = ParlaiParser(False, False, "Throw a party!")
         parser.add_argument(
-            '-n', '--seconds', default=-1, type=float, help='Number of seconds to party'
+            "-n", "--seconds", default=-1, type=float, help="Number of seconds to party"
         )
         return parser
 
     def run(self):
-        end = float('inf') if self.opt['seconds'] <= 0 else self.opt['seconds']
+        end = float("inf") if self.opt["seconds"] <= 0 else self.opt["seconds"]
         i = 0
         timespent = 0
         while True:
@@ -275,10 +275,10 @@ class Party(ParlaiScript):
                 i += 1
                 sys.stdout.write(CLEAR_SCREEN)
                 sys.stdout.write(color)
-                sys.stdout.write('\n\n    ')
-                sys.stdout.write(frame.replace('\n', '\n    '))
+                sys.stdout.write("\n\n    ")
+                sys.stdout.write(frame.replace("\n", "\n    "))
                 sys.stdout.write(COLORS[(i * 3 + 1) % len(COLORS)])
-                sys.stdout.write('\n\n              P A R T Y    P A R R O T\n')
+                sys.stdout.write("\n\n              P A R T Y    P A R R O T\n")
                 sys.stdout.write(RESET)
                 time.sleep(DELAY)
                 timespent += DELAY
@@ -286,8 +286,8 @@ class Party(ParlaiScript):
                     raise KeyboardInterrupt
             except KeyboardInterrupt:
                 break
-        sys.stdout.write(RESET + '\n')
+        sys.stdout.write(RESET + "\n")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Party.main()

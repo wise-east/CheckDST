@@ -28,7 +28,7 @@ class DatatypeHelper:
         >>> DatatypeHelper.fold("train:ordered")
         ... "train"
         """
-        return datatype.split(':')[0]
+        return datatype.split(":")[0]
 
     @classmethod
     def strip_stream(cls, datatype: str) -> str:
@@ -61,11 +61,11 @@ class DatatypeHelper:
         :return should_cycle:
             given datatype, return whether we should cycle
         """
-        assert datatype is not None, 'datatype must not be none'
+        assert datatype is not None, "datatype must not be none"
         return (
-            'train' in datatype
-            and 'evalmode' not in datatype
-            and 'ordered' not in datatype
+            "train" in datatype
+            and "evalmode" not in datatype
+            and "ordered" not in datatype
         )
 
     @classmethod
@@ -79,12 +79,12 @@ class DatatypeHelper:
         :return should_shuffle:
             given datatype, return whether we should shuffle
         """
-        assert datatype is not None, 'datatype must not be none'
+        assert datatype is not None, "datatype must not be none"
         return (
-            'train' in datatype
-            and 'evalmode' not in datatype
-            and 'ordered' not in datatype
-            and 'stream' not in datatype
+            "train" in datatype
+            and "evalmode" not in datatype
+            and "ordered" not in datatype
+            and "stream" not in datatype
         )
 
     @classmethod
@@ -98,8 +98,8 @@ class DatatypeHelper:
         :return is_training:
             bool indicating whether should return eval_labels or labels
         """
-        assert datatype is not None, 'datatype must not be none'
-        return 'train' in datatype and 'evalmode' not in datatype
+        assert datatype is not None, "datatype must not be none"
+        return "train" in datatype and "evalmode" not in datatype
 
     @classmethod
     def is_streaming(cls, datatype: str) -> bool:
@@ -112,7 +112,7 @@ class DatatypeHelper:
         :returns:
             bool indicating whether we are streaming
         """
-        return 'stream' in datatype
+        return "stream" in datatype
 
     @classmethod
     def split_data_by_fold(

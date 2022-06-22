@@ -19,11 +19,11 @@ def _path(opt):
     build(opt)
 
     questions_path = os.path.join(
-        opt['datapath'], 'FVQA', 'new_dataset_release', 'all_qs_dict_release.json'
+        opt["datapath"], "FVQA", "new_dataset_release", "all_qs_dict_release.json"
     )
-    trainset_path = os.path.join(opt['datapath'], 'FVQA', 'Name_Lists')
+    trainset_path = os.path.join(opt["datapath"], "FVQA", "Name_Lists")
     image_path = os.path.join(
-        opt['datapath'], 'FVQA', 'new_dataset_release', 'images', ''
+        opt["datapath"], "FVQA", "new_dataset_release", "images", ""
     )
 
     return questions_path, trainset_path, image_path
@@ -41,28 +41,28 @@ class SplitTeacher(Teacher):
     def __init__(self, opt, shared=None):
         super().__init__(opt)
 
-        dt = opt['datatype'].split(':')[0]
-        if dt not in ('train', 'test'):
-            raise RuntimeError('Not valid datatype (only train/test).')
+        dt = opt["datatype"].split(":")[0]
+        if dt not in ("train", "test"):
+            raise RuntimeError("Not valid datatype (only train/test).")
 
-        task = opt.get('task', 'fvqa:split:0')
+        task = opt.get("task", "fvqa:split:0")
         task_num = 0  # default to train/split 0
-        split = task.split(':')
+        split = task.split(":")
         if len(split) > 2:
             task_num = split[2]
             if task_num not in [str(i) for i in range(5)]:
-                raise RuntimeError('Invalid train/test split ID (0-4 inclusive)')
+                raise RuntimeError("Invalid train/test split ID (0-4 inclusive)")
 
-        if not hasattr(self, 'factmetrics'):
-            if shared and shared.get('factmetrics'):
-                self.factmetrics = shared['factmetrics']
+        if not hasattr(self, "factmetrics"):
+            if shared and shared.get("factmetrics"):
+                self.factmetrics = shared["factmetrics"]
             else:
-                self.factmetrics = TeacherMetrics(opt.get('metrics', 'default'))
-            self.datatype = opt['datatype']
+                self.factmetrics = TeacherMetrics(opt.get("metrics", "default"))
+            self.datatype = opt["datatype"]
         questions_path, trainset_path, self.image_path = _path(opt)
 
-        if shared and 'ques' in shared:
-            self.ques = shared['ques']
+        if shared and "ques" in shared:
+            self.ques = shared["ques"]
         else:
             self._setup_data(questions_path, trainset_path, dt, task_num)
         self.len = len(self.ques)
@@ -71,8 +71,8 @@ class SplitTeacher(Teacher):
         # for ordered data in batch mode (especially, for validation and
         # testing), each teacher in the batch gets a start index and a step
         # size so they all process disparate sets of the data
-        self.step_size = opt.get('batchsize', 1)
-        self.data_offset = opt.get('batchindex', 0)
+        self.step_size = opt.get("batchsize", 1)
+        self.data_offset = opt.get("batchindex", 0)
         self.image_loader = ImageLoader(opt)
 
         self.reset()
@@ -86,7 +86,7 @@ class SplitTeacher(Teacher):
     def report(self):
         r = super().report()
         for k, v in self.factmetrics.report().items():
-            r[f'factmetrics_{k}'] = v
+            r[f"factmetrics_{k}"] = v
         return r
 
     def reset(self):
@@ -116,61 +116,61 @@ class SplitTeacher(Teacher):
     def act(self):
         if self.asked_question:
             self.asked_question = False
-            action = {'text': 'Which fact supports this answer?', 'episode_done': True}
-            if self.datatype.startswith('train'):
-                action['labels'] = self.lastY[1]
+            action = {"text": "Which fact supports this answer?", "episode_done": True}
+            if self.datatype.startswith("train"):
+                action["labels"] = self.lastY[1]
             if (
-                self.datatype != 'train'
+                self.datatype != "train"
                 and self.episode_idx + self.step_size >= self.num_episodes()
             ):
                 self.epochDone = True
             return action
 
-        if self.datatype == 'train':
+        if self.datatype == "train":
             self.episode_idx = random.randrange(self.len)
         else:
             self.episode_idx = (self.episode_idx + self.step_size) % self.num_episodes()
 
         self.asked_question = True
         qa = self.ques[self.episode_idx]
-        question = qa['question']
-        img_path = self.image_path + qa['img_file']
+        question = qa["question"]
+        img_path = self.image_path + qa["img_file"]
 
         action = {
-            'image': self.image_loader.load(img_path),
-            'text': question,
-            'episode_done': False,
+            "image": self.image_loader.load(img_path),
+            "text": question,
+            "episode_done": False,
         }
 
-        human_readable = qa['fact_surface'].replace('[', '').replace(']', '')
-        self.lastY = [[qa['answer']], [human_readable]]
+        human_readable = qa["fact_surface"].replace("[", "").replace("]", "")
+        self.lastY = [[qa["answer"]], [human_readable]]
 
-        if self.datatype.startswith('train'):
-            action['labels'] = self.lastY[0]
+        if self.datatype.startswith("train"):
+            action["labels"] = self.lastY[0]
 
         return action
 
     def share(self):
         shared = super().share()
-        shared['factmetrics'] = self.factmetrics
-        shared['ques'] = self.ques
-        if hasattr(self, 'facts'):
-            shared['facts'] = self.facts
+        shared["factmetrics"] = self.factmetrics
+        shared["ques"] = self.ques
+        if hasattr(self, "facts"):
+            shared["facts"] = self.facts
         return shared
 
     def _setup_data(self, questions_path, trainset_path, datatype, task_num):
-        print('loading: ' + questions_path)
+        print("loading: " + questions_path)
         with PathManager.open(questions_path) as questions_file:
             questions = json.load(questions_file)
         train_test_images = set()
-        fn = os.path.join(trainset_path, '{}_list_{}.txt'.format(datatype, task_num))
+        fn = os.path.join(trainset_path, "{}_list_{}.txt".format(datatype, task_num))
         with PathManager.open(fn) as imageset:
             for line in imageset:
                 train_test_images.add(line.strip())
         self.ques = [
             questions[k]
             for k in sorted(questions.keys())
-            if questions[k]['img_file'] in train_test_images
+            if questions[k]["img_file"] in train_test_images
         ]
 
 

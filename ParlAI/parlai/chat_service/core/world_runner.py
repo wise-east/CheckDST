@@ -33,7 +33,7 @@ class ChatServiceWorldRunner:
         def _is_done_initializing(fut):
             e = fut.exception()
             if e is not None:
-                self._log('`module_initialize` returned with error {}'.format(repr(e)))
+                self._log("`module_initialize` returned with error {}".format(repr(e)))
                 if self.debug:
                     raise e
             if fut.result():
@@ -123,7 +123,7 @@ class ChatServiceWorldRunner:
 
         def _world_fn():
             log_utils.print_and_log(
-                logging.INFO, 'Starting task {}...'.format(task_name)
+                logging.INFO, "Starting task {}...".format(task_name)
             )
             return self._run_world(task, world_name, agents)
 
@@ -178,7 +178,7 @@ class ChatServiceWorldRunner:
                 # perform onboarding
                 onboard_type = onboard_map.get(world_type)
                 if onboard_type:
-                    onboard_id = 'onboard-{}-{}'.format(overworld_agent.id, time.time())
+                    onboard_id = "onboard-{}-{}".format(overworld_agent.id, time.time())
                     agent = self.manager._create_agent(onboard_id, overworld_agent.id)
                     agent.data = overworld_agent.data
                     agent_state.set_active_agent(agent)
@@ -187,7 +187,7 @@ class ChatServiceWorldRunner:
                     agent_state.onboard_data = onboard_data
                     agent_state.data = agent.data
                 self.manager.add_agent_to_pool(agent_state, world_type)
-                log_utils.print_and_log(logging.INFO, 'onboarding/overworld complete')
+                log_utils.print_and_log(logging.INFO, "onboarding/overworld complete")
 
             return world_type
 

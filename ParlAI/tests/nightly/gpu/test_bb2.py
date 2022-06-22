@@ -27,37 +27,37 @@ LOCAL = True
 if TRANSFORMER_INSTALLED:
     SEARCH_QUERY_MODEL = ZOO_MEMORY_DECODER
     PERSONA_SUMMARY_MODEL = ZOO_QUERY_GENERATOR
-    ZOO_BB2 = 'zoo:blenderbot2/blenderbot2_400M/model'
-    ZOO_BB2_3B = 'zoo:blenderbot2/blenderbot2_3B/model'
-    SEARCH_SERVER = '<SERVER_API>'
+    ZOO_BB2 = "zoo:blenderbot2/blenderbot2_400M/model"
+    ZOO_BB2_3B = "zoo:blenderbot2/blenderbot2_3B/model"
+    SEARCH_SERVER = "<SERVER_API>"
     common_opt = {
-        'model': 'projects.blenderbot2.agents.blenderbot2:BlenderBot2RagAgent',
+        "model": "projects.blenderbot2.agents.blenderbot2:BlenderBot2RagAgent",
         # rag args
-        'init_opt': 'arch/bart_large',
-        'generation_model': 'bart',
-        'retriever_debug_index': 'compressed',
-        'label_truncate': 128,
-        'text_truncate': 512,
-        'batchsize': 4,
-        'fp16': True,
-        'model_parallel': True,
+        "init_opt": "arch/bart_large",
+        "generation_model": "bart",
+        "retriever_debug_index": "compressed",
+        "label_truncate": 128,
+        "text_truncate": 512,
+        "batchsize": 4,
+        "fp16": True,
+        "model_parallel": True,
         # train args
-        'task': 'convai2,wizard_of_wikipedia',
-        'num_examples': 8,
+        "task": "convai2,wizard_of_wikipedia",
+        "num_examples": 8,
     }
 
     def _test_bb2_rag(retrieval_method: KnowledgeAccessMethod, **kwargs):
         opt = copy.deepcopy(common_opt)
-        opt['knowledge_access_method'] = retrieval_method.value
+        opt["knowledge_access_method"] = retrieval_method.value
         opt.update(dict(kwargs))
-        print(' '.join([f'--{k} {v}' for k, v in opt.items()]))
+        print(" ".join([f"--{k} {v}" for k, v in opt.items()]))
         testing_utils.eval_model(opt, skip_test=True)
         torch.cuda.empty_cache()
 
     def _test_bb2_fid(retrieval_method: KnowledgeAccessMethod, **kwargs):
         opt = copy.deepcopy(common_opt)
-        opt['model'] = 'projects.blenderbot2.agents.blenderbot2:BlenderBot2FidAgent'
-        opt['knowledge_access_method'] = retrieval_method.value
+        opt["model"] = "projects.blenderbot2.agents.blenderbot2:BlenderBot2FidAgent"
+        opt["knowledge_access_method"] = retrieval_method.value
         opt.update(dict(kwargs))
         testing_utils.eval_model(opt, skip_test=True)
         torch.cuda.empty_cache()
@@ -139,7 +139,7 @@ class TestBB2RagTurn(unittest.TestCase):
     def test_rag_turn(self):
         _test_bb2_rag(
             KnowledgeAccessMethod.CLASSIFY,
-            rag_model_type='turn',
+            rag_model_type="turn",
             n_docs=3,
             batchsize=1,
             query_generator_model_file=SEARCH_QUERY_MODEL,
@@ -156,11 +156,11 @@ class TestBB2Search(unittest.TestCase):
     def test_rag(self):
         _test_bb2_rag(
             KnowledgeAccessMethod.CLASSIFY,
-            rag_model_type='token',
+            rag_model_type="token",
             n_docs=3,
             batchsize=1,
             query_generator_model_file=SEARCH_QUERY_MODEL,
-            rag_retriever_type='search_engine',
+            rag_retriever_type="search_engine",
             search_server=SEARCH_SERVER,
         )
 
@@ -175,11 +175,11 @@ class TestBB2RagSequence(unittest.TestCase):
     def test_rag(self):
         _test_bb2_rag(
             KnowledgeAccessMethod.CLASSIFY,
-            rag_model_type='sequence',
+            rag_model_type="sequence",
             n_docs=3,
             batchsize=1,
             query_generator_model_file=SEARCH_QUERY_MODEL,
-            rag_retriever_type='search_engine',
+            rag_retriever_type="search_engine",
             search_server=SEARCH_SERVER,
         )
 
@@ -194,11 +194,11 @@ class TestBB2QGenParams(unittest.TestCase):
     def test_rag(self):
         _test_bb2_rag(
             KnowledgeAccessMethod.CLASSIFY,
-            rag_model_type='token',
+            rag_model_type="token",
             n_docs=3,
             batchsize=1,
             query_generator_model_file=SEARCH_QUERY_MODEL,
-            rag_retriever_type='search_engine',
+            rag_retriever_type="search_engine",
             search_server=SEARCH_SERVER,
             query_generator_beam_size=3,
             query_generator_beam_min_length=2,
@@ -215,11 +215,11 @@ class TestBB2AdditionalTruncation(unittest.TestCase):
     def test_rag(self):
         _test_bb2_rag(
             KnowledgeAccessMethod.CLASSIFY,
-            rag_model_type='token',
+            rag_model_type="token",
             n_docs=3,
             batchsize=1,
             query_generator_model_file=SEARCH_QUERY_MODEL,
-            rag_retriever_type='search_engine',
+            rag_retriever_type="search_engine",
             search_server=SEARCH_SERVER,
             query_generator_truncate=24,
             memory_retriever_truncate=24,
@@ -236,14 +236,14 @@ class TestBB2GoldDocs(unittest.TestCase):
     def test_rag(self):
         _test_bb2_rag(
             KnowledgeAccessMethod.CLASSIFY,
-            rag_model_type='sequence',
+            rag_model_type="sequence",
             n_docs=3,
             batchsize=1,
             query_generator_model_file=SEARCH_QUERY_MODEL,
-            rag_retriever_type='search_engine',
+            rag_retriever_type="search_engine",
             search_server=SEARCH_SERVER,
             insert_gold_docs=True,
-            task='wizard_of_internet',
+            task="wizard_of_internet",
         )
 
 
@@ -257,14 +257,14 @@ class TestBB2MemoryDecoder(unittest.TestCase):
     def test_rag(self):
         _test_bb2_rag(
             KnowledgeAccessMethod.CLASSIFY,
-            rag_model_type='sequence',
+            rag_model_type="sequence",
             n_docs=3,
             batchsize=1,
             query_generator_model_file=SEARCH_QUERY_MODEL,
-            rag_retriever_type='search_engine',
+            rag_retriever_type="search_engine",
             search_server=SEARCH_SERVER,
             insert_gold_docs=True,
-            task='wizard_of_internet',
+            task="wizard_of_internet",
             memory_decoder_model_file=PERSONA_SUMMARY_MODEL,
         )
 
@@ -280,10 +280,10 @@ class TestBB2ZooModel(unittest.TestCase):
             KnowledgeAccessMethod.CLASSIFY,
             n_docs=3,
             batchsize=1,
-            task='wizard_of_internet',
+            task="wizard_of_internet",
             model_file=ZOO_BB2,
-            rag_retriever_type='dpr',
-            indexer_type='compressed',
+            rag_retriever_type="dpr",
+            indexer_type="compressed",
         )
 
     @unittest.skipIf(LOCAL, "Skipping Test because its slow and mem intensive")
@@ -292,13 +292,13 @@ class TestBB2ZooModel(unittest.TestCase):
             KnowledgeAccessMethod.CLASSIFY,
             n_docs=3,
             batchsize=1,
-            task='wizard_of_internet',
+            task="wizard_of_internet",
             model_file=ZOO_BB2_3B,
             search_server=SEARCH_SERVER,
-            init_opt='gen/blenderbot',
-            generation_model='transformer/generator',
+            init_opt="gen/blenderbot",
+            generation_model="transformer/generator",
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

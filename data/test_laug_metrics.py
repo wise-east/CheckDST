@@ -61,13 +61,13 @@ def compare(template):
     ), "Length is not matched. 2X test pred != laug pred"
     for idx, tr in tqdm(enumerate(test_result)):
         aug = aug_result[idx * 2]
-        x = tr['dialog'][0][0]
-        y = aug['dialog'][0][0]
+        x = tr["dialog"][0][0]
+        y = aug["dialog"][0][0]
 
         # keep only overlapping keys
-        x.pop('need_coref')
-        x.pop('id')
-        y.pop('id')
+        x.pop("need_coref")
+        x.pop("id")
+        y.pop("id")
 
         # if they are not the same, break
         if x != y:
@@ -81,15 +81,15 @@ def compare(template):
             break
 
         # compare beam text
-        x_beam = tr['dialog'][0][1]['beam_texts'][0][0]
-        y_beam = aug['dialog'][0][1]['beam_texts'][0][0]
+        x_beam = tr["dialog"][0][1]["beam_texts"][0][0]
+        y_beam = aug["dialog"][0][1]["beam_texts"][0][0]
 
         if x_beam != y_beam:
             logger.info(f"\n\tx: {x_beam}\n\ty: {y_beam}")
             break
 
         try:
-            x_jga = tr['dialog'][0][1]['metrics']['joint goal acc']
+            x_jga = tr["dialog"][0][1]["metrics"]["joint goal acc"]
         except Exception as e:
             # print(e)
             # pprint(tr['dialog'][0][1]['metrics'])
@@ -97,7 +97,7 @@ def compare(template):
             x_jga = -1
 
         try:
-            y_jga = aug['dialog'][0][1]['metrics']['jga_original']
+            y_jga = aug["dialog"][0][1]["metrics"]["jga_original"]
         except Exception as e:
             # print(e)
             # pprint(aug)

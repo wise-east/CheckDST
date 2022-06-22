@@ -11,19 +11,19 @@ import os
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/booktest/booktest.tar.bz2',
-        'booktest.tar.bz2',
-        '4079481d19c7681e3256c06ffd2781a230aca4a8d9390f3a5932c33e4b857c9d',
+        "http://parl.ai/downloads/booktest/booktest.tar.bz2",
+        "booktest.tar.bz2",
+        "4079481d19c7681e3256c06ffd2781a230aca4a8d9390f3a5932c33e4b857c9d",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'BookTest')
+    dpath = os.path.join(opt["datapath"], "BookTest")
     version = None
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

@@ -8,20 +8,20 @@ from parlai.utils.testing import AutoTeacherTest
 
 
 class StaticKGTeacher(AutoTeacherTest):
-    task = 'jericho_world'
+    task = "jericho_world"
 
 
 class TestStaticKGTeacher(AutoTeacherTest):
-    task = 'jericho_world:StaticKGTeacher'
+    task = "jericho_world:StaticKGTeacher"
 
 
 class TestActionKGTeacher(AutoTeacherTest):
-    task = 'jericho_world:ActionKGTeacher'
+    task = "jericho_world:ActionKGTeacher"
 
 
 class TestStateToValidActionsTeacher(AutoTeacherTest):
-    task = 'jericho_world:StateToValidActionsTeacher'
+    task = "jericho_world:StateToValidActionsTeacher"
 
 
 class TestStateToActionTeacher(AutoTeacherTest):
-    task = 'jericho_world:StateToActionTeacher'
+    task = "jericho_world:StateToActionTeacher"

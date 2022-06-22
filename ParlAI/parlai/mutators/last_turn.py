@@ -25,18 +25,18 @@ class LastTurnMutator(ManyEpisodeMutator):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         parser.add_argument(
-            '--preserve-context',
+            "--preserve-context",
             default=True,
-            type='bool',
-            help='If extra context is provided, keep it prepended to all turns.',
+            type="bool",
+            help="If extra context is provided, keep it prepended to all turns.",
         )
 
     def many_episode_mutation(self, episode: List[Message]) -> Iterator[List[Message]]:
         context = []
         for i, message in enumerate(episode):
-            if i == 0 and self.opt.get('preserve_context'):
-                text = message.pop('text').split("\n")
+            if i == 0 and self.opt.get("preserve_context"):
+                text = message.pop("text").split("\n")
                 context = text[:-1]
-                message['text'] = text[-1]
-            message['text'] = "\n".join(context + [message.pop('text')])
+                message["text"] = text[-1]
+            message["text"] = "\n".join(context + [message.pop("text")])
             yield [message]

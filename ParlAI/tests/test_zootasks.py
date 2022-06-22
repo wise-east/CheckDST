@@ -26,9 +26,9 @@ class TestZooAndTasks(unittest.TestCase):
     """
 
     def _assertZooString(self, member, container, animal_name=None):
-        msg = f'Missing or empty {member} in parlai.zoo.model_list'
+        msg = f"Missing or empty {member} in parlai.zoo.model_list"
         if animal_name:
-            msg += f' [{animal_name}]'
+            msg += f" [{animal_name}]"
         self.assertIn(member, container, msg=msg)
         self.assertTrue(container[member], msg=msg)
 
@@ -38,15 +38,15 @@ class TestZooAndTasks(unittest.TestCase):
         """
 
         for animal in model_list:
-            self._assertZooString('title', animal)
-            name = animal['title']
+            self._assertZooString("title", animal)
+            name = animal["title"]
             # every task must at least contain these
-            for key in ['id', 'task', 'description', 'example', 'result']:
+            for key in ["id", "task", "description", "example", "result"]:
                 self._assertZooString(key, animal, name)
 
             # if there's a second example there should be a second result
-            if 'example2' in animal:
-                self._assertZooString('result2', animal, name)
+            if "example2" in animal:
+                self._assertZooString("result2", animal, name)
 
             # every entry needs a project page or a website
             self.assertTrue(
@@ -58,13 +58,13 @@ class TestZooAndTasks(unittest.TestCase):
         """
         Ensure no type errors in the model zoo.
         """
-        self._check_types(model_list, 'Zoo')
+        self._check_types(model_list, "Zoo")
 
     def test_tasklist_types(self):
         """
         Ensure no type errors in the task list.
         """
-        self._check_types(task_list, 'Task')
+        self._check_types(task_list, "Task")
 
     @pytest.mark.nofbcode
     def test_tasklist(self):
@@ -76,7 +76,7 @@ class TestZooAndTasks(unittest.TestCase):
             task_list,
             "parlai/tasks",
             "task",
-            ignore=['fromfile', 'interactive', 'jsonfile', 'wrapper'],
+            ignore=["fromfile", "interactive", "jsonfile", "wrapper"],
         )
 
     @pytest.mark.nofbcode
@@ -102,7 +102,7 @@ class TestZooAndTasks(unittest.TestCase):
         dirs = set(dirs)
 
         # and the list of thing names
-        thing_names = {thing[thing_key].split(':')[0] for thing in thing_list}
+        thing_names = {thing[thing_key].split(":")[0] for thing in thing_list}
 
         errors = []
         # items with a directory but not a listing
@@ -124,16 +124,16 @@ class TestZooAndTasks(unittest.TestCase):
 
     def _check_types(self, thing_list, listname):
         for thing in thing_list:
-            name = thing['id']
+            name = thing["id"]
             for key, value in thing.items():
-                if key == 'tags':
+                if key == "tags":
                     self.assertIsInstance(
                         value, list, "{} {} tags is not a list".format(listname, name)
                     )
                     self.assertIsNot(
                         value, [], "{} {} must have some tags".format(listname, name)
                     )
-                elif key == 'links':
+                elif key == "links":
                     self.assertIsInstance(value, dict)
                     for k_, v_ in value.items():
                         self.assertIsInstance(k_, str)
@@ -146,5 +146,5 @@ class TestZooAndTasks(unittest.TestCase):
                     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

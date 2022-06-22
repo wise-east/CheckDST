@@ -29,20 +29,20 @@ class FullTeacher(DialogTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        self.key_value = ':key-value' in opt['task']
-        opt['task'] = 'wikipedia:all'
+        self.key_value = ":key-value" in opt["task"]
+        opt["task"] = "wikipedia:all"
         build(opt)
         self.opt = opt
-        opt['datafile'] = os.path.join(
-            opt['datapath'], 'wikipedia/full/wiki_full_extracted'
+        opt["datafile"] = os.path.join(
+            opt["datapath"], "wikipedia/full/wiki_full_extracted"
         )
-        self.id = 'wikipedia'
+        self.id = "wikipedia"
         super().__init__(opt, shared)
 
     def setup_data(self, path):
-        print('loading: ' + path)
+        print("loading: " + path)
         for subdir in os.listdir(path):
-            if subdir == 'README.md':
+            if subdir == "README.md":
                 continue
             subdir_path = os.path.join(path, subdir)
             for wiki_file in os.listdir(subdir_path):
@@ -50,19 +50,19 @@ class FullTeacher(DialogTeacher):
                 with PathManager.open(wiki_file_path) as wf:
                     for article_json in wf:
                         article = json.loads(article_json)
-                        title = article['title']
-                        text = article['text']
+                        title = article["title"]
+                        text = article["text"]
                         if self.key_value:
                             yield (title, [text]), True
                         else:
-                            yield (text, ['']), True
+                            yield (text, [""]), True
 
     def get_extraction_instructions(self):
         """
         If one wants to run extraction themselves on a raw wikipedia dump.
         """
-        dpath = os.path.join(self.opt['datapath'], 'wikipedia', 'full')
-        fname = 'enwiki-latest-pages-articles.xml.bz2'
+        dpath = os.path.join(self.opt["datapath"], "wikipedia", "full")
+        fname = "enwiki-latest-pages-articles.xml.bz2"
         instructions = (
             "To complete the data extraction, please run the following:\n"
             "mkdir -p {download} && "
@@ -71,9 +71,9 @@ class FullTeacher(DialogTeacher):
             "python WikiExtractor.py {wikifile} --filter_disambig_pages "
             "-o {output} --json"
         ).format(
-            download=self.opt['download_path'],
-            wikifile=dpath + '/' + fname,
-            output=dpath + '/' + 'wiki_extracted',
+            download=self.opt["download_path"],
+            wikifile=dpath + "/" + fname,
+            output=dpath + "/" + "wiki_extracted",
         )
 
         return instructions
@@ -94,20 +94,20 @@ class FullSplitTeacher(ChunkTeacher):
             self.opt = opt
             self._set_chunk_idx_to_file()
         else:
-            self.chunk_idx_to_file = shared['chunk_idx_to_file']
+            self.chunk_idx_to_file = shared["chunk_idx_to_file"]
         super().__init__(opt, shared)
 
     def _get_data_folder(self):
-        return os.path.join(self.opt['datapath'], 'wikipedia/full/wiki_full_extracted')
+        return os.path.join(self.opt["datapath"], "wikipedia/full/wiki_full_extracted")
 
     def get_num_samples(self, opt) -> Tuple[int, int]:
         """
         Return the number of samples given the datatype.
         """
-        datatype = opt['datatype']
-        if 'train' in datatype:
+        datatype = opt["datatype"]
+        if "train" in datatype:
             return self.TRAINSIZE, self.TRAINSIZE
-        elif 'valid' in datatype:
+        elif "valid" in datatype:
             return self.VALIDSIZE, self.VALIDSIZE
         else:
             # test
@@ -115,7 +115,7 @@ class FullSplitTeacher(ChunkTeacher):
 
     def _set_chunk_idx_to_file(self):
         folder = self._get_data_folder()
-        all_subdirs = sorted([x for x in os.listdir(folder) if 'README' not in x])
+        all_subdirs = sorted([x for x in os.listdir(folder) if "README" not in x])
         self.chunk_idx_to_file = {i: x for i, x in enumerate(all_subdirs)}
 
     def get_fold_chunks(self, opt) -> List[int]:  # type: ignore
@@ -125,11 +125,11 @@ class FullSplitTeacher(ChunkTeacher):
         Given the datatype (train/test/valid), return the list of chunk IDs that
         correspond to that split.
         """
-        datatype = opt['datatype']
+        datatype = opt["datatype"]
         all_chunk_idxs = list(self.chunk_idx_to_file.keys())
-        if 'train' in datatype:
+        if "train" in datatype:
             return all_chunk_idxs[:-2]
-        elif 'valid' in datatype:
+        elif "valid" in datatype:
             return [all_chunk_idxs[-2]]
         else:
             return [all_chunk_idxs[-1]]
@@ -148,24 +148,24 @@ class FullSplitTeacher(ChunkTeacher):
             with PathManager.open(wiki_file_path) as wf:
                 for article_json in wf:
                     article = json.loads(article_json)
-                    title = article['title']
-                    text = article['text']
+                    title = article["title"]
+                    text = article["text"]
                     output.append((title, text))
 
         return output
 
-    def create_message(self, queue_output: ChunkOutput, entry_idx=0) -> 'Message':
+    def create_message(self, queue_output: ChunkOutput, entry_idx=0) -> "Message":
         """
         Given the tuple output of the queue, return an act.
         """
         title, text = queue_output
         return Message(
-            {'title': title, 'text': text, 'labels': [''], 'episode_done': True}
+            {"title": title, "text": text, "labels": [""], "episode_done": True}
         )
 
     def share(self):
         shared = super().share()
-        shared['chunk_idx_to_file'] = self.chunk_idx_to_file
+        shared["chunk_idx_to_file"] = self.chunk_idx_to_file
         return shared
 
 
@@ -175,26 +175,26 @@ class SummaryTeacher(DialogTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        self.key_value = ':key-value' in opt['task']
-        opt['task'] = 'wikipedia:summary'
+        self.key_value = ":key-value" in opt["task"]
+        opt["task"] = "wikipedia:summary"
         build(opt)
-        opt['datafile'] = os.path.join(
-            opt['datapath'], 'wikipedia/summary/summaries.json'
+        opt["datafile"] = os.path.join(
+            opt["datapath"], "wikipedia/summary/summaries.json"
         )
-        self.id = 'wikipedia'
+        self.id = "wikipedia"
         super().__init__(opt, shared)
 
     def setup_data(self, path):
-        print('loading: ' + path)
+        print("loading: " + path)
         with PathManager.open(path) as wf:
             for article_json in wf:
                 article = json.loads(article_json)
-                title = article['title']
-                text = article['text']
+                title = article["title"]
+                text = article["text"]
                 if self.key_value:
                     yield (title, [text]), True
                 else:
-                    yield (title + '\n' + text, ['']), True
+                    yield (title + "\n" + text, [""]), True
 
 
 class DefaultTeacher(SummaryTeacher):

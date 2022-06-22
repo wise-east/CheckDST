@@ -10,8 +10,9 @@ import json
 import os
 import urllib.request
 
-_DATA_URL = ("https://raw.githubusercontent.com/clinc/oos-eval/"
-             "master/data/data_full.json")
+_DATA_URL = (
+    "https://raw.githubusercontent.com/clinc/oos-eval/" "master/data/data_full.json"
+)
 _DESIRED_SETS = ["train", "test", "val"]
 _HEADER = ["text", "category"]
 
@@ -20,9 +21,8 @@ def _get_script_flags():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--data_dir",
-        help="Path to dir where to save train, test, validation, "
-             "categories.json",
-        required=True
+        help="Path to dir where to save train, test, validation, " "categories.json",
+        required=True,
     )
     return parser.parse_args()
 
@@ -53,8 +53,7 @@ def _main():
         categories |= set(new_categories)
 
         _write_data_into_file(
-            path=os.path.join(data_dir, set_name + ".csv"),
-            rows=[_HEADER] + dataset
+            path=os.path.join(data_dir, set_name + ".csv"), rows=[_HEADER] + dataset
         )
 
     with open(os.path.join(data_dir, "categories.json"), "w") as cat_file:

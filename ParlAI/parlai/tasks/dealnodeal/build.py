@@ -10,19 +10,19 @@ import os
 
 RESOURCES = [
     DownloadableFile(
-        'https://github.com/facebookresearch/end-to-end-negotiator/archive/bbb93bbf00f69fced75d5c0d22e855bda07c9b78.zip',
-        'negotiation.zip',
-        '101f1ce90c3d86a55b097821de812af8e747004beb7a763a63127545b178ddf4',
+        "https://github.com/facebookresearch/end-to-end-negotiator/archive/bbb93bbf00f69fced75d5c0d22e855bda07c9b78.zip",
+        "negotiation.zip",
+        "101f1ce90c3d86a55b097821de812af8e747004beb7a763a63127545b178ddf4",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'negotiation')
+    dpath = os.path.join(opt["datapath"], "negotiation")
     version = "v1.1"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
 
         # make a clean directory if needed
         if build_data.built(dpath):

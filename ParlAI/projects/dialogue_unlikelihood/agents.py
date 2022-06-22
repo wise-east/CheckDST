@@ -63,12 +63,12 @@ class RewardUnlikelihoodAgentTrait(object):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         grp = super().add_cmdline_args(parser, partial_opt=partial_opt)
-        grp.add_argument('--alpha', default=1.0, type=float)
+        grp.add_argument("--alpha", default=1.0, type=float)
         return parser
 
     def compute_loss(self, batch, return_output=False):
         if batch.label_vec is None:
-            raise ValueError('Cannot compute loss without a label.')
+            raise ValueError("Cannot compute loss without a label.")
 
         model_output = self.model(*self._model_input(batch), ys=batch.label_vec)
         scores, preds, *_ = model_output  # scores is bsz x time x vocab
@@ -87,7 +87,7 @@ class RewardUnlikelihoodAgentTrait(object):
 
         mle_loss = (
             F.nll_loss(
-                scores_view, targets_view, ignore_index=self.NULL_IDX, reduction='none'
+                scores_view, targets_view, ignore_index=self.NULL_IDX, reduction="none"
             ).view_as(mle_notnull)
             * mle_notnull.float()
         ).sum()
@@ -95,9 +95,9 @@ class RewardUnlikelihoodAgentTrait(object):
         # limit loss to only the positive rewards
         mle_target_tokens = mle_notnull.long().sum()
         correct = ((targets == preds) * mle_notnull).sum()
-        self.global_metrics.add('token_acc', AverageMetric(correct, mle_target_tokens))
-        self.global_metrics.add('nll_loss', AverageMetric(mle_loss, mle_target_tokens))
-        self.global_metrics.add('ppl', PPLMetric(mle_loss, mle_target_tokens))
+        self.global_metrics.add("token_acc", AverageMetric(correct, mle_target_tokens))
+        self.global_metrics.add("nll_loss", AverageMetric(mle_loss, mle_target_tokens))
+        self.global_metrics.add("ppl", PPLMetric(mle_loss, mle_target_tokens))
         if mle_target_tokens > 0:
             mle_loss /= mle_target_tokens  # average loss per token
 
@@ -112,18 +112,18 @@ class RewardUnlikelihoodAgentTrait(object):
         ul_target_tokens = ul_notnull.long().sum()
         range_ = torch.arange(targets_view.size(0)).to(batch.label_vec.device)
         ul_scores = scores_view[range_, targets_view]
-        clamp_min = 1e-6 if self.opt['fp16'] else 1e-20
+        clamp_min = 1e-6 if self.opt["fp16"] else 1e-20
         ul_loss = (
             -torch.log(torch.clamp(1.0 - ul_scores.exp(), min=clamp_min)).view_as(
                 ul_notnull
             )
             * ul_notnull.float()
         ).sum()
-        self.global_metrics.add('ul_loss', AverageMetric(ul_loss, ul_target_tokens))
+        self.global_metrics.add("ul_loss", AverageMetric(ul_loss, ul_target_tokens))
         if ul_target_tokens > 0:
             ul_loss /= ul_target_tokens
 
-        loss = mle_loss + self.opt['alpha'] * ul_loss
+        loss = mle_loss + self.opt["alpha"] * ul_loss
 
         if return_output:
             return (loss, model_output)
@@ -148,11 +148,11 @@ class RepetitionUnlikelihoodAgentTrait(object):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         grp = super().add_cmdline_args(parser, partial_opt=partial_opt)
-        grp.add_argument('--seq-ul-ratio', default=0.5, type=float)
-        grp.add_argument('--seq-ul-n', default=4, type=int)
-        grp.add_argument('--mask-n', default=100, type=int)
-        grp.add_argument('--ctxt-beta', default=0.5, type=float)
-        grp.add_argument('--crep-pen', default='crep', type=str)
+        grp.add_argument("--seq-ul-ratio", default=0.5, type=float)
+        grp.add_argument("--seq-ul-n", default=4, type=int)
+        grp.add_argument("--mask-n", default=100, type=int)
+        grp.add_argument("--ctxt-beta", default=0.5, type=float)
+        grp.add_argument("--crep-pen", default="crep", type=str)
         return parser
 
     def _init_cuda_buffer(self, batchsize, maxlen, force=False):
@@ -165,7 +165,7 @@ class RepetitionUnlikelihoodAgentTrait(object):
         return n_grams
 
     def compute_loss(self, batch, return_output=False):
-        if self.is_training and (torch.rand(1).item() >= self.opt['seq_ul_ratio']):
+        if self.is_training and (torch.rand(1).item() >= self.opt["seq_ul_ratio"]):
             total_loss, model_output = super().compute_loss(batch, return_output=True)
             # No sequence level unlikelihood
             if return_output:
@@ -174,7 +174,7 @@ class RepetitionUnlikelihoodAgentTrait(object):
                 return total_loss
 
         # Generate
-        clamp_min = 1e-6 if self.opt['fp16'] else 1e-20
+        clamp_min = 1e-6 if self.opt["fp16"] else 1e-20
         maxlen = self.label_truncate or 256
         with torch.no_grad():
             beam_pred_scores, _ = self._generate(batch, self.beam_size, maxlen)
@@ -186,7 +186,7 @@ class RepetitionUnlikelihoodAgentTrait(object):
         logits, preds, _ = model_output
 
         # construct mask marking repeats
-        n = self.opt['seq_ul_n']  # label n-grams
+        n = self.opt["seq_ul_n"]  # label n-grams
         crep_mask = torch.zeros_like(pred_toks).type_as(logits)
         lrep_mask = torch.zeros_like(pred_toks).type_as(logits)
 
@@ -217,14 +217,14 @@ class RepetitionUnlikelihoodAgentTrait(object):
             pred_toks.size(0), pred_toks.size(1)
         )
 
-        mask = ((1 - self.opt['ctxt_beta']) * lrep_mask) + (
-            self.opt['ctxt_beta'] * crep_mask
+        mask = ((1 - self.opt["ctxt_beta"]) * lrep_mask) + (
+            self.opt["ctxt_beta"] * crep_mask
         )
 
         ul_loss = -(torch.log(one_minus_probs)) * mask
         total_loss = div(ul_loss.sum(), mask.sum())
         self.record_local_metric(
-            'ul_loss', AverageMetric.many(ul_loss.sum(dim=-1), mask.sum(dim=-1))
+            "ul_loss", AverageMetric.many(ul_loss.sum(dim=-1), mask.sum(dim=-1))
         )
 
         if not self.is_training:
@@ -242,7 +242,7 @@ class RepetitionUnlikelihoodAgentTrait(object):
         text_vecs_cpu = batch.text_vec.cpu()
         lrep, crep = 0, 0
         total_pred_ngs = 0
-        n = self.opt['seq_ul_n']
+        n = self.opt["seq_ul_n"]
         for i, pred in enumerate(preds):
             pred_token_list = pred.tolist()
             if self.END_IDX in pred_token_list:
@@ -270,18 +270,18 @@ class RepetitionUnlikelihoodAgentTrait(object):
                     crep += pred_counter[ng]
 
         self.global_metrics.add(
-            'lrep_%dgrams' % n, GlobalAverageMetric(lrep, total_pred_ngs)
+            "lrep_%dgrams" % n, GlobalAverageMetric(lrep, total_pred_ngs)
         )
         self.global_metrics.add(
-            'crep_%dgrams' % n, GlobalAverageMetric(crep, total_pred_ngs)
+            "crep_%dgrams" % n, GlobalAverageMetric(crep, total_pred_ngs)
         )
 
 
 class _VocabUnlikelihoodTrait(object):
     def reset_metrics(self):
         super().reset_metrics()
-        self.metrics['high_freq'] = 0
-        self.metrics['gold_high'] = 0
+        self.metrics["high_freq"] = 0
+        self.metrics["gold_high"] = 0
 
     def _kldiv(self, p_counter, q_counter) -> float:
         ptotal = sum(p_counter.values())
@@ -299,13 +299,13 @@ class _VocabUnlikelihoodTrait(object):
 
     def report(self):
         report = super().report()
-        report['kldiv_humgen'] = self._kldiv(
+        report["kldiv_humgen"] = self._kldiv(
             self.running_human, self.running_generation
         )
-        report['kldiv_genhum'] = self._kldiv(
+        report["kldiv_genhum"] = self._kldiv(
             self.running_generation, self.running_human
         )
-        report['jsdiv'] = self._jsdiv(self.running_human, self.running_generation)
+        report["jsdiv"] = self._jsdiv(self.running_human, self.running_generation)
         return report
 
 
@@ -319,24 +319,24 @@ class SequenceVocabUnlikelihoodAgentTrait(_VocabUnlikelihoodTrait):
 
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
-        self.NUM_STEPS = opt['queue_size']
+        self.NUM_STEPS = opt["queue_size"]
         if shared is None:
             self._reset_running_histories()
             self._last_was_training = True
             self.truebins = {}
-            counts_file = self.opt['counts_file']
+            counts_file = self.opt["counts_file"]
             if counts_file is None:
                 counts_file = os.path.join(
-                    os.path.dirname(self.opt['model_file']), 'counts.txt'
+                    os.path.dirname(self.opt["model_file"]), "counts.txt"
                 )
                 if not PathManager.exists(counts_file):
                     raise RuntimeError(
-                        'Please give a --counts-file to use vocab unlikelihood'
+                        "Please give a --counts-file to use vocab unlikelihood"
                     )
             with PathManager.open(counts_file) as f:
                 for line in f:
                     record = json.loads(line)
-                    self.truebins[record['word_id']] = record['bin']
+                    self.truebins[record["word_id"]] = record["bin"]
 
     def reset(self):
         super().reset()
@@ -353,13 +353,13 @@ class SequenceVocabUnlikelihoodAgentTrait(_VocabUnlikelihoodTrait):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         grp = super().add_cmdline_args(parser, partial_opt=partial_opt)
-        grp.add_argument('--alpha', default=1.0, type=float)
-        grp.add_argument('--queue-size', default=32, type=int)
+        grp.add_argument("--alpha", default=1.0, type=float)
+        grp.add_argument("--queue-size", default=32, type=int)
         grp.add_argument(
-            '--weighting', choices={'uniform', 'logdiff', 'kldiv'}, default='uniform'
+            "--weighting", choices={"uniform", "logdiff", "kldiv"}, default="uniform"
         )
-        grp.add_argument('--threshold', type=float, default=1e-3)
-        grp.add_argument('--counts-file', type=str, default=None)
+        grp.add_argument("--threshold", type=float, default=1e-3)
+        grp.add_argument("--counts-file", type=str, default=None)
         return parser
 
     def _init_cuda_buffer(self, *args, **kwargs):
@@ -367,38 +367,38 @@ class SequenceVocabUnlikelihoodAgentTrait(_VocabUnlikelihoodTrait):
 
     def reset_metrics(self):
         super().reset_metrics()
-        self.metrics['num_penalize'] = 0
-        self.metrics['steps'] = 0
-        self.metrics['hum_toks'] = 0
-        self.metrics['gen_toks'] = 0
-        self.metrics['ul_weights'] = 0
+        self.metrics["num_penalize"] = 0
+        self.metrics["steps"] = 0
+        self.metrics["hum_toks"] = 0
+        self.metrics["gen_toks"] = 0
+        self.metrics["ul_weights"] = 0
         # better clean our statistics so not to leak test statistics into train
 
     def _get_bins(self, counts: Counter):
         c = Counter()
         for k, v in counts.items():
-            c.update({self.truebins.get(k, 'never'): v})
+            c.update({self.truebins.get(k, "never"): v})
         t = sum(c.values())
         return {k: round_sigfigs(v / t, 4) for k, v in c.items()}
 
     def _l2dist(self, bins):
         return (
-            (bins.get('frequent', 0) - 0.4) ** 2
-            + (bins.get('medium', 0) - 0.3) ** 2
-            + (bins.get('rare', 0) - 0.2) ** 2
-            + (bins.get('veryrare', 0) - 0.1) ** 2
-            + (bins.get('never', 0) - 0.0) ** 2
+            (bins.get("frequent", 0) - 0.4) ** 2
+            + (bins.get("medium", 0) - 0.3) ** 2
+            + (bins.get("rare", 0) - 0.2) ** 2
+            + (bins.get("veryrare", 0) - 0.1) ** 2
+            + (bins.get("never", 0) - 0.0) ** 2
         )
 
     def report(self):
         r = super().report()
         if self.running_generation and self.running_human:
             for k, v in self._get_bins(self.running_human).items():
-                r[f'humdist_{k}'] = v
+                r[f"humdist_{k}"] = v
             gendist = self._get_bins(self.running_generation)
             for k, v in gendist.items():
-                r[f'gendist_{k}'] = v
-            r['dist_l2'] = self._l2dist(gendist)
+                r[f"gendist_{k}"] = v
+            r["dist_l2"] = self._l2dist(gendist)
 
         return r
 
@@ -414,7 +414,7 @@ class SequenceVocabUnlikelihoodAgentTrait(_VocabUnlikelihoodTrait):
 
         with torch.no_grad():
             beam_pred_scores, _ = self._generate(
-                batch, self.beam_size, self.opt['label_truncate']
+                batch, self.beam_size, self.opt["label_truncate"]
             )
 
             # forward pass to create graph for beam search case
@@ -447,24 +447,24 @@ class SequenceVocabUnlikelihoodAgentTrait(_VocabUnlikelihoodTrait):
         hum_sum = sum(self.running_human.values())
 
         # what did we oversample?
-        if self.opt['weighting'] == 'logdiff':
+        if self.opt["weighting"] == "logdiff":
             to_penalize = {
                 w: (v / gen_sum) - (self.running_human.get(w, 0) / hum_sum)
                 for w, v in self.running_generation.items()
             }
             to_penalize = {
-                w: v for w, v in to_penalize.items() if v >= self.opt['threshold']
+                w: v for w, v in to_penalize.items() if v >= self.opt["threshold"]
             }
             to_penalize = {w: math.log(v / 0.001) for w, v in to_penalize.items()}
-        elif self.opt['weighting'] == 'uniform':
+        elif self.opt["weighting"] == "uniform":
             to_penalize = {
                 w: (v / gen_sum) - (self.running_human.get(w, 0) / hum_sum)
                 for w, v in self.running_generation.items()
             }
             to_penalize = {
-                w: 1 for w, v in to_penalize.items() if v >= self.opt['threshold']
+                w: 1 for w, v in to_penalize.items() if v >= self.opt["threshold"]
             }
-        elif self.opt['weighting'] == 'kldiv':
+        elif self.opt["weighting"] == "kldiv":
             to_penalize = {
                 w: (
                     self.running_generation[w] / gen_sum,
@@ -483,12 +483,12 @@ class SequenceVocabUnlikelihoodAgentTrait(_VocabUnlikelihoodTrait):
                 for w, (p_gen, p_hum) in to_penalize.items()
             }
             to_penalize = {
-                k: v for k, v in to_penalize.items() if v > self.opt['threshold']
+                k: v for k, v in to_penalize.items() if v > self.opt["threshold"]
             }
         else:
             raise ValueError
 
-        self.global_metrics.add('num_penalize', SumMetric(len(to_penalize)))
+        self.global_metrics.add("num_penalize", SumMetric(len(to_penalize)))
 
         ul_weights = torch.zeros(gen_mask.shape)
         ul_mask = torch.zeros_like(gen_mask)
@@ -496,7 +496,7 @@ class SequenceVocabUnlikelihoodAgentTrait(_VocabUnlikelihoodTrait):
             ul_mask = ul_mask | (gentoks == wordid)
             ul_weights[gentoks == wordid] = weight
         ul_weights = ul_weights.to(gen_mask.device)
-        self.global_metrics.add('ul_weights', AverageMetric(ul_weights[ul_mask].mean()))
+        self.global_metrics.add("ul_weights", AverageMetric(ul_weights[ul_mask].mean()))
 
         # and whack it
         model_output = self.model(*self._model_input(batch), ys=gentoks)
@@ -506,7 +506,7 @@ class SequenceVocabUnlikelihoodAgentTrait(_VocabUnlikelihoodTrait):
         almost_scores = F.log_softmax(scores[ul_mask], dim=-1)
         ul_scores = almost_scores[torch.arange(len(downweight)), downweight]
 
-        clamp_min = 1e-6 if self.opt['fp16'] else 1e-20
+        clamp_min = 1e-6 if self.opt["fp16"] else 1e-20
 
         ul_loss = (
             -(torch.log(torch.clamp(1 - ul_scores.exp(), min=clamp_min)))
@@ -514,15 +514,15 @@ class SequenceVocabUnlikelihoodAgentTrait(_VocabUnlikelihoodTrait):
         ).sum()
         num_ul = ul_mask.sum()
 
-        self.global_metrics.add('ul_loss', AverageMetric(ul_loss, num_ul))
-        self.global_metrics.add('ul_num_tokens', SumMetric(num_ul))
+        self.global_metrics.add("ul_loss", AverageMetric(ul_loss, num_ul))
+        self.global_metrics.add("ul_num_tokens", SumMetric(num_ul))
 
         ul_loss = div(ul_loss, num_ul)
 
         if len(self.generation_history) < self.NUM_STEPS:
             loss = nll_loss
         else:
-            loss = nll_loss + self.opt['alpha'] * ul_loss
+            loss = nll_loss + self.opt["alpha"] * ul_loss
 
         if return_output:
             return (loss, model_output)

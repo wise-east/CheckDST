@@ -25,9 +25,9 @@ def get_style_labeled_data_path(opt: Opt, base_task: str) -> str:
     """
     build_style_labeled_datasets(opt)
     # Build the data if it doesn't exist.
-    dt = opt['datatype'].split(':')[0]
+    dt = opt["datatype"].split(":")[0]
     return os.path.join(
-        get_style_labeled_data_folder(opt['datapath']), base_task, dt + '.txt'
+        get_style_labeled_data_folder(opt["datapath"]), base_task, dt + ".txt"
     )
 
 
@@ -37,7 +37,7 @@ def get_personality_list_path(opt: Opt) -> str:
     """
     build_personality_list(opt)
     # Build the data if it doesn't exist.
-    return os.path.join(opt['datapath'], TASK_FOLDER_NAME, 'personality_list.txt')
+    return os.path.join(opt["datapath"], TASK_FOLDER_NAME, "personality_list.txt")
 
 
 class LabeledBlendedSkillTalkTeacher(ParlAIDialogTeacher):
@@ -47,8 +47,8 @@ class LabeledBlendedSkillTalkTeacher(ParlAIDialogTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        opt['parlaidialogteacher_datafile'] = get_style_labeled_data_path(
-            opt=opt, base_task='blended_skill_talk'
+        opt["parlaidialogteacher_datafile"] = get_style_labeled_data_path(
+            opt=opt, base_task="blended_skill_talk"
         )
         super().__init__(opt, shared=shared)
 
@@ -60,8 +60,8 @@ class LabeledConvAI2PersonaTopicifierTeacher(ParlAIDialogTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        opt['parlaidialogteacher_datafile'] = get_style_labeled_data_path(
-            opt=opt, base_task='blended_skill_talk:ConvAI2PersonaTopicifierTeacher'
+        opt["parlaidialogteacher_datafile"] = get_style_labeled_data_path(
+            opt=opt, base_task="blended_skill_talk:ConvAI2PersonaTopicifierTeacher"
         )
         super().__init__(opt, shared=shared)
 
@@ -73,8 +73,8 @@ class LabeledEDPersonaTopicifierTeacher(ParlAIDialogTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        opt['parlaidialogteacher_datafile'] = get_style_labeled_data_path(
-            opt=opt, base_task='blended_skill_talk:EDPersonaTopicifierTeacher'
+        opt["parlaidialogteacher_datafile"] = get_style_labeled_data_path(
+            opt=opt, base_task="blended_skill_talk:EDPersonaTopicifierTeacher"
         )
         super().__init__(opt, shared=shared)
 
@@ -86,8 +86,8 @@ class LabeledWoWPersonaTopicifierTeacher(ParlAIDialogTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        opt['parlaidialogteacher_datafile'] = get_style_labeled_data_path(
-            opt=opt, base_task='blended_skill_talk:WoWPersonaTopicifierTeacher'
+        opt["parlaidialogteacher_datafile"] = get_style_labeled_data_path(
+            opt=opt, base_task="blended_skill_talk:WoWPersonaTopicifierTeacher"
         )
         super().__init__(opt, shared=shared)
 
@@ -110,17 +110,17 @@ class PrevCurrUttStyleTeacher(AbstractWrapperTeacher):
         """
         Edit the fields of the action manually.
         """
-        if 'labels' in act:
-            labels = act['labels']
+        if "labels" in act:
+            labels = act["labels"]
             if len(labels) != 1:
                 raise ValueError(
-                    f'{type(self).__name__} can only be used with one label!'
+                    f"{type(self).__name__} can only be used with one label!"
                 )
-            assert '\n' not in labels[0]
+            assert "\n" not in labels[0]
             # Classifier will not expect more than 1 newline in context
-            act.force_set('text', act['text'].split('\n')[-1] + '\n' + labels[0])
-            act.force_set('labels', [act['personality']])
+            act.force_set("text", act["text"].split("\n")[-1] + "\n" + labels[0])
+            act.force_set("labels", [act["personality"]])
         else:
-            assert 'text' not in act and act['episode_done'] is True
-        act.force_set('episode_done', True)  # Clear the dialogue history
+            assert "text" not in act and act["episode_done"] is True
+        act.force_set("episode_done", True)  # Clear the dialogue history
         return act

@@ -22,22 +22,22 @@ class SpacyTokenizer(Tokenizer):
             annotators: set that can include pos, lemma, and ner.
             model: spaCy model to use (either path, or keyword like 'en').
         """
-        model = kwargs.get('model', 'en')
-        self.annotators = copy.deepcopy(kwargs.get('annotators', set()))
-        nlp_kwargs = {'parser': False}
-        if not {'lemma', 'pos', 'ner'} & self.annotators:
-            nlp_kwargs['tagger'] = False
-        if not {'ner'} & self.annotators:
-            nlp_kwargs['entity'] = False
+        model = kwargs.get("model", "en")
+        self.annotators = copy.deepcopy(kwargs.get("annotators", set()))
+        nlp_kwargs = {"parser": False}
+        if not {"lemma", "pos", "ner"} & self.annotators:
+            nlp_kwargs["tagger"] = False
+        if not {"ner"} & self.annotators:
+            nlp_kwargs["entity"] = False
         self.nlp = spacy.load(model, **nlp_kwargs)
 
     def tokenize(self, text):
         # We don't treat new lines as tokens.
-        clean_text = text.replace('\n', ' ')
+        clean_text = text.replace("\n", " ")
         tokens = self.nlp.tokenizer(clean_text)
-        if {'lemma', 'pos', 'ner'} & self.annotators:
+        if {"lemma", "pos", "ner"} & self.annotators:
             self.nlp.tagger(tokens)
-        if {'ner'} & self.annotators:
+        if {"ner"} & self.annotators:
             self.nlp.entity(tokens)
 
         data = []
@@ -61,4 +61,4 @@ class SpacyTokenizer(Tokenizer):
             )
 
         # Set special option for non-entity tag: '' vs 'O' in spaCy
-        return Tokens(data, self.annotators, opts={'non_ent': ''})
+        return Tokens(data, self.annotators, opts={"non_ent": ""})

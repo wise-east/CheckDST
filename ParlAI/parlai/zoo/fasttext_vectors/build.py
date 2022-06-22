@@ -10,12 +10,12 @@ Fastext vectors, e.g. use with filename "models:fasttext_vectors/wiki.en.vec".
 import os
 import torchtext.vocab as vocab
 
-URL = 'https://dl.fbaipublicfiles.com/fasttext/vectors-wiki/wiki.en.vec'
+URL = "https://dl.fbaipublicfiles.com/fasttext/vectors-wiki/wiki.en.vec"
 
 
 def download(datapath):
     return vocab.Vectors(
-        name='wiki.en.vec',
+        name="wiki.en.vec",
         url=URL,
-        cache=os.path.join(datapath, 'models', 'fasttext_vectors'),
+        cache=os.path.join(datapath, "models", "fasttext_vectors"),
     )

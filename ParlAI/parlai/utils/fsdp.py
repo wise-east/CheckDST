@@ -39,7 +39,7 @@ def should_use_fsdp(opt):
     return (
         FSDP_AVAILABLE
         and is_distributed()
-        and opt.get('ddp_backend', DEFAULT_DDP_BACKEND) in ('zero2', 'zero3')
+        and opt.get("ddp_backend", DEFAULT_DDP_BACKEND) in ("zero2", "zero3")
     )
 
 
@@ -54,20 +54,20 @@ def maybe_fsdp_wrap(opt):
         return
 
     # zero3 not supported at this time. Throw an exception
-    if opt['ddp_backend'] == 'zero3':
+    if opt["ddp_backend"] == "zero3":
         raise NotImplementedError(
-            '--ddp-backend zero3 is not supported at this time. For details, see '
-            'https://github.com/facebookresearch/ParlAI/issues/3753.'
+            "--ddp-backend zero3 is not supported at this time. For details, see "
+            "https://github.com/facebookresearch/ParlAI/issues/3753."
         )
 
-    reshard_after_forward = opt['ddp_backend'] == 'zero3'
-    compute_dtype = torch.float16 if opt['fp16'] else torch.float32
-    mixed_precision = opt['fp16'] and opt['fp16_impl'] == 'safe'
+    reshard_after_forward = opt["ddp_backend"] == "zero3"
+    compute_dtype = torch.float16 if opt["fp16"] else torch.float32
+    mixed_precision = opt["fp16"] and opt["fp16_impl"] == "safe"
     fsdp_args = dict(
         reshard_after_forward=reshard_after_forward,
         mixed_precision=mixed_precision,
         compute_dtype=compute_dtype,
-        state_dict_device=torch.device('cpu'),
+        state_dict_device=torch.device("cpu"),
         flatten_parameters=True,
         process_group=get_dist_group(),
     )
@@ -86,7 +86,7 @@ def delay_halving(opt):
     to call half() early.
     """
 
-    return opt['fp16'] and should_use_fsdp(opt) and opt['fp16_impl'] == 'safe'
+    return opt["fp16"] and should_use_fsdp(opt) and opt["fp16_impl"] == "safe"
 
 
 def should_sync_gradnorm(opt):
@@ -99,8 +99,8 @@ def should_sync_gradnorm(opt):
     """
     return (
         FSDP_AVAILABLE
-        and opt['fp16']
-        and opt.get('ddp_backend', DEFAULT_DDP_BACKEND) in ('zero2', 'zero3')
+        and opt["fp16"]
+        and opt.get("ddp_backend", DEFAULT_DDP_BACKEND) in ("zero2", "zero3")
     )
 
 

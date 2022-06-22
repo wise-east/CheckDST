@@ -13,21 +13,21 @@ import os
 
 def _path(opt):
     build(opt)
-    suffix = ''
-    dt = opt['datatype'].split(':')[0]
-    if dt == 'train':
-        suffix = 'train'
-    elif dt == 'test':
-        suffix = 'test'
-    elif dt == 'valid':
-        suffix = 'dev'
+    suffix = ""
+    dt = opt["datatype"].split(":")[0]
+    if dt == "train":
+        suffix = "train"
+    elif dt == "test":
+        suffix = "test"
+    elif dt == "valid":
+        suffix = "dev"
     return os.path.join(
-        opt['datapath'],
-        'WikiMovies',
-        'movieqa',
-        'questions',
-        'wiki_entities',
-        'wiki-entities_qa_{suffix}.txt'.format(suffix=suffix),
+        opt["datapath"],
+        "WikiMovies",
+        "movieqa",
+        "questions",
+        "wiki_entities",
+        "wiki-entities_qa_{suffix}.txt".format(suffix=suffix),
     )
 
 
@@ -35,21 +35,21 @@ def _path(opt):
 class KBTeacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
         build(opt)
-        task = opt.get('task')
+        task = opt.get("task")
         if not task:
-            task = 'wikimovies:KB:kb'
-        kb = task.split(':')
+            task = "wikimovies:KB:kb"
+        kb = task.split(":")
         if len(kb) == 3:
             kb = kb[2]
         elif len(kb) == 2:
             # default to 'kb' if 'kb', 'wiki', or 'ie' not specified
-            kb = 'kb'
+            kb = "kb"
         kbs = {}
-        kbs['kb'] = os.path.join('wiki_entities', 'wiki_entities_kb.txt')
-        kbs['wiki'] = 'wiki.txt'
-        kbs['ie'] = 'wiki_ie.txt'
-        opt['datafile'] = os.path.join(
-            opt['datapath'], 'WikiMovies', 'movieqa', 'knowledge_source', kbs[kb]
+        kbs["kb"] = os.path.join("wiki_entities", "wiki_entities_kb.txt")
+        kbs["wiki"] = "wiki.txt"
+        kbs["ie"] = "wiki_ie.txt"
+        opt["datafile"] = os.path.join(
+            opt["datapath"], "WikiMovies", "movieqa", "knowledge_source", kbs[kb]
         )
         super().__init__(opt, shared)
 
@@ -58,8 +58,8 @@ class DefaultTeacher(FbDeprecatedDialogTeacher):
     def __init__(self, opt, shared=None):
         build(opt)
         opt = copy.deepcopy(opt)
-        opt['datafile'] = _path(opt)
-        opt['cands_datafile'] = os.path.join(
-            opt['datapath'], 'WikiMovies', 'movieqa', 'knowledge_source', 'entities.txt'
+        opt["datafile"] = _path(opt)
+        opt["cands_datafile"] = os.path.join(
+            opt["datapath"], "WikiMovies", "movieqa", "knowledge_source", "entities.txt"
         )
         super().__init__(opt, shared)

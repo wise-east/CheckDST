@@ -27,7 +27,7 @@ class MTurkConfig:
         default=MISSING,
         metadata={
             "help": (
-                'Path(s) to a list of IDs of workers to soft-block, separated by newlines. Use commas to indicate multiple lists'
+                "Path(s) to a list of IDs of workers to soft-block, separated by newlines. Use commas to indicate multiple lists"
             )
         },
     )
@@ -68,19 +68,19 @@ def soft_block_mturk_workers(
     """
     Soft-block all MTurk workers listed in the input paths.
     """
-    if cfg.mephisto.provider.get('_provider_type', 'mock') == 'mturk':
-        if cfg.mturk.get('worker_blocklist_paths', None) is None:
+    if cfg.mephisto.provider.get("_provider_type", "mock") == "mturk":
+        if cfg.mturk.get("worker_blocklist_paths", None) is None:
             print(
-                'Skipping soft-blocking workers because no blocklist path(s) are given.'
+                "Skipping soft-blocking workers because no blocklist path(s) are given."
             )
         else:
-            blocklist_paths = cfg.mturk.worker_blocklist_paths.split(',')
+            blocklist_paths = cfg.mturk.worker_blocklist_paths.split(",")
             worker_blocklist = set()
             for path in blocklist_paths:
                 with open(path) as f:
-                    worker_blocklist |= set(f.read().strip().split('\n'))
+                    worker_blocklist |= set(f.read().strip().split("\n"))
             print(
-                f'About to soft-block {len(worker_blocklist):d} workers by '
+                f"About to soft-block {len(worker_blocklist):d} workers by "
                 f'giving them the qualification "{soft_block_qual_name}".'
             )
             direct_soft_block_mturk_workers(

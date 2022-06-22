@@ -21,8 +21,8 @@ from parlai.core.torch_agent import Batch
 from parlai.core.torch_image_agent import TorchImageAgent
 
 
-TOKEN_IMAGE = '__image__'
-TOKEN_NO_IMAGE = '__no_image__'
+TOKEN_IMAGE = "__image__"
+TOKEN_NO_IMAGE = "__no_image__"
 
 
 class ImageSeq2seqAgent(TransformerGeneratorAgent, TorchImageAgent):
@@ -37,9 +37,9 @@ class ImageSeq2seqAgent(TransformerGeneratorAgent, TorchImageAgent):
         Override to build appropriate model.
         """
         self.model = ImageSeq2seqModel(self.opt, self.dict)
-        if self.opt['embedding_type'] != 'random':
+        if self.opt["embedding_type"] != "random":
             self._copy_embeddings(
-                self.model.embeddings.weight, self.opt['embedding_type']
+                self.model.embeddings.weight, self.opt["embedding_type"]
             )
         return self.model
 
@@ -52,20 +52,20 @@ class ImageSeq2seqAgent(TransformerGeneratorAgent, TorchImageAgent):
         """
         TransformerGeneratorAgent.add_cmdline_args(parser, partial_opt=partial_opt)
         TorchImageAgent.add_cmdline_args(parser, partial_opt=partial_opt)
-        group = parser.add_argument_group('Image Encoder Args')
+        group = parser.add_argument_group("Image Encoder Args")
         group.add_argument(
-            '--include-image-token',
-            type='bool',
+            "--include-image-token",
+            type="bool",
             default=True,
             recommended=True,
-            help='if true, include image token (or no image token) for each example',
+            help="if true, include image token (or no image token) for each example",
         )
         group.add_argument(
-            '--image-fusion-type',
+            "--image-fusion-type",
             type=str,
-            default='late',
+            default="late",
             choices=[f.value for f in FusionType],
-            help='which fusion type to use',
+            help="which fusion type to use",
         )
         return group
 
@@ -74,7 +74,7 @@ class ImageSeq2seqAgent(TransformerGeneratorAgent, TorchImageAgent):
         Override to include image tokens.
         """
         self.dict = super().build_dictionary()
-        if self.opt.get('include_image_token') and TOKEN_IMAGE not in self.dict:
+        if self.opt.get("include_image_token") and TOKEN_IMAGE not in self.dict:
             self.dict[TOKEN_IMAGE] = 1
             self.dict[TOKEN_NO_IMAGE] = 1
 
@@ -85,19 +85,19 @@ class ImageSeq2seqAgent(TransformerGeneratorAgent, TorchImageAgent):
         Override to include image token.
         """
         obs = super()._set_text_vec(*args, **kwargs)
-        if 'text' not in obs or 'text_vec' not in obs:
+        if "text" not in obs or "text_vec" not in obs:
             return obs
-        if self.opt.get('include_image_token', False):
+        if self.opt.get("include_image_token", False):
             # `truncate` is the third arg to this function
             truncate = args[2] - 1 if args[2] is not None else None
             vec = torch.LongTensor(  # type: ignore
-                self._check_truncate(obs['text_vec'], truncate, True)
+                self._check_truncate(obs["text_vec"], truncate, True)
             )
             token = TOKEN_NO_IMAGE
-            if obs.get('image', None) is not None:
+            if obs.get("image", None) is not None:
                 token = TOKEN_IMAGE
             obs.force_set(
-                'text_vec',
+                "text_vec",
                 torch.cat([vec, vec.new_tensor(self.dict[token]).unsqueeze(0)], 0),
             )
         return obs
@@ -150,39 +150,39 @@ class ImageSeq2seqAgent(TransformerGeneratorAgent, TorchImageAgent):
             4. When using an init model without image tokens in the embeddings.
                 This is only the case if the embs differ by 2 in dimension 0
         """
-        state_dict['encoder.dummy_image_enc'] = self.model.encoder.dummy_image_enc
-        state_dict['encoder.ones_mask'] = self.model.encoder.ones_mask
+        state_dict["encoder.dummy_image_enc"] = self.model.encoder.dummy_image_enc
+        state_dict["encoder.ones_mask"] = self.model.encoder.ones_mask
         # Case 1 -> No Image Encoder
-        if 'encoder.image_encoder.0.weight' not in state_dict:
+        if "encoder.image_encoder.0.weight" not in state_dict:
             for k, v in self.model.encoder.image_encoder.state_dict().items():
-                state_dict[f'encoder.image_encoder.{k}'] = v
+                state_dict[f"encoder.image_encoder.{k}"] = v
 
         # case 2 -> Segment embeddings in new model
         if (
-            self.opt.get('n_segments', 0) >= 1
-            and 'encoder.segment_embeddings.weight' not in state_dict
+            self.opt.get("n_segments", 0) >= 1
+            and "encoder.segment_embeddings.weight" not in state_dict
         ):
             state_dict[
-                'encoder.segment_embeddings.weight'
+                "encoder.segment_embeddings.weight"
             ] = self.model.encoder.segment_embeddings.weight
 
         # Case 3 -> Only an Encoder provided
-        if not (any('decoder' in state_key for state_key in state_dict)):
+        if not (any("decoder" in state_key for state_key in state_dict)):
             for k, v in self.model.decoder.state_dict().items():
-                state_dict[f'decoder.{k}'] = v
-            state_dict['decoder.embeddings.weight'] = state_dict['embeddings.weight']
-            if 'START' not in state_dict:
-                state_dict['START'] = self.model.START
+                state_dict[f"decoder.{k}"] = v
+            state_dict["decoder.embeddings.weight"] = state_dict["embeddings.weight"]
+            if "START" not in state_dict:
+                state_dict["START"] = self.model.START
 
-        if self.opt['init_model'] is not None:
+        if self.opt["init_model"] is not None:
             try:
                 self.model.load_state_dict(state_dict)
                 return
             except RuntimeError as e:
                 # Case 4 --> Check for Embedding Diffs. Make sure dims match up
-                embs = state_dict['embeddings.weight']
-                enc_embs = state_dict['encoder.embeddings.weight']
-                dec_embs = state_dict['decoder.embeddings.weight']
+                embs = state_dict["embeddings.weight"]
+                enc_embs = state_dict["encoder.embeddings.weight"]
+                dec_embs = state_dict["decoder.embeddings.weight"]
                 init_embs = self.model.embeddings.weight
                 if (
                     embs.shape[0] + 2 != init_embs.shape[0]
@@ -192,19 +192,19 @@ class ImageSeq2seqAgent(TransformerGeneratorAgent, TorchImageAgent):
 
                 state_dict.update(
                     {
-                        'embeddings.weight': torch.cat(
+                        "embeddings.weight": torch.cat(
                             (
                                 embs.to(init_embs.device, dtype=init_embs.dtype),
                                 init_embs[-2:, :],
                             )
                         ),
-                        'encoder.embeddings.weight': torch.cat(
+                        "encoder.embeddings.weight": torch.cat(
                             (
                                 enc_embs.to(init_embs.device, dtype=init_embs.dtype),
                                 init_embs[-2:, :],
                             )
                         ),
-                        'decoder.embeddings.weight': torch.cat(
+                        "decoder.embeddings.weight": torch.cat(
                             (
                                 dec_embs.to(init_embs.device, dtype=init_embs.dtype),
                                 init_embs[-2:, :],
@@ -214,7 +214,7 @@ class ImageSeq2seqAgent(TransformerGeneratorAgent, TorchImageAgent):
                 )
                 pct_init = round(embs.shape[0] / len(self.dict) * 100, 1)
                 print(
-                    f'Initialized embeddings for {embs.shape[0]} tokens ({pct_init}%)'
+                    f"Initialized embeddings for {embs.shape[0]} tokens ({pct_init}%)"
                 )
 
         self.model.load_state_dict(state_dict)

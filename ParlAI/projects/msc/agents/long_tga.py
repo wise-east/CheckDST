@@ -34,12 +34,12 @@ class TransformerVariantAgent(TransformerGeneratorAgent):
             parser, partial_opt=partial_opt
         )  # add transformer args
         parser.add_argument(
-            '--n-positions-init',
+            "--n-positions-init",
             type=int,
             default=None,
             hidden=True,
-            help='Number of positional embeddings from the init model. Defaults '
-            'to truncate or 1024 if not provided.',
+            help="Number of positional embeddings from the init model. Defaults "
+            "to truncate or 1024 if not provided.",
         )
         return parser
 

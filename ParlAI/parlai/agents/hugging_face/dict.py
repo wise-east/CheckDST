@@ -39,23 +39,23 @@ class HuggingFaceDictionaryAgent(DictionaryAgent, ABC):
             self.tok2ind = self.hf_tokenizer.get_vocab()
             self.ind2tok = {v: k for k, v in self.tok2ind.items()}
         else:
-            self.hf_tokenizer = shared['hf_tokenizer']
-            self.tok2ind = shared['tok2ind']
-            self.ind2tok = shared['ind2tok']
+            self.hf_tokenizer = shared["hf_tokenizer"]
+            self.tok2ind = shared["tok2ind"]
+            self.ind2tok = shared["ind2tok"]
 
         self.freq = defaultdict(int)
         for tok in self.tok2ind:
             self.freq[tok] = 1
-        self.minfreq = opt.get('dict_minfreq', DictionaryAgent.default_minfreq)
+        self.minfreq = opt.get("dict_minfreq", DictionaryAgent.default_minfreq)
 
         self._unk_token_idx = self.hf_tokenizer.unk_token_id
         self.override_special_tokens(opt)
 
-        self.lower = opt.get('dict_lower', DictionaryAgent.default_lower)
-        self.tokenizer = 'hf'
+        self.lower = opt.get("dict_lower", DictionaryAgent.default_lower)
+        self.tokenizer = "hf"
         self.opt = opt
         self.max_length = (
-            self.opt.get('text_truncate') or self.hf_tokenizer.model_max_length
+            self.opt.get("text_truncate") or self.hf_tokenizer.model_max_length
         )
 
     @abstractmethod
@@ -86,9 +86,9 @@ class HuggingFaceDictionaryAgent(DictionaryAgent, ABC):
 
     def share(self):
         shared = super().share()
-        shared['hf_tokenizer'] = self.hf_tokenizer
-        shared['ind2tok'] = self.ind2tok
-        shared['tok2ind'] = self.tok2ind
+        shared["hf_tokenizer"] = self.hf_tokenizer
+        shared["ind2tok"] = self.ind2tok
+        shared["tok2ind"] = self.tok2ind
         return shared
 
     def format_text(self, text: str) -> str:
@@ -103,7 +103,7 @@ class HuggingFaceDictionaryAgent(DictionaryAgent, ABC):
             add_special_tokens=self.add_special_tokens,
             max_length=self.max_length,
             pad_to_max_length=False,
-            truncation='longest_first',
+            truncation="longest_first",
         )
 
     def vec2txt(self, vec, **kwargs):
@@ -165,7 +165,7 @@ class Gpt2DictionaryAgent(HuggingFaceDictionaryAgent):
         """
         self.additional_special_tokens = additional_special_tokens
         self.hf_tokenizer.add_special_tokens(
-            {'additional_special_tokens': additional_special_tokens}
+            {"additional_special_tokens": additional_special_tokens}
         )
         for tok in self.additional_special_tokens:
             self.add_token(tok)
@@ -212,7 +212,7 @@ class DialoGPTDictionaryAgent(Gpt2DictionaryAgent):
 
 class T5DictionaryAgent(HuggingFaceDictionaryAgent):
     def get_tokenizer(self, opt):
-        return T5TokenizerFast.from_pretrained(opt['t5_model_arch'], truncation=True)
+        return T5TokenizerFast.from_pretrained(opt["t5_model_arch"], truncation=True)
 
     @property
     def add_special_tokens(self) -> bool:

@@ -15,7 +15,7 @@ def opt_to_kwargs(opt):
     Get kwargs for seq2seq from opt.
     """
     kwargs = {}
-    for k in ['memsize', 'time_features', 'position_encoding', 'hops']:
+    for k in ["memsize", "time_features", "position_encoding", "hops"]:
         if k in opt:
             kwargs[k] = opt[k]
     return kwargs
@@ -116,7 +116,7 @@ class Embed(nn.Embedding):
     Applies Position Encoding if enabled and currently applies BOW sum.
     """
 
-    def __init__(self, *args, position_encoding=False, reduction='mean', **kwargs):
+    def __init__(self, *args, position_encoding=False, reduction="mean", **kwargs):
         """
         Initialize custom Embedding layer.
 
@@ -132,9 +132,9 @@ class Embed(nn.Embedding):
 
     def _reduce(self, embs, input):
         # last dimension is embedding, do operation over dim before that
-        if self.reduction == 'sum':
+        if self.reduction == "sum":
             return embs.sum(-2)
-        elif self.reduction == 'mean':
+        elif self.reduction == "mean":
             # this is more fair than mean(-2) since mean includes null tokens
             sum = embs.sum(-2)
             lens = (
@@ -143,7 +143,7 @@ class Embed(nn.Embedding):
             return sum / lens
         else:
             raise RuntimeError(
-                'reduction method {} not supported'.format(self.reduction)
+                "reduction method {} not supported".format(self.reduction)
             )
 
     def forward(self, input):

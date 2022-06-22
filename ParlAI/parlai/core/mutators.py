@@ -25,15 +25,15 @@ def setup_mutator_registry():
     Loads the mutators so that @register_mutator is hit for all.
     """
     global MUTATOR_REGISTRY
-    if hasattr(setup_mutator_registry, 'loaded'):
+    if hasattr(setup_mutator_registry, "loaded"):
         return
-    for module in pkgutil.iter_modules(parlai.mutators.__path__, 'parlai.mutators.'):
+    for module in pkgutil.iter_modules(parlai.mutators.__path__, "parlai.mutators."):
         importlib.import_module(module.name)
     try:
         import parlai_fb.mutators
 
         for module in pkgutil.iter_modules(
-            parlai_fb.mutators.__path__, 'parlai_fb.mutators.'
+            parlai_fb.mutators.__path__, "parlai_fb.mutators."
         ):
             importlib.import_module(module.name)
     except ImportError:
@@ -42,7 +42,7 @@ def setup_mutator_registry():
         import parlai_internal.mutators
 
         for module in pkgutil.iter_modules(
-            parlai_internal.mutators.__path__, 'parlai_internal.mutators.'
+            parlai_internal.mutators.__path__, "parlai_internal.mutators."
         ):
             importlib.import_module(module.name)
     except ImportError:
@@ -92,7 +92,7 @@ class Mutator(abc.ABC):
         if not mutator_names:
             return []
         assert isinstance(mutator_names, str)
-        names = mutator_names.replace('+', ',').split(',')
+        names = mutator_names.replace("+", ",").split(",")
         mutators = [MUTATOR_REGISTRY[name] for name in names]
         return mutators
 
@@ -107,7 +107,7 @@ class Mutator(abc.ABC):
 
     def _pop_episode_done(self, message: Message) -> Tuple[Message, bool]:
         try:
-            episode_done = message.pop('episode_done')
+            episode_done = message.pop("episode_done")
         except KeyError:
             episode_done = False
         return message, episode_done
@@ -134,7 +134,7 @@ class Mutator(abc.ABC):
 
     def _add_episode_done(self, episode: List[Message]) -> List[Message]:
         for i, message in enumerate(episode):
-            message['episode_done'] = i == len(episode) - 1
+            message["episode_done"] = i == len(episode) - 1
         return episode
 
     @abc.abstractmethod
@@ -183,9 +183,9 @@ class MessageMutator(Mutator):
                 continue
             message, episode_done = self._pop_episode_done(message)
             message = self.message_mutation(message)
-            if 'episode_done' in message:
-                raise ValueError('MessageMutators should not modify episode_done.')
-            message['episode_done'] = episode_done
+            if "episode_done" in message:
+                raise ValueError("MessageMutators should not modify episode_done.")
+            message["episode_done"] = episode_done
             yield message
 
 

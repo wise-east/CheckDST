@@ -25,52 +25,52 @@ class ModelImageChatWorld(BaseModelChatWorld):
     def __init__(self, opt, agent, bot, image_idx: int, image_act: Message):
         super().__init__(opt, agent=agent, bot=bot)
 
-        self.image_stack = opt['image_stack']
+        self.image_stack = opt["image_stack"]
         self.image_idx = image_idx
         self.image_act = image_act
 
         # Get a stringified version of the image to show the user
-        orig_image = self.image_act['image']
+        orig_image = self.image_act["image"]
         self.image_src = get_image_src(image=orig_image)
 
         # Get a featurized version of the image to show the bot
-        with NamedTemporaryFile(suffix='.jpg') as f:
+        with NamedTemporaryFile(suffix=".jpg") as f:
             orig_image.save(f)
             image_loader = ImageLoader(self.bot.model_agent.opt)
-            self.image_act.force_set('image', image_loader.load(f.name))
+            self.image_act.force_set("image", image_loader.load(f.name))
 
     def _run_initial_turn(self) -> None:
         """
         Show the image to the human and bot, and show the bot's response to the human.
         """
 
-        system_id = 'SYSTEM'
+        system_id = "SYSTEM"
         system_agent_idx = None
 
         # Show the image to the human
         image_act_for_human = {
-            'episode_done': False,
-            'id': system_id,
-            'text': f"""Welcome! You'll now have a conversation with your partner.
+            "episode_done": False,
+            "id": system_id,
+            "text": f"""Welcome! You'll now have a conversation with your partner.
 
 <-- FIRST, YOUR PARTNER WILL SAY SOMETHING ABOUT THIS IMAGE TO YOUR LEFT.
 
 Be sure to talk about this image a little bit before discussing other things!
 """,
-            'task_data': {'image_src': self.image_src},
-            'agent_idx': system_agent_idx,
+            "task_data": {"image_src": self.image_src},
+            "agent_idx": system_agent_idx,
         }
         self.agent.observe(validate(image_act_for_human))
 
         # Show the image to the bot
         image_act = {
             **self.image_act,
-            'episode_done': False,
-            'id': system_id,
-            'agent_idx': system_agent_idx,
+            "episode_done": False,
+            "id": system_id,
+            "agent_idx": system_agent_idx,
         }
         self.bot.observe(validate(image_act))
-        del image_act['image']
+        del image_act["image"]
         # Don't save the image features to disk
 
         # Have the bot respond
@@ -80,10 +80,10 @@ Be sure to talk about this image a little bit before discussing other things!
         ).json_safe_payload()
         self.agent.observe(validate(bot_first_act_raw))
         bot_first_act = {
-            'episode_done': False,
-            'id': bot_first_act_raw['id'],
-            'text': bot_first_act_raw['text'],
-            'agent_idx': 1,
+            "episode_done": False,
+            "id": bot_first_act_raw["id"],
+            "text": bot_first_act_raw["text"],
+            "agent_idx": 1,
         }
 
         # Record lines of dialogue
@@ -98,7 +98,7 @@ Be sure to talk about this image a little bit before discussing other things!
             # Add the image to every human act, seen by the bot. Also adds in any other
             # image-related fields needed by the model
             for key, value in self.image_act.items():
-                if key not in ['episode_done', 'id', 'text', 'agent_idx']:
+                if key not in ["episode_done", "id", "text", "agent_idx"]:
                     acts[agent_idx][key] = value
 
     def get_final_chat_data(self) -> Dict[str, Any]:
@@ -106,7 +106,7 @@ Be sure to talk about this image a little bit before discussing other things!
         Add image-specific fields to the final chat data.
         """
         data = super().get_final_chat_data()
-        data['image_idx'] = self.image_idx
+        data["image_idx"] = self.image_idx
         return data
 
     def _prepare_acceptability_checking(self) -> Tuple[List[str], List[str]]:
@@ -117,7 +117,7 @@ Be sure to talk about this image a little bit before discussing other things!
         first message with "Hi", etc.
         """
         human_messages, violation_types = super()._prepare_acceptability_checking()
-        violation_types.append('penalize_greetings')
+        violation_types.append("penalize_greetings")
         return human_messages, violation_types
 
     def shutdown(self):
@@ -138,14 +138,14 @@ def make_world(opt, agents):
 
     # We are showing an image to the worker and bot, so grab the image path and other
     # context info
-    image_idx, model_name, no_more_work = opt['image_stack'].get_next_image(
+    image_idx, model_name, no_more_work = opt["image_stack"].get_next_image(
         agents[0].mephisto_agent.get_worker().db_id
     )
-    full_image_context = opt['image_contexts'][image_idx]
+    full_image_context = opt["image_contexts"][image_idx]
     if no_more_work:
         # There are no more HITs for this worker to do, so give them a qualification
         agents[0].mephisto_agent.get_worker().grant_qualification(
-            qualification_name=opt['block_qualification'], value=1
+            qualification_name=opt["block_qualification"], value=1
         )
 
     # Get a bot agent
@@ -156,7 +156,7 @@ def make_world(opt, agents):
         agent=agents[0],
         bot=bot_worker,
         image_idx=image_idx,
-        image_act=full_image_context['image_act'],
+        image_act=full_image_context["image_act"],
     )
 
 

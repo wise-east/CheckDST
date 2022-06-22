@@ -40,18 +40,18 @@ try:
 
                 # Params
                 opt = {
-                    'evals_per_image_model_combo': 2,
-                    'models': ['model_1', 'model_2'],
-                    'num_images': 3,
-                    'stack_folder': tmpdir,
+                    "evals_per_image_model_combo": 2,
+                    "models": ["model_1", "model_2"],
+                    "num_images": 3,
+                    "stack_folder": tmpdir,
                 }
                 num_stack_slots = (
-                    opt['evals_per_image_model_combo']
-                    * len(opt['models'])
-                    * opt['num_images']
+                    opt["evals_per_image_model_combo"]
+                    * len(opt["models"])
+                    * opt["num_images"]
                 )
                 num_workers = 5
-                worker_id_to_remove = '2'
+                worker_id_to_remove = "2"
                 stack_idx_to_remove_worker_from = 0
 
                 # Create the stack
@@ -61,17 +61,16 @@ try:
                     for _ in range(num_stack_slots):
                         worker_id = random.randrange(num_workers)
                         _ = stack.get_next_image(str(worker_id))
-                        print('STACK: ', stack.stack)
+                        print("STACK: ", stack.stack)
                     stack.remove_worker_from_stack(
                         worker=worker_id_to_remove,
                         stack_idx=stack_idx_to_remove_worker_from,
                     )
-                    print('STACK: ', stack.stack)
+                    print("STACK: ", stack.stack)
                     stdout = output.getvalue()
 
                 # Check the output against what it should be
                 file_regression.check(contents=stdout)
-
 
 except ImportError:
     pass

@@ -27,7 +27,7 @@ from parlai.utils.logging import logger
 from parlai.utils.typing import TShared
 
 
-SILENCE = '__SILENCE__'
+SILENCE = "__SILENCE__"
 
 
 class SplitType(Enum):
@@ -39,7 +39,7 @@ class SplitType(Enum):
 
 def _datapath(opt: Opt) -> str:
     build(opt)
-    return os.path.join(opt['datapath'], 'cmu_dog')
+    return os.path.join(opt["datapath"], "cmu_dog")
 
 
 def _datafile(split: str, split_type: SplitType) -> str:
@@ -49,7 +49,7 @@ def _datafile(split: str, split_type: SplitType) -> str:
     if split_type == SplitType.ORIGINAL:
         return f"{split}.json"
     if split_type == SplitType.SEEN:
-        if 'test' in split:
+        if "test" in split:
             return "test_seen_split_seen_unseen.json"
         return f"{split}_split_seen_unseen.json"
     if split_type == SplitType.UNSEEN:
@@ -69,11 +69,11 @@ def _all_split_datafiles(opt: Opt) -> List[str]:
     if split_type in {SplitType.SEEN, SplitType.UNSEEN}:
         # For seen/unseen split, the full set of dialogs is split
         # across train, valid, test seen, and test unseen
-        for split in ['train', 'valid', 'test']:
+        for split in ["train", "valid", "test"]:
             datafiles.append(_datafile(split, SplitType.SEEN))
-        datafiles.append(_datafile('test', SplitType.UNSEEN))
+        datafiles.append(_datafile("test", SplitType.UNSEEN))
     else:
-        for split in ['train', 'valid', 'test']:
+        for split in ["train", "valid", "test"]:
             datafiles.append(_datafile(split, split_type))
     return datafiles
 
@@ -136,7 +136,7 @@ def _build_rare_word_f1(opt: Opt) -> RareWordF1Calculator:
         convo_texts = []
         for conv in convo_data.values():
             # get all messages
-            convo_texts.append(' '.join([m['text'] for m in conv['history']]))
+            convo_texts.append(" ".join([m["text"] for m in conv["history"]]))
         return convo_texts
 
     # use conversation data from all splits for consistency
@@ -148,7 +148,7 @@ def _build_rare_word_f1(opt: Opt) -> RareWordF1Calculator:
             data = json.load(f)
         convos += _collect_convo_text(data)
 
-    return RareWordF1Calculator(' '.join(convos), top_p=0.5)
+    return RareWordF1Calculator(" ".join(convos), top_p=0.5)
 
 
 class CMUDocumentGroundedConversationsTeacher(DialogTeacher):
@@ -161,7 +161,7 @@ class CMUDocumentGroundedConversationsTeacher(DialogTeacher):
 
     def __init__(self, opt: Opt, shared: TShared = None):
         opt = copy.deepcopy(opt)
-        self.delimiter = opt.get('delimiter', '\n')
+        self.delimiter = opt.get("delimiter", "\n")
         split_type = SplitType(opt.get("cmu_dog_split_type"))
         if split_type == SplitType.ORIGINAL:
             logger.warning(
@@ -169,12 +169,12 @@ class CMUDocumentGroundedConversationsTeacher(DialogTeacher):
                 "valid, and test. See https://github.com/festvox/datasets-CMU_DoG/issues/2 "
                 "for more detail."
             )
-        opt['datafile'] = _datafile(
-            split=DatatypeHelper.fold(opt['datatype']), split_type=split_type
+        opt["datafile"] = _datafile(
+            split=DatatypeHelper.fold(opt["datatype"]), split_type=split_type
         )
         super().__init__(opt, shared)
         if shared:
-            self.rare_word_f1 = shared['rare_word_f1']
+            self.rare_word_f1 = shared["rare_word_f1"]
         else:
             self.rare_word_f1 = _build_rare_word_f1(opt)
 
@@ -190,8 +190,8 @@ class CMUDocumentGroundedConversationsTeacher(DialogTeacher):
             default=[1, 2, 3],
             choices=[1, 2, 3],
             nargs="+",
-            help='The higher the number, the better quality the conversation. '
-            'For each rating, the number of conversations is as follows: 1-1443, 2-2142, 3-527',
+            help="The higher the number, the better quality the conversation. "
+            "For each rating, the number of conversations is as follows: 1-1443, 2-2142, 3-527",
         )
         cmu_dog.add_argument(
             "--cmu-dog-only-with-knowledge",
@@ -214,7 +214,7 @@ class CMUDocumentGroundedConversationsTeacher(DialogTeacher):
         cmu_dog.add_argument(
             "--cmu-dog-include-knowledge-keys",
             type=str,
-            default='cast,critical_response,director,genre,introduction,movieName,rating,year',
+            default="cast,critical_response,director,genre,introduction,movieName,rating,year",
             help="Comma-separated list of keys into the knowledge to include as the general conversational context",
         )
         cmu_dog.add_argument(
@@ -240,7 +240,7 @@ class CMUDocumentGroundedConversationsTeacher(DialogTeacher):
 
     def share(self):
         shared = super().share()
-        shared['rare_word_f1'] = self.rare_word_f1
+        shared["rare_word_f1"] = self.rare_word_f1
         return shared
 
     def setup_data(self, datafile: str):
@@ -269,7 +269,7 @@ class CMUDocumentGroundedConversationsTeacher(DialogTeacher):
             _conv_id, conv_data = data[conv_idx]
 
             dialog = _collapse_multi_msgs(
-                conv_data["history"], self.opt['cmu_dog_multi_msg_delimiter']
+                conv_data["history"], self.opt["cmu_dog_multi_msg_delimiter"]
             )
             movie_article = wiki_data[str(conv_data["wikiDocumentIdx"])]
 
@@ -286,7 +286,7 @@ class CMUDocumentGroundedConversationsTeacher(DialogTeacher):
                 # The section displayed changes across the conversation
                 doc_idx = str(label_turn["docIdx"])
                 gold_knowledge = _article_section_to_text(
-                    movie_article[doc_idx], self.opt['cmu_dog_fact_delimiter']
+                    movie_article[doc_idx], self.opt["cmu_dog_fact_delimiter"]
                 )
                 section = (
                     movie_article[doc_idx]
@@ -295,15 +295,15 @@ class CMUDocumentGroundedConversationsTeacher(DialogTeacher):
                 )
                 section_text = _article_section_to_text(
                     section,
-                    self.opt['cmu_dog_fact_delimiter'],
-                    self.opt.get('cmu_dog_include_knowledge_keys').split(','),
+                    self.opt["cmu_dog_fact_delimiter"],
+                    self.opt.get("cmu_dog_include_knowledge_keys").split(","),
                 )
 
                 # By default, start conversation with silence
                 if idx == start_idx:
                     context = (
                         section_text
-                        if self.opt['cmu_dog_provide_movie_context']
+                        if self.opt["cmu_dog_provide_movie_context"]
                         else SILENCE
                     )
                 else:
@@ -311,12 +311,12 @@ class CMUDocumentGroundedConversationsTeacher(DialogTeacher):
 
                 yield Message(
                     {
-                        'text': context,
-                        'labels': [label],
-                        'available_knowledge_raw': section,
-                        'available_knowledge_text': section_text,
-                        'title': movie_article['0']['movieName'],
-                        'checked_sentence': gold_knowledge,
+                        "text": context,
+                        "labels": [label],
+                        "available_knowledge_raw": section,
+                        "available_knowledge_text": section_text,
+                        "title": movie_article["0"]["movieName"],
+                        "checked_sentence": gold_knowledge,
                     }
                 ), idx == start_idx
 
@@ -326,30 +326,30 @@ class CMUDocumentGroundedConversationsTeacher(DialogTeacher):
         labels: Optional[Tuple[str]],
         model_response: Message,
     ):
-        if 'text' in model_response and 'checked_sentence' in teacher_action:
+        if "text" in model_response and "checked_sentence" in teacher_action:
             self.metrics.add(
-                'knowledge_f1',
+                "knowledge_f1",
                 F1Metric.compute(
-                    model_response['text'], [teacher_action['checked_sentence']]
+                    model_response["text"], [teacher_action["checked_sentence"]]
                 ),
             )
-        if 'text' in model_response and labels:
+        if "text" in model_response and labels:
             self.metrics.add(
-                'rare_word_f1',
-                self.rare_word_f1.compute(model_response['text'], labels),
+                "rare_word_f1",
+                self.rare_word_f1.compute(model_response["text"], labels),
             )
 
 
 @register_mutator("prepend_knowledge_to_message")
 class PrependKnowledgeToMessageMutator(MessageMutator):
     def message_mutation(self, message: Message) -> Message:
-        if not message.get('available_knowledge_text'):
+        if not message.get("available_knowledge_text"):
             return message
-        context = message.pop('text')
+        context = message.pop("text")
         knowledge = f'{TOKEN_KNOWLEDGE} {message["available_knowledge_text"]} {TOKEN_END_KNOWLEDGE}'
-        delimiter = self.opt.get('delimiter', '\n')
-        message['text'] = (
-            knowledge if context == SILENCE else f'{knowledge}{delimiter}{context}'
+        delimiter = self.opt.get("delimiter", "\n")
+        message["text"] = (
+            knowledge if context == SILENCE else f"{knowledge}{delimiter}{context}"
         )
         return message
 
@@ -359,9 +359,9 @@ class KnowledgeWhenUpdatedMutator(EpisodeMutator):
     def episode_mutation(self, episode: List[Message]) -> List[Message]:
         last_knowledge = None
         for msg in episode:
-            knowledge = msg.pop('available_knowledge_text')
+            knowledge = msg.pop("available_knowledge_text")
             if last_knowledge != knowledge:
-                msg['available_knowledge_text'] = knowledge
+                msg["available_knowledge_text"] = knowledge
             last_knowledge = knowledge
         return episode
 

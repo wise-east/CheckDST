@@ -33,13 +33,13 @@ def setup_script_registry():
     """
     Loads the scripts so that @register_script is hit for all.
     """
-    for module in pkgutil.iter_modules(parlai.scripts.__path__, 'parlai.scripts.'):
+    for module in pkgutil.iter_modules(parlai.scripts.__path__, "parlai.scripts."):
         importlib.import_module(module.name)
     try:
         import parlai_fb.scripts
 
         for module in pkgutil.iter_modules(
-            parlai_fb.scripts.__path__, 'parlai_fb.scripts.'
+            parlai_fb.scripts.__path__, "parlai_fb.scripts."
         ):
             importlib.import_module(module.name)
     except ImportError:
@@ -48,7 +48,7 @@ def setup_script_registry():
         import parlai_internal.scripts
 
         for module in pkgutil.iter_modules(
-            parlai_internal.scripts.__path__, 'parlai_internal.scripts.'
+            parlai_internal.scripts.__path__, "parlai_internal.scripts."
         ):
             importlib.import_module(module.name)
     except ImportError:
@@ -102,7 +102,7 @@ class ParlaiScript(object):
 
     @classmethod
     def _run_from_parser_and_opt(cls, opt: Opt, parser: ParlaiParser):
-        logging.set_log_level(opt.get('loglevel', 'info').upper())
+        logging.set_log_level(opt.get("loglevel", "info").upper())
         script = cls(opt)
         script.parser = parser
         return script.run()
@@ -152,15 +152,15 @@ class _SupercommandParser(ParlaiParser):
         from parlai.utils.strings import colorize
 
         logo = ""
-        logo += colorize('       _', 'red') + "\n"
-        logo += colorize('      /', 'red') + colorize('"', 'brightblack')
+        logo += colorize("       _", "red") + "\n"
+        logo += colorize("      /", "red") + colorize('"', "brightblack")
         logo += colorize(")", "yellow") + "\n"
-        logo += colorize('     //', 'red') + colorize(')', 'yellow') + '\n'
-        logo += colorize('  ==', 'green')
-        logo += colorize("/", 'blue') + colorize('/', 'red') + colorize("'", 'yellow')
-        logo += colorize("===", 'green') + " ParlAI\n"
-        logo += colorize("   /", 'blue')
-        kwargs['description'] = logo
+        logo += colorize("     //", "red") + colorize(")", "yellow") + "\n"
+        logo += colorize("  ==", "green")
+        logo += colorize("/", "blue") + colorize("/", "red") + colorize("'", "yellow")
+        logo += colorize("===", "green") + " ParlAI\n"
+        logo += colorize("   /", "blue")
+        kwargs["description"] = logo
         return super().__init__(*args, **kwargs)
 
     def add_extra_args(self, args):
@@ -179,7 +179,7 @@ class _SupercommandParser(ParlaiParser):
 
     def parse_known_args(self, args=None, namespace=None, nohelp=False):
         known, unused = super().parse_known_args(args, namespace, nohelp)
-        if hasattr(known, '_subparser'):
+        if hasattr(known, "_subparser"):
             # keep this around to keep the print message more in tune
             self._help_subparser = known._subparser
         return known, unused
@@ -222,9 +222,9 @@ class _SubcommandParser(ParlaiParser):
     """
 
     def __init__(self, **kwargs):
-        kwargs['add_parlai_args'] = False
-        kwargs['add_model_args'] = False
-        assert 'description' in kwargs, 'Must supply description'
+        kwargs["add_parlai_args"] = False
+        kwargs["add_model_args"] = False
+        assert "description" in kwargs, "Must supply description"
         return super().__init__(**kwargs)
 
     def parse_known_args(self, args=None, namespace=None, nohelp=False):
@@ -234,8 +234,8 @@ class _SubcommandParser(ParlaiParser):
 
 
 def _SuperscriptHelpFormatter(**kwargs):
-    kwargs['width'] = 100
-    kwargs['max_help_position'] = 9999
+    kwargs["width"] = 100
+    kwargs["max_help_position"] = 9999
 
     return CustomHelpFormatter(**kwargs)
 
@@ -250,33 +250,33 @@ def superscript_main(args=None):
         False, False, formatter_class=_SuperscriptHelpFormatter
     )
     parser.add_argument(
-        '--helpall',
-        action='helpall',
-        help='List all commands, including advanced ones.',
+        "--helpall",
+        action="helpall",
+        help="List all commands, including advanced ones.",
     )
     parser.add_argument(
-        '--version',
-        action='version',
+        "--version",
+        action="version",
         version=get_version_string(),
-        help='Prints version info and exit.',
+        help="Prints version info and exit.",
     )
     parser.set_defaults(super_command=None)
     subparsers = parser.add_subparsers(
         parser_class=_SubcommandParser, title="Commands", metavar="COMMAND"
     )
     hparser = subparsers.add_parser(
-        'help',
-        aliases=['h'],
+        "help",
+        aliases=["h"],
         help=argparse.SUPPRESS,
-        description='List the main commands.',
+        description="List the main commands.",
     )
-    hparser.set_defaults(super_command='help')
+    hparser.set_defaults(super_command="help")
     hparser = subparsers.add_parser(
-        'helpall',
+        "helpall",
         help=argparse.SUPPRESS,
-        description='List all commands, including advanced ones.',
+        description="List all commands, including advanced ones.",
     )
-    hparser.set_defaults(super_command='helpall')
+    hparser.set_defaults(super_command="helpall")
 
     # build the supercommand
     for script_name, registration in SCRIPT_REGISTRY.items():
@@ -314,12 +314,12 @@ def superscript_main(args=None):
         pass
 
     opt = parser.parse_args(args)
-    cmd = opt.pop('super_command')
-    if cmd == 'helpall':
+    cmd = opt.pop("super_command")
+    if cmd == "helpall":
         parser.print_helpall()
-    elif cmd == 'versioninfo':
+    elif cmd == "versioninfo":
         exit(0)
-    elif cmd == 'help' or cmd is None:
+    elif cmd == "help" or cmd is None:
         parser.print_help()
     elif cmd is not None:
         return SCRIPT_REGISTRY[cmd].klass._run_from_parser_and_opt(opt, parser)

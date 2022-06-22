@@ -27,20 +27,20 @@ import os
 
 def _path(opt):
     build(opt)
-    dt = opt['datatype'].split(':')[0]
-    if dt in ['train', 'valid', 'test']:
+    dt = opt["datatype"].split(":")[0]
+    if dt in ["train", "valid", "test"]:
         data_path = os.path.join(
-            opt['datapath'], 'personality_captions/{}.json'.format(dt)
+            opt["datapath"], "personality_captions/{}.json".format(dt)
         )
 
     personalities_data_path = os.path.join(
-        opt['datapath'], 'personality_captions/personalities.json'
+        opt["datapath"], "personality_captions/personalities.json"
     )
-    image_path = ''
-    if opt.get('yfcc_path'):
-        image_path = opt['yfcc_path']
+    image_path = ""
+    if opt.get("yfcc_path"):
+        image_path = opt["yfcc_path"]
     else:
-        image_path = os.path.join(opt['datapath'], 'yfcc_images')
+        image_path = os.path.join(opt["datapath"], "yfcc_images")
 
     return data_path, personalities_data_path, image_path
 
@@ -56,15 +56,15 @@ class PersonalityCaptionsTeacher(FixedDialogTeacher):
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
         self.opt = opt
-        self.image_mode = opt.get('image_mode', 'no_image_model')
+        self.image_mode = opt.get("image_mode", "no_image_model")
         self.data_path, personalities_data_path, self.image_path = _path(opt)
-        self.datatype = opt.get('datatype').split(':')[0]
-        self.include_personality = opt.get('include_personality')
-        self.include_image = opt.get('include_image')
-        self.num_test_labels = opt.get('num_test_labels')
-        if shared and 'data' in shared:
-            self.data = shared['data']
-            self.image_loader = shared['image_loader']
+        self.datatype = opt.get("datatype").split(":")[0]
+        self.include_personality = opt.get("include_personality")
+        self.include_image = opt.get("include_image")
+        self.num_test_labels = opt.get("num_test_labels")
+        if shared and "data" in shared:
+            self.data = shared["data"]
+            self.image_loader = shared["image_loader"]
         else:
             self.image_loader = ImageLoader(opt)
             self._setup_data(self.data_path, personalities_data_path)
@@ -78,40 +78,40 @@ class PersonalityCaptionsTeacher(FixedDialogTeacher):
         Add command line args.
         """
         super().add_cmdline_args(parser, partial_opt)
-        agent = parser.add_argument_group('Personality-Captions arguments')
+        agent = parser.add_argument_group("Personality-Captions arguments")
         agent.add_argument(
-            '--include-personality',
-            type='bool',
+            "--include-personality",
+            type="bool",
             default=True,
-            help='Whether to provide personality to agent',
+            help="Whether to provide personality to agent",
         )
         agent.add_argument(
-            '--include-image',
-            type='bool',
+            "--include-image",
+            type="bool",
             default=True,
-            help='Whether to provide image to agent',
+            help="Whether to provide image to agent",
         )
         agent.add_argument(
-            '--num-test-labels',
+            "--num-test-labels",
             type=int,
             default=1,
             choices=[1, 5],
-            help='Provide model with either 1 or 5 possible '
-            'labels for each test example. The number of label '
-            'candidates for each case is 100 and 500 '
-            'respectively.',
+            help="Provide model with either 1 or 5 possible "
+            "labels for each test example. The number of label "
+            "candidates for each case is 100 and 500 "
+            "respectively.",
         )
         agent.add_argument(
-            '--yfcc-path',
+            "--yfcc-path",
             type=str,
             default=None,
-            help='Path to yfcc images (if not downloaded '
-            'via the provided download script)',
+            help="Path to yfcc images (if not downloaded "
+            "via the provided download script)",
         )
         return parser
 
     def _setup_data(self, data_path, personalities_data_path):
-        print('loading: ' + data_path)
+        print("loading: " + data_path)
         with PathManager.open(data_path) as f:
             self.data = json.load(f)
         with PathManager.open(personalities_data_path) as f:
@@ -143,7 +143,7 @@ class PersonalityCaptionsTeacher(FixedDialogTeacher):
         :param image_id:
             id of image to load
         """
-        img_path = os.path.join(self.image_path, '{}.jpg'.format(image_id))
+        img_path = os.path.join(self.image_path, "{}.jpg".format(image_id))
         self.data_loader.request_load(
             self.receive_data, self.image_loader.load, (img_path,)
         )
@@ -163,19 +163,19 @@ class PersonalityCaptionsTeacher(FixedDialogTeacher):
         data = self.data[episode_idx]
 
         action = {
-            'text': data['personality'] if self.include_personality else '',
-            'image_id': data['image_hash'],
-            'episode_done': True,
-            'labels': [data['comment']],
+            "text": data["personality"] if self.include_personality else "",
+            "image_id": data["image_hash"],
+            "episode_done": True,
+            "labels": [data["comment"]],
         }
-        if self.num_test_labels == 5 and 'test' in self.datatype:
-            action['labels'] += data['additional_comments']
+        if self.num_test_labels == 5 and "test" in self.datatype:
+            action["labels"] += data["additional_comments"]
 
-        if 'candidates' in data:
-            if self.num_test_labels == 5 and 'test' in self.datatype:
-                action['label_candidates'] = data['500_candidates']
+        if "candidates" in data:
+            if self.num_test_labels == 5 and "test" in self.datatype:
+                action["label_candidates"] = data["500_candidates"]
             else:
-                action['label_candidates'] = data['candidates']
+                action["label_candidates"] = data["candidates"]
 
         return action
 
@@ -186,21 +186,21 @@ class PersonalityCaptionsTeacher(FixedDialogTeacher):
         Queues next example.
         """
         ready = None
-        load_image = self.image_mode != 'no_image_model' and self.include_image
+        load_image = self.image_mode != "no_image_model" and self.include_image
         # pull up the currently queued example
         if self.example is not None:
             # if self.image_mode != 'none' and 'image_id' in self.example:
-            if load_image and 'image_id' in self.example:
+            if load_image and "image_id" in self.example:
                 # move the image we loaded in the background into the example
                 image = self.data_queue.get()
-                self.example['image'] = image
+                self.example["image"] = image
             ready = (self.example, self.imageEpochDone)
         # get the next base example: super().next_example() calls self.get()
         self.example, self.imageEpochDone = super().next_example()
         # if self.image_mode != 'none' and 'image_id' in self.example:
-        if load_image and 'image_id' in self.example:
+        if load_image and "image_id" in self.example:
             # load the next image in the background
-            image_id = self.example['image_id']
+            image_id = self.example["image_id"]
             self.submit_load_request(image_id)
         # Try to return the previously cached example
         if ready is None:
@@ -213,8 +213,8 @@ class PersonalityCaptionsTeacher(FixedDialogTeacher):
         Share appropriate attributes.
         """
         shared = super().share()
-        shared['data'] = self.data
-        shared['image_loader'] = self.image_loader
+        shared["data"] = self.data
+        shared["image_loader"] = self.image_loader
         return shared
 
 
@@ -227,14 +227,14 @@ class PersonalityCaptionsTestTeacher(PersonalityCaptionsTeacher):
         super()._setup_data(data_path, personalities_data_path)
         from parlai.zoo.personality_captions.transresnet import download
 
-        download(self.opt['datapath'])
+        download(self.opt["datapath"])
         image_features_path = os.path.join(
-            self.opt['datapath'],
-            'models/personality_captions/transresnet/test_image_feats',
+            self.opt["datapath"],
+            "models/personality_captions/transresnet/test_image_feats",
         )
         import torch
 
-        with PathManager.open(image_features_path, 'rb') as f:
+        with PathManager.open(image_features_path, "rb") as f:
             self.image_features = torch.load(f)
 
     def reset(self):
@@ -271,19 +271,19 @@ class PersonalityCaptionsTestTeacher(PersonalityCaptionsTeacher):
         data = self.data[episode_idx]
 
         action = {
-            'text': data['personality'] if self.include_personality else '',
-            'image': self.image_features[data['image_hash']],
-            'episode_done': True,
-            'labels': [data['comment']],
+            "text": data["personality"] if self.include_personality else "",
+            "image": self.image_features[data["image_hash"]],
+            "episode_done": True,
+            "labels": [data["comment"]],
         }
-        if self.num_test_labels == 5 and 'test' in self.datatype:
-            action['labels'] += data['additional_comments']
+        if self.num_test_labels == 5 and "test" in self.datatype:
+            action["labels"] += data["additional_comments"]
 
-        if 'candidates' in data:
-            if self.num_test_labels == 5 and 'test' in self.datatype:
-                action['label_candidates'] = data['500_candidates']
+        if "candidates" in data:
+            if self.num_test_labels == 5 and "test" in self.datatype:
+                action["label_candidates"] = data["500_candidates"]
             else:
-                action['label_candidates'] = data['candidates']
+                action["label_candidates"] = data["candidates"]
 
         return action
 

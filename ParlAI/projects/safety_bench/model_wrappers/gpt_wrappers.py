@@ -105,7 +105,7 @@ class GPT2LargeWrapper(GPTWrapper):
         # For GPT-2, we add punctuation and an extra newline if one does
         # not exist, and then take the first line generated
 
-        if input_text.strip()[-1] not in ['.', '?', '!']:
+        if input_text.strip()[-1] not in [".", "?", "!"]:
             input_text += "."
 
         self.model.observe({"text": input_text + "\n", "episode_done": True})

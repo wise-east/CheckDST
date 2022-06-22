@@ -58,126 +58,126 @@ class TorchRankerAgent(TorchAgent):
         Add CLI args.
         """
         super().add_cmdline_args(parser, partial_opt=partial_opt)
-        agent = parser.add_argument_group('TorchRankerAgent')
+        agent = parser.add_argument_group("TorchRankerAgent")
         agent.add_argument(
-            '-cands',
-            '--candidates',
+            "-cands",
+            "--candidates",
             type=str,
-            default='inline',
-            choices=['batch', 'inline', 'fixed', 'batch-all-cands'],
-            help='The source of candidates during training '
-            '(see TorchRankerAgent._build_candidates() for details).',
+            default="inline",
+            choices=["batch", "inline", "fixed", "batch-all-cands"],
+            help="The source of candidates during training "
+            "(see TorchRankerAgent._build_candidates() for details).",
         )
         agent.add_argument(
-            '-ecands',
-            '--eval-candidates',
+            "-ecands",
+            "--eval-candidates",
             type=str,
-            default='inline',
-            choices=['batch', 'inline', 'fixed', 'vocab', 'batch-all-cands'],
-            help='The source of candidates during evaluation (defaults to the same'
-            'value as --candidates if no flag is given)',
+            default="inline",
+            choices=["batch", "inline", "fixed", "vocab", "batch-all-cands"],
+            help="The source of candidates during evaluation (defaults to the same"
+            "value as --candidates if no flag is given)",
         )
         agent.add_argument(
-            '-icands',
-            '--interactive-candidates',
+            "-icands",
+            "--interactive-candidates",
             type=str,
-            default='fixed',
-            choices=['fixed', 'inline', 'vocab'],
-            help='The source of candidates during interactive mode. Since in '
-            'interactive mode, batchsize == 1, we cannot use batch candidates.',
+            default="fixed",
+            choices=["fixed", "inline", "vocab"],
+            help="The source of candidates during interactive mode. Since in "
+            "interactive mode, batchsize == 1, we cannot use batch candidates.",
         )
         agent.add_argument(
-            '--repeat-blocking-heuristic',
-            type='bool',
+            "--repeat-blocking-heuristic",
+            type="bool",
             default=True,
-            help='Block repeating previous utterances. '
-            'Helpful for many models that score repeats highly, so switched '
-            'on by default.',
+            help="Block repeating previous utterances. "
+            "Helpful for many models that score repeats highly, so switched "
+            "on by default.",
         )
         agent.add_argument(
-            '-fcp',
-            '--fixed-candidates-path',
+            "-fcp",
+            "--fixed-candidates-path",
             type=str,
-            help='A text file of fixed candidates to use for all examples, one '
-            'candidate per line',
+            help="A text file of fixed candidates to use for all examples, one "
+            "candidate per line",
         )
         agent.add_argument(
-            '--fixed-candidate-vecs',
+            "--fixed-candidate-vecs",
             type=str,
-            default='reuse',
+            default="reuse",
             help='One of "reuse", "replace", or a path to a file with vectors '
-            'corresponding to the candidates at --fixed-candidates-path. '
-            'The default path is a /path/to/model-file.<cands_name>, where '
-            '<cands_name> is the name of the file (not the full path) passed by '
-            'the flag --fixed-candidates-path. By default, this file is created '
+            "corresponding to the candidates at --fixed-candidates-path. "
+            "The default path is a /path/to/model-file.<cands_name>, where "
+            "<cands_name> is the name of the file (not the full path) passed by "
+            "the flag --fixed-candidates-path. By default, this file is created "
             'once and reused. To replace it, use the "replace" option.',
         )
         agent.add_argument(
-            '--encode-candidate-vecs',
-            type='bool',
+            "--encode-candidate-vecs",
+            type="bool",
             default=True,
-            help='Cache and save the encoding of the candidate vecs. This '
-            'might be used when interacting with the model in real time '
-            'or evaluating on fixed candidate set when the encoding of '
-            'the candidates is independent of the input.',
+            help="Cache and save the encoding of the candidate vecs. This "
+            "might be used when interacting with the model in real time "
+            "or evaluating on fixed candidate set when the encoding of "
+            "the candidates is independent of the input.",
         )
         agent.add_argument(
-            '--encode-candidate-vecs-batchsize',
+            "--encode-candidate-vecs-batchsize",
             type=int,
             default=256,
             hidden=True,
-            help='Batchsize when encoding candidate vecs',
+            help="Batchsize when encoding candidate vecs",
         )
         agent.add_argument(
-            '--init-model',
+            "--init-model",
             type=str,
             default=None,
-            help='Initialize model with weights from this file.',
+            help="Initialize model with weights from this file.",
         )
         agent.add_argument(
-            '--train-predict',
-            type='bool',
+            "--train-predict",
+            type="bool",
             default=False,
-            help='Get predictions and calculate mean rank during the train '
-            'step. Turning this on may slow down training.',
+            help="Get predictions and calculate mean rank during the train "
+            "step. Turning this on may slow down training.",
         )
         agent.add_argument(
-            '--cap-num-predictions',
+            "--cap-num-predictions",
             type=int,
             default=100,
-            help='Limit to the number of predictions in output.text_candidates',
+            help="Limit to the number of predictions in output.text_candidates",
         )
         agent.add_argument(
-            '--ignore-bad-candidates',
-            type='bool',
+            "--ignore-bad-candidates",
+            type="bool",
             default=False,
-            help='Ignore examples for which the label is not present in the '
-            'label candidates. Default behavior results in RuntimeError. ',
+            help="Ignore examples for which the label is not present in the "
+            "label candidates. Default behavior results in RuntimeError. ",
         )
         agent.add_argument(
-            '--rank-top-k',
+            "--rank-top-k",
             type=int,
             default=-1,
-            help='Ranking returns the top k results of k > 0, otherwise sorts every '
-            'single candidate according to the ranking.',
+            help="Ranking returns the top k results of k > 0, otherwise sorts every "
+            "single candidate according to the ranking.",
         )
         agent.add_argument(
-            '--inference',
-            choices={'max', 'topk'},
-            default='max',
-            help='Final response output algorithm',
+            "--inference",
+            choices={"max", "topk"},
+            default="max",
+            help="Final response output algorithm",
         )
         agent.add_argument(
-            '--topk',
+            "--topk",
             type=int,
             default=5,
-            help='K used in Top K sampling inference, when selected',
+            help="K used in Top K sampling inference, when selected",
         )
         agent.add_argument(
-            '--return-cand-scores',
-            type='bool',
+            "--return-cand-scores",
+            type="bool",
             default=False,
-            help='Return sorted candidate scores from eval_step',
+            help="Return sorted candidate scores from eval_step",
         )
         return parser
 
@@ -185,7 +185,7 @@ class TorchRankerAgent(TorchAgent):
         # Must call _get_init_model() first so that paths are updated if necessary
         # (e.g., a .dict file)
         init_model, is_finetune = self._get_init_model(opt, shared)
-        opt['rank_candidates'] = True
+        opt["rank_candidates"] = True
         self._set_candidate_variables(opt)
         super().__init__(opt, shared)
 
@@ -200,8 +200,8 @@ class TorchRankerAgent(TorchAgent):
 
             if self.model is None or self.criterion is None:
                 raise AttributeError(
-                    'build_model() and build_criterion() need to return the model '
-                    'or criterion'
+                    "build_model() and build_criterion() need to return the model "
+                    "or criterion"
                 )
             train_params = trainable_parameters(self.model)
             total_params = total_parameters(self.model)
@@ -212,7 +212,7 @@ class TorchRankerAgent(TorchAgent):
             if self.fp16:
                 self.model = self.model.half()
             if init_model:
-                logging.info(f'Loading existing model parameters from {init_model}')
+                logging.info(f"Loading existing model parameters from {init_model}")
                 states = self.load(init_model)
             else:
                 states = {}
@@ -228,7 +228,7 @@ class TorchRankerAgent(TorchAgent):
                     self.model = torch.nn.DataParallel(self.model)
                 self.criterion.cuda()
 
-        self.rank_top_k = opt.get('rank_top_k', -1)
+        self.rank_top_k = opt.get("rank_top_k", -1)
 
         # Set fixed and vocab candidates if applicable
         self.set_fixed_candidates(shared)
@@ -236,15 +236,15 @@ class TorchRankerAgent(TorchAgent):
 
         if shared:
             # We don't use get here because hasattr is used on optimizer later.
-            if 'optimizer' in shared:
-                self.optimizer = shared['optimizer']
+            if "optimizer" in shared:
+                self.optimizer = shared["optimizer"]
         elif self._should_initialize_optimizer():
             # only build an optimizer if we're training
             optim_params = [p for p in self.model.parameters() if p.requires_grad]
             was_reset = self.init_optim(
                 optim_params,
-                states.get('optimizer'),
-                states.get('optimizer_type'),
+                states.get("optimizer"),
+                states.get("optimizer_type"),
                 is_finetune=is_finetune,
             )
             if was_reset:
@@ -252,7 +252,7 @@ class TorchRankerAgent(TorchAgent):
             self.build_lr_scheduler(states, hard_reset=is_finetune or was_reset)
 
         if shared is None and is_distributed():
-            device_ids = None if self.model_parallel else [self.opt['gpu']]
+            device_ids = None if self.model_parallel else [self.opt["gpu"]]
             self.model = torch.nn.parallel.DistributedDataParallel(
                 self.model, device_ids=device_ids, broadcast_buffers=False
             )
@@ -264,9 +264,9 @@ class TorchRankerAgent(TorchAgent):
         By default torch.nn.CrossEntropyLoss.
         """
         if self.fp16:
-            return FP16SafeCrossEntropy(reduction='none')
+            return FP16SafeCrossEntropy(reduction="none")
         else:
-            return torch.nn.CrossEntropyLoss(reduction='none')
+            return torch.nn.CrossEntropyLoss(reduction="none")
 
     def _set_candidate_variables(self, opt):
         """
@@ -277,12 +277,12 @@ class TorchRankerAgent(TorchAgent):
         `set_interactive_mode` function.
         """
         # candidate variables
-        self.candidates = opt['candidates']
-        self.eval_candidates = opt['eval_candidates']
+        self.candidates = opt["candidates"]
+        self.eval_candidates = opt["eval_candidates"]
         # options
-        self.fixed_candidates_path = opt['fixed_candidates_path']
-        self.ignore_bad_candidates = opt['ignore_bad_candidates']
-        self.encode_candidate_vecs = opt['encode_candidate_vecs']
+        self.fixed_candidates_path = opt["fixed_candidates_path"]
+        self.ignore_bad_candidates = opt["ignore_bad_candidates"]
+        self.encode_candidate_vecs = opt["encode_candidate_vecs"]
 
     def set_interactive_mode(self, mode, shared=False):
         """
@@ -302,15 +302,15 @@ class TorchRankerAgent(TorchAgent):
             return
 
         # Override eval_candidates to interactive_candidates
-        self.eval_candidates = self.opt.get('interactive_candidates', 'fixed')
-        if self.eval_candidates == 'fixed':
+        self.eval_candidates = self.opt.get("interactive_candidates", "fixed")
+        if self.eval_candidates == "fixed":
             # Set fixed candidates path if it does not exist
-            if self.fixed_candidates_path is None or self.fixed_candidates_path == '':
+            if self.fixed_candidates_path is None or self.fixed_candidates_path == "":
                 # Attempt to get a standard candidate set for the given task
                 path = self.get_task_candidates_path()
                 if path:
                     if not shared:
-                        logging.info(f'Setting fixed_candidates path to: {path}')
+                        logging.info(f"Setting fixed_candidates path to: {path}")
                     self.fixed_candidates_path = path
 
         # Ignore bad candidates in interactive mode
@@ -319,18 +319,18 @@ class TorchRankerAgent(TorchAgent):
         return
 
     def get_task_candidates_path(self):
-        path = self.opt['model_file'] + '.cands-' + self.opt['task'] + '.cands'
-        if PathManager.exists(path) and self.opt['fixed_candidate_vecs'] == 'reuse':
+        path = self.opt["model_file"] + ".cands-" + self.opt["task"] + ".cands"
+        if PathManager.exists(path) and self.opt["fixed_candidate_vecs"] == "reuse":
             return path
-        logging.warning(f'Building candidates file as they do not exist: {path}')
+        logging.warning(f"Building candidates file as they do not exist: {path}")
         from parlai.scripts.build_candidates import build_cands
         from copy import deepcopy
 
         opt = deepcopy(self.opt)
-        opt['outfile'] = path
-        opt['datatype'] = 'train:evalmode'
-        opt['interactive_task'] = False
-        opt['batchsize'] = 1
+        opt["outfile"] = path
+        opt["datatype"] = "train:evalmode"
+        opt["interactive_task"] = False
+        opt["batchsize"] = 1
         build_cands(opt)
         return path
 
@@ -351,7 +351,7 @@ class TorchRankerAgent(TorchAgent):
         pass
 
     def _maybe_invalidate_fixed_encs_cache(self):
-        if self.candidates != 'fixed':
+        if self.candidates != "fixed":
             self.fixed_candidate_encs = None
 
     def _get_batch_train_metrics(self, scores):
@@ -366,13 +366,13 @@ class TorchRankerAgent(TorchAgent):
         targets = scores.new_empty(batchsize).long()
         targets = torch.arange(batchsize, out=targets)
         nb_ok = (scores.max(dim=1)[1] == targets).float()
-        self.record_local_metric('train_accuracy', AverageMetric.many(nb_ok))
+        self.record_local_metric("train_accuracy", AverageMetric.many(nb_ok))
         # calculate mean_rank
         above_dot_prods = scores - scores.diag().view(-1, 1)
         ranks = (above_dot_prods > 0).float().sum(dim=1) + 1
         mrr = 1.0 / (ranks + 0.00001)
-        self.record_local_metric('rank', AverageMetric.many(ranks))
-        self.record_local_metric('mrr', AverageMetric.many(mrr))
+        self.record_local_metric("rank", AverageMetric.many(ranks))
+        self.record_local_metric("mrr", AverageMetric.many(mrr))
 
     def _get_train_preds(self, scores, label_inds, cands, cand_vecs):
         """
@@ -393,8 +393,8 @@ class TorchRankerAgent(TorchAgent):
             rank = rank.item() if len(rank) == 1 else scores.size(1)
             ranks_m.append(1 + rank)
             mrrs_m.append(1.0 / (1 + rank))
-        self.record_local_metric('rank', AverageMetric.many(ranks_m))
-        self.record_local_metric('mrr', AverageMetric.many(mrrs_m))
+        self.record_local_metric("rank", AverageMetric.many(ranks_m))
+        self.record_local_metric("mrr", AverageMetric.many(mrrs_m))
 
         ranks = ranks.cpu()
         # Here we get the top prediction for each example, but do not
@@ -432,14 +432,14 @@ class TorchRankerAgent(TorchAgent):
 
         # skip examples for which the set of label candidates do not
         # contain the label
-        if 'labels_vec' in obs and 'label_candidates_vecs' in obs:
-            cand_vecs = obs['label_candidates_vecs']
-            label_vec = obs['labels_vec']
+        if "labels_vec" in obs and "label_candidates_vecs" in obs:
+            cand_vecs = obs["label_candidates_vecs"]
+            label_vec = obs["labels_vec"]
             matches = [x for x in cand_vecs if torch.equal(x, label_vec)]
             if len(matches) == 0:
                 warn_once(
-                    'At least one example has a set of label candidates that '
-                    'does not contain the label.'
+                    "At least one example has a set of label candidates that "
+                    "does not contain the label."
                 )
                 return False
 
@@ -456,32 +456,32 @@ class TorchRankerAgent(TorchAgent):
         self.zero_grad()
 
         cands, cand_vecs, label_inds = self._build_candidates(
-            batch, source=self.candidates, mode='train'
+            batch, source=self.candidates, mode="train"
         )
         try:
             scores = self.score_candidates(batch, cand_vecs)
             loss = self.criterion(scores, label_inds)
-            self.record_local_metric('mean_loss', AverageMetric.many(loss))
+            self.record_local_metric("mean_loss", AverageMetric.many(loss))
             loss = loss.mean()
             self.backward(loss)
             self.update_params()
         except RuntimeError as e:
             # catch out of memory exceptions during fwd/bck (skip batch)
-            if 'out of memory' in str(e):
+            if "out of memory" in str(e):
                 logging.error(
-                    'Ran out of memory, skipping batch. '
-                    'if this happens frequently, decrease batchsize or '
-                    'truncate the inputs to the model.'
+                    "Ran out of memory, skipping batch. "
+                    "if this happens frequently, decrease batchsize or "
+                    "truncate the inputs to the model."
                 )
                 return Output()
             else:
                 raise e
 
         # Get train predictions
-        if self.candidates == 'batch':
+        if self.candidates == "batch":
             self._get_batch_train_metrics(scores)
             return Output()
-        if not self.opt.get('train_predict', False):
+        if not self.opt.get("train_predict", False):
             warn_once(
                 "Some training metrics are omitted for speed. Set the flag "
                 "`--train-predict` to calculate train metrics."
@@ -503,20 +503,20 @@ class TorchRankerAgent(TorchAgent):
         self.model.eval()
 
         cands, cand_vecs, label_inds = self._build_candidates(
-            batch, source=self.eval_candidates, mode='eval'
+            batch, source=self.eval_candidates, mode="eval"
         )
 
         cand_encs = None
-        if self.encode_candidate_vecs and self.eval_candidates in ['fixed', 'vocab']:
+        if self.encode_candidate_vecs and self.eval_candidates in ["fixed", "vocab"]:
             # if we cached candidate encodings for a fixed list of candidates,
             # pass those into the score_candidates function
             if self.fixed_candidate_encs is None:
                 self.fixed_candidate_encs = self._make_candidate_encs(
                     cand_vecs
                 ).detach()
-            if self.eval_candidates == 'fixed':
+            if self.eval_candidates == "fixed":
                 cand_encs = self.fixed_candidate_encs
-            elif self.eval_candidates == 'vocab':
+            elif self.eval_candidates == "vocab":
                 cand_encs = self.vocab_candidate_encs
 
         scores = self.score_candidates(batch, cand_vecs, cand_encs=cand_encs)
@@ -527,7 +527,7 @@ class TorchRankerAgent(TorchAgent):
         else:
             sorted_scores, ranks = scores.sort(1, descending=True)
 
-        if self.opt.get('return_cand_scores', False):
+        if self.opt.get("return_cand_scores", False):
             sorted_scores = sorted_scores.cpu()
         else:
             sorted_scores = None
@@ -535,7 +535,7 @@ class TorchRankerAgent(TorchAgent):
         # Update metrics
         if label_inds is not None:
             loss = self.criterion(scores, label_inds)
-            self.record_local_metric('loss', AverageMetric.many(loss))
+            self.record_local_metric("loss", AverageMetric.many(loss))
             ranks_m = []
             mrrs_m = []
             for b in range(batchsize):
@@ -543,11 +543,11 @@ class TorchRankerAgent(TorchAgent):
                 rank = rank.item() if len(rank) == 1 else scores.size(1)
                 ranks_m.append(1 + rank)
                 mrrs_m.append(1.0 / (1 + rank))
-            self.record_local_metric('rank', AverageMetric.many(ranks_m))
-            self.record_local_metric('mrr', AverageMetric.many(mrrs_m))
+            self.record_local_metric("rank", AverageMetric.many(ranks_m))
+            self.record_local_metric("mrr", AverageMetric.many(mrrs_m))
 
         ranks = ranks.cpu()
-        max_preds = self.opt['cap_num_predictions']
+        max_preds = self.opt["cap_num_predictions"]
         cand_preds = []
         for i, ordering in enumerate(ranks):
             if cand_vecs.dim() == 2:
@@ -562,18 +562,18 @@ class TorchRankerAgent(TorchAgent):
             cand_preds.append(list(islice(cand_preds_generator, max_preds)))
 
         if (
-            self.opt.get('repeat_blocking_heuristic', True)
-            and self.eval_candidates == 'fixed'
+            self.opt.get("repeat_blocking_heuristic", True)
+            and self.eval_candidates == "fixed"
         ):
             cand_preds = self.block_repeats(cand_preds)
 
-        if self.opt.get('inference', 'max') == 'max':
+        if self.opt.get("inference", "max") == "max":
             preds = [cand_preds[i][0] for i in range(batchsize)]
         else:
             # Top-k inference.
             preds = []
             for i in range(batchsize):
-                preds.append(random.choice(cand_preds[i][0 : self.opt['topk']]))
+                preds.append(random.choice(cand_preds[i][0 : self.opt["topk"]]))
 
         return Output(preds, cand_preds, sorted_scores=sorted_scores)
 
@@ -584,7 +584,7 @@ class TorchRankerAgent(TorchAgent):
         history_strings = []
         for h in self.history.history_raw_strings:
             # Heuristic: Block any given line in the history, splitting by '\n'.
-            history_strings.extend(h.split('\n'))
+            history_strings.extend(h.split("\n"))
 
         new_preds = []
         for cp in cand_preds:
@@ -602,11 +602,11 @@ class TorchRankerAgent(TorchAgent):
         Useful to override to change vectorization behavior.
         """
         obs = args[0]
-        if 'labels' in obs:
-            cands_key = 'candidates'
+        if "labels" in obs:
+            cands_key = "candidates"
         else:
-            cands_key = 'eval_candidates'
-        if self.opt[cands_key] not in ['inline', 'batch-all-cands']:
+            cands_key = "eval_candidates"
+        if self.opt[cands_key] not in ["inline", "batch-all-cands"]:
             # vectorize label candidates if and only if we are using inline
             # candidates
             return obs
@@ -670,10 +670,10 @@ class TorchRankerAgent(TorchAgent):
         if label_vecs is not None:
             assert label_vecs.dim() == 2
 
-        if source == 'batch':
+        if source == "batch":
             warn_once(
-                '[ Executing {} mode with batch labels as set of candidates. ]'
-                ''.format(mode)
+                "[ Executing {} mode with batch labels as set of candidates. ]"
+                "".format(mode)
             )
             if batchsize == 1:
                 warn_once(
@@ -691,10 +691,10 @@ class TorchRankerAgent(TorchAgent):
             cand_vecs = label_vecs
             label_inds = label_vecs.new_tensor(range(batchsize))
 
-        elif source == 'batch-all-cands':
+        elif source == "batch-all-cands":
             warn_once(
-                '[ Executing {} mode with all candidates provided in the batch ]'
-                ''.format(mode)
+                "[ Executing {} mode with all candidates provided in the batch ]"
+                "".format(mode)
             )
             if batch.candidate_vecs is None:
                 raise ValueError(
@@ -702,7 +702,7 @@ class TorchRankerAgent(TorchAgent):
                     "candidate_vecs cannot be None. If your task does not have "
                     "inline candidates, consider using one of "
                     "--{m}={{'batch','fixed','vocab'}}."
-                    "".format(m='candidates' if mode == 'train' else 'eval-candidates')
+                    "".format(m="candidates" if mode == "train" else "eval-candidates")
                 )
             # initialize the list of cands with the labels
             cands = []
@@ -721,17 +721,17 @@ class TorchRankerAgent(TorchAgent):
                 [cands_to_id[label] for label in batch.labels]
             )
 
-        elif source == 'inline':
+        elif source == "inline":
             warn_once(
-                '[ Executing {} mode with provided inline set of candidates ]'
-                ''.format(mode)
+                "[ Executing {} mode with provided inline set of candidates ]"
+                "".format(mode)
             )
             if batch.candidate_vecs is None:
                 raise ValueError(
                     "If using candidate source 'inline', then batch.candidate_vecs "
                     "cannot be None. If your task does not have inline candidates, "
                     "consider using one of --{m}={{'batch','fixed','vocab'}}."
-                    "".format(m='candidates' if mode == 'train' else 'eval-candidates')
+                    "".format(m="candidates" if mode == "train" else "eval-candidates")
                 )
 
             cands = batch.candidates
@@ -740,7 +740,7 @@ class TorchRankerAgent(TorchAgent):
             )
             if self.use_cuda:
                 cand_vecs = cand_vecs.to(
-                    0 if self.opt['gpu'] == -1 else self.opt['gpu']
+                    0 if self.opt["gpu"] == -1 else self.opt["gpu"]
                 )
             if label_vecs is not None:
                 label_inds = label_vecs.new_empty((batchsize))
@@ -760,12 +760,12 @@ class TorchRankerAgent(TorchAgent):
                         label_inds = None
                     else:
                         raise RuntimeError(
-                            'At least one of your examples has a set of label candidates '
-                            'that does not contain the label. To ignore this error '
-                            'set `--ignore-bad-candidates True`.'
+                            "At least one of your examples has a set of label candidates "
+                            "that does not contain the label. To ignore this error "
+                            "set `--ignore-bad-candidates True`."
                         )
 
-        elif source == 'fixed':
+        elif source == "fixed":
             if self.fixed_candidates is None:
                 raise ValueError(
                     "If using candidate source 'fixed', then you must provide the path "
@@ -797,15 +797,15 @@ class TorchRankerAgent(TorchAgent):
                         label_inds = None
                     else:
                         raise RuntimeError(
-                            'At least one of your examples has a set of label candidates '
-                            'that does not contain the label. To ignore this error '
-                            'set `--ignore-bad-candidates True`.'
+                            "At least one of your examples has a set of label candidates "
+                            "that does not contain the label. To ignore this error "
+                            "set `--ignore-bad-candidates True`."
                         )
 
-        elif source == 'vocab':
+        elif source == "vocab":
             warn_once(
-                '[ Executing {} mode with tokens from vocabulary as candidates. ]'
-                ''.format(mode)
+                "[ Executing {} mode with tokens from vocabulary as candidates. ]"
+                "".format(mode)
             )
             cands = self.vocab_candidates
             cand_vecs = self.vocab_candidate_vecs
@@ -828,15 +828,15 @@ class TorchRankerAgent(TorchAgent):
         Share model parameters.
         """
         shared = super().share()
-        shared['fixed_candidates'] = self.fixed_candidates
-        shared['fixed_candidate_vecs'] = self.fixed_candidate_vecs
-        shared['fixed_candidate_encs'] = self.fixed_candidate_encs
-        shared['num_fixed_candidates'] = self.num_fixed_candidates
-        shared['vocab_candidates'] = self.vocab_candidates
-        shared['vocab_candidate_vecs'] = self.vocab_candidate_vecs
-        shared['vocab_candidate_encs'] = self.vocab_candidate_encs
-        if hasattr(self, 'optimizer'):
-            shared['optimizer'] = self.optimizer
+        shared["fixed_candidates"] = self.fixed_candidates
+        shared["fixed_candidate_vecs"] = self.fixed_candidate_vecs
+        shared["fixed_candidate_encs"] = self.fixed_candidate_encs
+        shared["num_fixed_candidates"] = self.num_fixed_candidates
+        shared["vocab_candidates"] = self.vocab_candidates
+        shared["vocab_candidate_vecs"] = self.vocab_candidate_vecs
+        shared["vocab_candidate_encs"] = self.vocab_candidate_encs
+        if hasattr(self, "optimizer"):
+            shared["optimizer"] = self.optimizer
         return shared
 
     def set_vocab_candidates(self, shared):
@@ -847,11 +847,11 @@ class TorchRankerAgent(TorchAgent):
         self.vocab_candidate_vecs will contain a [num_cands, 1] LongTensor
         """
         if shared:
-            self.vocab_candidates = shared['vocab_candidates']
-            self.vocab_candidate_vecs = shared['vocab_candidate_vecs']
-            self.vocab_candidate_encs = shared['vocab_candidate_encs']
+            self.vocab_candidates = shared["vocab_candidates"]
+            self.vocab_candidate_vecs = shared["vocab_candidate_vecs"]
+            self.vocab_candidate_encs = shared["vocab_candidate_encs"]
         else:
-            if 'vocab' in (self.opt['candidates'], self.opt['eval_candidates']):
+            if "vocab" in (self.opt["candidates"], self.opt["eval_candidates"]):
                 cands = []
                 vecs = []
                 for ind in range(1, len(self.dict)):
@@ -901,15 +901,15 @@ class TorchRankerAgent(TorchAgent):
         instead of just vectorized ones.
         """
         if shared:
-            self.fixed_candidates = shared['fixed_candidates']
-            self.fixed_candidate_vecs = shared['fixed_candidate_vecs']
-            self.fixed_candidate_encs = shared['fixed_candidate_encs']
-            self.num_fixed_candidates = shared['num_fixed_candidates']
+            self.fixed_candidates = shared["fixed_candidates"]
+            self.fixed_candidate_vecs = shared["fixed_candidate_vecs"]
+            self.fixed_candidate_encs = shared["fixed_candidate_encs"]
+            self.num_fixed_candidates = shared["num_fixed_candidates"]
         else:
             self.num_fixed_candidates = 0
             opt = self.opt
             cand_path = self.fixed_candidates_path
-            if 'fixed' in (self.candidates, self.eval_candidates):
+            if "fixed" in (self.candidates, self.eval_candidates):
                 if not cand_path:
                     # Attempt to get a standard candidate set for the given task
                     path = self.get_task_candidates_path()
@@ -919,21 +919,21 @@ class TorchRankerAgent(TorchAgent):
                         cand_path = self.fixed_candidates_path
                 # Load candidates
                 logging.info(f"Loading fixed candidate set from {cand_path}")
-                with PathManager.open(cand_path, 'r', encoding='utf-8') as f:
+                with PathManager.open(cand_path, "r", encoding="utf-8") as f:
                     cands = [line.strip() for line in f.readlines()]
                 # Load or create candidate vectors
-                if PathManager.exists(self.opt['fixed_candidate_vecs']):
-                    vecs_path = opt['fixed_candidate_vecs']
+                if PathManager.exists(self.opt["fixed_candidate_vecs"]):
+                    vecs_path = opt["fixed_candidate_vecs"]
                     vecs = self.load_candidates(vecs_path)
                 else:
-                    setting = self.opt['fixed_candidate_vecs']
-                    model_dir, model_file = os.path.split(self.opt['model_file'])
+                    setting = self.opt["fixed_candidate_vecs"]
+                    model_dir, model_file = os.path.split(self.opt["model_file"])
                     model_name = os.path.splitext(model_file)[0]
                     cands_name = os.path.splitext(os.path.basename(cand_path))[0]
                     vecs_path = os.path.join(
-                        model_dir, '.'.join([model_name, cands_name, 'vecs'])
+                        model_dir, ".".join([model_name, cands_name, "vecs"])
                     )
-                    if setting == 'reuse' and PathManager.exists(vecs_path):
+                    if setting == "reuse" and PathManager.exists(vecs_path):
                         vecs = self.load_candidates(vecs_path)
                     else:  # setting == 'replace' OR generating for the first time
                         vecs = self._make_candidate_vecs(cands)
@@ -948,14 +948,14 @@ class TorchRankerAgent(TorchAgent):
                 if self.encode_candidate_vecs:
                     # candidate encodings are fixed so set them up now
                     enc_path = os.path.join(
-                        model_dir, '.'.join([model_name, cands_name, 'encs'])
+                        model_dir, ".".join([model_name, cands_name, "encs"])
                     )
-                    if setting == 'reuse' and PathManager.exists(enc_path):
-                        encs = self.load_candidates(enc_path, cand_type='encodings')
+                    if setting == "reuse" and PathManager.exists(enc_path):
+                        encs = self.load_candidates(enc_path, cand_type="encodings")
                     else:
                         encs = self._make_candidate_encs(self.fixed_candidate_vecs)
                         self._save_candidates(
-                            encs, path=enc_path, cand_type='encodings'
+                            encs, path=enc_path, cand_type="encodings"
                         )
                     self.fixed_candidate_encs = encs
                     if self.use_cuda:
@@ -972,12 +972,12 @@ class TorchRankerAgent(TorchAgent):
                 self.fixed_candidate_vecs = None
                 self.fixed_candidate_encs = None
 
-    def load_candidates(self, path, cand_type='vectors'):
+    def load_candidates(self, path, cand_type="vectors"):
         """
         Load fixed candidates from a path.
         """
         logging.info(f"Loading fixed candidate set {cand_type} from {path}")
-        with PathManager.open(path, 'rb') as f:
+        with PathManager.open(path, "rb") as f:
             return torch.load(f, map_location=lambda cpu, _: cpu)
 
     def _make_candidate_vecs(self, cands):
@@ -995,12 +995,12 @@ class TorchRankerAgent(TorchAgent):
             [cand_vecs], pad_idx=self.NULL_IDX, dtype=cand_vecs[0].dtype
         ).squeeze(0)
 
-    def _save_candidates(self, vecs, path, cand_type='vectors'):
+    def _save_candidates(self, vecs, path, cand_type="vectors"):
         """
         Save cached vectors.
         """
         logging.info(f"Saving fixed candidate set {cand_type} to {path}")
-        with PathManager.open(path, 'wb') as f:
+        with PathManager.open(path, "wb") as f:
             torch.save(vecs, f)
 
     def encode_candidates(self, padded_cands):
@@ -1013,11 +1013,11 @@ class TorchRankerAgent(TorchAgent):
             The padded candidates.
         """
         raise NotImplementedError(
-            'Abstract method: user must implement encode_candidates(). '
-            'If your agent encodes candidates independently '
-            'from context, you can get performance gains with fixed cands by '
-            'implementing this function and running with the flag '
-            '--encode-candidate-vecs True.'
+            "Abstract method: user must implement encode_candidates(). "
+            "If your agent encodes candidates independently "
+            "from context, you can get performance gains with fixed cands by "
+            "implementing this function and running with the flag "
+            "--encode-candidate-vecs True."
         )
 
     def _make_candidate_encs(self, vecs):
@@ -1028,7 +1028,7 @@ class TorchRankerAgent(TorchAgent):
         """
 
         cand_encs = []
-        bsz = self.opt.get('encode_candidate_vecs_batchsize', 256)
+        bsz = self.opt.get("encode_candidate_vecs_batchsize", 256)
         vec_batches = [vecs[i : i + bsz] for i in range(0, len(vecs), bsz)]
         logging.info(
             "Encoding fixed candidates set from ({} batch(es) of up to {}) ]"

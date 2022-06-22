@@ -31,12 +31,12 @@ def _make_argparse_table(class_):
         actions = []
         # get options defined within only this group
         for action in ag._group_actions:
-            if hasattr(action, 'hidden') and action.hidden:
+            if hasattr(action, "hidden") and action.hidden:
                 # some options are marked hidden
                 continue
-            if action.dest == argparse.SUPPRESS or action.dest == 'help':
+            if action.dest == argparse.SUPPRESS or action.dest == "help":
                 continue
-            action_strings = ",  ".join(f'`{a}`' for a in action.option_strings)
+            action_strings = ",  ".join(f"`{a}`" for a in action.option_strings)
             description = []
             if action.help:
                 h = action.help
@@ -47,13 +47,13 @@ def _make_argparse_table(class_):
             # list choices if there are any
             if action.choices:
                 description += [
-                    "Choices: " + ", ".join(f'`{c}`' for c in action.choices) + "."
+                    "Choices: " + ", ".join(f"`{c}`" for c in action.choices) + "."
                 ]
             # list default and recommended values.
             default_value = ""
             if action.default is not None and action.default is not argparse.SUPPRESS:
                 default_value += f"Default: ``{action.default}``.  "
-            if hasattr(action, 'recommended') and action.recommended:
+            if hasattr(action, "recommended") and action.recommended:
                 default_value += f"Recommended: ``{action.recommended}``. "
 
             # special escape for a few args which use a literal newline as their default
@@ -69,7 +69,7 @@ def _make_argparse_table(class_):
         if not actions:
             continue
 
-        readme.append(f'__{ag.title}__\n\n')
+        readme.append(f"__{ag.title}__\n\n")
         readme.append("| Argument | Description |\n")
         readme.append("|----------|----------|\n")
         for row in actions:
@@ -90,34 +90,34 @@ def prepare_agent_readme(agent):
     :return:
         agent's readme
     """
-    readme_path = f'{os.path.join(parlai.agents.__path__[0], agent)}/README.md'
+    readme_path = f"{os.path.join(parlai.agents.__path__[0], agent)}/README.md"
     if not os.path.exists(readme_path):
-        raise RuntimeError(f'Agent {agent} must have README.md')
+        raise RuntimeError(f"Agent {agent} must have README.md")
     with open(readme_path) as f:
         readme = f.readlines()
 
-    if '# ' not in readme[0]:
-        readme[0] = f'# {agent}'
+    if "# " not in readme[0]:
+        readme[0] = f"# {agent}"
 
     # try to import all of the agents and look for their classes
     root = os.path.join(parlai.agents.__path__[0], agent)
     submodules = pkgutil.iter_modules([root])
     for sm in submodules:
         # look in the main folder
-        if not (sm.name == agent or sm.name == 'agents'):
+        if not (sm.name == agent or sm.name == "agents"):
             continue
-        module_name = f'parlai.agents.{agent}.{sm.name}'
+        module_name = f"parlai.agents.{agent}.{sm.name}"
         module = importlib.import_module(module_name)
         for itemname in dir(module):
             # skip all private items
-            if itemname.startswith('_'):
+            if itemname.startswith("_"):
                 continue
             item = getattr(module, itemname)
             # avoid catching TorchAgent/TorchRankerAgent/...
             if (
                 inspect.isclass(item)
                 and issubclass(item, parlai.core.agents.Agent)
-                and hasattr(item, 'add_cmdline_args')
+                and hasattr(item, "add_cmdline_args")
                 and not inspect.isabstract(item)
             ):
                 # gather all the options
@@ -137,13 +137,13 @@ def write_all_agents():
     :param fout:
         file object to write to
     """
-    os.makedirs('agent_refs', exist_ok=True)
+    os.makedirs("agent_refs", exist_ok=True)
     agents = [name for _, name, _ in pkgutil.iter_modules(parlai.agents.__path__)]
     for agent in agents:
-        with open(f'agent_refs/{agent}.md', 'w') as fout:
-            fout.write(''.join(prepare_agent_readme(agent)))
+        with open(f"agent_refs/{agent}.md", "w") as fout:
+            fout.write("".join(prepare_agent_readme(agent)))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Write the agents!
     write_all_agents()

@@ -25,7 +25,7 @@ class TorchScriptAgent(Agent):
     def __init__(self, opt: Opt, shared=None):
 
         super().__init__(opt=opt, shared=shared)
-        with PathManager.open(self.opt['model_file'], "rb") as f:
+        with PathManager.open(self.opt["model_file"], "rb") as f:
             self.module = torch.jit.load(f)
 
         # Track incoming history strings
@@ -36,13 +36,13 @@ class TorchScriptAgent(Agent):
         Share the scripted module object.
         """
         shared = super().share()
-        shared['module'] = self.module
+        shared["module"] = self.module
         return shared
 
     def observe(self, observation: Message) -> Message:
         # TODO: support self._validate_observe_invariants() method of TorchAgent
 
-        self.history.append(observation['text'])
+        self.history.append(observation["text"])
 
         return super().observe(observation)
 
@@ -50,21 +50,21 @@ class TorchScriptAgent(Agent):
         # TODO: support self._validate_self_observe_invariants() method of TorchAgent
 
         assert self.observation is not None
-        if self.observation['episode_done']:
+        if self.observation["episode_done"]:
             # oh this was the last example in the episode. reset the history
             self.history = []
             # additionally mark the last observation as invalid
             self.observation = None
         else:
-            self.history.append(self_message['text'])
+            self.history.append(self_message["text"])
 
     def reset(self):
         super().reset()
         self.history = []
 
     def act(self) -> Message:
-        response_text = self.module('\n'.join(self.history))
-        response = Message({'text': response_text, 'episode_done': False})
+        response_text = self.module("\n".join(self.history))
+        response = Message({"text": response_text, "episode_done": False})
         # self.observation will determine if we're going onto a new episode
         self.self_observe(response)
         return response

@@ -42,7 +42,7 @@ def get_test_results_in_train_stats(trainstats_fn):
             # trainstats =f.read()
         # print(trainstats.keys())
         # print(str(trainstats_fn))
-        test_result = trainstats['final_test_report']
+        test_result = trainstats["final_test_report"]
         return test_result, is_faulty_json
     except Exception as e:
         # print(e)
@@ -61,7 +61,7 @@ def get_test_results_in_train_stats(trainstats_fn):
     json_txt = r"{" + trainstat_txt + "}"
     try:
         trainstats = json.loads(json_txt)
-        test_result = trainstats['final_test_report']
+        test_result = trainstats["final_test_report"]
 
     except Exception as e:
         logger.info(e)
@@ -81,7 +81,7 @@ def print_jga_summary(model_dirs: str):
     full_shot_jgas = []
     for md in model_dirs:
         print(md)
-        subdirs = md.glob('*')
+        subdirs = md.glob("*")
         for sd in sorted(subdirs):
             # print(sd)
             total += 1
@@ -110,7 +110,7 @@ def print_jga_summary(model_dirs: str):
             else:
                 # print(f"Properly loaded: {trainstats_fn}")
                 properly_loaded += 1
-                jga = test_result['joint goal acc']
+                jga = test_result["joint goal acc"]
                 grouped_results[trainconfig].append(jga)
 
         print(f"{Path(md).parts[-1]},median jga,mean jga,count")
@@ -243,15 +243,15 @@ def melt_and_format_target_df(df, custom_target_metrics=[], get_sum=False):
 
     for idx, row in df.iterrows():
         for aug in ["NEI", "SD", "TP"]:
-            cjga_val = row['jga_new_conditional'] if row['inv'] == aug else None
-            jga_val = row['jga_perturbed'] if row['inv'] == aug else None
-            df.at[idx, f'{aug} cJGA'] = cjga_val
-            df.at[idx, f'{aug} JGA'] = jga_val
+            cjga_val = row["jga_new_conditional"] if row["inv"] == aug else None
+            jga_val = row["jga_perturbed"] if row["inv"] == aug else None
+            df.at[idx, f"{aug} cJGA"] = cjga_val
+            df.at[idx, f"{aug} JGA"] = jga_val
 
-        hall_swap_val = row['NoHF Swap'] if row['inv'] == "NEI" else None
-        hall_orig_val = row['NoHF Orig'] if row['inv'] == "NEI" else None
-        df.at[idx, f'NoHF Swap'] = hall_swap_val
-        df.at[idx, f'NoHF Orig'] = hall_orig_val
+        hall_swap_val = row["NoHF Swap"] if row["inv"] == "NEI" else None
+        hall_orig_val = row["NoHF Orig"] if row["inv"] == "NEI" else None
+        df.at[idx, f"NoHF Swap"] = hall_swap_val
+        df.at[idx, f"NoHF Orig"] = hall_orig_val
     # target = df[df["test_jga"]> 0.1]
 
     ### brittle code that only works with equal number of rows for all invariances
@@ -313,24 +313,24 @@ def melt_and_format_target_df(df, custom_target_metrics=[], get_sum=False):
 
     if get_sum:
         sum1 = (
-            target[target['variable'].isin(sum_metrics)]
-            .groupby("epochs")['value']
-            .agg('sum')
+            target[target["variable"].isin(sum_metrics)]
+            .groupby("epochs")["value"]
+            .agg("sum")
         )
         sum2 = (
-            target[target['variable'].isin(sum_metrics2)]
-            .groupby("epochs")['value']
-            .agg('sum')
+            target[target["variable"].isin(sum_metrics2)]
+            .groupby("epochs")["value"]
+            .agg("sum")
         )
-        custom_target_metrics = ['sum cJGA', 'sum JGA']
+        custom_target_metrics = ["sum cJGA", "sum JGA"]
         temp = (
             pd.concat([sum1, sum2], axis=1)
             .set_axis(custom_target_metrics, axis=1)
             .reset_index()
         )
 
-        ep_max_sum_cJGA = temp['sum cJGA'].idxmax()
-        ep_max_sum_JGA = temp['sum JGA'].idxmax()
+        ep_max_sum_cJGA = temp["sum cJGA"].idxmax()
+        ep_max_sum_JGA = temp["sum JGA"].idxmax()
 
         # if ep_max_sum_cJGA != ep_max_sum_JGA:
         print(ep_max_sum_cJGA, ep_max_sum_JGA)
@@ -356,10 +356,10 @@ def plot_cjga_trends(df, no_band=True, title="", log_scale=False):
     }
     rename_columns = {"variable": "CheckDST"}
 
-    df['%'] = df['value'].apply(lambda x: x * 100 if x < 1 else x)
+    df["%"] = df["value"].apply(lambda x: x * 100 if x < 1 else x)
 
     for idx, row in df.iterrows():
-        df.at[idx, 'variable'] = name_mapping.get(row['variable'], row['variable'])
+        df.at[idx, "variable"] = name_mapping.get(row["variable"], row["variable"])
     df.rename(rename_columns, axis=1, inplace=True)
     # sns.axes_style("white")
     # sns.set_style("white")
@@ -421,7 +421,7 @@ def example_data():
     data = [
         TARGET_METRICS,
         (
-            'Basecase',
+            "Basecase",
             [
                 [0.88, 0.01, 0.03, 0.03, 0.00, 0.06],
                 [0.01, 0.01, 0.02, 0.71, 0.74, 0.70],
@@ -431,7 +431,7 @@ def example_data():
     return data
 
 
-def radar_factory(num_vars, frame='circle'):
+def radar_factory(num_vars, frame="circle"):
     """
     Create a radar chart with `num_vars` axes.
 
@@ -459,7 +459,7 @@ def radar_factory(num_vars, frame='circle'):
 
     class RadarAxes(PolarAxes):
 
-        name = 'radar'
+        name = "radar"
         # use 1 line segment to connect specified points
         RESOLUTION = 1
         PolarTransform = RadarTransform
@@ -467,7 +467,7 @@ def radar_factory(num_vars, frame='circle'):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             # rotate plot such that the first axis is at the top
-            self.set_theta_zero_location('N')
+            self.set_theta_zero_location("N")
 
         def fill(self, *args, closed=True, **kwargs):
             """Override fill so that line is closed by default"""
@@ -493,21 +493,21 @@ def radar_factory(num_vars, frame='circle'):
         def _gen_axes_patch(self):
             # The Axes patch must be centered at (0.5, 0.5) and of radius 0.5
             # in axes coordinates.
-            if frame == 'circle':
+            if frame == "circle":
                 return Circle((0.5, 0.5), 0.5)
-            elif frame == 'polygon':
+            elif frame == "polygon":
                 return RegularPolygon((0.5, 0.5), num_vars, radius=0.5, edgecolor="k")
             else:
                 raise ValueError("Unknown value for 'frame': %s" % frame)
 
         def _gen_axes_spines(self):
-            if frame == 'circle':
+            if frame == "circle":
                 return super()._gen_axes_spines()
-            elif frame == 'polygon':
+            elif frame == "polygon":
                 # spine_type must be 'left'/'right'/'top'/'bottom'/'circle'.
                 spine = Spine(
                     axes=self,
-                    spine_type='circle',
+                    spine_type="circle",
                     path=Path_mpl.unit_regular_polygon(num_vars),
                 )
                 # unit_regular_polygon gives a polygon of radius 1 centered at
@@ -516,7 +516,7 @@ def radar_factory(num_vars, frame='circle'):
                 spine.set_transform(
                     Affine2D().scale(0.5).translate(0.5, 0.5) + self.transAxes
                 )
-                return {'polar': spine}
+                return {"polar": spine}
             else:
                 raise ValueError("Unknown value for 'frame': %s" % frame)
 
@@ -530,17 +530,17 @@ print("hi")
 def plot_checkdst_radarchart():
 
     N = 6
-    theta = radar_factory(N, frame='polygon')
+    theta = radar_factory(N, frame="polygon")
 
     data = example_data()
     spoke_labels = data.pop(0)
 
     fig, axs = plt.subplots(
-        figsize=(9, 9), nrows=1, ncols=1, subplot_kw=dict(projection='radar')
+        figsize=(9, 9), nrows=1, ncols=1, subplot_kw=dict(projection="radar")
     )
     fig.subplots_adjust(wspace=0.25, hspace=0.20, top=0.85, bottom=0.05)
 
-    colors = ['b', 'r']
+    colors = ["b", "r"]
     # Plot the four cases from the example data on separate axes
     for ax, (title, case_data) in zip([axs], data):
         print(case_data)
@@ -551,15 +551,15 @@ def plot_checkdst_radarchart():
         for d, color in zip(case_data, colors):
             d = np.array(d)
             ax.plot(theta, d, color=color)
-            ax.errorbar(theta, [0.05] * len(d), yerr="error", fmt='o')
+            ax.errorbar(theta, [0.05] * len(d), yerr="error", fmt="o")
             # ax.fill(theta,  d + 0.05, color=color, alpha=0.25)
             # ax.fill(theta,  d - 0.05, color="white", alpha=0.25)
             # ax.fill(theta, d, facecolor=color, alpha=0.25, label='_nolegend_')
         ax.set_varlabels(spoke_labels)
 
     # add legend relative to top-left plot
-    labels = ('TripPy', 'BART-DST')
-    legend = axs.legend(labels, loc=(0.9, 0.95), labelspacing=0.1, fontsize='small')
+    labels = ("TripPy", "BART-DST")
+    legend = axs.legend(labels, loc=(0.9, 0.95), labelspacing=0.1, fontsize="small")
 
     # fig.text(0.5, 0.965, '5-Factor Solution Profiles Across Four Scenarios',
     #          horizontalalignment='center', color='black', weight='bold',

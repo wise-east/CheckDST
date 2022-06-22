@@ -48,6 +48,6 @@ def setup_wrapper_registry():
     """
     for module in pkgutil.iter_modules(
         projects.safety_bench.model_wrappers.__path__,
-        'projects.safety_bench.model_wrappers.',
+        "projects.safety_bench.model_wrappers.",
     ):
         importlib.import_module(module.name)

@@ -11,20 +11,20 @@ from .build_2018 import build as build_2018
 import copy
 import os
 
-SILENCE_TOKEN = '__SILENCE__'
+SILENCE_TOKEN = "__SILENCE__"
 
 
 def _path(opt, version, use_history):
     # Build the data if it doesn't exist.
-    if version == '2009':
+    if version == "2009":
         assert use_history
-        datapath = build_2009(opt['datapath'])
-    elif version == '2018':
-        datapath = build_2018(opt['datapath'], use_history)
+        datapath = build_2009(opt["datapath"])
+    elif version == "2018":
+        datapath = build_2018(opt["datapath"], use_history)
     else:
 
-        raise Exception('Unknown version for OpenSubtitles: %s' % version)
-    return os.path.join(datapath, opt['datatype'].split(':')[0] + '.txt')
+        raise Exception("Unknown version for OpenSubtitles: %s" % version)
+    return os.path.join(datapath, opt["datatype"].split(":")[0] + ".txt")
 
 
 class HalfTeacher(FbDeprecatedDialogTeacher):
@@ -32,11 +32,11 @@ class HalfTeacher(FbDeprecatedDialogTeacher):
     This version of opensubtitles creates half of all possible dialog examples.
     """
 
-    def __init__(self, opt, shared=None, version='2018', use_history=True):
+    def __init__(self, opt, shared=None, version="2018", use_history=True):
         opt = copy.deepcopy(opt)
-        opt['datafile'] = _path(opt, version, use_history)
-        if not opt['datatype'].startswith('train'):
-            opt['cands_datafile'] = opt['datafile']
+        opt["datafile"] = _path(opt, version, use_history)
+        if not opt["datatype"].startswith("train"):
+            opt["cands_datafile"] = opt["datafile"]
         super().__init__(opt, shared)
 
     def setup_data(self, path):
@@ -51,11 +51,11 @@ class FullTeacher(FbDeprecatedDialogTeacher):
     This version of opensubtitles creates all possible dialog examples.
     """
 
-    def __init__(self, opt, shared=None, version='2018', use_history=True):
+    def __init__(self, opt, shared=None, version="2018", use_history=True):
         opt = copy.deepcopy(opt)
-        opt['datafile'] = _path(opt, version, use_history)
-        if not opt['datatype'].startswith('train'):
-            opt['cands_datafile'] = opt['datafile']
+        opt["datafile"] = _path(opt, version, use_history)
+        if not opt["datatype"].startswith("train"):
+            opt["cands_datafile"] = opt["datafile"]
         super().__init__(opt, shared)
 
     def setup_data(self, path):
@@ -127,47 +127,47 @@ class Task10kTeacher(HalfTeacher):
 
 class V2009Teacher(FullTeacher):
     def __init__(self, opt, shared=None):
-        super(V2009Teacher, self).__init__(opt, shared, '2009', True)
+        super(V2009Teacher, self).__init__(opt, shared, "2009", True)
 
 
 class V2009HalfTeacher(HalfTeacher):
     def __init__(self, opt, shared=None):
-        super(V2009HalfTeacher, self).__init__(opt, shared, '2009', True)
+        super(V2009HalfTeacher, self).__init__(opt, shared, "2009", True)
 
 
 class V2009Task100kTeacher(Task100kTeacher):
     def __init__(self, opt, shared=None):
-        super(V2009Task100kTeacher, self).__init__(opt, shared, '2009', True)
+        super(V2009Task100kTeacher, self).__init__(opt, shared, "2009", True)
 
 
 class V2009Task10kTeacher(Task10kTeacher):
     def __init__(self, opt, shared=None):
-        super(V2009Task10kTeacher, self).__init__(opt, shared, '2009', True)
+        super(V2009Task10kTeacher, self).__init__(opt, shared, "2009", True)
 
 
 class V2018Teacher(FullTeacher):
     def __init__(self, opt, shared=None):
-        super(V2018Teacher, self).__init__(opt, shared, '2018', True)
+        super(V2018Teacher, self).__init__(opt, shared, "2018", True)
 
 
 class V2018HalfTeacher(HalfTeacher):
     def __init__(self, opt, shared=None):
-        super(V2018HalfTeacher, self).__init__(opt, shared, '2018', True)
+        super(V2018HalfTeacher, self).__init__(opt, shared, "2018", True)
 
 
 class V2018Task100kTeacher(Task100kTeacher):
     def __init__(self, opt, shared=None):
-        super(V2018Task100kTeacher, self).__init__(opt, shared, '2018', True)
+        super(V2018Task100kTeacher, self).__init__(opt, shared, "2018", True)
 
 
 class V2018Task10kTeacher(Task10kTeacher):
     def __init__(self, opt, shared=None):
-        super(V2018Task10kTeacher, self).__init__(opt, shared, '2018', True)
+        super(V2018Task10kTeacher, self).__init__(opt, shared, "2018", True)
 
 
 class V2018NoHistoryTeacher(FullTeacher):
     def __init__(self, opt, shared=None):
-        super(V2018NoHistoryTeacher, self).__init__(opt, shared, '2018', False)
+        super(V2018NoHistoryTeacher, self).__init__(opt, shared, "2018", False)
 
 
 class V2018NoHistoryTask100kTeacher(Task100kTeacher):
@@ -179,12 +179,12 @@ class V2018NoHistoryTask100kTeacher(Task100kTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        super(V2018NoHistoryTask100kTeacher, self).__init__(opt, shared, '2018', False)
+        super(V2018NoHistoryTask100kTeacher, self).__init__(opt, shared, "2018", False)
 
 
 class V2018NoHistoryTask10kTeacher(Task10kTeacher):
     def __init__(self, opt, shared=None):
-        super(V2018NoHistoryTask10kTeacher, self).__init__(opt, shared, '2018', False)
+        super(V2018NoHistoryTask10kTeacher, self).__init__(opt, shared, "2018", False)
 
 
 # Defaults to full teacher (all possible examples)

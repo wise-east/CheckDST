@@ -14,7 +14,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 
-UNSAFE_FIELDS = {'metrics'}
+UNSAFE_FIELDS = {"metrics"}
 
 
 class Message(dict):
@@ -28,8 +28,8 @@ class Message(dict):
     def __setitem__(self, key, val):
         if key in self:
             raise RuntimeError(
-                'Message already contains key `{}`. If this was intentional, '
-                'please use the function `force_set(key, value)`.'.format(key)
+                "Message already contains key `{}`. If this was intentional, "
+                "please use the function `force_set(key, value)`.".format(key)
             )
         super().__setitem__(key, val)
 
@@ -44,13 +44,13 @@ class Message(dict):
         """
         Create a Message for batch padding.
         """
-        return cls({'batch_padding': True, 'episode_done': True})
+        return cls({"batch_padding": True, "episode_done": True})
 
     def is_padding(self) -> bool:
         """
         Determine if a message is a padding example or not.
         """
-        return bool(self.get('batch_padding'))
+        return bool(self.get("batch_padding"))
 
     def json_safe_payload(self) -> Dict[str, Any]:
         """

@@ -33,20 +33,22 @@ class DSTExample(object):
     A single training/test example for the DST dataset.
     """
 
-    def __init__(self,
-                 guid,
-                 text_a,
-                 text_b,
-                 history,
-                 text_a_label=None,
-                 text_b_label=None,
-                 history_label=None,
-                 values=None,
-                 inform_label=None,
-                 inform_slot_label=None,
-                 refer_label=None,
-                 diag_state=None,
-                 class_label=None):
+    def __init__(
+        self,
+        guid,
+        text_a,
+        text_b,
+        history,
+        text_a_label=None,
+        text_b_label=None,
+        history_label=None,
+        values=None,
+        inform_label=None,
+        inform_slot_label=None,
+        refer_label=None,
+        diag_state=None,
+        class_label=None,
+    ):
         self.guid = guid
         self.text_a = text_a
         self.text_b = text_b
@@ -94,20 +96,22 @@ class DSTExample(object):
 class InputFeatures(object):
     """A single set of features of data."""
 
-    def __init__(self,
-                 input_ids,
-                 input_ids_unmasked,
-                 input_mask,
-                 segment_ids,
-                 start_pos=None,
-                 end_pos=None,
-                 values=None,
-                 inform=None,
-                 inform_slot=None,
-                 refer_id=None,
-                 diag_state=None,
-                 class_label_id=None,
-                 guid="NONE"):
+    def __init__(
+        self,
+        input_ids,
+        input_ids_unmasked,
+        input_mask,
+        segment_ids,
+        start_pos=None,
+        end_pos=None,
+        values=None,
+        inform=None,
+        inform_slot=None,
+        refer_id=None,
+        diag_state=None,
+        class_label_id=None,
+        guid="NONE",
+    ):
         self.guid = guid
         self.input_ids = input_ids
         self.input_ids_unmasked = input_ids_unmasked
@@ -126,14 +130,16 @@ class InputFeatures(object):
 class AuxInputFeatures(object):
     """A single set of features of data."""
 
-    def __init__(self,
-                 input_ids,
-                 input_mask,
-                 segment_ids,
-                 start_pos=None,
-                 end_pos=None,
-                 label=None,
-                 uid="NONE"):
+    def __init__(
+        self,
+        input_ids,
+        input_mask,
+        segment_ids,
+        start_pos=None,
+        end_pos=None,
+        label=None,
+        uid="NONE",
+    ):
         self.uid = uid
         self.input_ids = input_ids
         self.input_mask = input_mask
@@ -143,27 +149,41 @@ class AuxInputFeatures(object):
         self.label = label
 
 
-def convert_examples_to_features(examples, slot_list, class_types, model_type, tokenizer, max_seq_length, slot_value_dropout=0.0):
+def convert_examples_to_features(
+    examples,
+    slot_list,
+    class_types,
+    model_type,
+    tokenizer,
+    max_seq_length,
+    slot_value_dropout=0.0,
+):
     """Loads a data file into a list of `InputBatch`s."""
 
-    if model_type == 'bert':
-        model_specs = {'MODEL_TYPE': 'bert',
-                       'CLS_TOKEN': '[CLS]',
-                       'UNK_TOKEN': '[UNK]',
-                       'SEP_TOKEN': '[SEP]',
-                       'TOKEN_CORRECTION': 4}
-    elif model_type == 'roberta':
-        model_specs = {'MODEL_TYPE': 'roberta',
-                       'CLS_TOKEN': '<s>',
-                       'UNK_TOKEN': '<unk>',
-                       'SEP_TOKEN': '</s>',
-                       'TOKEN_CORRECTION': 6}
+    if model_type == "bert":
+        model_specs = {
+            "MODEL_TYPE": "bert",
+            "CLS_TOKEN": "[CLS]",
+            "UNK_TOKEN": "[UNK]",
+            "SEP_TOKEN": "[SEP]",
+            "TOKEN_CORRECTION": 4,
+        }
+    elif model_type == "roberta":
+        model_specs = {
+            "MODEL_TYPE": "roberta",
+            "CLS_TOKEN": "<s>",
+            "UNK_TOKEN": "<unk>",
+            "SEP_TOKEN": "</s>",
+            "TOKEN_CORRECTION": 6,
+        }
     else:
         logger.error("Unknown model type (%s). Aborting." % (model_type))
         exit(1)
 
-    def _tokenize_text_and_label(text, text_label_dict, slot, tokenizer, model_specs, slot_value_dropout):
-        joint_text_label = [0 for _ in text_label_dict[slot]] # joint all slots' label
+    def _tokenize_text_and_label(
+        text, text_label_dict, slot, tokenizer, model_specs, slot_value_dropout
+    ):
+        joint_text_label = [0 for _ in text_label_dict[slot]]  # joint all slots' label
         for slot_text_label in text_label_dict.values():
             for idx, label in enumerate(slot_text_label):
                 if label == 1:
@@ -175,9 +195,9 @@ def convert_examples_to_features(examples, slot_list, class_types, model_type, t
         token_labels = []
         for token, token_label, joint_label in zip(text, text_label, joint_text_label):
             token = convert_to_unicode(token)
-            if model_specs['MODEL_TYPE'] == 'roberta':
-                token = ' ' + token
-            sub_tokens = tokenizer.tokenize(token) # Most time intensive step
+            if model_specs["MODEL_TYPE"] == "roberta":
+                token = " " + token
+            sub_tokens = tokenizer.tokenize(token)  # Most time intensive step
             tokens_unmasked.extend(sub_tokens)
             if slot_value_dropout == 0.0 or joint_label == 0:
                 tokens.extend(sub_tokens)
@@ -187,7 +207,7 @@ def convert_examples_to_features(examples, slot_list, class_types, model_type, t
                     if rn > slot_value_dropout:
                         tokens.append(sub_token)
                     else:
-                        tokens.append(model_specs['UNK_TOKEN'])
+                        tokens.append(model_specs["UNK_TOKEN"])
             token_labels.extend([token_label for _ in sub_tokens])
         assert len(tokens) == len(token_labels)
         assert len(tokens_unmasked) == len(token_labels)
@@ -211,45 +231,64 @@ def convert_examples_to_features(examples, slot_list, class_types, model_type, t
                 tokens_a.pop()
             else:
                 tokens_b.pop()
-    
-    def _truncate_length_and_warn(tokens_a, tokens_b, history, max_seq_length, model_specs, guid):
+
+    def _truncate_length_and_warn(
+        tokens_a, tokens_b, history, max_seq_length, model_specs, guid
+    ):
         # Modifies `tokens_a` and `tokens_b` in place so that the total
         # length is less than the specified length.
         # Account for [CLS], [SEP], [SEP], [SEP] with "- 4" (BERT)
         # Account for <s>, </s></s>, </s></s>, </s> with "- 6" (RoBERTa)
-        if len(tokens_a) + len(tokens_b) + len(history) > max_seq_length - model_specs['TOKEN_CORRECTION']:
-            logger.info("Truncate Example %s. Total len=%d." % (guid, len(tokens_a) + len(tokens_b) + len(history)))
+        if (
+            len(tokens_a) + len(tokens_b) + len(history)
+            > max_seq_length - model_specs["TOKEN_CORRECTION"]
+        ):
+            logger.info(
+                "Truncate Example %s. Total len=%d."
+                % (guid, len(tokens_a) + len(tokens_b) + len(history))
+            )
             input_text_too_long = True
         else:
             input_text_too_long = False
-        _truncate_seq_pair(tokens_a, tokens_b, history, max_seq_length - model_specs['TOKEN_CORRECTION'])
+        _truncate_seq_pair(
+            tokens_a,
+            tokens_b,
+            history,
+            max_seq_length - model_specs["TOKEN_CORRECTION"],
+        )
         return input_text_too_long
 
-    def _get_token_label_ids(token_labels_a, token_labels_b, token_labels_history, max_seq_length, model_specs):
+    def _get_token_label_ids(
+        token_labels_a,
+        token_labels_b,
+        token_labels_history,
+        max_seq_length,
+        model_specs,
+    ):
         token_label_ids = []
-        token_label_ids.append(0) # [CLS]/<s>
+        token_label_ids.append(0)  # [CLS]/<s>
         for token_label in token_labels_a:
             token_label_ids.append(token_label)
-        token_label_ids.append(0) # [SEP]/</s></s>
-        if model_specs['MODEL_TYPE'] == 'roberta':
+        token_label_ids.append(0)  # [SEP]/</s></s>
+        if model_specs["MODEL_TYPE"] == "roberta":
             token_label_ids.append(0)
         for token_label in token_labels_b:
             token_label_ids.append(token_label)
-        token_label_ids.append(0) # [SEP]/</s></s>
-        if model_specs['MODEL_TYPE'] == 'roberta':
+        token_label_ids.append(0)  # [SEP]/</s></s>
+        if model_specs["MODEL_TYPE"] == "roberta":
             token_label_ids.append(0)
         for token_label in token_labels_history:
             token_label_ids.append(token_label)
-        token_label_ids.append(0) # [SEP]/</s>
+        token_label_ids.append(0)  # [SEP]/</s>
         while len(token_label_ids) < max_seq_length:
-            token_label_ids.append(0) # padding
+            token_label_ids.append(0)  # padding
         assert len(token_label_ids) == max_seq_length
         return token_label_ids
 
     def _get_start_end_pos(class_type, token_label_ids, max_seq_length):
-        if class_type == 'copy_value' and 1 not in token_label_ids:
-            #logger.warn("copy_value label, but token_label not detected. Setting label to 'none'.")
-            class_type = 'none'
+        if class_type == "copy_value" and 1 not in token_label_ids:
+            # logger.warn("copy_value label, but token_label not detected. Setting label to 'none'.")
+            class_type = "none"
         start_pos = 0
         end_pos = 0
         if 1 in token_label_ids:
@@ -264,7 +303,9 @@ def convert_examples_to_features(examples, slot_list, class_types, model_type, t
                     assert token_label_ids[i] == 1
         return class_type, start_pos, end_pos
 
-    def _get_transformer_input(tokens_a, tokens_b, history, max_seq_length, tokenizer, model_specs):
+    def _get_transformer_input(
+        tokens_a, tokens_b, history, max_seq_length, tokenizer, model_specs
+    ):
         # The convention in BERT is:
         # (a) For sequence pairs:
         #  tokens:   [CLS] is this jack ##son ##ville ? [SEP] no it is not . [SEP]
@@ -285,39 +326,39 @@ def convert_examples_to_features(examples, slot_list, class_types, model_type, t
         # the entire model is fine-tuned.
         tokens = []
         segment_ids = []
-        tokens.append(model_specs['CLS_TOKEN'])
+        tokens.append(model_specs["CLS_TOKEN"])
         segment_ids.append(0)
         for token in tokens_a:
             tokens.append(token)
             segment_ids.append(0)
-        tokens.append(model_specs['SEP_TOKEN'])
+        tokens.append(model_specs["SEP_TOKEN"])
         segment_ids.append(0)
-        if model_specs['MODEL_TYPE'] == 'roberta':
-            tokens.append(model_specs['SEP_TOKEN'])
+        if model_specs["MODEL_TYPE"] == "roberta":
+            tokens.append(model_specs["SEP_TOKEN"])
             segment_ids.append(0)
-        if model_specs['MODEL_TYPE'] != 'roberta':
+        if model_specs["MODEL_TYPE"] != "roberta":
             for token in tokens_b:
                 tokens.append(token)
                 segment_ids.append(1)
-            tokens.append(model_specs['SEP_TOKEN'])
+            tokens.append(model_specs["SEP_TOKEN"])
             segment_ids.append(1)
         else:
             for token in tokens_b:
                 tokens.append(token)
                 segment_ids.append(0)
-            tokens.append(model_specs['SEP_TOKEN'])
+            tokens.append(model_specs["SEP_TOKEN"])
             segment_ids.append(0)
-            if model_specs['MODEL_TYPE'] == 'roberta':
-                tokens.append(model_specs['SEP_TOKEN'])
+            if model_specs["MODEL_TYPE"] == "roberta":
+                tokens.append(model_specs["SEP_TOKEN"])
                 segment_ids.append(0)
         for token in history:
             tokens.append(token)
-            if model_specs['MODEL_TYPE'] == 'roberta':
+            if model_specs["MODEL_TYPE"] == "roberta":
                 segment_ids.append(0)
             else:
                 segment_ids.append(1)
-        tokens.append(model_specs['SEP_TOKEN'])
-        if model_specs['MODEL_TYPE'] == 'roberta':
+        tokens.append(model_specs["SEP_TOKEN"])
+        if model_specs["MODEL_TYPE"] == "roberta":
             segment_ids.append(0)
         else:
             segment_ids.append(1)
@@ -327,7 +368,7 @@ def convert_examples_to_features(examples, slot_list, class_types, model_type, t
         input_mask = [1] * len(input_ids)
         # Zero-pad up to the sequence length.
         while len(input_ids) < max_seq_length:
-            if model_specs['MODEL_TYPE'] == 'roberta':
+            if model_specs["MODEL_TYPE"] == "roberta":
                 input_ids.append(1)
             else:
                 input_ids.append(0)
@@ -337,11 +378,11 @@ def convert_examples_to_features(examples, slot_list, class_types, model_type, t
         assert len(input_mask) == max_seq_length
         assert len(segment_ids) == max_seq_length
         return tokens, input_ids, input_mask, segment_ids
-    
+
     total_cnt = 0
     too_long_cnt = 0
 
-    refer_list = ['none'] + slot_list
+    refer_list = ["none"] + slot_list
 
     features = []
     # Convert single example
@@ -361,30 +402,67 @@ def convert_examples_to_features(examples, slot_list, class_types, model_type, t
         end_pos_dict = {}
         for slot in slot_list:
             tokens_a, tokens_a_unmasked, token_labels_a = _tokenize_text_and_label(
-                example.text_a, example.text_a_label, slot, tokenizer, model_specs, slot_value_dropout)
+                example.text_a,
+                example.text_a_label,
+                slot,
+                tokenizer,
+                model_specs,
+                slot_value_dropout,
+            )
             tokens_b, tokens_b_unmasked, token_labels_b = _tokenize_text_and_label(
-                example.text_b, example.text_b_label, slot, tokenizer, model_specs, slot_value_dropout)
-            tokens_history, tokens_history_unmasked, token_labels_history = _tokenize_text_and_label(
-                example.history, example.history_label, slot, tokenizer, model_specs, slot_value_dropout)
+                example.text_b,
+                example.text_b_label,
+                slot,
+                tokenizer,
+                model_specs,
+                slot_value_dropout,
+            )
+            (
+                tokens_history,
+                tokens_history_unmasked,
+                token_labels_history,
+            ) = _tokenize_text_and_label(
+                example.history,
+                example.history_label,
+                slot,
+                tokenizer,
+                model_specs,
+                slot_value_dropout,
+            )
 
             input_text_too_long = _truncate_length_and_warn(
-                tokens_a, tokens_b, tokens_history, max_seq_length, model_specs, example.guid)
+                tokens_a,
+                tokens_b,
+                tokens_history,
+                max_seq_length,
+                model_specs,
+                example.guid,
+            )
 
             if input_text_too_long:
                 if example_index < 10:
                     if len(token_labels_a) > len(tokens_a):
-                        logger.info('    tokens_a truncated labels: %s' % str(token_labels_a[len(tokens_a):]))
+                        logger.info(
+                            "    tokens_a truncated labels: %s"
+                            % str(token_labels_a[len(tokens_a) :])
+                        )
                     if len(token_labels_b) > len(tokens_b):
-                        logger.info('    tokens_b truncated labels: %s' % str(token_labels_b[len(tokens_b):]))
+                        logger.info(
+                            "    tokens_b truncated labels: %s"
+                            % str(token_labels_b[len(tokens_b) :])
+                        )
                     if len(token_labels_history) > len(tokens_history):
-                        logger.info('    tokens_history truncated labels: %s' % str(token_labels_history[len(tokens_history):]))
+                        logger.info(
+                            "    tokens_history truncated labels: %s"
+                            % str(token_labels_history[len(tokens_history) :])
+                        )
 
-                token_labels_a = token_labels_a[:len(tokens_a)]
-                token_labels_b = token_labels_b[:len(tokens_b)]
-                token_labels_history = token_labels_history[:len(tokens_history)]
-                tokens_a_unmasked = tokens_a_unmasked[:len(tokens_a)]
-                tokens_b_unmasked = tokens_b_unmasked[:len(tokens_b)]
-                tokens_history_unmasked = tokens_history_unmasked[:len(tokens_history)]
+                token_labels_a = token_labels_a[: len(tokens_a)]
+                token_labels_b = token_labels_b[: len(tokens_b)]
+                token_labels_history = token_labels_history[: len(tokens_history)]
+                tokens_a_unmasked = tokens_a_unmasked[: len(tokens_a)]
+                tokens_b_unmasked = tokens_b_unmasked[: len(tokens_b)]
+                tokens_history_unmasked = tokens_history_unmasked[: len(tokens_history)]
 
             assert len(token_labels_a) == len(tokens_a)
             assert len(token_labels_b) == len(tokens_b)
@@ -392,13 +470,24 @@ def convert_examples_to_features(examples, slot_list, class_types, model_type, t
             assert len(token_labels_a) == len(tokens_a_unmasked)
             assert len(token_labels_b) == len(tokens_b_unmasked)
             assert len(token_labels_history) == len(tokens_history_unmasked)
-            token_label_ids = _get_token_label_ids(token_labels_a, token_labels_b, token_labels_history, max_seq_length, model_specs)
+            token_label_ids = _get_token_label_ids(
+                token_labels_a,
+                token_labels_b,
+                token_labels_history,
+                max_seq_length,
+                model_specs,
+            )
 
             value_dict[slot] = example.values[slot]
             inform_dict[slot] = example.inform_label[slot]
 
-            class_label_mod, start_pos_dict[slot], end_pos_dict[slot] = _get_start_end_pos(
-                example.class_label[slot], token_label_ids, max_seq_length)
+            (
+                class_label_mod,
+                start_pos_dict[slot],
+                end_pos_dict[slot],
+            ) = _get_start_end_pos(
+                example.class_label[slot], token_label_ids, max_seq_length
+            )
             if class_label_mod != example.class_label[slot]:
                 example.class_label[slot] = class_label_mod
             inform_slot_dict[slot] = example.inform_slot_label[slot]
@@ -408,24 +497,23 @@ def convert_examples_to_features(examples, slot_list, class_types, model_type, t
 
         if input_text_too_long:
             too_long_cnt += 1
-            
-        tokens, input_ids, input_mask, segment_ids = _get_transformer_input(tokens_a,
-                                                                            tokens_b,
-                                                                            tokens_history,
-                                                                            max_seq_length,
-                                                                            tokenizer,
-                                                                            model_specs)
+
+        tokens, input_ids, input_mask, segment_ids = _get_transformer_input(
+            tokens_a, tokens_b, tokens_history, max_seq_length, tokenizer, model_specs
+        )
         if slot_value_dropout > 0.0:
-            _, input_ids_unmasked, _, _ = _get_transformer_input(tokens_a_unmasked,
-                                                                 tokens_b_unmasked,
-                                                                 tokens_history_unmasked,
-                                                                 max_seq_length,
-                                                                 tokenizer,
-                                                                 model_specs)
+            _, input_ids_unmasked, _, _ = _get_transformer_input(
+                tokens_a_unmasked,
+                tokens_b_unmasked,
+                tokens_history_unmasked,
+                max_seq_length,
+                tokenizer,
+                model_specs,
+            )
         else:
             input_ids_unmasked = input_ids
 
-        assert(len(input_ids) == len(input_ids_unmasked))
+        assert len(input_ids) == len(input_ids_unmasked)
 
         if example_index < 10:
             logger.info("*** Example ***")
@@ -457,9 +545,14 @@ def convert_examples_to_features(examples, slot_list, class_types, model_type, t
                 inform_slot=inform_slot_dict,
                 refer_id=refer_id_dict,
                 diag_state=diag_state_dict,
-                class_label_id=class_label_id_dict))
+                class_label_id=class_label_id_dict,
+            )
+        )
 
-    logger.info("========== %d out of %d examples have text too long" % (too_long_cnt, total_cnt))
+    logger.info(
+        "========== %d out of %d examples have text too long"
+        % (too_long_cnt, total_cnt)
+    )
 
     return features
 
@@ -483,28 +576,30 @@ def convert_aux_examples_to_features(examples, aux_task_def, max_seq_length):
         assert len(input_mask) == max_seq_length
         assert len(segment_ids) == max_seq_length
         return input_ids, input_mask, segment_ids
-    
+
     features = []
     # Convert single example
     for (example_index, example) in enumerate(examples):
         if example_index % 1000 == 0:
             logger.info("Writing example %d of %d" % (example_index, len(examples)))
 
-        uid = example['uid']
-        label = example['label']
-        tokens = example['token_id']
-        type_id = example['type_id']
+        uid = example["uid"]
+        label = example["label"]
+        tokens = example["token_id"]
+        type_id = example["type_id"]
 
         start = 0
         end = 0
-        if aux_task_def['task_type'] == "span":
-            start = example['start_position']
-            end = example['end_position']
+        if aux_task_def["task_type"] == "span":
+            start = example["start_position"]
+            end = example["end_position"]
 
         # TODO: implement truncation
         assert len(tokens) <= max_seq_length
 
-        input_ids, input_mask, segment_ids = _get_transformer_input(tokens, type_id, max_seq_length)
+        input_ids, input_mask, segment_ids = _get_transformer_input(
+            tokens, type_id, max_seq_length
+        )
 
         if example_index < 10:
             logger.info("*** Example ***")
@@ -524,7 +619,9 @@ def convert_aux_examples_to_features(examples, aux_task_def, max_seq_length):
                 segment_ids=segment_ids,
                 start_pos=start,
                 end_pos=end,
-                label=label))
+                label=label,
+            )
+        )
 
     return features
 

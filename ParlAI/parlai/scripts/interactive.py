@@ -32,44 +32,44 @@ import random
 def setup_args(parser=None):
     if parser is None:
         parser = ParlaiParser(
-            True, True, 'Interactive chat with a model on the command line'
+            True, True, "Interactive chat with a model on the command line"
         )
-    parser.add_argument('-d', '--display-examples', type='bool', default=False)
+    parser.add_argument("-d", "--display-examples", type="bool", default=False)
     parser.add_argument(
-        '--display-prettify',
-        type='bool',
+        "--display-prettify",
+        type="bool",
         default=False,
-        help='Set to use a prettytable when displaying '
-        'examples with text candidates',
+        help="Set to use a prettytable when displaying "
+        "examples with text candidates",
     )
     parser.add_argument(
-        '--display-add-fields',
+        "--display-add-fields",
         type=str,
-        default='',
+        default="",
         help='Display these fields when verbose is off (e.g., "--display-add-fields label_candidates,beam_texts")',
     )
     parser.add_argument(
-        '-it',
-        '--interactive-task',
-        type='bool',
+        "-it",
+        "--interactive-task",
+        type="bool",
         default=True,
-        help='Create interactive version of task',
+        help="Create interactive version of task",
     )
     parser.add_argument(
-        '--outfile',
+        "--outfile",
         type=str,
-        default='',
-        help='Saves a jsonl file containing all of the task examples and '
-        'model replies. Set to the empty string to not save at all',
+        default="",
+        help="Saves a jsonl file containing all of the task examples and "
+        "model replies. Set to the empty string to not save at all",
     )
     parser.add_argument(
-        '--save-format',
+        "--save-format",
         type=str,
-        default='conversations',
-        choices=['conversations', 'parlai'],
-        help='Format to save logs in. conversations is a jsonl format, parlai is a text format.',
+        default="conversations",
+        choices=["conversations", "parlai"],
+        help="Format to save logs in. conversations is a jsonl format, parlai is a text format.",
     )
-    parser.set_defaults(interactive_mode=True, task='interactive')
+    parser.set_defaults(interactive_mode=True, task="interactive")
     LocalHumanAgent.add_cmdline_args(parser, partial_opt=None)
     WorldLogger.add_cmdline_args(parser, partial_opt=None)
     return parser
@@ -77,7 +77,7 @@ def setup_args(parser=None):
 
 def interactive(opt):
     if isinstance(opt, ParlaiParser):
-        logging.error('interactive should be passed opt not Parser')
+        logging.error("interactive should be passed opt not Parser")
         opt = opt.parse_args()
 
     # Create model and assign it to the specified task
@@ -85,7 +85,7 @@ def interactive(opt):
     agent.opt.log()
     human_agent = LocalHumanAgent(opt)
     # set up world logger
-    world_logger = WorldLogger(opt) if opt.get('outfile') else None
+    world_logger = WorldLogger(opt) if opt.get("outfile") else None
     world = create_task(opt, [human_agent, agent])
 
     # Show some example dialogs:
@@ -99,16 +99,16 @@ def interactive(opt):
 
         if world_logger is not None:
             world_logger.log(world)
-        if opt.get('display_examples'):
+        if opt.get("display_examples"):
             print("---")
             print(world.display())
 
     if world_logger is not None:
         # dump world acts to file
-        world_logger.write(opt['outfile'], world, file_format=opt['save_format'])
+        world_logger.write(opt["outfile"], world, file_format=opt["save_format"])
 
 
-@register_script('interactive', aliases=['i'])
+@register_script("interactive", aliases=["i"])
 class Interactive(ParlaiScript):
     @classmethod
     def setup_args(cls):
@@ -118,6 +118,6 @@ class Interactive(ParlaiScript):
         return interactive(self.opt)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     random.seed(42)
     Interactive.main()

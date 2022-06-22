@@ -141,12 +141,12 @@ def prepare_integration_tests(opt: Opt):
         for pair in pairs:
             episode.append(
                 [
-                    {'text': pair[0], 'episode_done': False, 'id': 'human'},
-                    {'text': pair[1], 'episode_done': False, 'id': 'bot'},
+                    {"text": pair[0], "episode_done": False, "id": "human"},
+                    {"text": pair[1], "episode_done": False, "id": "bot"},
                 ]
             )
         # mark the last episode as done
-        episode[-1][1]['episode_done'] = True
+        episode[-1][1]["episode_done"] = True
         if "human_eval_turn_range" in inp_act:
             turn_range = [int(x) for x in inp_act["human_eval_turn_range"].split("|")]
             episode = episode[turn_range[0] : turn_range[1] + 1]
@@ -155,12 +155,12 @@ def prepare_integration_tests(opt: Opt):
 
     task_data_path = os.path.join(opt["log_folder"], "task_data.jsonl")
     indices_path = os.path.join(opt["log_folder"], "annotation_indices.jsonl")
-    with PathManager.open(task_data_path, 'w') as fw:
+    with PathManager.open(task_data_path, "w") as fw:
         for episode in chat_logs:
-            fw.write(json.dumps(episode) + '\n')
-    with PathManager.open(indices_path, 'w') as fw:
+            fw.write(json.dumps(episode) + "\n")
+    with PathManager.open(indices_path, "w") as fw:
         for episode in chat_logs:
-            fw.write(f'[{len(episode) * 2 -1}]' + '\n')
+            fw.write(f"[{len(episode) * 2 -1}]" + "\n")
 
     _next_steps(safety_setting, task_data_path, indices_path)
 

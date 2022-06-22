@@ -49,7 +49,7 @@ class TestMetric(unittest.TestCase):
             self.assertEqual(actual_output, output)
 
         failing_inputs = [
-            ('4', AssertionError),
+            ("4", AssertionError),
             ([6.8], AssertionError),
             (torch.Tensor([1, 3.8]), ValueError),  # Tensor has more than 1 element
         ]
@@ -83,7 +83,7 @@ class TestMetric(unittest.TestCase):
             self.assertIsInstance(actual_output, float)
 
         failing_inputs = [
-            ((2, '4'), AssertionError),
+            ((2, "4"), AssertionError),
             ((torch.Tensor([1, 1]), torch.Tensor([2])), ValueError),
         ]
         for input_, error in failing_inputs:
@@ -118,7 +118,7 @@ class TestMetric(unittest.TestCase):
         m2 = AverageMetric(3, 4)
 
         assert (m1 + m2) == AverageMetric(4, 7)
-        assert MacroAverageMetric({'a': m1, 'b': m2}) == 0.5 * (1.0 / 3 + 3.0 / 4)
+        assert MacroAverageMetric({"a": m1, "b": m2}) == 0.5 * (1.0 / 3 + 3.0 / 4)
 
 
 class TestMetrics(unittest.TestCase):
@@ -128,27 +128,27 @@ class TestMetrics(unittest.TestCase):
 
     def test_simpleadd(self):
         m = Metrics()
-        m.add('key', SumMetric(1))
-        m.add('key', SumMetric(2))
-        assert m.report()['key'] == 3
+        m.add("key", SumMetric(1))
+        m.add("key", SumMetric(2))
+        assert m.report()["key"] == 3
 
         m.clear()
-        assert 'key' not in m.report()
+        assert "key" not in m.report()
 
-        m.add('key', SumMetric(1.5))
-        m.add('key', SumMetric(2.5))
-        assert m.report()['key'] == 4.0
+        m.add("key", SumMetric(1.5))
+        m.add("key", SumMetric(2.5))
+        assert m.report()["key"] == 4.0
 
     def test_shared(self):
         m = Metrics()
         m2 = Metrics(shared=m.share())
         m3 = Metrics(shared=m.share())
 
-        m2.add('key', SumMetric(1))
-        m3.add('key', SumMetric(2))
-        m.add('key', SumMetric(3))
+        m2.add("key", SumMetric(1))
+        m3.add("key", SumMetric(2))
+        m.add("key", SumMetric(3))
 
-        assert m.report()['key'] == 6
+        assert m.report()["key"] == 6
 
     def test_multithreaded(self):
         # legacy test, but left because it's just another test
@@ -156,10 +156,10 @@ class TestMetrics(unittest.TestCase):
         m2 = Metrics(shared=m.share())
         m3 = Metrics(shared=m.share())
 
-        m2.add('key', SumMetric(1))
-        m3.add('key', SumMetric(2))
-        m.add('key', SumMetric(3))
-        assert m.report()['key'] == 6
+        m2.add("key", SumMetric(1))
+        m3.add("key", SumMetric(2))
+        m.add("key", SumMetric(3))
+        assert m.report()["key"] == 6
 
     def test_verymultithreaded(self):
         # legacy test, but useful all the same, for ensuring
@@ -170,10 +170,10 @@ class TestMetrics(unittest.TestCase):
 
         # intentionally just over the int overflow
         for _ in range(32768 + 1):
-            ms[random.randint(0, nt - 1)].add('key', SumMetric(1))
+            ms[random.randint(0, nt - 1)].add("key", SumMetric(1))
         thread_ids = list(range(nt))
         random.shuffle(thread_ids)
-        assert m.report()['key'] == 32768 + 1
+        assert m.report()["key"] == 32768 + 1
 
     def test_largebuffer(self):
         # legacy test. left as just another test
@@ -182,102 +182,102 @@ class TestMetrics(unittest.TestCase):
 
         # intentionally just over the int overflow
         for _ in range(32768 + 1):
-            m2.add('key', SumMetric(1))
+            m2.add("key", SumMetric(1))
 
-        assert m.report()['key'] == 32768 + 1
+        assert m.report()["key"] == 32768 + 1
 
     def test_recent(self):
         m = Metrics()
         m2 = Metrics(shared=m.share())
-        m.add('test', SumMetric(1))
-        assert m.report() == {'test': 1}
-        assert m.report_recent() == {'test': 1}
+        m.add("test", SumMetric(1))
+        assert m.report() == {"test": 1}
+        assert m.report_recent() == {"test": 1}
         m.clear_recent()
-        m.add('test', SumMetric(2))
-        assert m.report() == {'test': 3}
-        assert m.report_recent() == {'test': 2}
-        assert m2.report() == {'test': 3}
+        m.add("test", SumMetric(2))
+        assert m.report() == {"test": 3}
+        assert m.report_recent() == {"test": 2}
+        assert m2.report() == {"test": 3}
         assert m2.report_recent() == {}
-        m2.add('test', SumMetric(3))
-        assert m2.report() == {'test': 6}
-        assert m.report() == {'test': 6}
-        assert m2.report_recent() == {'test': 3}
-        assert m.report_recent() == {'test': 2}
+        m2.add("test", SumMetric(3))
+        assert m2.report() == {"test": 6}
+        assert m.report() == {"test": 6}
+        assert m2.report_recent() == {"test": 3}
+        assert m.report_recent() == {"test": 2}
         m2.clear_recent()
-        assert m2.report() == {'test': 6}
-        assert m.report() == {'test': 6}
+        assert m2.report() == {"test": 6}
+        assert m.report() == {"test": 6}
         assert m2.report_recent() == {}
-        assert m.report_recent() == {'test': 2}
+        assert m.report_recent() == {"test": 2}
         m.clear_recent()
-        assert m2.report() == {'test': 6}
-        assert m.report() == {'test': 6}
+        assert m2.report() == {"test": 6}
+        assert m.report() == {"test": 6}
         assert m.report_recent() == {}
 
 
 class TestAggregators(unittest.TestCase):
     def test_unnamed_aggregation(self):
         report1 = {
-            'avg': AverageMetric(3, 4),
-            'sum': SumMetric(3),
-            'fixed': FixedMetric(4),
-            'global_avg': GlobalAverageMetric(3, 4),
+            "avg": AverageMetric(3, 4),
+            "sum": SumMetric(3),
+            "fixed": FixedMetric(4),
+            "global_avg": GlobalAverageMetric(3, 4),
         }
         report2 = {
-            'avg': AverageMetric(1, 3),
-            'sum': SumMetric(4),
-            'fixed': FixedMetric(4),
-            'global_avg': GlobalAverageMetric(1, 3),
+            "avg": AverageMetric(1, 3),
+            "sum": SumMetric(4),
+            "fixed": FixedMetric(4),
+            "global_avg": GlobalAverageMetric(1, 3),
         }
         agg = aggregate_unnamed_reports([report1, report2])
-        assert agg['avg'] == 4.0 / 7
-        assert agg['sum'] == 7
-        assert agg['fixed'] == 4
-        assert agg['global_avg'] == 4.0 / 7
+        assert agg["avg"] == 4.0 / 7
+        assert agg["sum"] == 7
+        assert agg["fixed"] == 4
+        assert agg["global_avg"] == 4.0 / 7
 
     def test_macro_aggregation(self):
         report1 = {
-            'avg': AverageMetric(3, 4),
-            'sum': SumMetric(3),
-            'fixed': FixedMetric(4),
-            'global_avg': GlobalAverageMetric(3, 4),
+            "avg": AverageMetric(3, 4),
+            "sum": SumMetric(3),
+            "fixed": FixedMetric(4),
+            "global_avg": GlobalAverageMetric(3, 4),
         }
         report2 = {
-            'avg': AverageMetric(1, 3),
-            'sum': SumMetric(4),
-            'fixed': FixedMetric(4),
-            'global_avg': GlobalAverageMetric(1, 3),
+            "avg": AverageMetric(1, 3),
+            "sum": SumMetric(4),
+            "fixed": FixedMetric(4),
+            "global_avg": GlobalAverageMetric(1, 3),
         }
-        agg = aggregate_named_reports({'a': report1, 'b': report2}, micro_average=False)
-        assert agg['avg'] == 0.5 * (3.0 / 4 + 1.0 / 3)
-        assert agg['sum'] == 7
-        assert agg['fixed'] == 4
-        assert agg['global_avg'] in (report1['global_avg'], report2['global_avg'])
+        agg = aggregate_named_reports({"a": report1, "b": report2}, micro_average=False)
+        assert agg["avg"] == 0.5 * (3.0 / 4 + 1.0 / 3)
+        assert agg["sum"] == 7
+        assert agg["fixed"] == 4
+        assert agg["global_avg"] in (report1["global_avg"], report2["global_avg"])
         # task level metrics
-        assert agg['a/avg'] == 3.0 / 4
-        assert agg['a/sum'] == 3
-        assert agg['a/fixed'] == 4
-        assert 'a/global_avg' not in agg
-        assert agg['b/avg'] == 1.0 / 3
-        assert agg['b/sum'] == 4
-        assert agg['b/fixed'] == 4
-        assert 'b/global_avg' not in agg
+        assert agg["a/avg"] == 3.0 / 4
+        assert agg["a/sum"] == 3
+        assert agg["a/fixed"] == 4
+        assert "a/global_avg" not in agg
+        assert agg["b/avg"] == 1.0 / 3
+        assert agg["b/sum"] == 4
+        assert agg["b/fixed"] == 4
+        assert "b/global_avg" not in agg
 
     def test_uneven_macro_aggrevation(self):
-        report1 = {'avg': AverageMetric(1, 1)}
-        report2 = {'avg': AverageMetric(0, 1)}
-        report3 = {'avg': AverageMetric(0, 1)}
+        report1 = {"avg": AverageMetric(1, 1)}
+        report2 = {"avg": AverageMetric(0, 1)}
+        report3 = {"avg": AverageMetric(0, 1)}
         agg1 = aggregate_named_reports(
-            {'a': report1, 'b': report2}, micro_average=False
+            {"a": report1, "b": report2}, micro_average=False
         )
-        agg2 = aggregate_named_reports({'a': {}, 'c': report3}, micro_average=False)
+        agg2 = aggregate_named_reports({"a": {}, "c": report3}, micro_average=False)
 
         agg = aggregate_unnamed_reports([agg1, agg2])
-        assert agg1['avg'] == 0.5
-        assert agg2['avg'] == 0.0
-        assert agg['a/avg'] == 1.0
-        assert agg['b/avg'] == 0.0
-        assert agg['c/avg'] == 0.0
-        assert agg['avg'] == 1.0 / 3
+        assert agg1["avg"] == 0.5
+        assert agg2["avg"] == 0.0
+        assert agg["a/avg"] == 1.0
+        assert agg["b/avg"] == 0.0
+        assert agg["c/avg"] == 0.0
+        assert agg["avg"] == 1.0 / 3
 
     def test_time_metric(self):
         metric = TimerMetric(10, 0, 1)
@@ -292,39 +292,39 @@ class TestAggregators(unittest.TestCase):
 
     def test_micro_aggregation(self):
         report1 = {
-            'avg': AverageMetric(3, 4),
-            'sum': SumMetric(3),
-            'fixed': FixedMetric(4),
-            'global_avg': GlobalAverageMetric(3, 4),
+            "avg": AverageMetric(3, 4),
+            "sum": SumMetric(3),
+            "fixed": FixedMetric(4),
+            "global_avg": GlobalAverageMetric(3, 4),
         }
         report2 = {
-            'avg': AverageMetric(1, 3),
-            'sum': SumMetric(4),
-            'fixed': FixedMetric(4),
-            'global_avg': GlobalAverageMetric(1, 3),
+            "avg": AverageMetric(1, 3),
+            "sum": SumMetric(4),
+            "fixed": FixedMetric(4),
+            "global_avg": GlobalAverageMetric(1, 3),
         }
-        agg = aggregate_named_reports({'a': report1, 'b': report2}, micro_average=True)
-        assert agg['avg'] == 4.0 / 7
-        assert agg['sum'] == 7
-        assert agg['fixed'] == 4
-        assert agg['global_avg'] in (report1['global_avg'], report2['global_avg'])
+        agg = aggregate_named_reports({"a": report1, "b": report2}, micro_average=True)
+        assert agg["avg"] == 4.0 / 7
+        assert agg["sum"] == 7
+        assert agg["fixed"] == 4
+        assert agg["global_avg"] in (report1["global_avg"], report2["global_avg"])
         # task level metrics
-        assert agg['a/avg'] == 3.0 / 4
-        assert agg['a/sum'] == 3
-        assert agg['a/fixed'] == 4
-        assert 'a/global_avg' not in agg
-        assert agg['b/avg'] == 1.0 / 3
-        assert agg['b/sum'] == 4
-        assert agg['b/fixed'] == 4
-        assert 'b/global_avg' not in agg
+        assert agg["a/avg"] == 3.0 / 4
+        assert agg["a/sum"] == 3
+        assert agg["a/fixed"] == 4
+        assert "a/global_avg" not in agg
+        assert agg["b/avg"] == 1.0 / 3
+        assert agg["b/sum"] == 4
+        assert agg["b/fixed"] == 4
+        assert "b/global_avg" not in agg
 
     def test_auc_metrics(self):
-        class_name = 'class_notok'
-        class_to_int = {'class_notok': 1, 'class_ok': 0}
+        class_name = "class_notok"
+        class_to_int = {"class_notok": 1, "class_ok": 0}
         decimal_place = 3
         # task 1; borrowing example from scikit learn
         task1_probabilities = [0.1, 0.4, 0.35, 0.8]
-        task1_gold_labels = ['class_ok', 'class_ok', 'class_notok', 'class_notok']
+        task1_gold_labels = ["class_ok", "class_ok", "class_notok", "class_notok"]
         task1_pos_buckets = {0.35: 1, 0.8: 1}
         task1_neg_buckets = {0.1: 1, 0.4: 1}
         task1_exp_fp_tp = {
@@ -333,12 +333,12 @@ class TestAggregators(unittest.TestCase):
             0.35: (1, 2),
             0.4: (1, 1),
             0.8: (0, 1),
-            '_': (0, 0),
+            "_": (0, 0),
         }
 
         # task 2; checking with an odd number
         task2_probabilities = [0.05, 0.2, 0.6]
-        task2_gold_labels = ['class_ok', 'class_ok', 'class_notok']
+        task2_gold_labels = ["class_ok", "class_ok", "class_notok"]
         task2_pos_buckets = {0.6: 1}
         task2_neg_buckets = {0.05: 1, 0.2: 1}
         task2_exp_fp_tp = {0.05: (2, 1), 0.2: (1, 1), 0.6: (0, 1), 1.5: (0, 0)}
@@ -357,19 +357,19 @@ class TestAggregators(unittest.TestCase):
             0.4: (1, 2),
             0.6: (0, 2),
             0.8: (0, 1),
-            '_': (0, 0),
+            "_": (0, 0),
         }
 
         # task 4: testing when there's ones in the same bucket
         task4_probabilities = [0.1, 0.400001, 0.4, 0.359, 0.35, 0.900001, 0.9]
         task4_gold_labels = [
-            'class_ok',
-            'class_ok',
-            'class_ok',
-            'class_notok',
-            'class_notok',
-            'class_notok',
-            'class_notok',
+            "class_ok",
+            "class_ok",
+            "class_ok",
+            "class_notok",
+            "class_notok",
+            "class_notok",
+            "class_notok",
         ]
         task4_neg_buckets = {0.1: 1, 0.4: 2}
         task4_pos_buckets = {0.35: 1, 0.359: 1, 0.9: 2}
@@ -380,7 +380,7 @@ class TestAggregators(unittest.TestCase):
             0.359: (2, 3),
             0.4: (2, 2),
             0.9: (0, 2),
-            '_': (0, 0),
+            "_": (0, 0),
         }
 
         # task 5: testing when there's more difference in the bucket (similar to task 4),
@@ -388,15 +388,15 @@ class TestAggregators(unittest.TestCase):
         task5_probabilities = [0, 0.8, 0.4009, 0.400, 0.359, 0.35, 0.9999, 0.999, 1]
         # 4 okay, 5 not okay
         task5_gold_labels = [
-            'class_ok',
-            'class_ok',
-            'class_ok',
-            'class_ok',
-            'class_notok',
-            'class_notok',
-            'class_notok',
-            'class_notok',
-            'class_notok',
+            "class_ok",
+            "class_ok",
+            "class_ok",
+            "class_ok",
+            "class_notok",
+            "class_notok",
+            "class_notok",
+            "class_notok",
+            "class_notok",
         ]
         task5_neg_buckets = {0: 1, 0.8: 1, 0.4: 2}
         task5_pos_buckets = {0.35: 1, 0.359: 1, 0.999: 2, 1: 1}
@@ -409,7 +409,7 @@ class TestAggregators(unittest.TestCase):
             0.8: (1, 3),
             0.9: (0, 3),
             1.0: (0, 1),
-            '_': (0, 0),
+            "_": (0, 0),
         }
 
         # task 6: combining task 4 + task 5 (combining with same keys)
@@ -428,7 +428,7 @@ class TestAggregators(unittest.TestCase):
             0.9: (0, 5),
             0.999: (0, 3),
             1: (0, 1),
-            '_': (0, 0),
+            "_": (0, 0),
         }
 
         # run and check the TPs and FPs for singles
@@ -566,7 +566,7 @@ class TestAggregators(unittest.TestCase):
 
         ### now reusing the tests for the other class, just checking rocs
         ## for binary classes, they should be the same?
-        class_name = 'class_ok'
+        class_name = "class_ok"
         task1_probabilities = [1 - curr_prob for curr_prob in task1_probabilities]
         task2_probabilities = [1 - curr_prob for curr_prob in task2_probabilities]
         task3_probabilities = [1 - curr_prob for curr_prob in task3_probabilities]
@@ -648,26 +648,26 @@ class TestAggregators(unittest.TestCase):
         report2 = {}
         task1_f1s = {}
         task2_f1s = {}
-        classes = ['class_ok', 'class_notok']
+        classes = ["class_ok", "class_notok"]
         task1_predictions = [
-            'class_ok',
-            'class_ok',
-            'class_ok',
-            'class_ok',
-            'class_notok',
-            'class_notok',
-            'class_notok',
-            'class_notok',
+            "class_ok",
+            "class_ok",
+            "class_ok",
+            "class_ok",
+            "class_notok",
+            "class_notok",
+            "class_notok",
+            "class_notok",
         ]
         task1_gold_labels = [
-            'class_ok',
-            'class_ok',
-            'class_notok',
-            'class_notok',
-            'class_ok',
-            'class_ok',
-            'class_notok',
-            'class_notok',
+            "class_ok",
+            "class_ok",
+            "class_notok",
+            "class_notok",
+            "class_ok",
+            "class_ok",
+            "class_notok",
+            "class_notok",
         ]
         for each in classes:
             precisions, recalls, f1s = ConfusionMatrixMetric.compute_metrics(
@@ -675,36 +675,36 @@ class TestAggregators(unittest.TestCase):
             )
             report1.update(
                 {
-                    f'{each}_precision': sum(precisions, None),
-                    f'{each}_recall': sum(recalls, None),
-                    f'{each}_f1': sum(f1s, None),
+                    f"{each}_precision": sum(precisions, None),
+                    f"{each}_recall": sum(recalls, None),
+                    f"{each}_f1": sum(f1s, None),
                 }
             )
             task1_f1s[each] = f1s
-        report1['weighted_f1'] = sum(WeightedF1Metric.compute_many(task1_f1s), None)
+        report1["weighted_f1"] = sum(WeightedF1Metric.compute_many(task1_f1s), None)
         # task 2, for class ok
         # TP = 3, TN = 2, FP = 2, FN = 1
         # for class not ok
         # TP = 2, TN = 3, FP = 1, FN = 2
         task2_predictions = [
-            'class_ok',
-            'class_ok',
-            'class_ok',
-            'class_ok',
-            'class_ok',
-            'class_notok',
-            'class_notok',
-            'class_notok',
+            "class_ok",
+            "class_ok",
+            "class_ok",
+            "class_ok",
+            "class_ok",
+            "class_notok",
+            "class_notok",
+            "class_notok",
         ]
         task2_gold_labels = [
-            'class_ok',
-            'class_ok',
-            'class_notok',
-            'class_notok',
-            'class_ok',
-            'class_ok',
-            'class_notok',
-            'class_notok',
+            "class_ok",
+            "class_ok",
+            "class_notok",
+            "class_notok",
+            "class_ok",
+            "class_ok",
+            "class_notok",
+            "class_notok",
         ]
         for each in classes:
             precisions, recalls, f1s = ConfusionMatrixMetric.compute_metrics(
@@ -712,34 +712,34 @@ class TestAggregators(unittest.TestCase):
             )
             report2.update(
                 {
-                    f'{each}_precision': sum(precisions, None),
-                    f'{each}_recall': sum(recalls, None),
-                    f'{each}_f1': sum(f1s, None),
+                    f"{each}_precision": sum(precisions, None),
+                    f"{each}_recall": sum(recalls, None),
+                    f"{each}_f1": sum(f1s, None),
                 }
             )
             task2_f1s[each] = f1s
-        report2['weighted_f1'] = sum(WeightedF1Metric.compute_many(task2_f1s), None)
+        report2["weighted_f1"] = sum(WeightedF1Metric.compute_many(task2_f1s), None)
 
         agg = aggregate_named_reports(
-            {'task1': report1, 'task2': report2}, micro_average=False
+            {"task1": report1, "task2": report2}, micro_average=False
         )
         # task1
-        assert agg['task1/class_ok_precision'] == 0.5
-        assert agg['task1/class_ok_recall'] == 0.5
-        assert agg['task1/class_ok_f1'] == 0.5
+        assert agg["task1/class_ok_precision"] == 0.5
+        assert agg["task1/class_ok_recall"] == 0.5
+        assert agg["task1/class_ok_f1"] == 0.5
         # task2
-        assert agg['task2/class_ok_precision'] == 3 / 5
-        assert agg['task2/class_ok_recall'] == 3 / 4
-        assert agg['task2/class_ok_f1'] == 2 / 3
+        assert agg["task2/class_ok_precision"] == 3 / 5
+        assert agg["task2/class_ok_recall"] == 3 / 4
+        assert agg["task2/class_ok_f1"] == 2 / 3
         # task2 not ok
-        assert agg['task2/class_notok_precision'] == 2 / 3
-        assert agg['task2/class_notok_recall'] == 0.5
-        assert agg['task2/class_notok_f1'] == 4 / 7
+        assert agg["task2/class_notok_precision"] == 2 / 3
+        assert agg["task2/class_notok_recall"] == 0.5
+        assert agg["task2/class_notok_f1"] == 4 / 7
         # weighted f1
-        assert agg['task1/weighted_f1'] == 0.5
-        assert agg['task2/weighted_f1'] == (2 / 3) * 0.5 + (4 / 7) * 0.5
+        assert agg["task1/weighted_f1"] == 0.5
+        assert agg["task2/weighted_f1"] == (2 / 3) * 0.5 + (4 / 7) * 0.5
         # all
-        assert agg['weighted_f1'] == (0.5 + (2 / 3) * 0.5 + (4 / 7) * 0.5) / 2
+        assert agg["weighted_f1"] == (0.5 + (2 / 3) * 0.5 + (4 / 7) * 0.5) / 2
 
 
 class TestDistinct(unittest.TestCase):
@@ -818,8 +818,8 @@ class TestFairseqBleuMetric(unittest.TestCase):
 
         assert all(
             parlai_bleus[k] == fairseq_bleus[k] for k in range(1, 5)
-        ), f'{parlai_bleus}\n{fairseq_bleus}'
+        ), f"{parlai_bleus}\n{fairseq_bleus}"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

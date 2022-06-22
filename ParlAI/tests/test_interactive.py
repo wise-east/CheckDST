@@ -29,14 +29,14 @@ class FakeInput(object):
     def __call__(self, prompt=""):
         self.turn += 1
         if self.turn <= self.max_turns:
-            return f'Turn {self.turn}'
+            return f"Turn {self.turn}"
 
         self.turn = 0
         self.episode += 1
         if self.episode <= self.max_episodes:
-            return '[DONE]'
+            return "[DONE]"
         elif self.clean_exit:
-            return '[EXIT]'
+            return "[EXIT]"
         else:
             raise EOFError
 
@@ -44,26 +44,26 @@ class FakeInput(object):
 class TestInteractive(unittest.TestCase):
     def setUp(self):
         # override input() with our fake, deterministic output
-        patcher = mock.patch('builtins.input', new=FakeInput())
+        patcher = mock.patch("builtins.input", new=FakeInput())
         self.addCleanup(patcher.stop)
         patcher.start()
 
     def test_repeat(self):
-        Interactive.main(model='repeat_query')
+        Interactive.main(model="repeat_query")
 
     def test_safe_interactive(self):
-        SafeInteractive.main(model='repeat_query')
+        SafeInteractive.main(model="repeat_query")
 
 
 class TestInteractiveConvai2(unittest.TestCase):
     def setUp(self):
         # override input() with our fake, deterministic output
-        patcher = mock.patch('builtins.input', new=FakeInput())
+        patcher = mock.patch("builtins.input", new=FakeInput())
         self.addCleanup(patcher.stop)
         patcher.start()
 
     def test_repeat(self):
-        Interactive.main(model='repeat_query', task='convai2', datatype='valid')
+        Interactive.main(model="repeat_query", task="convai2", datatype="valid")
 
 
 class TestInteractiveLogging(unittest.TestCase):
@@ -71,12 +71,12 @@ class TestInteractiveLogging(unittest.TestCase):
         for clean in (True, False):
             with self.subTest(clean=clean), testing_utils.tempdir() as tmpdir:
                 fake_input = FakeInput(max_episodes=2, clean_exit=clean)
-                with mock.patch('builtins.input', new=fake_input):
+                with mock.patch("builtins.input", new=fake_input):
                     self._run_test_repeat(tmpdir, fake_input)
 
     def _run_test_repeat(self, tmpdir: str, fake_input: FakeInput):
-        outfile = os.path.join(tmpdir, 'log.jsonl')
-        Interactive.main(model='repeat_query', outfile=outfile)
+        outfile = os.path.join(tmpdir, "log.jsonl")
+        Interactive.main(model="repeat_query", outfile=outfile)
 
         log = conversations.Conversations(outfile)
         self.assertEqual(len(log), fake_input.max_episodes)
@@ -95,30 +95,30 @@ class TestInteractiveWeb(unittest.TestCase):
         port = random.randint(30000, 40000)
         thread = threading.Thread(
             target=iweb.InteractiveWeb.main,
-            kwargs={'model': 'repeat_query', 'port': port},
+            kwargs={"model": "repeat_query", "port": port},
             daemon=True,
         )
         thread.start()
         iweb.wait()
 
-        r = requests.get(f'http://localhost:{port}/')
-        assert '<html>' in r.text
+        r = requests.get(f"http://localhost:{port}/")
+        assert "<html>" in r.text
 
-        r = requests.post(f'http://localhost:{port}/interact', data='This is a test')
+        r = requests.post(f"http://localhost:{port}/interact", data="This is a test")
         assert r.status_code == 200
         response = json.loads(r.text)
-        assert 'text' in response
-        assert response['text'] == 'This is a test'
+        assert "text" in response
+        assert response["text"] == "This is a test"
 
-        r = requests.post(f'http://localhost:{port}/reset')
+        r = requests.post(f"http://localhost:{port}/reset")
         assert r.status_code == 200
         response = json.loads(r.text)
         assert response == {}
 
-        r = requests.get(f'http://localhost:{port}/bad')
+        r = requests.get(f"http://localhost:{port}/bad")
         assert r.status_code == 500
 
-        r = requests.post(f'http://localhost:{port}/bad')
+        r = requests.post(f"http://localhost:{port}/bad")
         assert r.status_code == 500
 
         iweb.shutdown()
@@ -129,9 +129,9 @@ class TestProfileInteractive(unittest.TestCase):
         from parlai.scripts.profile_interactive import ProfileInteractive
 
         fake_input = FakeInput(max_episodes=2)
-        with mock.patch('builtins.input', new=fake_input):
-            ProfileInteractive.main(model='repeat_query')
+        with mock.patch("builtins.input", new=fake_input):
+            ProfileInteractive.main(model="repeat_query")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

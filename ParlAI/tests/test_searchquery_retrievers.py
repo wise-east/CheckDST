@@ -36,7 +36,7 @@ if TRANSFORMER_INSTALLED:
             pass
 
         def generate_search_query(self, query):
-            return ['mock search query', NO_SEARCH_QUERY]
+            return ["mock search query", NO_SEARCH_QUERY]
 
         def initiate_retriever_api(self, opt) -> SearchEngineRetriever:
             return SearchEngineRetrieverMock(opt)
@@ -58,22 +58,22 @@ if TRANSFORMER_INSTALLED:
 ################################################################
 
 common_opt = [
-    '--init-model',
-    'zoo:unittest/transformer_generator2/model',
-    '--dict-file',
-    'zoo:unittest/transformer_generator2/model.dict',
-    '--n-layers',
-    '2',
-    '--n-heads',
-    '2',
-    '--embedding-size',
-    '32',
-    '--ffn-size',
-    '128',
-    '--dict-tokenizer',
-    're',
-    '--generation-model',
-    'transformer/generator',
+    "--init-model",
+    "zoo:unittest/transformer_generator2/model",
+    "--dict-file",
+    "zoo:unittest/transformer_generator2/model.dict",
+    "--n-layers",
+    "2",
+    "--n-heads",
+    "2",
+    "--embedding-size",
+    "32",
+    "--ffn-size",
+    "128",
+    "--dict-tokenizer",
+    "re",
+    "--generation-model",
+    "transformer/generator",
 ]
 
 
@@ -84,10 +84,10 @@ class TestSearchQuerySearchEngineRetriever(unittest.TestCase):
         opt = parser.parse_args(
             common_opt
             + [
-                '--model',
-                'parlai.agents.fid.fid:SearchQuerySearchEngineFiDAgent',
-                '--retriever-debug-index',
-                'compressed',
+                "--model",
+                "parlai.agents.fid.fid:SearchQuerySearchEngineFiDAgent",
+                "--retriever-debug-index",
+                "compressed",
             ]
         )
         dictionary = BertTokenizerDictionaryAgent(opt)
@@ -117,7 +117,7 @@ class TestSearchQuerySearchEngineRetriever(unittest.TestCase):
         second_retrieved_doc = retrieved_docs[1][1]
         self.assertIsInstance(second_retrieved_doc, Document)
         self.assertIsInstance(second_retrieved_doc.get_text(), str)
-        self.assertEqual(second_retrieved_doc.get_text(), '')
+        self.assertEqual(second_retrieved_doc.get_text(), "")
 
 
 ################################################################
@@ -132,17 +132,17 @@ class TestSearchQueryFAISSIndexRetriever(unittest.TestCase):
         opt = parser.parse_args(
             common_opt
             + [
-                '--model',
-                'parlai.agents.fid.fid:SearchQueryFAISSIndexFiDAgent',
-                '--retriever-debug-index',
-                'compressed',
+                "--model",
+                "parlai.agents.fid.fid:SearchQueryFAISSIndexFiDAgent",
+                "--retriever-debug-index",
+                "compressed",
             ]
         )
         dictionary = BertTokenizerDictionaryAgent(opt)
         self.rertriever = MockSearchQueryFAISSIndexRetriever(opt, dictionary, None)
 
     def test_retrieval(self):
-        self.rertriever.queries = ['mock query']
+        self.rertriever.queries = ["mock query"]
 
         retrieved = self.rertriever.retrieve_and_score(
             torch.LongTensor([[101, 456, 654, 102]])
@@ -157,7 +157,7 @@ class TestSearchQueryFAISSIndexRetriever(unittest.TestCase):
 
         second_retrieved_doc = retrieved_docs[0][1]
         self.assertIsInstance(second_retrieved_doc, Document)
-        self.assertNotEqual(second_retrieved_doc.get_text(), '')
+        self.assertNotEqual(second_retrieved_doc.get_text(), "")
 
     def test_retrieval_no_query(self):
         self.rertriever.queries = [NO_SEARCH_QUERY]
@@ -176,4 +176,4 @@ class TestSearchQueryFAISSIndexRetriever(unittest.TestCase):
         second_retrieved_doc = retrieved_docs[0][1]
         self.assertIsInstance(second_retrieved_doc, Document)
         self.assertIsInstance(second_retrieved_doc.get_text(), str)
-        self.assertEqual(second_retrieved_doc.get_text(), '')
+        self.assertEqual(second_retrieved_doc.get_text(), "")

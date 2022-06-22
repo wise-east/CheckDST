@@ -94,8 +94,8 @@ for key in tqdm(list(keys)):
         if key in data1 and key not in data2:
             logger.info(data1[key])
         continue
-    slot1 = dict(seq2dict(data1[key]['slots_inf']))
-    slot2 = dict(seq2dict(data2[key]['slots_inf']))
+    slot1 = dict(seq2dict(data1[key]["slots_inf"]))
+    slot2 = dict(seq2dict(data2[key]["slots_inf"]))
     if slot1 != slot2:
 
         diff_dict1, diff_dict2 = get_diffs(slot1, slot2)
@@ -107,7 +107,7 @@ for key in tqdm(list(keys)):
         # print(f"slots for {v2}: {slot2}")
 
         print(f"Dialogue ID: {key}")
-        if data1[key]['context'] != data2[key]['context']:
+        if data1[key]["context"] != data2[key]["context"]:
             print(f"Context1: {data1[key]['context']}")
             print(f"Context2: {data2[key]['context']}")
         else:

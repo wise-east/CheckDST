@@ -84,8 +84,8 @@ class Opt(dict):
         Display all deepcopies.
         """
         if len(self.deepcopies) == 0:
-            return 'No deepcopies performed on this opt.'
-        return '\n'.join(f'{i}. {loc}' for i, loc in enumerate(self.deepcopies, 1))
+            return "No deepcopies performed on this opt."
+        return "\n".join(f"{i}. {loc}" for i, loc in enumerate(self.deepcopies, 1))
 
     def display_history(self, key):
         """
@@ -97,11 +97,11 @@ class Opt(dict):
             if key != key_:
                 continue
             i += 1
-            changes.append(f'{i}. {key} was set to {val} at:\n{loc}')
+            changes.append(f"{i}. {key} was set to {val} at:\n{loc}")
         if changes:
-            return '\n'.join(changes)
+            return "\n".join(changes)
         else:
-            return f'No history for {key}'
+            return f"No history for {key}"
 
     def save(self, filename: str) -> None:
         """
@@ -117,10 +117,10 @@ class Opt(dict):
             if key in dct:
                 del dct[key]
 
-        with PathManager.open(filename, 'w', encoding='utf-8') as f:
+        with PathManager.open(filename, "w", encoding="utf-8") as f:
             json.dump(dct, fp=f, indent=4)
             # extra newline for convenience of working with jq
-            f.write('\n')
+            f.write("\n")
 
     @classmethod
     def load(cls, optfile: str) -> Opt:
@@ -129,11 +129,11 @@ class Opt(dict):
         """
         try:
             # try json first
-            with PathManager.open(optfile, 'r', encoding='utf-8') as t_handle:
+            with PathManager.open(optfile, "r", encoding="utf-8") as t_handle:
                 dct = json.load(t_handle)
         except UnicodeDecodeError:
             # oops it's pickled
-            with PathManager.open(optfile, 'rb') as b_handle:
+            with PathManager.open(optfile, "rb") as b_handle:
                 dct = pickle.load(b_handle)
         for key in __AUTOCLEAN_KEYS__:
             if key in dct:
@@ -163,7 +163,7 @@ class Opt(dict):
             return cls.load(user_filename)
         else:
             # Maybe a bundled opt preset
-            for root in ['parlai', 'parlai_internal', 'parlai_fb']:
+            for root in ["parlai", "parlai_internal", "parlai_fb"]:
                 try:
                     if pkg_resources.resource_exists(root, oa_filename):
                         return cls.load(

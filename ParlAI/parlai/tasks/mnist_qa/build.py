@@ -12,19 +12,19 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/mnist/mnist.tar.gz',
-        'mnist.tar.gz',
-        'c4e2f85cdae81ebf3a76d7ac0f0af8c4d91f4d1fb9bc2fd942b669a72b80585d',
+        "http://parl.ai/downloads/mnist/mnist.tar.gz",
+        "mnist.tar.gz",
+        "c4e2f85cdae81ebf3a76d7ac0f0af8c4d91f4d1fb9bc2fd942b669a72b80585d",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'mnist')
+    dpath = os.path.join(opt["datapath"], "mnist")
     version = None
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

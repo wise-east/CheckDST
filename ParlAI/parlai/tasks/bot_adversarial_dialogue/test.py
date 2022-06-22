@@ -8,20 +8,20 @@ from parlai.utils.testing import AutoTeacherTest  # noqa: F401
 
 
 class TestBotAdversarialDialogueTurn4Teacher(AutoTeacherTest):
-    task = 'bot_adversarial_dialogue:bad_speaker_to_eval=all:bad_safety_mix=all:bad_num_turns=4'
+    task = "bot_adversarial_dialogue:bad_speaker_to_eval=all:bad_safety_mix=all:bad_num_turns=4"
 
 
 class TestBotAdversarialDialogueSafeTeacher(AutoTeacherTest):
-    task = 'bot_adversarial_dialogue:bad_speaker_to_eval=all:bad_safety_mix=safe:bad_num_turns=4'
+    task = "bot_adversarial_dialogue:bad_speaker_to_eval=all:bad_safety_mix=safe:bad_num_turns=4"
 
 
 class TestBotAdversarialDialogueHumanTeacher(AutoTeacherTest):
-    task = 'bot_adversarial_dialogue:bad_speaker_to_eval=human:bad_safety_mix=all:bad_num_turns=4'
+    task = "bot_adversarial_dialogue:bad_speaker_to_eval=human:bad_safety_mix=all:bad_num_turns=4"
 
 
 class TestHumanSafetyEvaluation(AutoTeacherTest):
-    task = 'bot_adversarial_dialogue:HumanSafetyEvaluation'
+    task = "bot_adversarial_dialogue:HumanSafetyEvaluation"
 
 
 class TestHumanNonadvSafetyEvaluation(AutoTeacherTest):
-    task = 'bot_adversarial_dialogue:HumanNonadvSafetyEvaluation'
+    task = "bot_adversarial_dialogue:HumanNonadvSafetyEvaluation"

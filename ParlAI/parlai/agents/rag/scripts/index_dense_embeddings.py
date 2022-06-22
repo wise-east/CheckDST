@@ -29,35 +29,35 @@ class Indexer(ParlaiScript):
         """
         Setup args.
         """
-        parser = ParlaiParser(True, True, 'Index Dense Embs')
+        parser = ParlaiParser(True, True, "Index Dense Embs")
         parser.add_argument(
-            '--embeddings-dir', type=str, help='directory of embeddings'
+            "--embeddings-dir", type=str, help="directory of embeddings"
         )
         parser.add_argument(
-            '--embeddings-name', type=str, default='', help='name of emb part'
+            "--embeddings-name", type=str, default="", help="name of emb part"
         )
         parser.add_argument(
-            '--partition-index',
-            type='bool',
+            "--partition-index",
+            type="bool",
             default=False,
-            help='specify True to partition indexing per file (useful when all files do not fit into memory)',
+            help="specify True to partition indexing per file (useful when all files do not fit into memory)",
         )
         parser.add_argument(
-            '--save-index-dir',
+            "--save-index-dir",
             type=str,
-            help='directory in which to save index',
+            help="directory in which to save index",
             default=None,
         )
         parser.add_argument(
-            '--num-shards',
+            "--num-shards",
             type=int,
             default=1,
-            help='how many workers to use to split up the work',
+            help="how many workers to use to split up the work",
         )
         parser.add_argument(
-            '--shard-id',
+            "--shard-id",
             type=int,
-            help='shard id for this worker. should be between 0 and num_shards',
+            help="shard id for this worker. should be between 0 and num_shards",
         )
         parser = RagAgent.add_cmdline_args(parser)
         parser.set_defaults(compressed_indexer_gpu_train=True)
@@ -68,40 +68,40 @@ class Indexer(ParlaiScript):
         Load dense embeddings and index with FAISS.
         """
         # create index
-        index_dir = self.opt['embeddings_dir']
+        index_dir = self.opt["embeddings_dir"]
         embs_name = (
-            f"{self.opt['embeddings_name']}_" if self.opt['embeddings_name'] else ''
+            f"{self.opt['embeddings_name']}_" if self.opt["embeddings_name"] else ""
         )
         num_parts = len(
             [
                 f
                 for f in os.listdir(index_dir)
-                if f.endswith('.pt') and 'sample' not in f
+                if f.endswith(".pt") and "sample" not in f
             ]
         )
         input_files = [
-            os.path.join(index_dir, f'{embs_name}{i}.pt') for i in range(num_parts)
+            os.path.join(index_dir, f"{embs_name}{i}.pt") for i in range(num_parts)
         ]
-        if self.opt['indexer_type'] == 'compressed':
-            index_name = self.opt['compressed_indexer_factory'].replace(',', '__')
-        elif self.opt['embeddings_name']:
-            index_name = self.opt['embeddings_name']
+        if self.opt["indexer_type"] == "compressed":
+            index_name = self.opt["compressed_indexer_factory"].replace(",", "__")
+        elif self.opt["embeddings_name"]:
+            index_name = self.opt["embeddings_name"]
         else:
-            index_name = 'hnsw_flat'
+            index_name = "hnsw_flat"
         index_path = os.path.join(index_dir, index_name)
 
-        if self.opt['save_index_dir']:
+        if self.opt["save_index_dir"]:
             index_path, index_name = os.path.split(index_path)
-            index_path = os.path.join(self.opt['save_index_dir'], index_name)
-            if not os.path.exists(self.opt['save_index_dir']):
-                logging.info(f'Creating directory for file {index_path}')
-                os.makedirs(self.opt['save_index_dir'])
+            index_path = os.path.join(self.opt["save_index_dir"], index_name)
+            if not os.path.exists(self.opt["save_index_dir"]):
+                logging.info(f"Creating directory for file {index_path}")
+                os.makedirs(self.opt["save_index_dir"])
 
-        logging.info(f'index path: {index_path}')
+        logging.info(f"index path: {index_path}")
         self.index_path = index_path
 
         self.index = indexer_factory(self.opt)
-        if self.opt['indexer_type'] != 'exact':
+        if self.opt["indexer_type"] != "exact":
             self.train_then_add(input_files)
         else:
             self.index_data(input_files)
@@ -117,7 +117,7 @@ class Indexer(ParlaiScript):
         """
         all_docs = []
         for in_file in input_files:
-            logging.info(f'Reading file {in_file}')
+            logging.info(f"Reading file {in_file}")
             docs = torch.load(in_file)
             if isinstance(docs, list):
                 all_docs += docs
@@ -138,15 +138,15 @@ class Indexer(ParlaiScript):
 
         tensors = []
         for s in input_files:
-            logging.info(f'Loading in file {s}')
+            logging.info(f"Loading in file {s}")
             tensor = torch.load(s)
-            if self.opt['partition_index']:
+            if self.opt["partition_index"]:
                 self.index.train([tensor])
                 self.index.add([tensor])
             else:
                 tensors.append(tensor)
 
-        if not self.opt['partition_index']:
+        if not self.opt["partition_index"]:
             self.index.train([torch.cat(tensors)])
             self.index.add([torch.cat(tensors)])
 

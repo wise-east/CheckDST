@@ -14,9 +14,9 @@ class TestAlice(unittest.TestCase):
         """
         Test that the ALICE agent is stable over time.
         """
-        valid, test = testing_utils.eval_model(dict(task='convai2', model='alice'))
-        self.assertEqual(valid['f1'], 0.01397)
+        valid, test = testing_utils.eval_model(dict(task="convai2", model="alice"))
+        self.assertEqual(valid["f1"], 0.01397)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

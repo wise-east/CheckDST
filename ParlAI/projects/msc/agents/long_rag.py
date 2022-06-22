@@ -84,12 +84,12 @@ class LongFidModel(FidModel):
     def add_cmdline_args(
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
-        if hasattr(FidModel, 'add_cmdline_args'):
+        if hasattr(FidModel, "add_cmdline_args"):
             FidModel.add_cmdline_args(parser, partial_opt)
-        longfid_group = parser.add_argument_group('Long Fid Model Args')
-        longfid_group.set_defaults(memory_key='full_text')
+        longfid_group = parser.add_argument_group("Long Fid Model Args")
+        longfid_group.set_defaults(memory_key="full_text")
         longfid_group.add_argument(
-            '--fid-ddp-compatible',
+            "--fid-ddp-compatible",
             type=bool,
             default=False,
             help=" whethether to set requires_grad = False for DDP compatibility",
@@ -120,10 +120,10 @@ class TransformerGeneratorVariantRagAgent(
 
 
 GENERATION_AGENTS = {
-    'transformer_variant/generator': TransformerGeneratorVariantRagAgent,
-    'transformer/generator': TransformerGeneratorRagAgent,
-    'bart': BartRagAgent,
-    't5': T5RagAgent,
+    "transformer_variant/generator": TransformerGeneratorVariantRagAgent,
+    "transformer/generator": TransformerGeneratorRagAgent,
+    "bart": BartRagAgent,
+    "t5": T5RagAgent,
 }
 
 
@@ -147,19 +147,19 @@ class LongRagAgent(TransformerGeneratorVariantRagAgent, RagAgent):
         RagAgent.add_cmdline_args(parser, partial_opt=None)
         TransformerGeneratorVariantRagAgent.add_cmdline_args(parser, partial_opt)
         parser.add_argument(
-            '--generation-model',
+            "--generation-model",
             type=str,
-            default='transformer_variant/generator',
-            help='which generation model to use',
+            default="transformer_variant/generator",
+            help="which generation model to use",
             choices=[
-                'transformer_variant/generator',
-                'transformer/generator',
-                'bart',
-                't5',
+                "transformer_variant/generator",
+                "transformer/generator",
+                "bart",
+                "t5",
             ],
         )
         parser.add_argument(
-            '--max-memories', type=int, default=10, help='maximum amount of memories. '
+            "--max-memories", type=int, default=10, help="maximum amount of memories. "
         )
         return parser
 
@@ -188,12 +188,12 @@ class LongFidAgent(LongRagAgent):
         self._rag_model_interface = Fid(self.opt, self.NULL_IDX)
 
     def build_model(self) -> Union[T5FidModel, LongFidModel]:
-        if self.generation_model == 't5':
+        if self.generation_model == "t5":
             model = T5FidModel(self.opt, self.dict)
         else:
             model = LongFidModel(self.opt, self.dict)
-        if self.opt['embedding_type'] != 'random':
+        if self.opt["embedding_type"] != "random":
             self._copy_embeddings(
-                model.encoder.embeddings.weight, self.opt['embedding_type']
+                model.encoder.embeddings.weight, self.opt["embedding_type"]
             )
         return model

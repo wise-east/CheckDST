@@ -53,38 +53,38 @@ def setup_args():
     """
     parser = ParlaiParser(False, False)
     parser.add_argument(
-        '-ids',
-        '--run-ids',
+        "-ids",
+        "--run-ids",
         type=str,
         default=None,
-        help='Comma-separated list of run IDs to analyze',
+        help="Comma-separated list of run IDs to analyze",
     )
     parser.add_argument(
-        '--root-dir',
+        "--root-dir",
         type=str,
         default=None,
-        help='Optional root ACUTE-Eval save directory',
+        help="Optional root ACUTE-Eval save directory",
     )
     parser.add_argument(
-        '--outdir', type=str, default=None, help='Where to save the results'
+        "--outdir", type=str, default=None, help="Where to save the results"
     )
     parser.add_argument(
-        '--pairings-filepath',
+        "--pairings-filepath",
         type=str,
         default=None,
-        help='Path to the ACUTE analysis pairs for the corresponding run id',
+        help="Path to the ACUTE analysis pairs for the corresponding run id",
     )
     parser.add_argument(
-        '--mephisto-root',
+        "--mephisto-root",
         type=str,
         default=None,
-        help='Where to check for mephisto data (default own dir)',
+        help="Where to check for mephisto data (default own dir)",
     )
     parser.add_argument(
-        '--model-ordering',
+        "--model-ordering",
         type=str,
         default=None,
-        help='Comma-separated list of models, in the order in which to display them',
+        help="Comma-separated list of models, in the order in which to display them",
     )
     return parser
 
@@ -96,7 +96,7 @@ class AcuteAnalyzer(object):
     Given a run_id, we can do lots of fun things!
     """
 
-    CHECKBOX_PREFIX = 'checkbox: '
+    CHECKBOX_PREFIX = "checkbox: "
     # Prepended to checkbox columns in self.dataframe
 
     def __init__(self, opt: Dict, remove_failed: bool = True):
@@ -111,30 +111,30 @@ class AcuteAnalyzer(object):
         :param remove_failed:
             Whether to remove ratings from turkers who failed onboarding
         """
-        assert ',' not in opt['run_ids'], "AcuteAnalyzer can only handle one run ID!"
-        self.run_id = opt['run_ids']
-        self.pairings_filepath = opt['pairings_filepath']
-        self.outdir = opt['outdir']
-        self.root_dir = opt['root_dir']
+        assert "," not in opt["run_ids"], "AcuteAnalyzer can only handle one run ID!"
+        self.run_id = opt["run_ids"]
+        self.pairings_filepath = opt["pairings_filepath"]
+        self.outdir = opt["outdir"]
+        self.root_dir = opt["root_dir"]
         # Get task for loading pairing files
-        self.task = opt.get('task', 'q')
-        if opt.get('model_ordering') is not None:
-            self.custom_model_ordering = opt['model_ordering'].split(',')
+        self.task = opt.get("task", "q")
+        if opt.get("model_ordering") is not None:
+            self.custom_model_ordering = opt["model_ordering"].split(",")
         else:
             self.custom_model_ordering = None
         if not self.outdir or not self.pairings_filepath:
             # Default to using self.root_dir as the root directory for outputs
             assert self.root_dir is not None and os.path.isdir(
                 self.root_dir
-            ), '--root-dir must be a real directory!'
+            ), "--root-dir must be a real directory!"
         if not self.pairings_filepath:
             # Will be set to a non-empty path later
-            self.pairings_filepath = ''
+            self.pairings_filepath = ""
         if not self.outdir:
-            self.outdir = os.path.join(self.root_dir, f'{self.run_id}-results')
+            self.outdir = os.path.join(self.root_dir, f"{self.run_id}-results")
         if not os.path.exists(self.outdir):
             os.makedirs(self.outdir, exist_ok=True)
-        mephisto_root_path = opt['mephisto_root']
+        mephisto_root_path = opt["mephisto_root"]
         if not mephisto_root_path:
             mephisto_root_path = None
         mephisto_db = LocalMephistoDB(database_path=mephisto_root_path)
@@ -146,7 +146,7 @@ class AcuteAnalyzer(object):
         if remove_failed:
             self._remove_failed_onboarding()
         if self.dataframe.index.size == 0:
-            raise ValueError('No valid results found!')
+            raise ValueError("No valid results found!")
         self._get_model_nick_names()
         self._load_pairing_files()
 
@@ -164,45 +164,45 @@ class AcuteAnalyzer(object):
         :return response:
             Formatted worker's response data from the task
         """
-        task_data = unit_details['data'][idx]
+        task_data = unit_details["data"][idx]
         response: Dict[str, Any] = {
-            'run_id': self.run_id,
-            'worker': unit_details['worker_id'],
-            'time_taken': unit_details['task_end'] - unit_details['task_start'],
-            'question': task_data['task_specs']['question'],
-            'unit_id': unit_details['unit_id'],
-            'task_start': unit_details['task_start'],
+            "run_id": self.run_id,
+            "worker": unit_details["worker_id"],
+            "time_taken": unit_details["task_end"] - unit_details["task_start"],
+            "question": task_data["task_specs"]["question"],
+            "unit_id": unit_details["unit_id"],
+            "task_start": unit_details["task_start"],
         }
-        onboarding = task_data['task_specs'].get('is_onboarding', False)
-        if 'speakerChoice' not in task_data or task_data['speakerChoice'] == '':
-            print('speakerChoice not in task data!')
+        onboarding = task_data["task_specs"].get("is_onboarding", False)
+        if "speakerChoice" not in task_data or task_data["speakerChoice"] == "":
+            print("speakerChoice not in task data!")
             return
-        choice = task_data['speakerChoice']
+        choice = task_data["speakerChoice"]
         if onboarding:
-            response['correct'] = choice == task_data['pairing_dict']['correct_answer']
+            response["correct"] = choice == task_data["pairing_dict"]["correct_answer"]
         else:
-            response['correct'] = -1
+            response["correct"] = -1
 
         speakers_to_eval = sorted(task_data["pairing_dict"]["speakers_to_eval"])
         response.update(
             {
-                'winner': choice,
-                'loser': speakers_to_eval[1 - (speakers_to_eval.index(choice))],
-                'eval_choice_0': speakers_to_eval[0],
-                'eval_choice_1': speakers_to_eval[1],
-                'reason': task_data['textReason'],
-                'is_onboarding': onboarding,
-                'matchup': f"{'__vs__'.join(speakers_to_eval)}",
-                'pairing_id': task_data['pair_id'],
+                "winner": choice,
+                "loser": speakers_to_eval[1 - (speakers_to_eval.index(choice))],
+                "eval_choice_0": speakers_to_eval[0],
+                "eval_choice_1": speakers_to_eval[1],
+                "reason": task_data["textReason"],
+                "is_onboarding": onboarding,
+                "matchup": f"{'__vs__'.join(speakers_to_eval)}",
+                "pairing_id": task_data["pair_id"],
             }
         )
 
         # If it exists, add in which checkboxes of possible reasons the Turkers checked
-        if len(task_data.get('speakerReasons', {})) > 0:
+        if len(task_data.get("speakerReasons", {})) > 0:
             response.update(
                 {
                     self.checkbox_prefix + reason: checked
-                    for reason, checked in task_data['speakerReasons'].items()
+                    for reason, checked in task_data["speakerReasons"].items()
                 }
             )
         return response
@@ -238,13 +238,13 @@ class AcuteAnalyzer(object):
             unit_details = self._parse_unit(unit)
             if unit_details is None:
                 continue
-            for idx in range(len(unit_details['data'])):
+            for idx in range(len(unit_details["data"])):
                 response = self._extract_response_by_index(unit_details, idx)
                 if response is not None:
                     responses.append(response)
 
         if len(responses) == 0:
-            raise ValueError('No valid results found!')
+            raise ValueError("No valid results found!")
         else:
             return pd.DataFrame(responses)
 
@@ -252,9 +252,9 @@ class AcuteAnalyzer(object):
         """
         Check that the same eval question has been used for all results.
         """
-        if len(set(self.dataframe['question'].unique())) > 1:
+        if len(set(self.dataframe["question"].unique())) > 1:
             raise ValueError(
-                'All results must share the same eval question for consistency!'
+                "All results must share the same eval question for consistency!"
             )
 
     def _remove_failed_onboarding(self):
@@ -264,7 +264,7 @@ class AcuteAnalyzer(object):
         df = self.dataframe
 
         all_workers_failing_onboarding = df.loc[
-            df['is_onboarding'] & (df['correct'] == False), 'worker'  # noqa: E712
+            df["is_onboarding"] & (df["correct"] == False), "worker"  # noqa: E712
         ].values
 
         workers_failing_onboarding = sorted(
@@ -275,57 +275,57 @@ class AcuteAnalyzer(object):
             ~df["worker"].isin(workers_failing_onboarding) & ~df["is_onboarding"]
         ]
         print(
-            f'{self.dataframe.size:d} dataframe entries remaining after removing users who failed onboarding.'
+            f"{self.dataframe.size:d} dataframe entries remaining after removing users who failed onboarding."
         )
 
     def _load_pairing_files(self):
         df = self.dataframe
         if not os.path.exists(self.pairings_filepath):
-            print('No valid pairings filepath was passed in: will extract likely path.')
+            print("No valid pairings filepath was passed in: will extract likely path.")
             self.pairings_filepath = get_hashed_combo_path(
                 root_dir=self.root_dir,
-                subdir='pairings_files',
+                subdir="pairings_files",
                 task=self.task,
                 combos=self.combos,
             )
         if not os.path.exists(self.pairings_filepath):
             print(
-                f'WARNING: Pairings filepath {self.pairings_filepath} could not be found.'
+                f"WARNING: Pairings filepath {self.pairings_filepath} could not be found."
             )
             self.pairings_filepath = os.path.join(
                 self.root_dir,
-                'pairings_files',
+                "pairings_files",
                 hashlib.sha1(
-                    '___vs___'.join(
+                    "___vs___".join(
                         [f"{m}.{'q'.replace(':', '_')}" for m in self.models]
-                    ).encode('utf-8')
+                    ).encode("utf-8")
                 ).hexdigest()[:10],
             )
         if not os.path.exists(self.pairings_filepath):
             # For backward compatibility
             print(
-                f'WARNING: Pairings filepath {self.pairings_filepath} could not be found.'
+                f"WARNING: Pairings filepath {self.pairings_filepath} could not be found."
             )
             self.pairings_filepath = os.path.join(
                 self.root_dir,
-                'pairings_files',
-                '___vs___'.join(
+                "pairings_files",
+                "___vs___".join(
                     [f"{m}.{self.task.replace(':', '_')}" for m in self.models]
                 ),
             )
         if not os.path.exists(self.pairings_filepath):
             print(
-                f'NOTE: Pairings filepath {self.pairings_filepath} could not be found!'
+                f"NOTE: Pairings filepath {self.pairings_filepath} could not be found!"
             )
             return
         self.pairings = []
-        with open(self.pairings_filepath, 'r') as f:
+        with open(self.pairings_filepath, "r") as f:
             for line in f:
                 pair = json.loads(line)
-                model1, model2 = pair['speakers_to_eval']
-                pair[model1] = pair['dialogue_dicts'][0]
-                pair[model2] = pair['dialogue_dicts'][1]
-                del pair['dialogue_dicts']
+                model1, model2 = pair["speakers_to_eval"]
+                pair[model1] = pair["dialogue_dicts"][0]
+                pair[model2] = pair["dialogue_dicts"][1]
+                del pair["dialogue_dicts"]
                 self.pairings.append(pair)
         self.pairs_to_eval = [self.pairings[i] for i in df.pairing_id.values.tolist()]
         # Build dialogue_ids => dialogue mappings
@@ -333,23 +333,23 @@ class AcuteAnalyzer(object):
         winner_dialogues = []
         loser_dialogues = []
         for i, (_, row) in enumerate(df.iterrows()):
-            winner = row['winner']
-            loser = row['loser']
+            winner = row["winner"]
+            loser = row["loser"]
             winner_dialogues.append(self.pairs_to_eval[i][winner])
             loser_dialogues.append(self.pairs_to_eval[i][loser])
-        df['pairs_to_eval'] = pd.Series(self.pairs_to_eval, index=df.index)
-        df['winner_dialogue'] = pd.Series(winner_dialogues, index=df.index)
-        df['loser_dialogue'] = pd.Series(loser_dialogues, index=df.index)
+        df["pairs_to_eval"] = pd.Series(self.pairs_to_eval, index=df.index)
+        df["winner_dialogue"] = pd.Series(winner_dialogues, index=df.index)
+        df["loser_dialogue"] = pd.Series(loser_dialogues, index=df.index)
         self.dataframe = df
 
     def _get_model_nick_names(self):
         df = self.dataframe
-        df = df[df['run_id'] == self.run_id]
+        df = df[df["run_id"] == self.run_id]
         matchups = list(df.matchup.unique())
         models = set()
         combos = set()
         for matchup in matchups:
-            model1, model2 = matchup.split('__vs__')
+            model1, model2 = matchup.split("__vs__")
             models.add(model1)
             models.add(model2)
             combos.add(tuple(sorted((model1, model2))))
@@ -362,31 +362,31 @@ class AcuteAnalyzer(object):
         """
         Return dataframe reasons.
         """
-        return self.dataframe['reason'].values.tolist()
+        return self.dataframe["reason"].values.tolist()
 
     def get_max_hits_per_worker(self) -> List[int]:
         """
         Get max number of hits per worker.
         """
-        return self.dataframe.groupby('worker')['run_id'].count().max()
+        return self.dataframe.groupby("worker")["run_id"].count().max()
 
     def get_wins_per_model_matchup(self) -> pd.DataFrame:
         """
         Return the wins for each model by matchup.
         """
         self.matchup_total_df = (
-            self.dataframe.groupby(['eval_choice_0', 'eval_choice_1'])['run_id']
+            self.dataframe.groupby(["eval_choice_0", "eval_choice_1"])["run_id"]
             .count()
-            .to_frame('matchup_total')
+            .to_frame("matchup_total")
         )
         self.win_total_df = (
             self.dataframe.groupby(
-                ['eval_choice_0', 'eval_choice_1', 'winner', 'loser']
-            )['loser']
+                ["eval_choice_0", "eval_choice_1", "winner", "loser"]
+            )["loser"]
             .count()
-            .to_frame('win_total')
+            .to_frame("win_total")
             .reset_index()
-            .set_index(['eval_choice_0', 'eval_choice_1'])
+            .set_index(["eval_choice_0", "eval_choice_1"])
         )
         return self.win_total_df
 
@@ -396,11 +396,11 @@ class AcuteAnalyzer(object):
 
         Sorted according to win percentage
         """
-        if not hasattr(self, 'win_total_df'):
+        if not hasattr(self, "win_total_df"):
             self.get_wins_per_model_matchup()
 
         self.win_fraction_df = self.matchup_total_df.join(self.win_total_df).assign(
-            win_frac=lambda df: df['win_total'] / df['matchup_total']
+            win_frac=lambda df: df["win_total"] / df["matchup_total"]
         )
 
         pivoted_df = self.win_fraction_df.pivot(
@@ -428,12 +428,12 @@ class AcuteAnalyzer(object):
         """
         matchup_total_1_df = self.matchup_total_df.reset_index()
         matchup_total_2_df = matchup_total_1_df.rename(
-            columns={'eval_choice_0': 'eval_choice_1', 'eval_choice_1': 'eval_choice_0'}
+            columns={"eval_choice_0": "eval_choice_1", "eval_choice_1": "eval_choice_0"}
         )
         self.num_hits_per_matchup_df = (
             pd.concat([matchup_total_1_df, matchup_total_2_df], axis=0)
             .pivot(
-                index='eval_choice_0', columns='eval_choice_1', values='matchup_total'
+                index="eval_choice_0", columns="eval_choice_1", values="matchup_total"
             )
             .reindex(index=self.model_ordering, columns=self.model_ordering)
         )
@@ -453,8 +453,8 @@ class AcuteAnalyzer(object):
             if col.startswith(self.checkbox_prefix)
         ]
         group_column_types = {
-            'matchup_and_winner': ['matchup', 'winner'],
-            'winner': ['winner'],
+            "matchup_and_winner": ["matchup", "winner"],
+            "winner": ["winner"],
         }
         grouped_dataframes = {}
         for group_type, group_columns in group_column_types.items():
@@ -484,10 +484,10 @@ class AcuteAnalyzer(object):
 
         for _, pairing_sr in self.dataframe.iterrows():
             winning_dialogue = self._dialogue_to_string(
-                pairing_sr['winner_dialogue']['dialogue']
+                pairing_sr["winner_dialogue"]["dialogue"]
             )
             loser_dialogue = self._dialogue_to_string(
-                pairing_sr['loser_dialogue']['dialogue']
+                pairing_sr["loser_dialogue"]["dialogue"]
             )
             pairing_output = f"""CONVO PAIR ID: {pairing_sr['pairing_id']}
 
@@ -506,7 +506,7 @@ REASON: {pairing_sr['reason']}
 """
             pairing_outputs.append(pairing_output)
 
-        return ''.join(pairing_outputs)
+        return "".join(pairing_outputs)
 
     @staticmethod
     def _dialogue_to_string(dialogue: List[dict]) -> str:
@@ -541,23 +541,23 @@ REASON: {pairing_sr['reason']}
                 return "", "p>.05"
 
         output = []
-        for _, run_annotations in self.dataframe.groupby('run_id'):
+        for _, run_annotations in self.dataframe.groupby("run_id"):
             question = list(run_annotations.question)[0]
-            for matchup, annotations in run_annotations.groupby('matchup'):
-                model1, model2 = matchup.split('__vs__')
-                wincount1 = np.sum(annotations['winner'] == model1)
-                wincount2 = np.sum(annotations['winner'] == model2)
+            for matchup, annotations in run_annotations.groupby("matchup"):
+                model1, model2 = matchup.split("__vs__")
+                wincount1 = np.sum(annotations["winner"] == model1)
+                wincount2 = np.sum(annotations["winner"] == model2)
                 numratings = wincount1 + wincount2
-                winrate1 = np.mean(annotations['winner'] == model1)
-                winrate2 = np.mean(annotations['winner'] == model2)
+                winrate1 = np.mean(annotations["winner"] == model1)
+                winrate2 = np.mean(annotations["winner"] == model2)
                 p = binom_test([wincount1, wincount2])
 
                 stars, plevel = _signf_level(p)
 
                 agreements = []
-                for _, pairing_annotations in annotations.groupby('pairing_id'):
-                    pair_wincount1 = np.sum(pairing_annotations['winner'] == model1)
-                    pair_wincount2 = np.sum(pairing_annotations['winner'] == model2)
+                for _, pairing_annotations in annotations.groupby("pairing_id"):
+                    pair_wincount1 = np.sum(pairing_annotations["winner"] == model1)
+                    pair_wincount2 = np.sum(pairing_annotations["winner"] == model2)
                     if pair_wincount1 < 2 and pair_wincount2 < 2:
                         if pair_wincount1 == 1 and pair_wincount2 == 1:
                             agreements.append(0)
@@ -570,38 +570,38 @@ REASON: {pairing_sr['reason']}
 
                 output.append(
                     {
-                        'question': question,
-                        'matchup': matchup,
-                        'model1': model1,
-                        'model2': model2,
-                        'numwins1': wincount1,
-                        'numwins2': wincount2,
-                        'winrate1': winrate1,
-                        'winrate2': winrate2,
-                        'numratings': numratings,
-                        'p': p,
-                        'stars': stars,
-                        'sigf': plevel,
-                        'agree': total_agreement,
+                        "question": question,
+                        "matchup": matchup,
+                        "model1": model1,
+                        "model2": model2,
+                        "numwins1": wincount1,
+                        "numwins2": wincount2,
+                        "winrate1": winrate1,
+                        "winrate2": winrate2,
+                        "numratings": numratings,
+                        "p": p,
+                        "stars": stars,
+                        "sigf": plevel,
+                        "agree": total_agreement,
                     }
                 )
         output = pd.DataFrame(output)
         # order the columns how we want
         self.significance_df = output[
             [
-                'question',
-                'matchup',
-                'model1',
-                'numwins1',
-                'winrate1',
-                'model2',
-                'numwins2',
-                'winrate2',
-                'numratings',
-                'sigf',
-                'stars',
-                'p',
-                'agree',
+                "question",
+                "matchup",
+                "model1",
+                "numwins1",
+                "winrate1",
+                "model2",
+                "numwins2",
+                "winrate2",
+                "numratings",
+                "sigf",
+                "stars",
+                "p",
+                "agree",
             ]
         ]
         return self.significance_df
@@ -610,73 +610,73 @@ REASON: {pairing_sr['reason']}
         """
         Save results to a certain path.
         """
-        if not hasattr(self, 'significance_df'):
+        if not hasattr(self, "significance_df"):
             self.get_matchup_totals_with_significance()
         if path is None:
             path = self.outdir
 
         # Save raw dataframe
-        self.dataframe.to_csv(f'{path}/{self.run_id}.full.csv', index=False)
+        self.dataframe.to_csv(f"{path}/{self.run_id}.full.csv", index=False)
 
-        with open('{}/{}.significance.csv'.format(path, self.run_id), 'w') as f:
+        with open("{}/{}.significance.csv".format(path, self.run_id), "w") as f:
             f.write(self.significance_df.to_csv(index=False))
         print(
-            'To visualize significance result, try cat {} | column -t -s, | less -S'.format(
-                '{}/{}.significance.csv'.format(path, self.run_id)
+            "To visualize significance result, try cat {} | column -t -s, | less -S".format(
+                "{}/{}.significance.csv".format(path, self.run_id)
             )
         )
-        with open('{}/{}.grid.csv'.format(path, self.run_id), 'w') as f:
+        with open("{}/{}.grid.csv".format(path, self.run_id), "w") as f:
             f.write(self.get_win_fractions().to_csv(index=True))
-        with open(f'{path}/{self.run_id}.grid.winners_as_rows.csv', 'w') as f:
+        with open(f"{path}/{self.run_id}.grid.winners_as_rows.csv", "w") as f:
             f.write(self.get_win_fractions().transpose().to_csv(index=True))
         print(
-            'To visualize grid result, try cat {} | column -t -s, | less -S'.format(
-                '{}/{}.grid.csv'.format(path, self.run_id)
+            "To visualize grid result, try cat {} | column -t -s, | less -S".format(
+                "{}/{}.grid.csv".format(path, self.run_id)
             )
         )
 
         # Save stats on how many ratings each worker did
         ratings_per_worker = (
-            self.dataframe.groupby('worker')['run_id']
+            self.dataframe.groupby("worker")["run_id"]
             .count()
             .sort_values(ascending=False)
         )
-        ratings_per_worker.to_csv(f'{path}/{self.run_id}.ratings_per_worker.csv')
+        ratings_per_worker.to_csv(f"{path}/{self.run_id}.ratings_per_worker.csv")
 
         # Save stats on how often Turkers selected each checkbox that represents one
         # reason to pick the speaker they did
         if any(col.startswith(self.checkbox_prefix) for col in self.dataframe.columns):
             checkbox_stats_dataframes = self._compile_checkbox_stats()
             for group_type, stats in checkbox_stats_dataframes.items():
-                stats.to_csv(f'{path}/{self.run_id}.checkbox_stats.{group_type}.csv')
+                stats.to_csv(f"{path}/{self.run_id}.checkbox_stats.{group_type}.csv")
 
-        if not hasattr(self, 'pairings'):
+        if not hasattr(self, "pairings"):
 
-            print('No pairing file found, skipping conversation visualizations.')
+            print("No pairing file found, skipping conversation visualizations.")
 
         else:
 
-            with open('{}/{}.reason.html'.format(path, self.run_id), 'w') as f:
+            with open("{}/{}.reason.html".format(path, self.run_id), "w") as f:
                 f.write(render_conversations_per_matchups(self.dataframe, True).data)
             print(
-                'To visualize conversations with reasons only result, '
-                'try scp username@devfair:{} to your local machine'.format(
-                    ' {}/{}.reason.html'.format(path, self.run_id)
+                "To visualize conversations with reasons only result, "
+                "try scp username@devfair:{} to your local machine".format(
+                    " {}/{}.reason.html".format(path, self.run_id)
                 )
             )
-            with open('{}/{}.all.html'.format(path, self.run_id), 'w') as f:
+            with open("{}/{}.all.html".format(path, self.run_id), "w") as f:
                 f.write(render_conversations_per_matchups(self.dataframe, False).data)
             print(
-                'To visualize conversations result, try scp username@devfair:{}'
-                ' to your local machine'.format(
-                    '{}/{}.all.html'.format(path, self.run_id)
+                "To visualize conversations result, try scp username@devfair:{}"
+                " to your local machine".format(
+                    "{}/{}.all.html".format(path, self.run_id)
                 )
             )
 
             # Write all pairs of dialogues, as well as the Turkers' choices and reasons, as
             # a text file
             compiled_text = self._compile_convos_and_reasons()
-            with open(f'{path}/{self.run_id}.all_convo_pairs.txt', 'w') as f:
+            with open(f"{path}/{self.run_id}.all_convo_pairs.txt", "w") as f:
                 f.write(compiled_text)
 
 
@@ -690,17 +690,17 @@ class MultiRunAcuteAnalyzer(AcuteAnalyzer):
         Read in and combine the dataframes of other already-analyzed ACUTE-Eval runs.
         """
 
-        self.outdir = opt['outdir']
-        if opt.get('model_ordering') is not None:
-            self.custom_model_ordering = opt['model_ordering'].split(',')
+        self.outdir = opt["outdir"]
+        if opt.get("model_ordering") is not None:
+            self.custom_model_ordering = opt["model_ordering"].split(",")
         else:
             self.custom_model_ordering = None
-        self.run_id = 'combined'
+        self.run_id = "combined"
         self.checkbox_prefix = self.CHECKBOX_PREFIX
         # Prepended to checkbox columns in self.dataframe
 
         for dataframe in dataframes.values():
-            dataframe.loc[:, 'run_id'] = self.run_id
+            dataframe.loc[:, "run_id"] = self.run_id
             # Overwrite the run_id so that results will combine across runs
         self.dataframe = pd.concat(dataframes.values(), axis=0)
 
@@ -716,28 +716,28 @@ def get_multi_run_analyzer(opt) -> MultiRunAcuteAnalyzer:
     a separate analyzer class that will concatenate them.
     """
 
-    run_ids = opt['run_ids'].split(',')
+    run_ids = opt["run_ids"].split(",")
 
     # Define paths
     assert (
-        opt['outdir'] is not None
-    ), '--outdir must be specified when combining results of multiple runs!'
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    opt['outdir'] = os.path.join(opt['outdir'], f'combined_runs_{timestamp}')
-    os.makedirs(opt['outdir'], exist_ok=True)
-    run_id_list_path = os.path.join(opt['outdir'], 'run_ids.txt')
+        opt["outdir"] is not None
+    ), "--outdir must be specified when combining results of multiple runs!"
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    opt["outdir"] = os.path.join(opt["outdir"], f"combined_runs_{timestamp}")
+    os.makedirs(opt["outdir"], exist_ok=True)
+    run_id_list_path = os.path.join(opt["outdir"], "run_ids.txt")
 
     # Save a simple list of all run IDs stitched together
-    with open(run_id_list_path, 'w') as f:
+    with open(run_id_list_path, "w") as f:
         for run_id in run_ids:
-            f.write(run_id + '\n')
+            f.write(run_id + "\n")
 
     # Loop loading HITs over all run ids into dataframes
     dataframes = {}
     for run_id in run_ids:
-        print(f'\nStarting to load HITs for run ID {run_id}.')
+        print(f"\nStarting to load HITs for run ID {run_id}.")
         opt_copy = deepcopy(opt)
-        opt_copy['run_ids'] = run_id
+        opt_copy["run_ids"] = run_id
         dataframes[run_id] = AcuteAnalyzer(opt_copy).dataframe
 
     return MultiRunAcuteAnalyzer(opt=opt, dataframes=dataframes)
@@ -745,84 +745,84 @@ def get_multi_run_analyzer(opt) -> MultiRunAcuteAnalyzer:
 
 def render_row(row):
     result = []
-    for i, turn in enumerate(row['winner_dialogue']['dialogue']):
-        speakername = turn['id']
-        text = turn['text']
-        is_bot = (speakername != 'human_evaluator') and (speakername != 'other_speaker')
+    for i, turn in enumerate(row["winner_dialogue"]["dialogue"]):
+        speakername = turn["id"]
+        text = turn["text"]
+        is_bot = (speakername != "human_evaluator") and (speakername != "other_speaker")
         if i > 2 and is_bot:
-            speakername = 'bot'
-        align = 'right' if is_bot else 'left'
+            speakername = "bot"
+        align = "right" if is_bot else "left"
         color = "white" if is_bot else "black"
-        bgcolor = '#2391f7' if is_bot else '#e1e1e7'
+        bgcolor = "#2391f7" if is_bot else "#e1e1e7"
 
         result.append(
             (
                 '<div style="overflow: auto; padding: 1ex 0;">'
                 '<div style="clear: both; float: {}; color: {}; background-color: {}; padding: 0.5em 1em; border-radius: 1em; max-width: 80%">'
                 '<p style="margin: 0">{}: {}</p>'
-                '</div>'
-                '</div>'
+                "</div>"
+                "</div>"
             ).format(align, color, bgcolor, speakername, text)
         )
     winner_dialogue = (
         '<div style="background-color: white; margin: 0em; padding: 0.5em; '
         'font-family: sans-serif; font-size: 9pt; width: 99%;">'
-        + ''.join(result)
-        + '</div>'
+        + "".join(result)
+        + "</div>"
     )
     result = []
-    for i, turn in enumerate(row['loser_dialogue']['dialogue']):
-        speakername = turn['id']
-        is_bot = (speakername != 'human_evaluator') and (speakername != 'other_speaker')
+    for i, turn in enumerate(row["loser_dialogue"]["dialogue"]):
+        speakername = turn["id"]
+        is_bot = (speakername != "human_evaluator") and (speakername != "other_speaker")
         if i > 2 and is_bot:
-            speakername = 'bot'
-        text = turn['text']
+            speakername = "bot"
+        text = turn["text"]
 
-        align = 'right' if is_bot else 'left'
+        align = "right" if is_bot else "left"
         color = "white" if is_bot else "black"
-        bgcolor = '#2391f7' if is_bot else '#e1e1e7'
+        bgcolor = "#2391f7" if is_bot else "#e1e1e7"
 
         result.append(
             (
                 '<div style="overflow: auto; padding: 1ex 0;">'
                 '<div style="clear: both; float: {}; color: {}; background-color: {}; padding: 0.5em 1em; border-radius: 1em; max-width: 80%">'
                 '<p style="margin: 0">{}: {}</p>'
-                '</div>'
-                '</div>'
+                "</div>"
+                "</div>"
             ).format(align, color, bgcolor, speakername, text)
         )
     loser_dialogue = (
         '<div style="background-color: white; margin: 0em; padding: 0.5em; '
         'font-family: sans-serif; font-size: 9pt; width: 99%;">'
-        + ''.join(result)
-        + '</div>'
+        + "".join(result)
+        + "</div>"
     )
 
     return HTML(
-        '<tr><td>{}</td><td>{}</td><td>{}</td></tr>'.format(
-            winner_dialogue, loser_dialogue, row['reason']
+        "<tr><td>{}</td><td>{}</td><td>{}</td></tr>".format(
+            winner_dialogue, loser_dialogue, row["reason"]
         )
     )
 
 
 def render_many_conversations(table):
     return HTML(
-        '<table><tr><th>Winner Conversation</th><th>Loser Conversation</th><th>Reason</th></tr>{}</table>'.format(
-            ''.join(render_row(row).data for i, row in table.iterrows())
+        "<table><tr><th>Winner Conversation</th><th>Loser Conversation</th><th>Reason</th></tr>{}</table>".format(
+            "".join(render_row(row).data for i, row in table.iterrows())
         )
     )
 
 
 def render_conversations_per_matchups(table, force_reasons=True):
     matchups = list(table.matchup.unique())
-    result = ''
+    result = ""
     if force_reasons:
-        table = table[table['reason'] != '']
+        table = table[table["reason"] != ""]
     for matchup in matchups:
-        length = min(10, len(table[table['matchup'] == matchup]))
-        result += '<h2>{}</h2><body>{}</body>'.format(
+        length = min(10, len(table[table["matchup"] == matchup]))
+        result += "<h2>{}</h2><body>{}</body>".format(
             matchup,
-            render_many_conversations(table[table['matchup'] == matchup][:length]).data,
+            render_many_conversations(table[table["matchup"] == matchup][:length]).data,
         )
     return HTML(result)
 
@@ -832,7 +832,7 @@ if __name__ == "__main__":
     parser = setup_args()
     opt_ = parser.parse_args()
 
-    if ',' not in opt_['run_ids']:
+    if "," not in opt_["run_ids"]:
         analyzer = AcuteAnalyzer(opt_)
     else:
         analyzer = get_multi_run_analyzer(opt_)
@@ -844,5 +844,5 @@ if __name__ == "__main__":
 
     # Print matchup totals with significance
     result_ = pd.DataFrame(analyzer.get_matchup_totals_with_significance())
-    result_ = result_.drop(columns=['matchup', 'agree'])
+    result_ = result_.drop(columns=["matchup", "agree"])
     print(result_.round(2).to_string())

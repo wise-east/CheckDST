@@ -22,14 +22,14 @@ class Reformat_SGD(object):
                 self.dials = json.loads(df.read().lower())
         else:
             data_dir = os.path.join(self.data_dir, data_type)
-            sys.stdout.write('Extracting ' + data_type + ' data .... \n')
+            sys.stdout.write("Extracting " + data_type + " data .... \n")
             for filename in tqdm(os.listdir(data_dir)):
-                if 'dialog' in filename:  # exclude schema.json
+                if "dialog" in filename:  # exclude schema.json
                     file_path = os.path.join(data_dir, filename)
                 else:
                     continue
                 if os.path.isfile(file_path):
-                    data_json = open(file_path, 'r', encoding='utf-8')
+                    data_json = open(file_path, "r", encoding="utf-8")
                     data_in_file = json.loads(data_json.read().lower())
                     data_json.close()
                 else:
@@ -60,47 +60,47 @@ class Reformat_SGD(object):
                 ...
             }
         """
-        for data_type in ['train', 'dev', 'test']:
+        for data_type in ["train", "dev", "test"]:
             self._load_data(data_type)
             self.dials_form = {}
-            sys.stdout.write('Reformating ' + data_type + ' data .... \n')
+            sys.stdout.write("Reformating " + data_type + " data .... \n")
             for dial_id, dial in tqdm(self.dials.items()):
                 # self.dials_form[dial_id] = []
                 turn_form = {}
                 turn_num = 0
                 bspan = {}  # {dom:{slot_type:val, ...}, ...}
                 context = []
-                for turn in dial['turns']:
+                for turn in dial["turns"]:
                     # turn number
-                    turn_form['turn_num'] = turn_num
+                    turn_form["turn_num"] = turn_num
 
-                    if turn['speaker'] == 'system':
+                    if turn["speaker"] == "system":
                         # turn_form['sys'] = self._tokenize_punc(turn['utterance'])
                         context.append(
-                            "<system> " + self._tokenize_punc(turn['utterance'])
+                            "<system> " + self._tokenize_punc(turn["utterance"])
                         )
 
-                    if turn['speaker'] == 'user':
+                    if turn["speaker"] == "user":
                         context.append(
-                            "<user> " + self._tokenize_punc(turn['utterance'])
+                            "<user> " + self._tokenize_punc(turn["utterance"])
                         )
 
                         # dialog history/context
                         turn_form["context"] = " ".join(context)
 
                         # belief span
-                        turn_form['slots_inf'], bspan = self._extract_slots(
+                        turn_form["slots_inf"], bspan = self._extract_slots(
                             bspan,
-                            turn['frames'],
-                            turn['utterance'],
+                            turn["frames"],
+                            turn["utterance"],
                             turn_form["context"],
                         )
 
                         # # user utterance
-                        turn_form['utt'] = self._tokenize_punc(turn['utterance'])
+                        turn_form["utt"] = self._tokenize_punc(turn["utterance"])
 
                     # let each episode just be a single context-slot pair
-                    if 'utt' in turn_form:
+                    if "utt" in turn_form:
                         self.dials_form[dial_id + f"-{turn_num}"] = turn_form
                         turn_form = {}
                         turn_num += 1
@@ -117,9 +117,9 @@ class Reformat_SGD(object):
         Input:
             bspan = {
                         dom:{
-                            slot_type : slot_val, 
+                            slot_type : slot_val,
                             ...
-                            }, 
+                            },
                         ...
                     }
 
@@ -131,21 +131,21 @@ class Reformat_SGD(object):
                                                 "exclusive_end" : idx,
                                                 "slot" : slot_type,
                                                 "start": idx
-                                            }, 
+                                            },
                                             ...
                                         ],
                             "state"   : {"slot_values": {slot_type:[slot_val, ...], ...}}
                         },
                         ...
                      ]
-        
+
         Notice that:
             frames["slots"] contains only non-categorical slots, while
-            frames["state"] contains both non-categorical and categorical slots, 
+            frames["state"] contains both non-categorical and categorical slots,
             but it may contains multiple slot_vals for non-categorical slots.
             Therefore, we extract non-categorical slots based on frames["slots"]
             and extract categorical slots based on frames["state"]
-        
+
         Output:
             formalize dialog states into string like:
                 "restaurant area centre, restaurant pricerange cheap, ..."
@@ -238,9 +238,9 @@ class Reformat_SGD(object):
         Input:
             bspan = {
                         dom:{
-                            slot_type : slot_val, 
+                            slot_type : slot_val,
                             ...
-                            }, 
+                            },
                         ...
                     }
         To extract all the slot_val in this bspan.
@@ -254,7 +254,7 @@ class Reformat_SGD(object):
     def _find_speaker(self, slot_val, context):
         """
         assume the slot_val exists in the context, try
-        to find out who is the first speaker mentioned 
+        to find out who is the first speaker mentioned
         the slot_val
         context = "User: ... Sys: ... User: ... "
         """
@@ -266,9 +266,7 @@ class Reformat_SGD(object):
                     return "sys"
 
     def _tokenize_punc(self, utt):
-        """
-
-        """
+        """ """
         # corner_case = ['\.\.+', '!\.', '\$\.']
         # for case in corner_case:
         #     utt = re.sub(case, ' .', utt)
@@ -292,49 +290,49 @@ class Reformat_SGD(object):
     def clean_text(self, text):
         text = text.strip()
         text = text.lower()
-        text = text.replace(u"’", "'")
-        text = text.replace(u"‘", "'")
-        text = text.replace(';', ',')
-        text = text.replace('"', ' ')
-        text = text.replace('/', ' and ')
+        text = text.replace("’", "'")
+        text = text.replace("‘", "'")
+        text = text.replace(";", ",")
+        text = text.replace('"', " ")
+        text = text.replace("/", " and ")
         text = text.replace("don't", "do n't")
         text = clean_time(text)
         baddata = {
-            r'c\.b (\d), (\d) ([a-z])\.([a-z])': r'cb\1\2\3\4',
-            'c.b. 1 7 d.y': 'cb17dy',
-            'c.b.1 7 d.y': 'cb17dy',
-            'c.b 25, 9 a.q': 'cb259aq',
-            'isc.b 25, 9 a.q': 'is cb259aq',
-            'c.b2, 1 u.f': 'cb21uf',
-            'c.b 1,2 q.a': 'cb12qa',
-            '0-122-336-5664': '01223365664',
-            'postcodecb21rs': 'postcode cb21rs',
-            r'i\.d': 'id',
-            ' i d ': 'id',
-            'Telephone:01223358966': 'Telephone: 01223358966',
-            'depature': 'departure',
-            'depearting': 'departing',
-            '-type': ' type',
+            r"c\.b (\d), (\d) ([a-z])\.([a-z])": r"cb\1\2\3\4",
+            "c.b. 1 7 d.y": "cb17dy",
+            "c.b.1 7 d.y": "cb17dy",
+            "c.b 25, 9 a.q": "cb259aq",
+            "isc.b 25, 9 a.q": "is cb259aq",
+            "c.b2, 1 u.f": "cb21uf",
+            "c.b 1,2 q.a": "cb12qa",
+            "0-122-336-5664": "01223365664",
+            "postcodecb21rs": "postcode cb21rs",
+            r"i\.d": "id",
+            " i d ": "id",
+            "Telephone:01223358966": "Telephone: 01223358966",
+            "depature": "departure",
+            "depearting": "departing",
+            "-type": " type",
             r"b[\s]?&[\s]?b": "bed and breakfast",
             "b and b": "bed and breakfast",
             r"guesthouse[s]?": "guest house",
             r"swimmingpool[s]?": "swimming pool",
-            "wo n\'t": "will not",
-            " \'d ": " would ",
-            " \'m ": " am ",
-            " \'re' ": " are ",
-            " \'ll' ": " will ",
-            " \'ve ": " have ",
-            r'^\'': '',
-            r'\'$': '',
+            "wo n't": "will not",
+            " 'd ": " would ",
+            " 'm ": " am ",
+            " 're' ": " are ",
+            " 'll' ": " will ",
+            " 've ": " have ",
+            r"^\'": "",
+            r"\'$": "",
         }
         for tmpl, good in baddata.items():
             text = re.sub(tmpl, good, text)
 
         text = re.sub(
-            r'([a-zT]+)\.([a-z])', r'\1 . \2', text
+            r"([a-zT]+)\.([a-z])", r"\1 . \2", text
         )  # 'abc.xyz' -> 'abc . xyz'
-        text = re.sub(r'(\w+)\.\.? ', r'\1 . ', text)  # if 'abc. ' -> 'abc . '
+        text = re.sub(r"(\w+)\.\.? ", r"\1 . ", text)  # if 'abc. ' -> 'abc . '
         return text
 
 
@@ -342,9 +340,9 @@ def reformat_parlai(data_dir, force_reformat=False):
     # args = Parse_args()
     # args.data_dir = data_dir
     if (
-        os.path.exists(os.path.join(data_dir, 'data_reformat_train.json'))
-        and os.path.exists(os.path.join(data_dir, 'data_reformat_dev.json'))
-        and os.path.exists(os.path.join(data_dir, 'data_reformat_test.json'))
+        os.path.exists(os.path.join(data_dir, "data_reformat_train.json"))
+        and os.path.exists(os.path.join(data_dir, "data_reformat_dev.json"))
+        and os.path.exists(os.path.join(data_dir, "data_reformat_test.json"))
         and not force_reformat
     ):
         pass

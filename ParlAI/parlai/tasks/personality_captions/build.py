@@ -9,19 +9,19 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/personality_captions/personality_captions.tgz',
-        'personality_captions.tgz',
-        'e0979d3ac0854395ee74f2c61a6bc467838cc292c3a9a62e891d8230d3a01365',
+        "http://parl.ai/downloads/personality_captions/personality_captions.tgz",
+        "personality_captions.tgz",
+        "e0979d3ac0854395ee74f2c61a6bc467838cc292c3a9a62e891d8230d3a01365",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'personality_captions')
-    image_path = os.path.join(opt['datapath'], 'yfcc_images')
-    version = '2.0'
+    dpath = os.path.join(opt["datapath"], "personality_captions")
+    image_path = os.path.join(opt["datapath"], "yfcc_images")
+    version = "2.0"
     if not build_data.built(dpath, version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)
@@ -33,5 +33,5 @@ def build(opt):
 
         build_data.mark_done(dpath, version)
 
-    if not build_data.built(image_path, version) and not opt.get('yfcc_path'):
+    if not build_data.built(image_path, version) and not opt.get("yfcc_path"):
         download_images(opt)

@@ -48,22 +48,22 @@ from parlai.utils.testing import capture_output
 ########################
 
 ACUTE_EVAL_TYPES = {
-    'human': {
-        'question': 'Which speaker sounds more human?',
-        's1_choice': '<Speaker 1> sounds more human',
-        's2_choice': '<Speaker 2> sounds more human',
+    "human": {
+        "question": "Which speaker sounds more human?",
+        "s1_choice": "<Speaker 1> sounds more human",
+        "s2_choice": "<Speaker 2> sounds more human",
     },
-    'engaging': {
-        'question': 'Who would you prefer to talk to for a long conversation?',
-        's1_choice': 'I would prefer to talk to <Speaker 1>',
-        's2_choice': 'I would prefer to talk to <Speaker 2>',
+    "engaging": {
+        "question": "Who would you prefer to talk to for a long conversation?",
+        "s1_choice": "I would prefer to talk to <Speaker 1>",
+        "s2_choice": "I would prefer to talk to <Speaker 2>",
     },
-    'roleplay': {
-        'question': 'How well does the speaker play their role in the conversation?',
-        's1_choice': '<Speaker 1> plays their role better.',
-        's2_choice': '<Speaker 2> plays their role better.',
+    "roleplay": {
+        "question": "How well does the speaker play their role in the conversation?",
+        "s1_choice": "<Speaker 1> plays their role better.",
+        "s2_choice": "<Speaker 2> plays their role better.",
     },
-    'image': {
+    "image": {
         "question": "Who talks about the image better?",
         "s1_choice": "<Speaker 1> talks about the image better",
         "s2_choice": "<Speaker 2> talks about the image better",
@@ -123,16 +123,16 @@ class FastAcuteExecutor(object):
             and self.fast_acute_args.model_pairs is None
         ):
             raise RuntimeError(
-                'Either models or model-pairs should be set for comparison.'
+                "Either models or model-pairs should be set for comparison."
             )
         if self.fast_acute_args.model_pairs is not None:
-            model_pairs = self.fast_acute_args.model_pairs.split(',')
-            combos = [model_pair.split(':') for model_pair in model_pairs]
+            model_pairs = self.fast_acute_args.model_pairs.split(",")
+            combos = [model_pair.split(":") for model_pair in model_pairs]
             for model_pair in combos:
                 models.add(model_pair[0])
                 models.add(model_pair[1])
         else:
-            models = set(self.fast_acute_args.models.split(','))
+            models = set(self.fast_acute_args.models.split(","))
             combos = set(combinations(models, 2))
         self.models: List[str] = list(models)
         self.models.sort()
@@ -143,8 +143,8 @@ class FastAcuteExecutor(object):
         # verify that models are contained in the config:
         for model in self.models:
             if model not in choices:
-                raise RuntimeError(f'Model {model} not specified in the config.')
-        assert len(self.models) > 1, 'Must specify least 2 models'
+                raise RuntimeError(f"Model {model} not specified in the config.")
+        assert len(self.models) > 1, "Must specify least 2 models"
 
     def _print_progress(self, msg: str):
         """
@@ -169,13 +169,13 @@ class FastAcuteExecutor(object):
         config = self.model_config[model]
         config.update(
             {
-                'task': self.task,
-                'outfile': outfile,
-                'num_self_chats': self.fast_acute_args.num_self_chats,
-                'selfchat_max_turns': self.fast_acute_args.selfchat_max_turns,
-                'display_examples': False,
-                'log_every_n_secs': -1,
-                'indent': -1,
+                "task": self.task,
+                "outfile": outfile,
+                "num_self_chats": self.fast_acute_args.num_self_chats,
+                "selfchat_max_turns": self.fast_acute_args.selfchat_max_turns,
+                "display_examples": False,
+                "log_every_n_secs": -1,
+                "indent": -1,
             }
         )
         return config
@@ -188,10 +188,10 @@ class FastAcuteExecutor(object):
         config = self.model_config[model]
         config.update(
             {
-                'outfile': outfile,
-                'num_episodes': self.fast_acute_args.num_task_data_episodes,
-                'speaker_0_id': f'{model}_as_human',
-                'speaker_1_id': model,
+                "outfile": outfile,
+                "num_episodes": self.fast_acute_args.num_task_data_episodes,
+                "speaker_0_id": f"{model}_as_human",
+                "speaker_1_id": model,
             }
         )
         return config
@@ -203,7 +203,7 @@ class FastAcuteExecutor(object):
 
         Useful for getting selfchat log path without instantiating the exector.
         """
-        self_chats_folder = os.path.join(root_dir, 'self_chats')
+        self_chats_folder = os.path.join(root_dir, "self_chats")
         os.makedirs(self_chats_folder, exist_ok=True)
         return os.path.join(
             self_chats_folder, f"{model}.{task.replace(':', '_')}.jsonl"
@@ -214,17 +214,17 @@ class FastAcuteExecutor(object):
         Return path to chat logs for the given model.
         """
         config = self.model_config[model]
-        if 'log_path' in config:
-            path = config['log_path']
+        if "log_path" in config:
+            path = config["log_path"]
             assert os.path.exists(
                 path
-            ), f'Path provided in log_path for {model} does not exist'
-        elif 'task' in config:
+            ), f"Path provided in log_path for {model} does not exist"
+        elif "task" in config:
             path = self._get_task_data_path(model)
-        elif 'model' in config:
+        elif "model" in config:
             path = self._get_selfchat_log_path(model)
         else:
-            raise ValueError(f'Invalid config for {model}')
+            raise ValueError(f"Invalid config for {model}")
 
         return path
 
@@ -233,7 +233,7 @@ class FastAcuteExecutor(object):
         Return path to task data as conversations for given task.
         """
         task_data_dir = os.path.join(
-            self.fast_acute_args.root_dir, 'tasks_as_conversations'
+            self.fast_acute_args.root_dir, "tasks_as_conversations"
         )
         os.makedirs(task_data_dir, exist_ok=True)
         return os.path.join(task_data_dir, f"{model}.jsonl")
@@ -263,32 +263,32 @@ class FastAcuteExecutor(object):
         :return conversation:
             An ACUTE-Readable conversation
         """
-        is_selfchat = 'model' in self.model_config[model] or self.model_config[
+        is_selfchat = "model" in self.model_config[model] or self.model_config[
             model
-        ].get('is_selfchat', False)
+        ].get("is_selfchat", False)
         # It's a self-chat if one of the following are true:
         # (1) a model is specified in the config, meaning that we're collecting
         #   self-chats with that model
         # (2) we manually set 'is_selfchat' to True in the config
         if is_selfchat:
             # Set which speaker we will evaluate the conversation turns of
-            speaker_idx = self.model_config[model].get('speaker_idx', 0)
+            speaker_idx = self.model_config[model].get("speaker_idx", 0)
             assert speaker_idx in [0, 1]
-        conversation = {'context': [], 'dialogue': [], 'speakers': []}
-        dialog = dialogue_dict['dialog']
+        conversation = {"context": [], "dialogue": [], "speakers": []}
+        dialog = dialogue_dict["dialog"]
         for act_pair in dialog:
             for i, ex in enumerate(act_pair):
-                if ex['id'] == 'context':
-                    conversation['context'].append(ex)
+                if ex["id"] == "context":
+                    conversation["context"].append(ex)
                     continue
                 if is_selfchat:
-                    speaker_id = model if i == speaker_idx else f'other_speaker'
+                    speaker_id = model if i == speaker_idx else f"other_speaker"
                 else:
-                    speaker_id = ex['id']
-                if speaker_id not in conversation['speakers']:
-                    conversation['speakers'].append(speaker_id)
-                conversation['dialogue'].append(
-                    {'id': speaker_id, 'text': normalize_reply(ex['text'])}
+                    speaker_id = ex["id"]
+                if speaker_id not in conversation["speakers"]:
+                    conversation["speakers"].append(speaker_id)
+                conversation["dialogue"].append(
+                    {"id": speaker_id, "text": normalize_reply(ex["text"])}
                 )
         return conversation
 
@@ -312,7 +312,7 @@ class FastAcuteExecutor(object):
         id_num = 0
         for model in self.models:
             for convo in conversations[model]:
-                convo['unique_id'] = id_num
+                convo["unique_id"] = id_num
                 id_num += 1
 
     def _build_conversation_pairs(
@@ -349,7 +349,7 @@ class FastAcuteExecutor(object):
                 for i, c_id in enumerate(conversation_indices):
                     model = model_pair[i]
                     pair.append(self._acutify_convo(conversations[model][c_id], model))
-                    pair_ids.append(conversations[model][c_id]['unique_id'])
+                    pair_ids.append(conversations[model][c_id]["unique_id"])
                 pairs.append(
                     {
                         "is_onboarding": False,
@@ -370,16 +370,16 @@ class FastAcuteExecutor(object):
         else:
             # Default onboarding location
             onboarding_path = os.path.join(
-                self.fast_acute_args.root_dir, 'onboarding.json'
+                self.fast_acute_args.root_dir, "onboarding.json"
             )
         with open(onboarding_path) as f:
             onboarding_convo_pair: Dict[str, Any] = json.load(f)
 
-        self._print_progress(f'building pairings file, saving at {pairings_filepath}')
+        self._print_progress(f"building pairings file, saving at {pairings_filepath}")
         conversations = self._load_selfchats()
         pairs = self._build_conversation_pairs(conversations)
 
-        with open(pairings_filepath, 'w') as f:
+        with open(pairings_filepath, "w") as f:
             # Write the onboarding convo
             f.write(json.dumps(onboarding_convo_pair) + "\n")
             for pair in pairs:
@@ -394,7 +394,7 @@ class FastAcuteExecutor(object):
         """
         pairings_filepath = get_hashed_combo_path(
             root_dir=self.fast_acute_args.root_dir,
-            subdir='pairings_files',
+            subdir="pairings_files",
             task=self.task,
             combos=self.combos,
         )
@@ -403,16 +403,16 @@ class FastAcuteExecutor(object):
         else:
             modify_time = os.path.getmtime(pairings_filepath)
             self._print_progress(
-                f'Pairings already exist {pairings_filepath}. Last modified {time.ctime(modify_time)}'
+                f"Pairings already exist {pairings_filepath}. Last modified {time.ctime(modify_time)}"
             )
             if not self.fast_acute_args.use_existing_self_chat_files:
-                answer = ''
-                while answer.lower().strip() != 'y' and answer.lower().strip() != 'o':
-                    answer = input('Enter y to use, o to overwrite:')
-                    if answer.lower().strip() == 'o':
+                answer = ""
+                while answer.lower().strip() != "y" and answer.lower().strip() != "o":
+                    answer = input("Enter y to use, o to overwrite:")
+                    if answer.lower().strip() == "o":
                         self._build_pairings_file(pairings_filepath)
 
-        self._print_progress(f'loading pairings file from {pairings_filepath}')
+        self._print_progress(f"loading pairings file from {pairings_filepath}")
         self.pairings_filepath = pairings_filepath
 
     def _convert_task_to_conversations(self, model: str):
@@ -420,7 +420,7 @@ class FastAcuteExecutor(object):
         Convert task data to conversations format.
         """
         self._print_progress(
-            f'Converting task data to conversations format for {model}'
+            f"Converting task data to conversations format for {model}"
         )
         config = self._get_task_conversion_config(model)
 
@@ -447,28 +447,28 @@ class FastAcuteExecutor(object):
                 torch.cuda.empty_cache()
             except Exception:
                 pass
-            self._print_progress(f'Running self-chat for {model}')
+            self._print_progress(f"Running self-chat for {model}")
             outfile = self._get_log_path(model)
 
             if not os.path.exists(outfile):
-                if 'model' in self.model_config[model]:
+                if "model" in self.model_config[model]:
                     config = self._get_selfchat_config(model)
                     with capture_output():
                         parser = self_chat_setup_args()
                         parser.set_params(**config)
                         opt = parser.parse_args(args=[])
                     self_chat(opt)
-                elif 'task' in self.model_config[model]:
+                elif "task" in self.model_config[model]:
                     self._convert_task_to_conversations(model)
                 else:
                     raise RuntimeError(
-                        f'Path must exist if log_path specified for {model}'
+                        f"Path must exist if log_path specified for {model}"
                     )
 
                 if os.path.exists(outfile):
-                    self._print_progress(f'Chats saved to {outfile} for {model}')
+                    self._print_progress(f"Chats saved to {outfile} for {model}")
 
-            self._print_progress(f'Chats already exist in {outfile}, moving on...')
+            self._print_progress(f"Chats already exist in {outfile}, moving on...")
             self.chat_files[model] = outfile
 
     def run_acute_eval(self):
@@ -477,7 +477,7 @@ class FastAcuteExecutor(object):
         """
         self.set_up_acute_eval()
         db, cfg = load_db_and_process_config(self.args)
-        print(f'*** RUN ID: {cfg.mephisto.task.task_name} ***')
+        print(f"*** RUN ID: {cfg.mephisto.task.task_name} ***")
         operator = Operator(db)
         operator.validate_and_run_config(run_config=cfg.mephisto, shared_state=None)
         operator.wait_for_runs_then_shutdown(
@@ -489,20 +489,20 @@ class FastAcuteExecutor(object):
 
         total_convos = self.fast_acute_args.matchups_per_pair * len(self.combos)
         additional_params = {
-            'pairings_filepath': self.pairings_filepath,
-            's1_choice': self.question_config['s1_choice'],
-            's2_choice': self.question_config['s2_choice'],
-            'eval_question': self.question_config['question'],
-            'num_matchup_pairs': total_convos,
-            'block_qualification': f"{self.args.mephisto.task.task_name}_block_qual",
+            "pairings_filepath": self.pairings_filepath,
+            "s1_choice": self.question_config["s1_choice"],
+            "s2_choice": self.question_config["s2_choice"],
+            "eval_question": self.question_config["question"],
+            "num_matchup_pairs": total_convos,
+            "block_qualification": f"{self.args.mephisto.task.task_name}_block_qual",
         }
         overwritten_param_strings = []
         for key, val in additional_params.items():
             if val != self.fast_acute_args.get(key, None):
                 self.fast_acute_args[key] = val
-                overwritten_param_strings.append(f'\t{key}: {val}')
+                overwritten_param_strings.append(f"\t{key}: {val}")
         if len(overwritten_param_strings) > 0:
-            overwritten_param_output = '\n'.join(overwritten_param_strings)
+            overwritten_param_output = "\n".join(overwritten_param_strings)
             self._print_progress(
                 f"The following ACUTE-Eval parameters will be overwritten to the following:\n"
                 f"{overwritten_param_output}"
@@ -514,7 +514,7 @@ class FastAcuteExecutor(object):
 
         Save results to appropriate filepath.
         """
-        self._print_progress(f'Analyzing Results for run id {self.run_id}')
+        self._print_progress(f"Analyzing Results for run id {self.run_id}")
         parser = analysis_setup_args()
         if args is not None:
             arg_string = args.split()
@@ -524,17 +524,17 @@ class FastAcuteExecutor(object):
         today = datetime.date.today().isoformat()
         self.results_path = get_hashed_combo_path(
             root_dir=self.fast_acute_args.root_dir,
-            subdir=f'acute_results/{today}/',
+            subdir=f"acute_results/{today}/",
             task=self.task,
             combos=self.combos,
         )
         opt.update(
             {
-                'model_strings': ','.join(self.models),
-                'run_ids': self.run_id,
-                'root_dir': self.fast_acute_args.root_dir,
-                'outdir': self.results_path,
-                'task': self.task,
+                "model_strings": ",".join(self.models),
+                "run_ids": self.run_id,
+                "root_dir": self.fast_acute_args.root_dir,
+                "outdir": self.results_path,
+                "task": self.task,
             }
         )
 
@@ -542,15 +542,15 @@ class FastAcuteExecutor(object):
         self.results = analyzer.get_matchup_totals_with_significance()
         analyzer.save_results()
 
-        self._print_progress(f'ACUTE Results: {self.results}')
-        self._print_progress(f'ACUTE results saved to {self.results_path}')
+        self._print_progress(f"ACUTE Results: {self.results}")
+        self._print_progress(f"ACUTE results saved to {self.results_path}")
 
 
 defaults = [
     {"mephisto/blueprint": FAST_ACUTE_BLUEPRINT_TYPE},
     {"mephisto/architect": "local"},
     {"mephisto/provider": "mock"},
-    'conf/base_fast_acute',
+    "conf/base_fast_acute",
     {"conf": "example_fast_acute"},
 ]
 
@@ -562,12 +562,12 @@ class TestScriptConfig(MTurkRunScriptConfig):
     monitoring_log_rate: int = field(
         default=30,
         metadata={
-            'help': 'Frequency in seconds of logging the monitoring of the crowdsourcing task'
+            "help": "Frequency in seconds of logging the monitoring of the crowdsourcing task"
         },
     )
 
 
-register_script_config(name='fast_acute_scriptconfig', module=TestScriptConfig)
+register_script_config(name="fast_acute_scriptconfig", module=TestScriptConfig)
 
 
 @hydra.main(config_path="hydra_configs", config_name="fast_acute_scriptconfig")
@@ -585,5 +585,5 @@ def main(cfg: DictConfig) -> None:
     runner.analyze_results()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -112,7 +112,7 @@ class TransresnetMultimodalAgent(TransresnetAgent):
             cands_enc_file = "{}.cands_enc".format(self.fcp)
             print("loading saved cand encodings")
             if PathManager.exists(cands_enc_file):
-                with PathManager.open(cands_enc_file, 'rb') as f:
+                with PathManager.open(cands_enc_file, "rb") as f:
                     self.fixed_cands_enc = torch.load(
                         f, map_location=lambda cpu, _: cpu
                     )

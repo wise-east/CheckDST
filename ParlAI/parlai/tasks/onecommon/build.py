@@ -10,19 +10,19 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        'https://github.com/Alab-NII/onecommon/archive/v1.0.zip',
-        'onecommon.zip',
-        '9e6b7e71ca5baa7528c95ce007afaff31c94e057e88d84ee1f2ff908bfdb2519',
+        "https://github.com/Alab-NII/onecommon/archive/v1.0.zip",
+        "onecommon.zip",
+        "9e6b7e71ca5baa7528c95ce007afaff31c94e057e88d84ee1f2ff908bfdb2519",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'onecommon')
+    dpath = os.path.join(opt["datapath"], "onecommon")
     version = "1.0"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
 
         # make a clean directory if needed
         if build_data.built(dpath):

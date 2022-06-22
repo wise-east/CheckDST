@@ -83,69 +83,69 @@ class MaxPriorityQueue(Sequence):
 
 
 stopwords = {
-    'i',
-    'a',
-    'an',
-    'are',
-    'about',
-    'as',
-    'at',
-    'be',
-    'by',
-    'for',
-    'from',
-    'how',
-    'in',
-    'is',
-    'it',
-    'of',
-    'on',
-    'or',
-    'that',
-    'the',
-    'this',
-    'to',
-    'was',
-    'what',
-    'when',
-    'where',
-    '--',
-    '?',
-    '.',
+    "i",
+    "a",
+    "an",
+    "are",
+    "about",
+    "as",
+    "at",
+    "be",
+    "by",
+    "for",
+    "from",
+    "how",
+    "in",
+    "is",
+    "it",
+    "of",
+    "on",
+    "or",
+    "that",
+    "the",
+    "this",
+    "to",
+    "was",
+    "what",
+    "when",
+    "where",
+    "--",
+    "?",
+    ".",
     "''",
     "''",
     "``",
-    ',',
-    'do',
-    'see',
-    'want',
-    'people',
-    'and',
+    ",",
+    "do",
+    "see",
+    "want",
+    "people",
+    "and",
     "n't",
     "me",
-    'too',
-    'own',
-    'their',
-    '*',
+    "too",
+    "own",
+    "their",
+    "*",
     "'s",
-    'not',
-    'than',
-    'other',
-    'you',
-    'your',
-    'know',
-    'just',
-    'but',
-    'does',
-    'really',
-    'have',
-    'into',
-    'more',
-    'also',
-    'has',
-    'any',
-    'why',
-    'will',
+    "not",
+    "than",
+    "other",
+    "you",
+    "your",
+    "know",
+    "just",
+    "but",
+    "does",
+    "really",
+    "have",
+    "into",
+    "more",
+    "also",
+    "has",
+    "any",
+    "why",
+    "will",
 }
 
 
@@ -169,14 +169,14 @@ def score_match(query_rep, text, length_penalty, dictionary=None):
         return 0
     words = [w for w in dictionary.tokenize(text.lower())]
     score = 0
-    rw = query_rep['words']
+    rw = query_rep["words"]
     used = {}
     for w in words:
         if w in rw and w not in used:
             score += rw[w]
         used[w] = True
     norm = math.sqrt(len(used))
-    norm = math.pow(norm * query_rep['norm'], length_penalty)
+    norm = math.pow(norm * query_rep["norm"], length_penalty)
     if norm > 1:
         score /= norm
     return score
@@ -228,27 +228,27 @@ class IrBaselineAgent(Agent):
         """
         Add command line args specific to this agent.
         """
-        parser = parser.add_argument_group('IrBaseline Arguments')
+        parser = parser.add_argument_group("IrBaseline Arguments")
         parser.add_argument(
-            '-lp',
-            '--length_penalty',
+            "-lp",
+            "--length_penalty",
             type=float,
             default=0.5,
-            help='length penalty for responses',
+            help="length penalty for responses",
         )
         parser.add_argument(
-            '-hsz',
-            '--history_size',
+            "-hsz",
+            "--history_size",
             type=int,
             default=1,
-            help='number of utterances from the dialogue history to take use '
-            'as the query',
+            help="number of utterances from the dialogue history to take use "
+            "as the query",
         )
         parser.add_argument(
-            '--label_candidates_file',
+            "--label_candidates_file",
             type=str,
             default=None,
-            help='file of candidate responses to choose from',
+            help="file of candidate responses to choose from",
         )
         cls.dictionary_class().add_cmdline_args(parser, partial_opt=partial_opt)
         return parser
@@ -262,15 +262,15 @@ class IrBaselineAgent(Agent):
         Initialize agent.
         """
         super().__init__(opt)
-        self.id = 'IRBaselineAgent'
-        self.length_penalty = float(opt['length_penalty'])
+        self.id = "IRBaselineAgent"
+        self.length_penalty = float(opt["length_penalty"])
         self.dictionary = DictionaryAgent(opt)
         self.opt = opt
         self.history = []
         self.episodeDone = True
-        if opt.get('label_candidates_file'):
-            f = open(opt.get('label_candidates_file'))
-            self.label_candidates = f.read().split('\n')
+        if opt.get("label_candidates_file"):
+            f = open(opt.get("label_candidates_file"))
+            self.label_candidates = f.read().split("\n")
 
     def reset(self):
         """
@@ -288,51 +288,51 @@ class IrBaselineAgent(Agent):
         self.dictionary.observe(obs)
         if self.episodeDone:
             self.history = []
-        if 'text' in obs:
-            self.history.append(obs.get('text', ''))
-        self.episodeDone = obs.get('episode_done', False)
+        if "text" in obs:
+            self.history.append(obs.get("text", ""))
+        self.episodeDone = obs.get("episode_done", False)
         return obs
 
     def act(self):
         """
         Generate a response to the previously seen observation(s).
         """
-        if self.opt.get('datatype', '').startswith('train'):
+        if self.opt.get("datatype", "").startswith("train"):
             self.dictionary.act()
 
         obs = self.observation
         reply = {}
-        reply['id'] = self.getID()
+        reply["id"] = self.getID()
 
         # Rank candidates
         cands = None
-        if obs.get('label_candidates', False) and len(obs['label_candidates']) > 0:
-            cands = obs['label_candidates']
-        if hasattr(self, 'label_candidates'):
+        if obs.get("label_candidates", False) and len(obs["label_candidates"]) > 0:
+            cands = obs["label_candidates"]
+        if hasattr(self, "label_candidates"):
             # override label candidates with candidate file if set
             cands = self.label_candidates
         if cands:
-            hist_sz = self.opt.get('history_size', 1)
+            hist_sz = self.opt.get("history_size", 1)
             left_idx = max(0, len(self.history) - hist_sz)
-            text = ' '.join(self.history[left_idx : len(self.history)])
+            text = " ".join(self.history[left_idx : len(self.history)])
             rep = self.build_query_representation(text)
-            reply['text_candidates'] = rank_candidates(
+            reply["text_candidates"] = rank_candidates(
                 rep, cands, self.length_penalty, self.dictionary
             )
-            reply['text'] = reply['text_candidates'][0]
+            reply["text"] = reply["text_candidates"][0]
         return reply
 
     def save(self, path=None):
         """
         Save dictionary tokenizer if available.
         """
-        path = self.opt.get('model_file', None) if path is None else path
+        path = self.opt.get("model_file", None) if path is None else path
         if path:
-            self.dictionary.save(path + '.dict')
+            self.dictionary.save(path + ".dict")
             data = {}
-            data['opt'] = self.opt
+            data["opt"] = self.opt
             torch_utils.atomic_save(data, path)
-            with PathManager.open(path + '.opt', 'w') as handle:
+            with PathManager.open(path + ".opt", "w") as handle:
                 json.dump(self.opt, handle)
 
     def build_query_representation(self, query):
@@ -345,13 +345,13 @@ class IrBaselineAgent(Agent):
                   and 'norm' float (square root of the number of tokens)
         """
         rep = {}
-        rep['words'] = {}
+        rep["words"] = {}
         words = [w for w in self.dictionary.tokenize(query.lower())]
-        rw = rep['words']
+        rw = rep["words"]
         used = {}
         for w in words:
             assert len(self.dictionary.freq) > 0
             rw[w] = 1.0 / (1.0 + math.log(1.0 + self.dictionary.freq[w]))
             used[w] = True
-        rep['norm'] = math.sqrt(len(words))
+        rep["norm"] = math.sqrt(len(words))
         return rep

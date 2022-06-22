@@ -21,10 +21,10 @@ import os
 
 def _path(opt):
     build(opt)
-    dt = opt['datatype'].split(':')[0]
+    dt = opt["datatype"].split(":")[0]
 
-    labels_path = os.path.join(opt['datapath'], 'mnist', dt, 'labels.json')
-    image_path = os.path.join(opt['datapath'], 'mnist', dt)
+    labels_path = os.path.join(opt["datapath"], "mnist", dt, "labels.json")
+    image_path = os.path.join(opt["datapath"], "mnist", dt)
     return labels_path, image_path
 
 
@@ -37,21 +37,21 @@ class MnistQATeacher(DialogTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        self.datatype = opt['datatype'].split(':')[0]
+        self.datatype = opt["datatype"].split(":")[0]
         labels_path, self.image_path = _path(opt)
-        opt['datafile'] = labels_path
-        self.id = 'mnist_qa'
+        opt["datafile"] = labels_path
+        self.id = "mnist_qa"
         self.num_strs = [
-            'zero',
-            'one',
-            'two',
-            'three',
-            'four',
-            'five',
-            'six',
-            'seven',
-            'eight',
-            'nine',
+            "zero",
+            "one",
+            "two",
+            "three",
+            "four",
+            "five",
+            "six",
+            "seven",
+            "eight",
+            "nine",
         ]
 
         super().__init__(opt, shared)
@@ -60,15 +60,15 @@ class MnistQATeacher(DialogTeacher):
         return [str(x) for x in range(10)] + self.num_strs
 
     def setup_data(self, path):
-        print('loading: ' + path)
+        print("loading: " + path)
         with PathManager.open(path) as labels_file:
             self.labels = json.load(labels_file)
 
-        self.question = 'Which number is in the image?'
+        self.question = "Which number is in the image?"
         episode_done = True
 
         for i in range(len(self.labels)):
-            img_path = os.path.join(self.image_path, '%05d.bmp' % i)
+            img_path = os.path.join(self.image_path, "%05d.bmp" % i)
             label = [self.labels[i], self.num_strs[int(self.labels[i])]]
             yield (self.question, label, None, None, img_path), episode_done
 

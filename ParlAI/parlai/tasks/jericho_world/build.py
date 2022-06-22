@@ -12,34 +12,34 @@ from parlai.core.opt import Opt
 import parlai.utils.logging as logging
 
 
-GH_REPO = 'https://github.com/JerichoWorld/JerichoWorld.git'
+GH_REPO = "https://github.com/JerichoWorld/JerichoWorld.git"
 
-DATASET_NAME = 'jericho'
-VERSION = '1.0'
+DATASET_NAME = "jericho"
+VERSION = "1.0"
 
 
 def build(opt: Opt) -> None:
-    dpath = os.path.join(opt['datapath'], DATASET_NAME)
+    dpath = os.path.join(opt["datapath"], DATASET_NAME)
     if build_data.built(dpath, VERSION):
-        logging.debug('Data was already built. Skipping the data building.')
+        logging.debug("Data was already built. Skipping the data building.")
         return
 
     if os.path.exists(dpath):
-        logging.debug(f'Removing old/corrupted data in {dpath}.')
+        logging.debug(f"Removing old/corrupted data in {dpath}.")
         build_data.remove_dir(dpath)
 
     logging.info(
-        f'[building data: {dpath}]\nThis may take a while but only heppens once.'
+        f"[building data: {dpath}]\nThis may take a while but only heppens once."
     )
-    logging.info(f'Cloning Github repo {GH_REPO}')
+    logging.info(f"Cloning Github repo {GH_REPO}")
     temp_path = os.path.join(dpath, "temp")
     Repo.clone_from(GH_REPO, temp_path)
-    build_data.untar(temp_path, 'data.zip')
+    build_data.untar(temp_path, "data.zip")
 
     # Copying the unzipped data files to the dpath
-    for dt in ('train', 'test'):
-        fname = f'{dt}.json'
-        fsource = os.path.join(temp_path, 'data', fname)
+    for dt in ("train", "test"):
+        fname = f"{dt}.json"
+        fsource = os.path.join(temp_path, "data", fname)
         fdest = os.path.join(dpath, fname)
         os.rename(fsource, fdest)
 

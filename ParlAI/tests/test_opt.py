@@ -23,20 +23,20 @@ class TestOpt(unittest.TestCase):
 
     # Define test opts for opt comparison script
     compare_opt_1 = {
-        'key0': (1, 2),
-        'key1': 0,
-        'key2': 'a',
-        'override': {'inner_key0': [1], 'inner_key1': True, 'inner_key2': 'yes'},
+        "key0": (1, 2),
+        "key1": 0,
+        "key2": "a",
+        "override": {"inner_key0": [1], "inner_key1": True, "inner_key2": "yes"},
     }
     compare_opt_2 = {
-        'key0': (1, 2),
-        'key1': 1,
-        'key3': 'b',
-        'override': {'inner_key0': [1], 'inner_key1': False, 'inner_key3': 'no'},
+        "key0": (1, 2),
+        "key1": 1,
+        "key3": "b",
+        "override": {"inner_key0": [1], "inner_key1": False, "inner_key3": "no"},
     }
 
     def test_save_load(self):
-        o = Opt({'a': 3, 'b': 'foo'})
+        o = Opt({"a": 3, "b": "foo"})
         with testing_utils.tempdir() as tmpdir:
             fn = os.path.join(tmpdir, "opt")
             o.save(fn)
@@ -44,13 +44,13 @@ class TestOpt(unittest.TestCase):
             assert o == o2
 
     def test_save_withignore(self):
-        o = Opt({'a': 3, 'b': 'foo', 'override': {'a': 3}})
+        o = Opt({"a": 3, "b": "foo", "override": {"a": 3}})
         with testing_utils.tempdir() as tmpdir:
             fn = os.path.join(tmpdir, "opt")
             o.save(fn)
             o2 = Opt.load(fn)
             assert o != o2
-            assert 'override' not in o2
+            assert "override" not in o2
 
     def test_compare_opts(self):
         """
@@ -62,11 +62,11 @@ class TestOpt(unittest.TestCase):
         with testing_utils.tempdir() as tmpdir:
             # Write test opts
             opt_dir = tmpdir
-            opt_path_1 = os.path.join(opt_dir, '1.opt')
-            opt_path_2 = os.path.join(opt_dir, '2.opt')
-            with open(opt_path_1, 'w') as f1:
+            opt_path_1 = os.path.join(opt_dir, "1.opt")
+            opt_path_2 = os.path.join(opt_dir, "2.opt")
+            with open(opt_path_1, "w") as f1:
                 json.dump(self.compare_opt_1, f1)
-            with open(opt_path_2, 'w') as f2:
+            with open(opt_path_2, "w") as f2:
                 json.dump(self.compare_opt_2, f2)
 
             # Compare opts
@@ -95,11 +95,11 @@ key1:
 
             # Write test opts
             opt_dir = tmpdir
-            opt_path_1 = os.path.join(opt_dir, '1.opt')
-            opt_path_2 = os.path.join(opt_dir, '2.opt')
-            with open(opt_path_1, 'w') as f1:
+            opt_path_1 = os.path.join(opt_dir, "1.opt")
+            opt_path_2 = os.path.join(opt_dir, "2.opt")
+            with open(opt_path_1, "w") as f1:
                 json.dump(self.compare_opt_1, f1)
-            with open(opt_path_2, 'w') as f2:
+            with open(opt_path_2, "w") as f2:
                 json.dump(self.compare_opt_2, f2)
 
             # Compare opts
@@ -142,17 +142,17 @@ class TestInitOpt(unittest.TestCase):
 
         with testing_utils.tempdir() as temp_dir:
 
-            init_opt_path = os.path.join(temp_dir, 'init_opt.opt')
-            test_model_file = '/test_model_path/model'
+            init_opt_path = os.path.join(temp_dir, "init_opt.opt")
+            test_model_file = "/test_model_path/model"
 
             # Save a test opt file
-            init_opt = Opt({'model_file': test_model_file})
+            init_opt = Opt({"model_file": test_model_file})
             init_opt.save(init_opt_path)
 
             # Load the opt back in with --init-opt and make sure it's been set
             # correctly
             opt = ParlaiParser(True, True).parse_kwargs(init_opt=init_opt_path)
-            self.assertEqual(opt['model_file'], test_model_file)
+            self.assertEqual(opt["model_file"], test_model_file)
 
     def test_allow_missing_init_opts(self):
         """
@@ -161,10 +161,10 @@ class TestInitOpt(unittest.TestCase):
 
         with testing_utils.tempdir() as temp_dir:
 
-            init_opt_path = os.path.join(temp_dir, 'init_opt.opt')
+            init_opt_path = os.path.join(temp_dir, "init_opt.opt")
 
             # Save a test opt file with an argument that doesn't exist
-            init_opt = Opt({'made_up_arg': 'foo'})
+            init_opt = Opt({"made_up_arg": "foo"})
             init_opt.save(init_opt_path)
 
             # Assert that the opt file normally can't be loaded in
@@ -177,7 +177,7 @@ class TestInitOpt(unittest.TestCase):
             opt = ParlaiParser(True, True).parse_kwargs(
                 init_opt=init_opt_path, allow_missing_init_opts=True
             )
-            self.assertFalse(hasattr(opt, 'made_up_arg'))
+            self.assertFalse(hasattr(opt, "made_up_arg"))
 
 
 class TestCreateAgentFromOpt(unittest.TestCase):
@@ -188,25 +188,25 @@ class TestCreateAgentFromOpt(unittest.TestCase):
     def test_init_from_from_checkpoint(self):
         with testing_utils.tempdir() as temp_dir:
             opt_from_file = {
-                'datapath': 'dummy_path',
-                'model': 'repeat_label',
-                'init_model': os.path.join(temp_dir, 'something'),
-                'model_file': os.path.join(temp_dir, 'something_else'),
+                "datapath": "dummy_path",
+                "model": "repeat_label",
+                "init_model": os.path.join(temp_dir, "something"),
+                "model_file": os.path.join(temp_dir, "something_else"),
             }
             opt = Opt(
                 {
-                    'datapath': 'dummy_path',
-                    'model': 'repeat_label',
-                    'init_model': os.path.join(temp_dir, 'something_else.checkpoint'),
-                    'model_file': os.path.join(temp_dir, 'something_else'),
-                    'load_from_checkpoint': True,
+                    "datapath": "dummy_path",
+                    "model": "repeat_label",
+                    "init_model": os.path.join(temp_dir, "something_else.checkpoint"),
+                    "model_file": os.path.join(temp_dir, "something_else"),
+                    "load_from_checkpoint": True,
                 }
             )
 
-            with open(os.path.join(temp_dir, 'something_else.opt'), 'w') as f:
+            with open(os.path.join(temp_dir, "something_else.opt"), "w") as f:
                 f.write(json.dumps(opt_from_file))
 
             agent = create_agent_from_opt_file(opt)
-            init_model = agent.opt['init_model']
+            init_model = agent.opt["init_model"]
             # assert that the model was loaded with the correct checkpoitn
-            assert '.checkpoint' in init_model
+            assert ".checkpoint" in init_model

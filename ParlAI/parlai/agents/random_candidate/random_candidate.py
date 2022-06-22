@@ -30,12 +30,12 @@ class RandomCandidateAgent(Agent):
         """
         Add command line arguments for this agent.
         """
-        parser = parser.add_argument_group('RandomCandidateAgent Arguments')
+        parser = parser.add_argument_group("RandomCandidateAgent Arguments")
         parser.add_argument(
-            '--label_candidates_file',
+            "--label_candidates_file",
             type=str,
             default=None,
-            help='file of candidate responses to choose from',
+            help="file of candidate responses to choose from",
         )
         return parser
 
@@ -44,11 +44,11 @@ class RandomCandidateAgent(Agent):
         Initialize this agent.
         """
         super().__init__(opt)
-        self.id = 'RandomCandidateAgent'
+        self.id = "RandomCandidateAgent"
         random.seed(42)
-        if opt.get('label_candidates_file'):
-            f = open(opt.get('label_candidates_file'))
-            self.label_candidates = f.read().split('\n')
+        if opt.get("label_candidates_file"):
+            f = open(opt.get("label_candidates_file"))
+            self.label_candidates = f.read().split("\n")
 
     def act(self):
         """
@@ -64,20 +64,20 @@ class RandomCandidateAgent(Agent):
         """
         obs = self.observation
         if obs is None:
-            return {'text': 'Nothing to reply to yet.'}
+            return {"text": "Nothing to reply to yet."}
         reply = {}
-        reply['id'] = self.getID()
-        label_candidates = obs.get('label_candidates')
-        if hasattr(self, 'label_candidates'):
+        reply["id"] = self.getID()
+        label_candidates = obs.get("label_candidates")
+        if hasattr(self, "label_candidates"):
             # override label candidates with candidate file if set
             label_candidates = self.label_candidates
         if label_candidates:
             label_candidates = list(label_candidates)
             random.shuffle(label_candidates)
-            reply['text_candidates'] = label_candidates
-            reply['text'] = label_candidates[0]
+            reply["text_candidates"] = label_candidates
+            reply["text"] = label_candidates[0]
         else:
             # reply with I don't know.
-            reply['text'] = "I don't know."
+            reply["text"] = "I don't know."
 
         return reply

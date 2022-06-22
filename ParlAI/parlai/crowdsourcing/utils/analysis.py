@@ -36,26 +36,26 @@ class AbstractResultsCompiler(ABC):
 
     @classmethod
     def setup_args(cls):
-        parser = argparse.ArgumentParser('Compile crowdsourcing results')
+        parser = argparse.ArgumentParser("Compile crowdsourcing results")
         parser.add_argument(
-            '--output-folder', type=str, help='Folder to save output files to'
+            "--output-folder", type=str, help="Folder to save output files to"
         )
         parser.add_argument(
-            '--results-format',
+            "--results-format",
             type=str,
-            choices=['csv', 'json'],
-            default='csv',
-            help='Output format for results data',
+            choices=["csv", "json"],
+            default="csv",
+            help="Output format for results data",
         )
         parser.add_argument(
-            '--task-name', type=str, help='Name of the Mephisto task to open'
+            "--task-name", type=str, help="Name of the Mephisto task to open"
         )
         return parser
 
     def __init__(self, opt: Opt):
-        self.task_name = opt['task_name']
-        self.output_folder = opt['output_folder']
-        self.results_format = opt.get('results_format', 'json')
+        self.task_name = opt["task_name"]
+        self.output_folder = opt["output_folder"]
+        self.results_format = opt.get("results_format", "json")
 
         # We lazily load these later, or inject their mock version during testing.
         self._mephisto_db = None
@@ -109,7 +109,7 @@ class AbstractResultsCompiler(ABC):
         except (IndexError, AssertionError) as error:
             logging.error(error)
             logging.warning(
-                f'Skipping unit {unit.db_id}. No message found for this unit.'
+                f"Skipping unit {unit.db_id}. No message found for this unit."
             )
 
     def get_task_data(self) -> List[Dict[str, Any]]:
@@ -153,8 +153,8 @@ class AbstractResultsCompiler(ABC):
 
     def _validate_compiled_result_type(self, results):
         assert isinstance(results, dict) or isinstance(results, pd.DataFrame), (
-            'The output of result compiler needs to be a dictionary or a pandas dataframe. '
-            f'Found ({type(results)})'
+            "The output of result compiler needs to be a dictionary or a pandas dataframe. "
+            f"Found ({type(results)})"
         )
 
     def compile_and_save_results(self):
@@ -166,35 +166,35 @@ class AbstractResultsCompiler(ABC):
         compiled_results = self.compile_results()
         self._validate_compiled_result_type(compiled_results)
         results_path_base = self.get_results_path_base()
-        results_path = f'{results_path_base}.{self.results_format}'
+        results_path = f"{results_path_base}.{self.results_format}"
         os.makedirs(self.output_folder, exist_ok=True)
-        if self.results_format == 'csv':
+        if self.results_format == "csv":
             if not isinstance(compiled_results, pd.DataFrame):
                 logging.warning(
                     "The requested data output format was 'csv' while the data was compiled as a 'dict'. "
-                    'Transforming dictionary data into pd.DataFrame using pandas.'
+                    "Transforming dictionary data into pd.DataFrame using pandas."
                 )
                 compiled_results = pd.DataFrame.from_dict(
-                    compiled_results, orient='index'
+                    compiled_results, orient="index"
                 )
             compiled_results.to_csv(results_path, index=False)
-        elif self.results_format == 'json':
+        elif self.results_format == "json":
             if isinstance(compiled_results, pd.DataFrame):
                 logging.warning(
                     "The requested data output format was 'json' while the data was compiled as a 'dataframe'. "
-                    'Transforming dataframe into json using pandas.'
+                    "Transforming dataframe into json using pandas."
                 )
                 # Reset the index to make each row have a unique index value
                 compiled_results.reset_index().to_json(results_path)
             else:
-                with open(results_path, 'w') as fout:
+                with open(results_path, "w") as fout:
                     fout.write(json.dumps(compiled_results))
 
         else:
             raise ValueError(
                 f'Results save format of "{self.results_format}" currently unsupported!'
             )
-        logging.info(f'Wrote results file to {results_path}.')
+        logging.info(f"Wrote results file to {results_path}.")
 
 
 class AbstractTurnAnnotationResultsCompiler(AbstractResultsCompiler):
@@ -210,13 +210,13 @@ class AbstractTurnAnnotationResultsCompiler(AbstractResultsCompiler):
     def setup_args(cls):
         parser = super().setup_args()
         parser.add_argument(
-            '--results-folders', type=str, help='Comma-separated list of result folders'
+            "--results-folders", type=str, help="Comma-separated list of result folders"
         )
         parser.add_argument(
-            '--problem-buckets',
+            "--problem-buckets",
             type=str,
-            help='Comma-separated list of buckets used for annotation. Set to an empty string to not analyze problem buckets.',
-            default='bucket_0,bucket_1,bucket_2,bucket_3,bucket_4,none_all_good',
+            help="Comma-separated list of buckets used for annotation. Set to an empty string to not analyze problem buckets.",
+            default="bucket_0,bucket_1,bucket_2,bucket_3,bucket_4,none_all_good",
         )
         return parser
 
@@ -225,13 +225,13 @@ class AbstractTurnAnnotationResultsCompiler(AbstractResultsCompiler):
         super().__init__(opt)
 
         # Handle inputs
-        if 'results_folders' in opt:
-            self.results_folders = opt['results_folders'].split(',')
+        if "results_folders" in opt:
+            self.results_folders = opt["results_folders"].split(",")
         else:
             self.results_folders = None
-        if opt['problem_buckets'].lower() not in ['', 'none']:
+        if opt["problem_buckets"].lower() not in ["", "none"]:
             self.use_problem_buckets = True
-            self.problem_buckets = opt['problem_buckets'].split(',')
+            self.problem_buckets = opt["problem_buckets"].split(",")
         else:
             self.use_problem_buckets = False
             self.problem_buckets = []

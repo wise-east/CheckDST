@@ -12,19 +12,19 @@ import os
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/iwslt14/iwslt14.tgz',
-        'iwslt14.tgz',
-        'af4a96dbc7f792a9ba96cb1a56b314a15ea940fc7ea155aef72c19dc52d0ef84',
+        "http://parl.ai/downloads/iwslt14/iwslt14.tgz",
+        "iwslt14.tgz",
+        "af4a96dbc7f792a9ba96cb1a56b314a15ea940fc7ea155aef72c19dc52d0ef84",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'iwslt14')
-    version = 'None'
+    dpath = os.path.join(opt["datapath"], "iwslt14")
+    version = "None"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

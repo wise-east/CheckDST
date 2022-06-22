@@ -41,7 +41,7 @@ def get_class_name(item):
     #   are likely to share caching more
     # - split up the rest by class name because slow tests tend to be in
     #   the same module
-    if class_name and '.tasks.' not in module_name:
+    if class_name and ".tasks." not in module_name:
         return "{}.{}".format(module_name, class_name)
     else:
         return module_name
@@ -60,18 +60,18 @@ def filter_tests_with_circleci(test_list):
 
 # -----------------------------------------------------------------------
 MARKER_RULES = [
-    ('parlai_internal', 'internal'),
-    ('crowdsourcing/', 'crowdsourcing'),
-    ('nightly/gpu', 'nightly_gpu'),
-    ('nightly/cpu/', 'nightly_cpu'),
-    ('datatests/', 'data'),
-    ('parlai/tasks/', 'teacher'),
-    ('tasks/', 'tasks'),
+    ("parlai_internal", "internal"),
+    ("crowdsourcing/", "crowdsourcing"),
+    ("nightly/gpu", "nightly_gpu"),
+    ("nightly/cpu/", "nightly_cpu"),
+    ("datatests/", "data"),
+    ("parlai/tasks/", "teacher"),
+    ("tasks/", "tasks"),
 ]
 
 
 def pytest_collection_modifyitems(config, items):
-    marker_expr = config.getoption('markexpr')
+    marker_expr = config.getoption("markexpr")
 
     deselected = []
 
@@ -89,14 +89,14 @@ def pytest_collection_modifyitems(config, items):
         else:
             assert "/" not in rel_path[6:], f"Couldn't categorize '{rel_path}'"
             item.add_marker("unit")
-            if marker_expr != 'unit' and marker_expr != '':
+            if marker_expr != "unit" and marker_expr != "":
                 deselected.append(item)
 
     # kill everything that wasn't grabbed
     for item in deselected:
         items.remove(item)
 
-    if 'CIRCLE_NODE_TOTAL' in os.environ:
+    if "CIRCLE_NODE_TOTAL" in os.environ:
         # circleci, split up the parallelism by classes
         class_mapping = collections.defaultdict(list)
         for item in items:

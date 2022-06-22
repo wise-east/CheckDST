@@ -11,24 +11,24 @@ import os
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/COCO-IMG/test2015.zip',
-        'test2015.zip',
-        '52d45179bbe4fcc41ba16550b3df532fc9d0a0084b2afaeb6a3ae396032aaf14',
+        "http://parl.ai/downloads/COCO-IMG/test2015.zip",
+        "test2015.zip",
+        "52d45179bbe4fcc41ba16550b3df532fc9d0a0084b2afaeb6a3ae396032aaf14",
     ),
     DownloadableFile(
-        'http://images.cocodataset.org/annotations/image_info_test2015.zip',
-        'image_info_test2015.zip',
-        'cf400242f8497257fb8a3e369bc766491f4a7e42625fb3d72555504e9a8c3b18',
+        "http://images.cocodataset.org/annotations/image_info_test2015.zip",
+        "image_info_test2015.zip",
+        "cf400242f8497257fb8a3e369bc766491f4a7e42625fb3d72555504e9a8c3b18",
     ),
 ]
 
 
 def buildImage(opt):
-    dpath = os.path.join(opt['datapath'], 'COCO-IMG-2015')
-    version = '1'
+    dpath = os.path.join(opt["datapath"], "COCO-IMG-2015")
+    version = "1"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building image data: ' + dpath + ']')
+        print("[building image data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)
@@ -43,12 +43,12 @@ def buildImage(opt):
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'COCO_2015_Caption')
+    dpath = os.path.join(opt["datapath"], "COCO_2015_Caption")
     version = None
 
     # check if data had been previously built
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
 
         # make a clean directory if needed
         if build_data.built(dpath):

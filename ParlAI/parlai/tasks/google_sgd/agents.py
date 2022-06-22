@@ -26,9 +26,9 @@ class Text2API2TextTeacher(DialogTeacher):
     """
 
     def __init__(self, opt: Opt, shared=None):
-        self.fold = opt['datatype'].split(':')[0]
-        opt['datafile'] = self.fold
-        self.dpath = os.path.join(opt['datapath'], 'google_sgd')
+        self.fold = opt["datatype"].split(":")[0]
+        opt["datafile"] = self.fold
+        self.dpath = os.path.join(opt["datapath"], "google_sgd")
         if shared is None:
             warn_once(
                 "Google SGD is a beta dataset, and format may significantly change."
@@ -37,73 +37,73 @@ class Text2API2TextTeacher(DialogTeacher):
         super().__init__(opt, shared)
 
     def _load_data(self, fold):
-        dataset_fold = 'dev' if fold == 'valid' else fold
+        dataset_fold = "dev" if fold == "valid" else fold
         fold_path = os.path.join(self.dpath, dataset_fold)
-        schema_file = os.path.join(fold_path, 'schema.json')
-        with PathManager.open(schema_file, 'r') as f:
+        schema_file = os.path.join(fold_path, "schema.json")
+        with PathManager.open(schema_file, "r") as f:
             schema_lookup = {}
             for schema in json.load(f):
-                schema_lookup[schema['service_name']] = schema
+                schema_lookup[schema["service_name"]] = schema
 
         dialogs = []
         for file_id in range(1, build_.fold_size(dataset_fold) + 1):
-            filename = os.path.join(fold_path, f'dialogues_{file_id:03d}.json')
-            with PathManager.open(filename, 'r') as f:
+            filename = os.path.join(fold_path, f"dialogues_{file_id:03d}.json")
+            with PathManager.open(filename, "r") as f:
                 dialogs += json.load(f)
         return schema_lookup, dialogs
 
     def _get_api_call_and_results(self, sys_turn, schema_lookup):
         api_call = {}
         api_resp = {}
-        for frame in sys_turn['frames']:
-            if 'service_call' in frame:
+        for frame in sys_turn["frames"]:
+            if "service_call" in frame:
                 # API CALL
-                method = frame['service_call']['method']
-                for slot_type, slot_value in frame['service_call'][
-                    'parameters'
+                method = frame["service_call"]["method"]
+                for slot_type, slot_value in frame["service_call"][
+                    "parameters"
                 ].items():
-                    api_call[f'{method}.{slot_type}'] = slot_value
-                assert 'service_results' in frame
+                    api_call[f"{method}.{slot_type}"] = slot_value
+                assert "service_results" in frame
 
             # API Resp
-            if 'actions' in frame:
-                for action in frame['actions']:
-                    slot_type = action['slot']
-                    slot_value = action['canonical_values']
+            if "actions" in frame:
+                for action in frame["actions"]:
+                    slot_type = action["slot"]
+                    slot_value = action["canonical_values"]
                     api_resp[slot_type] = slot_value
         return api_call, api_resp
 
     def custom_evaluation(
         self, teacher_action: Message, labels, model_response: Message
     ):
-        resp = model_response.get('text')
+        resp = model_response.get("text")
         if not resp:
             return
 
-        if teacher_action['type'] == 'apicall' and resp.startswith('apicall: '):
-            gold = teacher_action['slots']
-            slot_strs = resp[9:].split(' ; ')
+        if teacher_action["type"] == "apicall" and resp.startswith("apicall: "):
+            gold = teacher_action["slots"]
+            slot_strs = resp[9:].split(" ; ")
             parsed = {}
             for slot_str in slot_strs:
-                if ' = ' not in slot_str:
-                    if slot_str != '':
+                if " = " not in slot_str:
+                    if slot_str != "":
                         # syntactically invalid generations should count against us
-                        self.metrics.add('slot_p', AverageMetric(0))
+                        self.metrics.add("slot_p", AverageMetric(0))
                     continue
-                name, value = slot_str.split(' = ')
+                name, value = slot_str.split(" = ")
                 parsed[name] = value
 
             # slot precision
             for k, v in parsed.items():
-                self.metrics.add('slot_p', AverageMetric(v == gold.get(k)))
+                self.metrics.add("slot_p", AverageMetric(v == gold.get(k)))
             # slot recall
             for k, v in gold.items():
-                self.metrics.add('slot_r', AverageMetric(v == parsed.get(k)))
-        elif teacher_action['type'] == 'apiresp':
-            delex_resp = self._delex(resp, teacher_action['slots'])
-            delex_label = self._delex(labels[0], teacher_action['slots'])
+                self.metrics.add("slot_r", AverageMetric(v == parsed.get(k)))
+        elif teacher_action["type"] == "apiresp":
+            delex_resp = self._delex(resp, teacher_action["slots"])
+            delex_label = self._delex(labels[0], teacher_action["slots"])
             self.metrics.add(
-                'delex_bleu', BleuMetric.compute(delex_resp, [delex_label])
+                "delex_bleu", BleuMetric.compute(delex_resp, [delex_label])
             )
 
     def _delex(self, text, slots):
@@ -115,13 +115,13 @@ class Text2API2TextTeacher(DialogTeacher):
         return delex
 
     def _api_dict_to_str(self, apidict):
-        return ' ; '.join(f'{k} = {v}' for k, v in apidict.items())
+        return " ; ".join(f"{k} = {v}" for k, v in apidict.items())
 
     def setup_data(self, fold):
         schema_lookup, dialogs = self._load_data(fold)
         for dialog in dialogs:
             # services = dialog['services']
-            turns = dialog['turns']
+            turns = dialog["turns"]
             num_turns = len(turns)
             for turn_id in range(0, num_turns, 2):
                 is_first_turn = turn_id == 0
@@ -136,32 +136,32 @@ class Text2API2TextTeacher(DialogTeacher):
                 if not api_call and not api_results:
                     # input: user_turn, output: sys_turn
                     yield {
-                        'text': user_turn['utterance'],
-                        'label': sys_turn['utterance'],
-                        'type': 'text',
+                        "text": user_turn["utterance"],
+                        "label": sys_turn["utterance"],
+                        "type": "text",
                     }, is_first_turn
                 elif not api_call and api_results:
                     yield {
-                        'text': f"{user_turn['utterance']} api_resp: {resp_str}",
-                        'label': sys_turn['utterance'],
-                        'type': 'apiresp',
-                        'slots': api_results,
+                        "text": f"{user_turn['utterance']} api_resp: {resp_str}",
+                        "label": sys_turn["utterance"],
+                        "type": "apiresp",
+                        "slots": api_results,
                     }, is_first_turn
                 elif api_call and api_results:
                     # input: user_turn, output: api_call
                     yield {
-                        'text': user_turn['utterance'],
-                        'label': f'apicall: {call_str}',
-                        'type': 'apicall',
-                        'slots': api_call,
+                        "text": user_turn["utterance"],
+                        "label": f"apicall: {call_str}",
+                        "type": "apicall",
+                        "slots": api_call,
                     }, is_first_turn
 
                     # system turn, input : api results, output : assistant turn
                     yield {
-                        'text': f"api_resp: {resp_str}",
-                        'label': sys_turn['utterance'],
-                        'type': 'apiresp',
-                        'slots': api_results,
+                        "text": f"api_resp: {resp_str}",
+                        "label": sys_turn["utterance"],
+                        "type": "apiresp",
+                        "slots": api_results,
                     }, False
                 else:
                     assert (
@@ -177,7 +177,7 @@ class Text2TextTeacher(Text2API2TextTeacher):
     def setup_data(self, fold):
         schema_lookup, dialogs = self._load_data(fold)
         for dialog in dialogs:
-            turns = dialog['turns']
+            turns = dialog["turns"]
             num_turns = len(turns)
             for turn_id in range(0, num_turns, 2):
                 if turn_id == 0:
@@ -189,9 +189,9 @@ class Text2TextTeacher(Text2API2TextTeacher):
                 sys_turn = turns[turn_id + 1]
                 # input: user_turn, output: sys_turn
                 yield {
-                    'text': user_turn['utterance'],
-                    'label': sys_turn['utterance'],
-                    'type': 'text',
+                    "text": user_turn["utterance"],
+                    "label": sys_turn["utterance"],
+                    "type": "text",
                 }, is_first_turn
 
 

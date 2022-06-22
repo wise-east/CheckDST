@@ -15,15 +15,15 @@ import os
 def _path(opt):
     # Build the data if it doesn't exist.
     build(opt)
-    dt = opt['datatype'].split(':')[0]
-    if dt == 'test':
+    dt = opt["datatype"].split(":")[0]
+    if dt == "test":
         warn_once("WARNING: Test set not included. Setting datatype to valid.")
-        dt = 'valid'
-    return os.path.join(opt['datapath'], 'CoQA', dt + '.txt')
+        dt = "valid"
+    return os.path.join(opt["datapath"], "CoQA", dt + ".txt")
 
 
 class DefaultTeacher(ParlAIDialogTeacher):
     def __init__(self, opt, shared=None):
         opt = copy.deepcopy(opt)
-        opt['parlaidialogteacher_datafile'] = _path(opt)
+        opt["parlaidialogteacher_datafile"] = _path(opt)
         super().__init__(opt, shared)

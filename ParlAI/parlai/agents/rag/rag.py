@@ -95,12 +95,12 @@ class T5RagAgent(T5Agent, BaseGenerationAgentMixin):
 
 
 GENERATION_AGENTS = {
-    'transformer/generator': TransformerGeneratorRagAgent,
-    'bart': BartRagAgent,
-    't5': T5RagAgent,
+    "transformer/generator": TransformerGeneratorRagAgent,
+    "bart": BartRagAgent,
+    "t5": T5RagAgent,
 }
 
-RAG_MODELS = {'sequence': RagSequence, 'token': RagToken, 'turn': RagTurn}
+RAG_MODELS = {"sequence": RagSequence, "token": RagToken, "turn": RagTurn}
 
 
 class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
@@ -126,7 +126,7 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
         TransformerGeneratorRagAgent.add_cmdline_args(parser, partial_opt)
         parser = setup_rag_args(parser)
         RagTurn.add_cmdline_args(parser, partial_opt)
-        if partial_opt and partial_opt.get('generation_model') == 'bart':
+        if partial_opt and partial_opt.get("generation_model") == "bart":
             BartRagAgent.add_cmdline_args(parser, partial_opt=partial_opt)
         T5RagAgent.add_cmdline_args(parser, partial_opt=partial_opt)
         # BART Agent sets these to True; doesn't let you set anything else
@@ -158,40 +158,40 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
     @retriever_query.setter
     def retriever_query(self, query: str):
         self._retriever_query = query
-        if query == 'one_turn':
-            self._query_key = 'text'
-        elif query == 'full_history':
-            self._query_key = 'full_text'
+        if query == "one_turn":
+            self._query_key = "text"
+        elif query == "full_history":
+            self._query_key = "full_text"
 
     def __init__(self, opt: Opt, shared: TShared = None):
         self.opt = opt
         if torch.cuda.is_available():
-            torch.cuda.set_device('cuda:0')
-        self.generation_model = opt['generation_model']
-        self.regret = opt['regret']
-        self.regret_intermediate_maxlen = opt['regret_intermediate_maxlen']
-        self.retriever_query = opt['rag_retriever_query']
+            torch.cuda.set_device("cuda:0")
+        self.generation_model = opt["generation_model"]
+        self.regret = opt["regret"]
+        self.regret_intermediate_maxlen = opt["regret_intermediate_maxlen"]
+        self.retriever_query = opt["rag_retriever_query"]
 
         # Super call
         self._generation_agent.__init__(self, opt, shared)  # type: ignore
-        self.rag_model_type = opt['rag_model_type']
+        self.rag_model_type = opt["rag_model_type"]
 
         if not shared and self.regret:
             self.regret_model = self.build_regret_model()
         elif shared:
-            self.regret_model = shared.get('regret_model')
+            self.regret_model = shared.get("regret_model")
 
     def build_regret_model(self) -> RagModel:
         """
         Build and return regret RagModel.
         """
-        model_file = modelzoo_path(self.opt['datapath'], self.opt['regret_model_file'])
+        model_file = modelzoo_path(self.opt["datapath"], self.opt["regret_model_file"])
         if model_file:
             assert os.path.exists(
                 model_file
-            ), f'specify correct path for --regret-model-file (currently {model_file})'
-            regret_opt = Opt.load(f'{model_file}.opt')
-            regret_opt['n_docs'] = self.opt['n_docs']  # Urgent that this is the same
+            ), f"specify correct path for --regret-model-file (currently {model_file})"
+            regret_opt = Opt.load(f"{model_file}.opt")
+            regret_opt["n_docs"] = self.opt["n_docs"]  # Urgent that this is the same
             # add keys that were not in this model when originally trained
             regret_opt.update(
                 {k: v for k, v in self.opt.items() if k not in regret_opt}
@@ -201,33 +201,33 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
                 [
                     regret_opt[k] == self.opt[k]
                     for k in [
-                        'rag_retriever_type',
-                        'path_to_index',
-                        'path_to_dpr_passages',
+                        "rag_retriever_type",
+                        "path_to_index",
+                        "path_to_dpr_passages",
                     ]
                 ]
             ):
-                logging.warning('Sharing retrievers between model and regret model!')
+                logging.warning("Sharing retrievers between model and regret model!")
                 retriever_shared = self.model.retriever.share()
-            elif self.opt['regret_override_index']:
+            elif self.opt["regret_override_index"]:
                 # Sharing Index Path & Passages only; not the full retriever
-                logging.warning('Overriding initial ReGReT model index')
-                regret_opt['path_to_index'] = self.opt['path_to_index']
-                regret_opt['path_to_dpr_passages'] = self.opt['path_to_dpr_passages']
+                logging.warning("Overriding initial ReGReT model index")
+                regret_opt["path_to_index"] = self.opt["path_to_index"]
+                regret_opt["path_to_dpr_passages"] = self.opt["path_to_dpr_passages"]
 
-            if self.opt['regret_dict_file']:
-                regret_opt['dict_file'] = self.opt['regret_dict_file']
+            if self.opt["regret_dict_file"]:
+                regret_opt["dict_file"] = self.opt["regret_dict_file"]
 
             regret_dict = self.dictionary_class()(regret_opt)
             model = RagModel(regret_opt, regret_dict, retriever_shared=retriever_shared)
-            with PathManager.open(model_file, 'rb') as f:
+            with PathManager.open(model_file, "rb") as f:
                 states = torch.load(
                     f,
                     map_location=lambda cpu, _: cpu,
                     pickle_module=parlai.utils.pickle,
                 )
-            assert 'model' in states
-            model.load_state_dict(states['model'])
+            assert "model" in states
+            model.load_state_dict(states["model"])
             if self.model_parallel:
                 ph = PipelineHelper()
                 ph.check_compatibility(self.opt)
@@ -251,7 +251,7 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
     def share(self):
         shared = super().share()
         if self.regret:
-            shared['regret_model'] = self.regret_model
+            shared["regret_model"] = self.regret_model
         return shared
 
     ########################################
@@ -280,18 +280,18 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
         observation = self._generation_agent.observe(self, observation)
         if observation.is_padding():
             return observation
-        if 'query_vec' not in observation:
+        if "query_vec" not in observation:
             self._set_query_vec(observation)
-        if 'input_turn_cnt_vec' not in observation:
+        if "input_turn_cnt_vec" not in observation:
             self._set_input_turn_cnt_vec(observation)
         return observation
 
     def eval_step(self, batch: Batch) -> Optional[Output]:
         output = super().eval_step(batch)
-        if output is None or not hasattr(self.model, 'retriever'):
+        if output is None or not hasattr(self.model, "retriever"):
             return output
         assert isinstance(self.model, RagModel)
-        if hasattr(self.model.retriever, 'top_docs'):
+        if hasattr(self.model.retriever, "top_docs"):
             output.top_docs = self.model.retriever.top_docs  # type: ignore
         return output
 
@@ -341,7 +341,7 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
             query_vec - tokenized vectors for retrieval mechanism
             input_turn_cnt_vec - count of input turns for each batch item
         """
-        if hasattr(self._rag_model_interface, 'get_generation_input'):
+        if hasattr(self._rag_model_interface, "get_generation_input"):
             return self._rag_model_interface.get_generation_input(batch)  # type: ignore
         return self._model_input(batch)
 
@@ -351,9 +351,9 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
         Build and return RagModel.
         """
         model = self._generation_agent.build_rag_model(self.opt, self.dict)
-        if self.opt['embedding_type'] != 'random':
+        if self.opt["embedding_type"] != "random":
             self._copy_embeddings(
-                model.encoder.embeddings.weight, self.opt['embedding_type']
+                model.encoder.embeddings.weight, self.opt["embedding_type"]
             )
         return model
 
@@ -365,17 +365,17 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
         """
         # map extra special tokens carefully
         new_size = self.model.embeddings.weight.size()[0]
-        orig_size = state_dict['embeddings.weight'].size()[0]
-        logging.info(f'Resizing token embeddings from {orig_size} to {new_size}')
+        orig_size = state_dict["embeddings.weight"].size()[0]
+        logging.info(f"Resizing token embeddings from {orig_size} to {new_size}")
         if new_size <= orig_size:
             # new size should be greater than original size,
             # as we are adding special tokens
             raise RuntimeError(msg)
 
         for emb_weights in [
-            'embeddings.weight',
-            'seq2seq_encoder.embeddings.weight',
-            'seq2seq_decoder.embeddings.weight',
+            "embeddings.weight",
+            "seq2seq_encoder.embeddings.weight",
+            "seq2seq_decoder.embeddings.weight",
         ]:
             # get new_embs
             old_embs = state_dict[emb_weights]
@@ -411,31 +411,31 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
             return state_dict with appropriate keys/values
         """
         # 1. Substitute all "encoder" and "decoder" keys with "seq2seq_encoder" and "seq2seq_decoder"
-        if not [k for k in state_dict if k.startswith('seq2seq')]:
+        if not [k for k in state_dict if k.startswith("seq2seq")]:
             for k in list(state_dict.keys()):
-                if k.startswith('encoder') or k.startswith('decoder'):
+                if k.startswith("encoder") or k.startswith("decoder"):
                     weights = state_dict.pop(k)
-                    state_dict[f'seq2seq_{k}'] = weights
+                    state_dict[f"seq2seq_{k}"] = weights
         # 2. Retriever state
-        if not [k for k in state_dict if 'retriever' in k]:
+        if not [k for k in state_dict if "retriever" in k]:
             retriever_state = {
                 f"retriever.{k}": v
                 for k, v in model.retriever.state_dict().items()  # type: ignore
             }
             state_dict.update(retriever_state)
         # 3. Handle n_positional difference
-        if opt.get('n_extra_positions', 0) > 0:
-            key = 'seq2seq_encoder.position_embeddings.weight'
+        if opt.get("n_extra_positions", 0) > 0:
+            key = "seq2seq_encoder.position_embeddings.weight"
             init_weight = (
                 model.seq2seq_encoder.position_embeddings.weight  # type: ignore
             )
-            if state_dict[key].size(0) < opt['n_positions'] + opt['n_extra_positions']:
+            if state_dict[key].size(0) < opt["n_positions"] + opt["n_extra_positions"]:
                 # Make sure we're not adding more positions to a model trained
                 # with extra positions
                 state_dict[key] = torch.cat(
                     [
                         state_dict[key].to(init_weight),  # type: ignore
-                        init_weight[-opt['n_extra_positions'] :, :],  # type: ignore
+                        init_weight[-opt["n_extra_positions"] :, :],  # type: ignore
                     ],
                     dim=0,
                 )
@@ -450,9 +450,9 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
         that the loaded DPR model weights are not overwritten by the state loading.
         """
         override_dpr = False
-        overrides = opt.get('override', {})
-        if overrides.get('dpr_model_file') and os.path.exists(
-            overrides['dpr_model_file']
+        overrides = opt.get("override", {})
+        if overrides.get("dpr_model_file") and os.path.exists(
+            overrides["dpr_model_file"]
         ):
             override_dpr = True
             logging.warning(
@@ -478,18 +478,18 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
         except RuntimeError as msg:
             state_dict = self.update_state_dict(self.opt, state_dict, self.model)
             msg_ = str(msg)
-            if 'size mismatch' in msg_ and 'embedding' in msg_:
-                if hasattr(self, 'special_toks') and len(self.special_toks) > 0:
+            if "size mismatch" in msg_ and "embedding" in msg_:
+                if hasattr(self, "special_toks") and len(self.special_toks) > 0:
                     state_dict = self._resize_token_embeddings(state_dict, msg_)
                     self.resized_embeddings = True  # make note that we resized here
                 else:
                     raise RuntimeError(
-                        f'{msg_}\n'
-                        '-----------------\n'
-                        'Could not load the model due to a size mismatch in the '
-                        'embeddings. A common reason for this is trying to load '
-                        'a model trained with fp16 but loaded without fp16. Try '
-                        'adding --fp16 true or --force-fp16-tokens true.'
+                        f"{msg_}\n"
+                        "-----------------\n"
+                        "Could not load the model due to a size mismatch in the "
+                        "embeddings. A common reason for this is trying to load "
+                        "a model trained with fp16 but loaded without fp16. Try "
+                        "adding --fp16 true or --force-fp16-tokens true."
                     )
             self.model.load_state_dict(state_dict)
 
@@ -508,10 +508,10 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
 
         batch = self._generation_agent.batchify(self, obs_batch, sort)
 
-        if any(ex.get('query_vec') is not None for ex in valid_exs):
+        if any(ex.get("query_vec") is not None for ex in valid_exs):
             _qs = []
             for ex in valid_exs:
-                q = ex.get('query_vec', self.EMPTY)
+                q = ex.get("query_vec", self.EMPTY)
                 if type(q) is list and type(q[0]) is list:
                     # handling input turns
                     _qs += q
@@ -520,10 +520,10 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
             self.set_batch_query(batch, _qs)
 
         batch.input_turn_cnt_vec = None
-        if any(ex.get('input_turn_cnt_vec') is not None for ex in valid_exs):
+        if any(ex.get("input_turn_cnt_vec") is not None for ex in valid_exs):
             batch.input_turn_cnt_vec = torch.cat(
                 [
-                    ex.get('input_turn_cnt_vec', torch.LongTensor([1]))
+                    ex.get("input_turn_cnt_vec", torch.LongTensor([1]))
                     for ex in valid_exs
                 ],
                 dim=0,
@@ -574,10 +574,10 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
             return observation with query vec.
         """
         query_str = observation[self._query_key]
-        if hasattr(self.model, 'module'):
-            observation['query_vec'] = self.model.module.tokenize_query(query_str)
+        if hasattr(self.model, "module"):
+            observation["query_vec"] = self.model.module.tokenize_query(query_str)
         else:
-            observation['query_vec'] = self.model.tokenize_query(query_str)
+            observation["query_vec"] = self.model.tokenize_query(query_str)
         return observation
 
     def _set_input_turn_cnt_vec(self, observation: Message) -> Message:
@@ -622,7 +622,7 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
         """
         Override TGA._get_next_decoder_input to repeat decoder input appropriately.
         """
-        if hasattr(self._rag_model_interface, 'get_next_decoder_input'):
+        if hasattr(self._rag_model_interface, "get_next_decoder_input"):
             dec_input = self._rag_model_interface.get_next_decoder_input(  # type: ignore
                 prev_input, selection, incr_state_inds
             )
@@ -644,7 +644,7 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
 
         Reason: the batchsize is artificially higher (n_docs * batchsize)
         """
-        if hasattr(self._rag_model_interface, 'get_ctxt_index'):
+        if hasattr(self._rag_model_interface, "get_ctxt_index"):
             batch_idx = self._rag_model_interface.get_ctxt_index(  # type: ignore
                 batch, batch_idx
             )
@@ -757,7 +757,7 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
             vec_i = pred_vecs[i]
             txt_i = self._v2t(vec_i)
             query_i = torch.LongTensor(self.model.tokenize_query(txt_i)).to(query_vec)
-            if self.retriever_query == 'one_turn':
+            if self.retriever_query == "one_turn":
                 new_queries.append(query_i)
             else:
                 query_i = torch.cat([query_vec[i][: query_lens[i]], query_i], dim=0)
@@ -767,7 +767,7 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
 
         if (
             batch.input_turn_cnt_vec is not None
-            and self.retriever_query == 'full_history'
+            and self.retriever_query == "full_history"
         ):
             batch.input_turn_cnt_vec += 1
 
@@ -811,25 +811,25 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
                 new_docs.append(docs_it)
                 offset += it
             docs = new_docs
-        title_key = self.opt['gold_knowledge_title_key']
-        passage_key = self.opt['gold_knowledge_passage_key']
+        title_key = self.opt["gold_knowledge_title_key"]
+        passage_key = self.opt["gold_knowledge_passage_key"]
         batchsize = len(batch.valid_indices)
-        n_docs = self.opt['n_docs']
+        n_docs = self.opt["n_docs"]
         metrics = {
             k: [0] * batchsize
             for k in [
-                'doc_r@1',
-                f'doc_r@{n_docs}',
-                'passage_r@1',
-                f'passage_r@{n_docs}',
-                'title@1_f1',
-                'passage@1_f1',
+                "doc_r@1",
+                f"doc_r@{n_docs}",
+                "passage_r@1",
+                f"passage_r@{n_docs}",
+                "title@1_f1",
+                "passage@1_f1",
             ]
         }
         for i in range(batchsize):
             ex = batch.observations[i]
-            label_title = normalize_answer(ex.get(title_key, ''))
-            label_passage = normalize_answer(ex.get(passage_key, ''))
+            label_title = normalize_answer(ex.get(title_key, ""))
+            label_passage = normalize_answer(ex.get(passage_key, ""))
 
             for rank, doc in enumerate(docs[i]):
                 model_title = normalize_answer(doc.get_title())
@@ -841,19 +841,19 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
                 )
 
                 if rank == 0:
-                    metrics['doc_r@1'][i] = int(title_exact_match)
-                    metrics['passage_r@1'][i] = int(passage_match)
-                    metrics['title@1_f1'][i] = F1Metric.compute(
+                    metrics["doc_r@1"][i] = int(title_exact_match)
+                    metrics["passage_r@1"][i] = int(passage_match)
+                    metrics["title@1_f1"][i] = F1Metric.compute(
                         guess=model_title, answers=[label_title]
                     ).value()
-                    metrics['passage@1_f1'][i] = F1Metric.compute(
+                    metrics["passage@1_f1"][i] = F1Metric.compute(
                         guess=model_passage, answers=[label_passage]
                     ).value()
-                metrics[f'doc_r@{n_docs}'][i] = int(
-                    metrics[f'doc_r@{n_docs}'][i] or title_exact_match
+                metrics[f"doc_r@{n_docs}"][i] = int(
+                    metrics[f"doc_r@{n_docs}"][i] or title_exact_match
                 )
-                metrics[f'passage_r@{n_docs}'][i] = int(
-                    metrics[f'passage_r@{n_docs}'][i] or passage_match
+                metrics[f"passage_r@{n_docs}"][i] = int(
+                    metrics[f"passage_r@{n_docs}"][i] or passage_match
                 )
 
         for m in metrics:
@@ -896,7 +896,7 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
         Override standard TGA.compute_loss to call relevant RAG Model Interface.
         """
         if batch.label_vec is None:
-            raise ValueError('Cannot compute loss without a label.')
+            raise ValueError("Cannot compute loss without a label.")
 
         model_output = self.get_model_output(batch)
         scores, preds, enc_state, *_ = model_output
@@ -912,16 +912,16 @@ class RagAgent(TransformerGeneratorRagAgent, BartRagAgent, T5RagAgent):
         )
 
         self.record_local_metric(
-            'loss', AverageMetric.many(metric_loss, metric_target_tokens)
+            "loss", AverageMetric.many(metric_loss, metric_target_tokens)
         )
         self.record_local_metric(
-            'ppl', PPLMetric.many(metric_loss, metric_target_tokens)
+            "ppl", PPLMetric.many(metric_loss, metric_target_tokens)
         )
         self.record_local_metric(
-            'token_acc', AverageMetric.many(metric_correct, metric_target_tokens)
+            "token_acc", AverageMetric.many(metric_correct, metric_target_tokens)
         )
         self.record_local_metric(
-            'token_em',
+            "token_em",
             AverageMetric.many(
                 [x == y for x, y in zip(metric_correct, metric_target_tokens)]
             ),

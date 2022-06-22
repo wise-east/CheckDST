@@ -521,7 +521,7 @@ model_list = [
         "example": (
             "parlai eval_model -mf zoo:unittest/transformer_generator2/model -t integration_tests:multiturn_candidate -m transformer/generator"
         ),
-        "external_website": '',
+        "external_website": "",
         "result": (
             """{'exs': 400, 'accuracy': 1.0, 'f1': 1.0, 'bleu-4': 0.2503, 'lr': 0.001, 'total_train_updates': 5000, 'gpu_mem_percent': 9.37e-05, 'loss': 0.0262, 'token_acc': 1.0, 'nll_loss': 7.935e-05, 'ppl': 1.0}"""
         ),
@@ -545,7 +545,7 @@ model_list = [
             "[ImageSeq2seq]: i like to go to the park and play with my friends ."
         ),
         "example2": (
-            "parlai eval_model -mf zoo:dodecadialogue/all_tasks_mt/model -t \"#Dodeca\""
+            'parlai eval_model -mf zoo:dodecadialogue/all_tasks_mt/model -t "#Dodeca"'
             "--prepend-personality True --prepend-gold-knowledge True --image-mode no_image_model"
         ),
         "result2": (
@@ -685,7 +685,7 @@ model_list = [
             "have the same properties . so , if you ' re interested in quantum physics , "
             "you might want to check out / r / askscience . there ' s a subreddit "
             "for that sort of thing . edit : i ' m not sure what you mean by "
-            "\" quantum physics \" , but i ' ll let you know if you want to know more . "
+            '" quantum physics " , but i \' ll let you know if you want to know more . '
             "edit 2 : thanks for the gold !"
         ),
     },
@@ -918,7 +918,7 @@ model_list = [
             "Image Seq2Seq base model, from which all DodecaDialogue models were trained"
         ),
         "example": (
-            "parlai train_model -t \"#Dodeca\" --prepend-gold-knowledge true --prepend-personality true -mf /tmp/dodeca_model --init-model zoo:dodecadialogue/base_model/model --dict-file zoo:dodecadialogue/dict/dodeca.dict --model image_seq2seq --dict-tokenizer bpe --dict-lower true -bs 32 -eps 0.5 -esz 512 --ffn-size 2048 --fp16 false --n-heads 16 --n-layers 8 --n-positions 512 --text-truncate 512 --label-truncate 128 --variant xlm -lr 7e-6 --lr-scheduler reduceonplateau --optimizer adamax --dropout 0.1 --validation-every-n-secs 3600 --validation-metric ppl --validation-metric-mode min --validation-patience 10 --activation gelu --embeddings-scale true --learn-positional-embeddings true --betas 0.9,0.999 --warmup-updates 2000 --gradient-clip 0.1"
+            'parlai train_model -t "#Dodeca" --prepend-gold-knowledge true --prepend-personality true -mf /tmp/dodeca_model --init-model zoo:dodecadialogue/base_model/model --dict-file zoo:dodecadialogue/dict/dodeca.dict --model image_seq2seq --dict-tokenizer bpe --dict-lower true -bs 32 -eps 0.5 -esz 512 --ffn-size 2048 --fp16 false --n-heads 16 --n-layers 8 --n-positions 512 --text-truncate 512 --label-truncate 128 --variant xlm -lr 7e-6 --lr-scheduler reduceonplateau --optimizer adamax --dropout 0.1 --validation-every-n-secs 3600 --validation-metric ppl --validation-metric-mode min --validation-patience 10 --activation gelu --embeddings-scale true --learn-positional-embeddings true --betas 0.9,0.999 --warmup-updates 2000 --gradient-clip 0.1'
         ),
         "result": "A trained model (logs omitted)",
     },
@@ -928,10 +928,10 @@ model_list = [
         "path": "zoo:blended_skill_talk/bst_single_task/model",
         "agent": "transformer/polyencoder",
         "task": "blended_skill_talk",
-        "project": 'https://github.com/facebookresearch/ParlAI/tree/main/projects/bst',
+        "project": "https://github.com/facebookresearch/ParlAI/tree/main/projects/bst",
         "description": "Pretrained polyencoder retrieval model fine-tuned on the BlendedSkillTalk dialogue task.",
         "example": "parlai interactive -mf zoo:blended_skill_talk/bst_single_task/model -t blended_skill_talk",
-        "result": 'Results vary.',
+        "result": "Results vary.",
         "example2": "parlai eval_model -mf zoo:blended_skill_talk/bst_single_task/model -t blended_skill_talk -dt test",
         "result2": """09:51:57 | Finished evaluating tasks ['blended_skill_talk'] using datatype test
     accuracy  bleu-4  exs    f1  gpu_mem  hits@1  hits@10  hits@100  hits@5  loss   mrr  rank   tpb
@@ -944,7 +944,7 @@ model_list = [
         "path": "zoo:blended_skill_talk/convai2_single_task/model",
         "agent": "transformer/polyencoder",
         "task": "blended_skill_talk",
-        "project": 'https://github.com/facebookresearch/ParlAI/tree/main/projects/bst',
+        "project": "https://github.com/facebookresearch/ParlAI/tree/main/projects/bst",
         "description": "Pretrained polyencoder retrieval model fine-tuned on the ConvAI2 dialogue task.",
         "example": "parlai eval_model -mf zoo:blended_skill_talk/convai2_single_task/model -t blended_skill_talk -dt test",
         "result": """10:23:53 | Finished evaluating tasks ['blended_skill_talk'] using datatype test
@@ -958,7 +958,7 @@ model_list = [
         "path": "zoo:blended_skill_talk/ed_single_task/model",
         "agent": "transformer/polyencoder",
         "task": "blended_skill_talk",
-        "project": 'https://github.com/facebookresearch/ParlAI/tree/main/projects/bst',
+        "project": "https://github.com/facebookresearch/ParlAI/tree/main/projects/bst",
         "description": "Pretrained polyencoder retrieval model fine-tuned on the EmpatheticDialogues dialogue task.",
         "example": "parlai eval_model -mf zoo:blended_skill_talk/ed_single_task/model -t blended_skill_talk -dt test",
         "result": """10:16:47 | Finished evaluating tasks ['blended_skill_talk'] using datatype test
@@ -972,7 +972,7 @@ model_list = [
         "path": "zoo:blended_skill_talk/wizard_single_task/model",
         "agent": "transformer/polyencoder",
         "task": "blended_skill_talk",
-        "project": 'https://github.com/facebookresearch/ParlAI/tree/main/projects/bst',
+        "project": "https://github.com/facebookresearch/ParlAI/tree/main/projects/bst",
         "description": "Pretrained polyencoder retrieval model fine-tuned on the Wizard of Wikipedia dialogue task.",
         "example": "parlai eval_model -mf zoo:blended_skill_talk/wizard_single_task/model -t blended_skill_talk -dt test",
         "result": """10:34:46 | Finished evaluating tasks ['blended_skill_talk'] using datatype test
@@ -986,7 +986,7 @@ model_list = [
         "path": "zoo:blended_skill_talk/multi_task/model",
         "agent": "transformer/polyencoder",
         "task": "blended_skill_talk",
-        "project": 'https://github.com/facebookresearch/ParlAI/tree/main/projects/bst',
+        "project": "https://github.com/facebookresearch/ParlAI/tree/main/projects/bst",
         "description": "Pretrained polyencoder retrieval model fine-tuned on the ConvAI2, EmpatheticDialogues, and Wizard of Wikipedia dialogue tasks.",
         "example": "parlai eval_model -mf zoo:blended_skill_talk/multi_task/model -t blended_skill_talk -dt test",
         "result": """10:23:35 | Finished evaluating tasks ['blended_skill_talk'] using datatype test
@@ -1000,7 +1000,7 @@ model_list = [
         "path": "zoo:blended_skill_talk/multi_task_bst_tuned/model",
         "agent": "transformer/polyencoder",
         "task": "blended_skill_talk",
-        "project": 'https://github.com/facebookresearch/ParlAI/tree/main/projects/bst',
+        "project": "https://github.com/facebookresearch/ParlAI/tree/main/projects/bst",
         "description": "Pretrained polyencoder retrieval model fine-tuned on the ConvAI2, EmpatheticDialogues, and Wizard of Wikipedia dialogue tasks, and then further fine-tuned on the BlendedSkillTalk dialogue task.",
         "example": "parlai eval_model -mf zoo:blended_skill_talk/multi_task_bst_tuned/model -t blended_skill_talk -dt test",
         "result": """10:36:01 | Finished evaluating tasks ['blended_skill_talk'] using datatype test
@@ -1017,7 +1017,7 @@ model_list = [
             "Small (87M parameter) generative transformer, pretrained on pushshift.io Reddit."
         ),
         "example": "parlai interactive -mf zoo:tutorial_transformer_generator/model",
-        "external_website": '',
+        "external_website": "",
         "result": (
             "Enter Your Message: hi, how are you today?\n"
             "[TransformerGenerator]: i ' m doing well , how about you ?\n"
@@ -1397,7 +1397,7 @@ model_list = [
         "path": "zoo:style_gen/c75_labeled_dialogue_generator/model",
         "agent": "projects.style_gen.style_gen:StyleGenAgent",
         "task": "style_gen:LabeledBlendedSkillTalk",
-        "project": 'https://github.com/facebookresearch/ParlAI/tree/main/projects/style_gen',
+        "project": "https://github.com/facebookresearch/ParlAI/tree/main/projects/style_gen",
         "description": "Generator trained on dialogue datasets, with 75% of train examples appended with Image-Chat personality labels",
         "example": "parlai eval_model --datatype test --model projects.style_gen.style_gen:StyleGenAgent --model-file zoo:style_gen/c75_labeled_dialogue_generator/model --skip-generation True --task style_gen:LabeledBlendedSkillTalk --use-style-frac 1.00",
         "result": """16:56:52 | Finished evaluating tasks ['style_gen:LabeledBlendedSkillTalk'] using datatype test
@@ -1410,7 +1410,7 @@ model_list = [
         "path": "zoo:style_gen/prev_curr_classifier/model",
         "agent": "projects.style_gen.classifier:ClassifierAgent",
         "task": "style_gen:LabeledBlendedSkillTalk",
-        "project": 'https://github.com/facebookresearch/ParlAI/tree/main/projects/style_gen',
+        "project": "https://github.com/facebookresearch/ParlAI/tree/main/projects/style_gen",
         "description": "Classifier trained on Image-Chat turns 2 and 3 to classify the personality of an example given that utterance and the previous utterance.",
         "example": "parlai eval_model --task style_gen:PrevCurrUttStyle --wrapper-task style_gen:LabeledBlendedSkillTalk --model-file zoo:style_gen/prev_curr_classifier/model --model projects.style_gen.classifier:ClassifierAgent --classes-from-file image_chat_personalities_file",
         "result": """18:42:33 | Finished evaluating tasks ['style_gen:PrevCurrUttStyle'] using datatype valid
@@ -1423,7 +1423,7 @@ model_list = [
         "path": "zoo:detectron/detectron_model.pth",
         "agent": "n/a",
         "task": "n/a",
-        "project": 'https://github.com/facebookresearch/vilbert-multi-task',
+        "project": "https://github.com/facebookresearch/vilbert-multi-task",
         "description": "Detectron Model for extracting 100x2048d object detection features. Model is from linked project website",
         "example": "parlai display_data -t flickr30k --image-mode faster_r_cnn_152_32x8d -n 1 -v",
         "result": """
@@ -1442,10 +1442,10 @@ model_list = [
     {
         "title": "Multi-Modal BlenderBot (MMB DegenPos)",
         "id": "multimodal_blenderbot",
-        "path": 'n/a',
+        "path": "n/a",
         "agent": "projects.multimodal_blenderbot.agents:BiasAgent",
         "task": "blended_skill_talk",
-        "project": 'https://github.com/facebookresearch/ParlAI/tree/main/projects/multimodal_blenderbot',
+        "project": "https://github.com/facebookresearch/ParlAI/tree/main/projects/multimodal_blenderbot",
         "description": "Model trained to talk about both images and general chitchat, trained with a degendering teacher and with 75% of Image-Chat styles replaced by a generic polarity string",
         "example": "python parlai/scripts/safe_interactive.py -t blended_skill_talk -mf ${FINETUNED_MODEL_PATH} --model projects.multimodal_blenderbot.agents:BiasAgent --delimiter $'\n' --beam-block-ngram 3 --beam-context-block-ngram 3 --beam-min-length 20 --beam-size 10 --inference beam --model-parallel False",
         "result": "(results will vary)",
@@ -1592,7 +1592,7 @@ model_list = [
         "example": ("parlai interactive -mf zoo:hallucination/bart_fid_rag/model"),
         "result": (
             "Enter Your Message: Hey! What's your favorite Elvis song?\n"
-            "[Fid]: I love Elvis Presley.  I love his music.  My favorite song is \"My Way.\""
+            '[Fid]: I love Elvis Presley.  I love his music.  My favorite song is "My Way."'
         ),
         "example2": (
             "parlai eval_model -mf zoo:hallucination/bart_fid_rag/model -t wizard_of_wikipedia --num-examples 100"
@@ -1648,7 +1648,7 @@ model_list = [
         "example": ("parlai interactive -mf zoo:hallucination/bart_rag_sequence/model"),
         "result": (
             "Enter Your Message: Hey! What's your favorite Elvis song?\n"
-            "[RAG]: My favorite Elvis Presley song is \"Stuck on You\". Do you have a favorite Elvis song?"
+            '[RAG]: My favorite Elvis Presley song is "Stuck on You". Do you have a favorite Elvis song?'
         ),
         "example2": (
             "parlai eval_model -mf zoo:hallucination/bart_rag_sequence/model -t wizard_of_wikipedia --num-examples 100"

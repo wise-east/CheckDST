@@ -40,7 +40,7 @@ import parlai.utils.distributed as distributed_utils
 def setup_args():
     parser = single_train.setup_args()
     parser.add_distributed_training_args()
-    parser.add_argument('--port', type=int, default=61337, help='TCP port number')
+    parser.add_argument("--port", type=int, default=61337, help="TCP port number")
     return parser
 
 
@@ -55,5 +55,5 @@ class DistributedTrain(ParlaiScript):
             return self.train_loop.train()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     DistributedTrain.main()

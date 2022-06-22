@@ -110,10 +110,10 @@ for domain, convs in dial_by_domain.items():
     )
 
     for conv_id in conv_list[:few_shot_train]:
-        few_shot_data['train'].update(convs[conv_id])
+        few_shot_data["train"].update(convs[conv_id])
 
     for conv_id in conv_list[few_shot_train : few_shot_train + few_shot_valid]:
-        few_shot_data['valid'].update(convs[conv_id])
+        few_shot_data["valid"].update(convs[conv_id])
 
     for conv_id in conv_list[
         few_shot_train
@@ -121,7 +121,7 @@ for domain, convs in dial_by_domain.items():
         + few_shot_valid
         + few_shot_test
     ]:
-        few_shot_data['test'].update(convs[conv_id])
+        few_shot_data["test"].update(convs[conv_id])
 
 
 for k, v in few_shot_data.items():

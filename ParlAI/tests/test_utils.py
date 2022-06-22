@@ -19,7 +19,7 @@ class TestUtils(unittest.TestCase):
         """
         Test rendering of nice reports.
         """
-        report_s = nice_report({'foo': 3})
+        report_s = nice_report({"foo": 3})
         assert "foo" in report_s
         assert "3" in report_s
         assert nice_report({}) == ""
@@ -105,19 +105,19 @@ class TestUtils(unittest.TestCase):
         assert nt.c == 1
 
     def test_opt(self):
-        opt = {'x': 0}
+        opt = {"x": 0}
         opt = Opt(opt)
-        opt['x'] += 1
-        opt['x'] = 10
-        self.assertEqual(opt.history[0][0], 'x', 'History not set properly')
-        self.assertEqual(opt.history[0][1], 1, 'History not set properly')
-        self.assertEqual(opt.history[1][0], 'x', 'History not set properly')
-        self.assertEqual(opt.history[1][1], 10, 'History not set properly')
+        opt["x"] += 1
+        opt["x"] = 10
+        self.assertEqual(opt.history[0][0], "x", "History not set properly")
+        self.assertEqual(opt.history[0][1], 1, "History not set properly")
+        self.assertEqual(opt.history[1][0], "x", "History not set properly")
+        self.assertEqual(opt.history[1][1], 10, "History not set properly")
 
         opt_copy = deepcopy(opt)
-        self.assertEqual(opt_copy.history[0][1], 1, 'Deepcopy history not set properly')
+        self.assertEqual(opt_copy.history[0][1], 1, "Deepcopy history not set properly")
         self.assertEqual(
-            opt_copy.history[1][1], 10, 'Deepcopy history not set properly'
+            opt_copy.history[1][1], 10, "Deepcopy history not set properly"
         )
 
 
@@ -240,5 +240,5 @@ class TestDatatypeHelper(unittest.TestCase):
         assert len(set(TRAIN_C_B_A + VALID_C_B_A + TEST_C_B_A)) is TOTAL_LEN
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

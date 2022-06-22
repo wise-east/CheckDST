@@ -25,13 +25,13 @@ def set_is_debug(is_debug):
 
 if logging_enabled:
     logging.basicConfig(
-        filename=str(time.time()) + '.log',
-        filemode='w',
-        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-        datefmt='%H:%M:%S',
+        filename=str(time.time()) + ".log",
+        filemode="w",
+        format="%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s",
+        datefmt="%H:%M:%S",
         level=logging.DEBUG,
     )
-    logger = logging.getLogger('mturk')
+    logger = logging.getLogger("mturk")
 
 
 def set_log_level(new_level):

@@ -18,7 +18,7 @@ def get_teacher(config) -> Teacher:
     """
     parser = ParlaiParser(True, False)
     opt = parser.parse_args(
-        list(chain.from_iterable(('--' + k, v) for k, v in config.teacher.items()))
+        list(chain.from_iterable(("--" + k, v) for k, v in config.teacher.items()))
     )
     agent = RepeatLabelAgent(opt)
     return create_task(opt, agent).get_task_agent()

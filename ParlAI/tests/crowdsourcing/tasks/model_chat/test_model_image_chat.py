@@ -23,7 +23,7 @@ from parlai.zoo.image_chat.transresnet_multimodal import (
 
 
 # Inputs
-AGENT_DISPLAY_IDS = ('Worker',)
+AGENT_DISPLAY_IDS = ("Worker",)
 AGENT_MESSAGES = [
     ("Response 1",),
     ("Response 2",),
@@ -71,45 +71,45 @@ try:
 
                 # Paths
                 expected_states_folder = os.path.join(
-                    os.path.dirname(os.path.abspath(__file__)), 'expected_states'
+                    os.path.dirname(os.path.abspath(__file__)), "expected_states"
                 )
                 expected_chat_data_path = os.path.join(
-                    expected_states_folder, 'final_chat_data__image_chat.json'
+                    expected_states_folder, "final_chat_data__image_chat.json"
                 )
                 expected_state_path = os.path.join(
-                    expected_states_folder, 'state__image_chat.json'
+                    expected_states_folder, "state__image_chat.json"
                 )
-                parlai_data_folder = os.path.join(tmpdir, 'parlai_data')
-                chat_data_folder = os.path.join(tmpdir, 'final_chat_data')
+                parlai_data_folder = os.path.join(tmpdir, "parlai_data")
+                chat_data_folder = os.path.join(tmpdir, "final_chat_data")
                 sample_image_path = os.path.join(
                     os.path.dirname(os.path.abspath(__file__)),
-                    'test_image_stack',
-                    'sample_image.jpg',
+                    "test_image_stack",
+                    "sample_image.jpg",
                 )
-                image_context_path = os.path.join(tmpdir, 'image_contexts')
-                stack_folder = os.path.join(tmpdir, 'image_stack')
+                image_context_path = os.path.join(tmpdir, "image_contexts")
+                stack_folder = os.path.join(tmpdir, "image_stack")
 
                 # Save image context: instead of downloading images, just save a pickle
                 # file with all of the image act
                 image_context = [
                     {
-                        'image_act': Message(
+                        "image_act": Message(
                             {
-                                'text': 'Obsessive',
-                                'image_id': '2923e28b6f588aff2d469ab2cccfac57',
-                                'episode_done': False,
-                                'label_candidates': [
+                                "text": "Obsessive",
+                                "image_id": "2923e28b6f588aff2d469ab2cccfac57",
+                                "episode_done": False,
+                                "label_candidates": [
                                     "I must learn that bird's name!",
                                     "My, aren't you a pretty bird?",
                                 ],
-                                'image': Image.open(sample_image_path),
-                                'id': 'image_chat',
-                                'eval_labels': ["I must learn that bird's name!"],
+                                "image": Image.open(sample_image_path),
+                                "id": "image_chat",
+                                "eval_labels": ["I must learn that bird's name!"],
                             }
                         )
                     }
                 ]
-                with open(image_context_path, 'wb') as f:
+                with open(image_context_path, "wb") as f:
                     pickle.dump(image_context, f)
 
                 # Download the Transresnet Multimodal model
@@ -119,27 +119,27 @@ try:
                 num_convos = 1
                 args = ModelImageChatBlueprintArgs()
                 overrides = [
-                    f'+mephisto.blueprint.{key}={val}'
+                    f"+mephisto.blueprint.{key}={val}"
                     for key, val in args.__dict__.items()
                     if key
                     in [
-                        'evals_per_image_model_combo',
-                        'max_resp_time',
-                        'override_opt',
-                        'random_seed',
-                        'world_file',
+                        "evals_per_image_model_combo",
+                        "max_resp_time",
+                        "override_opt",
+                        "random_seed",
+                        "world_file",
                     ]
                 ] + [
                     'mephisto.blueprint.annotations_config_path=""',
-                    f'mephisto.blueprint.chat_data_folder={chat_data_folder}',
-                    f'+mephisto.blueprint.image_context_path={image_context_path}',
-                    '+mephisto.blueprint.left_pane_text_path=${task_dir}/task_config/left_pane_text.html',
-                    '+mephisto.blueprint.max_concurrent_responses=1',
-                    'mephisto.blueprint.model_opt_path=${task_dir}/task_config/image_model_opts.yaml',
-                    f'+mephisto.blueprint.num_conversations={num_convos:d}',
-                    f'+mephisto.blueprint.stack_folder={stack_folder}',
-                    '+mephisto.blueprint.task_description_file=${task_dir}/task_config/task_description.html',
-                    'mephisto.blueprint.task_model_parallel=False',
+                    f"mephisto.blueprint.chat_data_folder={chat_data_folder}",
+                    f"+mephisto.blueprint.image_context_path={image_context_path}",
+                    "+mephisto.blueprint.left_pane_text_path=${task_dir}/task_config/left_pane_text.html",
+                    "+mephisto.blueprint.max_concurrent_responses=1",
+                    "mephisto.blueprint.model_opt_path=${task_dir}/task_config/image_model_opts.yaml",
+                    f"+mephisto.blueprint.num_conversations={num_convos:d}",
+                    f"+mephisto.blueprint.stack_folder={stack_folder}",
+                    "+mephisto.blueprint.task_description_file=${task_dir}/task_config/task_description.html",
+                    "mephisto.blueprint.task_model_parallel=False",
                 ]
                 # TODO: remove all of these params once Hydra 1.1 is released with
                 #  support for recursive defaults
@@ -173,14 +173,13 @@ try:
                 with open(expected_chat_data_path) as f:
                     expected_chat_data = json.load(f)
                 results_path = list(
-                    glob.glob(os.path.join(chat_data_folder, '*/*_*_*_sandbox.json'))
+                    glob.glob(os.path.join(chat_data_folder, "*/*_*_*_sandbox.json"))
                 )[0]
                 with open(results_path) as f:
                     actual_chat_data = json.load(f)
                 self._check_final_chat_data(
                     actual_value=actual_chat_data, expected_value=expected_chat_data
                 )
-
 
 except ImportError:
     pass

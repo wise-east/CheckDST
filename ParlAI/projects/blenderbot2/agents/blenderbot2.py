@@ -50,8 +50,8 @@ from parlai.agents.fid.fid import SearchQuerySearchEngineFiDAgent
 from parlai.utils.fsdp import is_fsdp
 
 
-ZOO_QUERY_GENERATOR = 'zoo:blenderbot2/query_generator/model'
-ZOO_MEMORY_DECODER = 'zoo:blenderbot2/memory_decoder/model'
+ZOO_QUERY_GENERATOR = "zoo:blenderbot2/query_generator/model"
+ZOO_MEMORY_DECODER = "zoo:blenderbot2/memory_decoder/model"
 
 
 class BlenderBot2ModelTypeMixin(RagModelInterface):
@@ -62,7 +62,7 @@ class BlenderBot2ModelTypeMixin(RagModelInterface):
     def __init__(self, opt: Opt, null_idx: int):
         super().__init__(opt, null_idx)
         if (
-            KnowledgeAccessMethod(opt['knowledge_access_method'])
+            KnowledgeAccessMethod(opt["knowledge_access_method"])
             is KnowledgeAccessMethod.ALL
         ):
             self.n_docs *= 2
@@ -153,9 +153,9 @@ class BlenderBot2RagTurn(BlenderBot2ModelTypeMixin, RagTurn):
 
 
 RAG_MODELS = {
-    'sequence': BlenderBot2RagSequence,
-    'token': BlenderBot2RagToken,
-    'turn': BlenderBot2RagTurn,
+    "sequence": BlenderBot2RagSequence,
+    "token": BlenderBot2RagToken,
+    "turn": BlenderBot2RagTurn,
 }
 
 
@@ -179,205 +179,205 @@ class BlenderBot2RagAgent(RagAgent):
         """
         RagAgent.add_cmdline_args(parser, partial_opt)
         SearchQuerySearchEngineFiDAgent.add_cmdline_args(parser, partial_opt)
-        bb2_group = parser.add_argument_group('BlenderBot2 Args')
+        bb2_group = parser.add_argument_group("BlenderBot2 Args")
         bb2_group.add_argument(
-            '--knowledge-access-method',
+            "--knowledge-access-method",
             type=str,
             default=KnowledgeAccessMethod.CLASSIFY.value,
             choices=[r.value for r in KnowledgeAccessMethod],
-            help='How to access knowledge for BlenderBot2 '
-            'classify => classify the input text, determine which knowledge to access\n'
-            'memory_only => only access memories\n'
-            'search_only => only access search\n'
-            'all => for each input, access from memories and search\n'
-            'none => do not access any knowledge.\n',
+            help="How to access knowledge for BlenderBot2 "
+            "classify => classify the input text, determine which knowledge to access\n"
+            "memory_only => only access memories\n"
+            "search_only => only access search\n"
+            "all => for each input, access from memories and search\n"
+            "none => do not access any knowledge.\n",
         )
         bb2_group.add_argument(
-            '--memory-key',
+            "--memory-key",
             type=str,
-            default='full_text',
-            help='Field in the observation from which to read memories.',
+            default="full_text",
+            help="Field in the observation from which to read memories.",
         )
         bb2_group.add_argument(
-            '--query-generator-key',
+            "--query-generator-key",
             type=str,
-            default='full_text',
-            help='Field for input to the knowledge access classifier.',
+            default="full_text",
+            help="Field for input to the knowledge access classifier.",
         )
         bb2_group.add_argument(
-            '--gold-document-key',
+            "--gold-document-key",
             type=str,
             default=SELECTED_DOCS,
-            help='Field for selected docs.',
+            help="Field for selected docs.",
         )
         bb2_group.add_argument(
-            '--gold-sentence-key',
+            "--gold-sentence-key",
             type=str,
             default=SELECTED_SENTENCES,
-            help='Field for selected sentences',
+            help="Field for selected sentences",
         )
         bb2_group.add_argument(
-            '--gold-document-titles-key',
+            "--gold-document-titles-key",
             type=str,
             default=SELECTED_DOCS_TITLES,
-            help='Field for selected docs titles.',
+            help="Field for selected docs titles.",
         )
         bb2_group.add_argument(
-            '--insert-gold-docs',
-            type='bool',
+            "--insert-gold-docs",
+            type="bool",
             default=False,
-            help='Set true to insert gold docs into retrieved docs.',
+            help="Set true to insert gold docs into retrieved docs.",
         )
         bb2_group.add_argument(
-            '--memory-extractor-phrase',
+            "--memory-extractor-phrase",
             type=str,
-            default='persona:',
+            default="persona:",
             help="phrase used to extract memories from `--memory-key` in the observation. "
             "For example, set to 'your persona:' to limit memories to only lines that "
             "contain 'your persona:'",
         )
         bb2_group.add_argument(
-            '--retriever-ignore-phrase',
+            "--retriever-ignore-phrase",
             type=str,
-            default='persona:',
-            help='filter input to the global knowledge retriever such that any utterance containing '
-            'the phrase will not be given as input.',
+            default="persona:",
+            help="filter input to the global knowledge retriever such that any utterance containing "
+            "the phrase will not be given as input.",
         )
-        q_gen_group = parser.add_argument_group('BlenderBot2 Query Generator Args')
+        q_gen_group = parser.add_argument_group("BlenderBot2 Query Generator Args")
         q_gen_group.add_argument(
-            '--query-generator-ignore-phrase',
+            "--query-generator-ignore-phrase",
             type=str,
-            default='persona:',
-            help='filter input to the query generator such that any utterance containing '
-            'the phrase will not be given as input.',
+            default="persona:",
+            help="filter input to the query generator such that any utterance containing "
+            "the phrase will not be given as input.",
         )
         q_gen_group.add_argument(
-            '--query-generator-model-file',
+            "--query-generator-model-file",
             type=str,
             default=ZOO_QUERY_GENERATOR,
-            help='path to a query generator; specify if searching OR classifying inputs.',
+            help="path to a query generator; specify if searching OR classifying inputs.",
         )
         q_gen_group.add_argument(
-            '--query-generator-delimiter',
+            "--query-generator-delimiter",
             type=str,
-            default='\n',
-            help='delimiter for the query generator',
+            default="\n",
+            help="delimiter for the query generator",
         )
         q_gen_group.add_argument(
-            '--query-generator-inference',
+            "--query-generator-inference",
             type=str,
-            default='beam',
-            help='query generator inference type',
+            default="beam",
+            help="query generator inference type",
         )
         q_gen_group.add_argument(
-            '--query-generator-beam-size', type=int, default=1, help='SQ Gen Beam Size'
+            "--query-generator-beam-size", type=int, default=1, help="SQ Gen Beam Size"
         )
         q_gen_group.add_argument(
-            '--query-generator-beam-min-length',
+            "--query-generator-beam-min-length",
             type=int,
             default=2,
-            help='SQ Gen Beam Min Length',
+            help="SQ Gen Beam Min Length",
         )
         q_gen_group.add_argument(
-            '--query-generator-truncate',
+            "--query-generator-truncate",
             type=int,
             default=-1,
-            help='Specify >0 for truncation to SQ generator',
+            help="Specify >0 for truncation to SQ generator",
         )
         bb2_group.add_argument(
-            '--memory-retriever-truncate',
+            "--memory-retriever-truncate",
             type=int,
             default=-1,
-            help='Specify >0 for truncation to the memory retriever.',
+            help="Specify >0 for truncation to the memory retriever.",
         )
         bb2_group.add_argument(
-            '--retriever-delimiter',
+            "--retriever-delimiter",
             type=str,
-            default='\n',
-            help='delimiter for the retriever',
+            default="\n",
+            help="delimiter for the retriever",
         )
         bb2_group.add_argument(
-            '--share-search-and-memory-query-encoder',
-            type='bool',
+            "--share-search-and-memory-query-encoder",
+            type="bool",
             default=False,
-            help='if true, query encoder is shared between search and memory retrievers.',
+            help="if true, query encoder is shared between search and memory retrievers.",
         )
         bb2_group.add_argument(
-            '--memory-reader-model',
+            "--memory-reader-model",
             type=str,
             default=None,
             choices=QUERY_MODEL_TYPES,
-            help='Model for accessing the memory',
+            help="Model for accessing the memory",
         )
         bb2_group.add_argument(
-            '--memory-doc-title-delimiter',
+            "--memory-doc-title-delimiter",
             type=str,
-            default=' / ',
-            help='title delimiter for memory docs',
+            default=" / ",
+            help="title delimiter for memory docs",
         )
         bb2_group.add_argument(
-            '--memory-writer-model',
+            "--memory-writer-model",
             type=str,
-            default='bert',
+            default="bert",
             hidden=True,
-            help='model for writing the memories',
+            help="model for writing the memories",
         )
         bb2_group.add_argument(
-            '--memory-writer-model-file',
+            "--memory-writer-model-file",
             type=str,
             default=DPR_ZOO_MODEL,
             hidden=True,
-            help='model file for memory writer',
+            help="model file for memory writer",
         )
-        memory_decoder = parser.add_argument_group('BlenderBot2 Memory Decoder Args')
+        memory_decoder = parser.add_argument_group("BlenderBot2 Memory Decoder Args")
         memory_decoder.add_argument(
-            '--memory-decoder-key',
+            "--memory-decoder-key",
             type=str,
-            default='full_text',
-            help='key of the observation for the memory decoder',
+            default="full_text",
+            help="key of the observation for the memory decoder",
         )
         memory_decoder.add_argument(
-            '--memory-decoder-ignore-phrase',
+            "--memory-decoder-ignore-phrase",
             type=str,
-            default='persona:',
-            help='filter input to the memory decoder such that any utterance containing '
-            'the phrase will not be given as input.',
+            default="persona:",
+            help="filter input to the memory decoder such that any utterance containing "
+            "the phrase will not be given as input.",
         )
         memory_decoder.add_argument(
-            '--memory-decoder-model-file',
+            "--memory-decoder-model-file",
             type=str,
             default=ZOO_MEMORY_DECODER,
-            help='path to a memory decoder.',
+            help="path to a memory decoder.",
         )
         memory_decoder.add_argument(
-            '--memory-decoder-delimiter',
+            "--memory-decoder-delimiter",
             type=str,
-            default='\n',
-            help='delimiter for the memory decoder',
+            default="\n",
+            help="delimiter for the memory decoder",
         )
         memory_decoder.add_argument(
-            '--memory-decoder-beam-size',
+            "--memory-decoder-beam-size",
             type=int,
             default=3,
-            help='memory decoder Beam Size',
+            help="memory decoder Beam Size",
         )
         memory_decoder.add_argument(
-            '--memory-decoder-beam-min-length',
+            "--memory-decoder-beam-min-length",
             type=int,
             default=10,
-            help='memory decoder Beam Min Length',
+            help="memory decoder Beam Min Length",
         )
         memory_decoder.add_argument(
-            '--memory-decoder-truncate',
+            "--memory-decoder-truncate",
             type=int,
             default=-1,
-            help='Specify >0 for truncation to memory decoder',
+            help="Specify >0 for truncation to memory decoder",
         )
         memory_decoder.add_argument(
-            '--memory-decoder-one-line-memories',
-            type='bool',
+            "--memory-decoder-one-line-memories",
+            type="bool",
             default=False,
-            help='specify to combine memories on one line, rather than several.',
+            help="specify to combine memories on one line, rather than several.",
         )
         return parser
 
@@ -392,7 +392,7 @@ class BlenderBot2RagAgent(RagAgent):
 
     @property
     def model_api(self) -> BlenderBot2RagModel:
-        if hasattr(self.model, 'module') and not is_fsdp(self.model):
+        if hasattr(self.model, "module") and not is_fsdp(self.model):
             return self.model.module
         else:
             return self.model
@@ -401,13 +401,13 @@ class BlenderBot2RagAgent(RagAgent):
         """
         Build and return BlenderBot2RagModel.
         """
-        if self.generation_model == 't5':
+        if self.generation_model == "t5":
             model = T5BlenderBot2RagModel(self.opt, self.dict)
         else:
             model = BlenderBot2RagModel(self.opt, self.dict)
-        if self.opt['embedding_type'] != 'random':
+        if self.opt["embedding_type"] != "random":
             self._copy_embeddings(
-                model.encoder.embeddings.weight, self.opt['embedding_type']
+                model.encoder.embeddings.weight, self.opt["embedding_type"]
             )
         return model
 
@@ -416,9 +416,9 @@ class BlenderBot2RagAgent(RagAgent):
         # call the parent upgrades
         opt_from_disk = super().upgrade_opt(opt_from_disk)
 
-        if 'memory_doc_delimiter' not in opt_from_disk:
+        if "memory_doc_delimiter" not in opt_from_disk:
             # 2020-06-22 old delimiter was ':'
-            opt_from_disk['memory_doc_delimiter'] = ':'
+            opt_from_disk["memory_doc_delimiter"] = ":"
 
         return opt_from_disk
 
@@ -431,7 +431,7 @@ class BlenderBot2RagAgent(RagAgent):
         """
         state_dict = RagAgent.update_state_dict(opt, state_dict, model)
         # 1. Retriever state
-        if not [k for k in state_dict if 'long_term_memory' in k]:
+        if not [k for k in state_dict if "long_term_memory" in k]:
             long_term_memory_state = {
                 f"long_term_memory.{k}": v
                 for k, v in model.long_term_memory.state_dict().items()  # type: ignore
@@ -447,30 +447,30 @@ class BlenderBot2RagAgent(RagAgent):
         Overrides TA.observe to tokenize various additional vectors.
         """
         observation = super().observe(observation)
-        if 'memory_vec' not in observation and self.opt['memory_key'] in observation:
+        if "memory_vec" not in observation and self.opt["memory_key"] in observation:
             self._set_memory_vec(observation)
         if (
-            'query_generator_vec' not in observation
-            and self.opt['query_generator_key'] in observation
+            "query_generator_vec" not in observation
+            and self.opt["query_generator_key"] in observation
         ):
             self._set_query_generator_vec(observation)
-        if 'gold_doc_vec' not in observation and all(
+        if "gold_doc_vec" not in observation and all(
             k in observation
             for k in [
-                self.opt['gold_document_key'],
-                self.opt['gold_sentence_key'],
-                self.opt['gold_document_titles_key'],
+                self.opt["gold_document_key"],
+                self.opt["gold_sentence_key"],
+                self.opt["gold_document_titles_key"],
             ]
         ):
             self._set_gold_doc_vec(observation)
         if (
-            'memory_decoder_vec' not in observation
-            and self.opt['memory_decoder_key'] in observation
+            "memory_decoder_vec" not in observation
+            and self.opt["memory_decoder_key"] in observation
         ):
             self._set_memory_decoder_vec(observation)
         return observation
 
-    def _filter_text(self, text: str, filter_phrase: str, delimiter: str = '\n') -> str:
+    def _filter_text(self, text: str, filter_phrase: str, delimiter: str = "\n") -> str:
         """
         Filter text such that utterances containing a filter phrase are removed.
 
@@ -486,8 +486,8 @@ class BlenderBot2RagAgent(RagAgent):
         """
         split_text = [
             t
-            for tt in text.split(self.opt.get('delimiter', '\n'))
-            for t in tt.split('\n')
+            for tt in text.split(self.opt.get("delimiter", "\n"))
+            for t in tt.split("\n")
         ]
         turns = [t for t in split_text if filter_phrase not in t]
         if not turns:
@@ -500,22 +500,22 @@ class BlenderBot2RagAgent(RagAgent):
         """
         Remove person tokens from a text input.
         """
-        return text.replace(f'{self.P1_TOKEN} ', '').replace(f'{self.P2_TOKEN} ', '')
+        return text.replace(f"{self.P1_TOKEN} ", "").replace(f"{self.P2_TOKEN} ", "")
 
     def _set_query_vec(self, observation: Message) -> Message:
         """
         Override RAG.set_query_vec to optionally filter phrases.
         """
         query_str = observation[self._query_key]
-        if self.opt['retriever_ignore_phrase']:
+        if self.opt["retriever_ignore_phrase"]:
             query_str = self._filter_text(
                 query_str,
-                self.opt['retriever_ignore_phrase'],
-                delimiter=self.opt['retriever_delimiter'],
+                self.opt["retriever_ignore_phrase"],
+                delimiter=self.opt["retriever_delimiter"],
             )
         if self.add_person_tokens:
             query_str = self._remove_person_tokens(query_str)
-        observation['query_vec'] = self.model_api.tokenize_query(query_str)
+        observation["query_vec"] = self.model_api.tokenize_query(query_str)
         return observation
 
     def _set_memory_vec(self, observation: Message) -> Message:
@@ -529,29 +529,29 @@ class BlenderBot2RagAgent(RagAgent):
             return observation with memory vec.
         """
         mem_vecs = None
-        method = KnowledgeAccessMethod(self.opt['knowledge_access_method'])
+        method = KnowledgeAccessMethod(self.opt["knowledge_access_method"])
         if method in [
             KnowledgeAccessMethod.ALL,
             KnowledgeAccessMethod.CLASSIFY,
             KnowledgeAccessMethod.MEMORY_ONLY,
         ]:
-            memories = observation[self.opt['memory_key']]
+            memories = observation[self.opt["memory_key"]]
             if isinstance(memories, str):
                 memories = [
                     t
-                    for tt in memories.split(self.opt.get('delimiter', '\n'))
-                    for t in tt.split('\n')
+                    for tt in memories.split(self.opt.get("delimiter", "\n"))
+                    for t in tt.split("\n")
                 ]
             assert isinstance(memories, list)
-            if self.opt['memory_extractor_phrase']:
+            if self.opt["memory_extractor_phrase"]:
                 # extract text lines only containing the memory extractor phrase
                 memories = [
-                    m for m in memories if self.opt['memory_extractor_phrase'] in m
+                    m for m in memories if self.opt["memory_extractor_phrase"] in m
                 ]
             if memories:
                 mem_vecs = [self.model_api.tokenize_memory(mem) for mem in memories]
 
-        observation['memory_vec'] = mem_vecs
+        observation["memory_vec"] = mem_vecs
         return observation
 
     def _set_query_generator_vec(self, observation: Message) -> Message:
@@ -565,7 +565,7 @@ class BlenderBot2RagAgent(RagAgent):
             return observation with query generator vec.
         """
         query_generator_vec = None
-        method = KnowledgeAccessMethod(self.opt['knowledge_access_method'])
+        method = KnowledgeAccessMethod(self.opt["knowledge_access_method"])
         if (
             method
             in [
@@ -575,12 +575,12 @@ class BlenderBot2RagAgent(RagAgent):
             ]
             and self.model_api.has_query_generator()
         ):
-            query_generator_input = observation[self.opt['query_generator_key']]
-            if self.opt['query_generator_ignore_phrase']:
+            query_generator_input = observation[self.opt["query_generator_key"]]
+            if self.opt["query_generator_ignore_phrase"]:
                 query_generator_input = self._filter_text(
                     query_generator_input,
-                    self.opt['query_generator_ignore_phrase'],
-                    self.opt['query_generator_delimiter'],
+                    self.opt["query_generator_ignore_phrase"],
+                    self.opt["query_generator_delimiter"],
                 )
             if self.add_person_tokens:
                 query_generator_input = self._remove_person_tokens(
@@ -590,7 +590,7 @@ class BlenderBot2RagAgent(RagAgent):
                 query_generator_input
             )
 
-        observation['query_generator_vec'] = query_generator_vec
+        observation["query_generator_vec"] = query_generator_vec
         return observation
 
     def _set_gold_doc_vec(self, observation: Message) -> Message:
@@ -607,20 +607,20 @@ class BlenderBot2RagAgent(RagAgent):
         :return observation:
             return observation with gold doc vec.
         """
-        if not observation[self.opt['gold_document_key']]:
+        if not observation[self.opt["gold_document_key"]]:
             return observation
         doc_vecs = None
         doc_title_vecs = None
-        method = KnowledgeAccessMethod(self.opt['knowledge_access_method'])
+        method = KnowledgeAccessMethod(self.opt["knowledge_access_method"])
         chunk_len = self.opt.get("splitted_chunk_length", 256)
         if method in [
             KnowledgeAccessMethod.ALL,
             KnowledgeAccessMethod.CLASSIFY,
             KnowledgeAccessMethod.SEARCH_ONLY,
         ]:
-            selected_documents = observation[self.opt['gold_document_key']]
-            sentences = observation[self.opt['gold_sentence_key']]
-            document_titles = observation[self.opt['gold_document_titles_key']]
+            selected_documents = observation[self.opt["gold_document_key"]]
+            sentences = observation[self.opt["gold_sentence_key"]]
+            document_titles = observation[self.opt["gold_document_titles_key"]]
             if isinstance(selected_documents, str):
                 documents = [selected_documents]
             assert isinstance(selected_documents, list)
@@ -629,9 +629,9 @@ class BlenderBot2RagAgent(RagAgent):
             for doc in selected_documents:
                 # Try to find the chunk with the selected sentence
                 used_chunk = None
-                words = doc.split(' ')
+                words = doc.split(" ")
                 chunks = [
-                    ' '.join(words[i : i + chunk_len])
+                    " ".join(words[i : i + chunk_len])
                     for i in range(0, len(words), chunk_len)
                 ]
                 for chunk in chunks:
@@ -646,8 +646,8 @@ class BlenderBot2RagAgent(RagAgent):
                 doc_vecs = [self.dict.txt2vec(doc) for doc in documents]
                 doc_title_vecs = [self.dict.txt2vec(title) for title in document_titles]
 
-        observation['gold_doc_vec'] = doc_vecs
-        observation['gold_doc_title_vec'] = doc_title_vecs
+        observation["gold_doc_vec"] = doc_vecs
+        observation["gold_doc_title_vec"] = doc_title_vecs
         return observation
 
     def _set_memory_decoder_vec(self, observation: Message) -> Message:
@@ -661,7 +661,7 @@ class BlenderBot2RagAgent(RagAgent):
             return observation with memory vec.
         """
         memory_decoder_vec = None
-        method = KnowledgeAccessMethod(self.opt['knowledge_access_method'])
+        method = KnowledgeAccessMethod(self.opt["knowledge_access_method"])
         if (
             method
             in [
@@ -671,25 +671,25 @@ class BlenderBot2RagAgent(RagAgent):
             ]
             and self.model_api.has_memory_decoder()
         ):
-            memory_decoder_input = observation[self.opt['memory_decoder_key']]
-            if self.opt['memory_decoder_ignore_phrase']:
+            memory_decoder_input = observation[self.opt["memory_decoder_key"]]
+            if self.opt["memory_decoder_ignore_phrase"]:
                 memory_decoder_input = self._filter_text(
                     memory_decoder_input,
-                    self.opt['memory_decoder_ignore_phrase'],
-                    self.opt['memory_decoder_delimiter'],
+                    self.opt["memory_decoder_ignore_phrase"],
+                    self.opt["memory_decoder_delimiter"],
                 )
             if self.add_person_tokens:
                 memory_decoder_input = self._remove_person_tokens(memory_decoder_input)
             conv_lines = [
                 t
-                for tt in memory_decoder_input.split(self.opt.get('delimiter', '\n'))
-                for t in tt.split('\n')
+                for tt in memory_decoder_input.split(self.opt.get("delimiter", "\n"))
+                for t in tt.split("\n")
             ]
             memory_decoder_vec = [
                 self.model_api.tokenize_memory_decoder_input(i) for i in conv_lines
             ]
 
-        observation['memory_decoder_vec'] = memory_decoder_vec
+        observation["memory_decoder_vec"] = memory_decoder_vec
         return observation
 
     def batchify(self, obs_batch: List[Message], sort: bool = False) -> Batch:
@@ -706,13 +706,13 @@ class BlenderBot2RagAgent(RagAgent):
         batch.num_gold_docs = None
         batch.memory_decoder_vec = None
         batch.num_memory_decoder_vecs = None
-        if any(ex.get('memory_vec') is not None for ex in valid_exs):
+        if any(ex.get("memory_vec") is not None for ex in valid_exs):
             batch = self._set_batch_memory_vec(valid_exs, batch)
-        if any(ex.get('query_generator_vec') is not None for ex in valid_exs):
+        if any(ex.get("query_generator_vec") is not None for ex in valid_exs):
             batch = self._set_batch_query_generator_vec(valid_exs, batch)
-        if any(ex.get('gold_doc_vec') is not None for ex in valid_exs):
+        if any(ex.get("gold_doc_vec") is not None for ex in valid_exs):
             batch = self._set_batch_gold_doc_vec(valid_exs, batch)
-        if any(ex.get('memory_decoder_vec') is not None for ex in valid_exs):
+        if any(ex.get("memory_decoder_vec") is not None for ex in valid_exs):
             batch = self._set_batch_memory_decoder_vec(valid_exs, batch)
         return batch
 
@@ -723,10 +723,10 @@ class BlenderBot2RagAgent(RagAgent):
         mems = []
         num_mems = []
         for ex in valid_exs:
-            if ex.get('memory_vec') is not None:
-                ms, _ = self._pad_tensor(ex['memory_vec'])
+            if ex.get("memory_vec") is not None:
+                ms, _ = self._pad_tensor(ex["memory_vec"])
                 mems.append(ms)
-                num_mems.append(len(ex['memory_vec']))
+                num_mems.append(len(ex["memory_vec"]))
             else:
                 num_mems.append(0)
         batch.memory_vec = padded_3d(mems)
@@ -739,7 +739,7 @@ class BlenderBot2RagAgent(RagAgent):
         """
         Set the query generator vec for the batch.
         """
-        _q_gens = [ex.get('query_generator_vec', self.EMPTY) for ex in valid_exs]
+        _q_gens = [ex.get("query_generator_vec", self.EMPTY) for ex in valid_exs]
         q_gen_vecs, _lens = self._pad_tensor(_q_gens)
         batch.query_generator_vec = q_gen_vecs
         return batch
@@ -752,12 +752,12 @@ class BlenderBot2RagAgent(RagAgent):
         titles = []
         num_docs = []
         for ex in valid_exs:
-            if ex.get('gold_doc_vec') is not None:
-                ds, _ = self._pad_tensor(ex['gold_doc_vec'])
-                ts, _ = self._pad_tensor(ex['gold_doc_title_vec'])
+            if ex.get("gold_doc_vec") is not None:
+                ds, _ = self._pad_tensor(ex["gold_doc_vec"])
+                ts, _ = self._pad_tensor(ex["gold_doc_title_vec"])
                 docs.append(ds)
                 titles.append(ts)
-                num_docs.append(len(ex['gold_doc_vec']))
+                num_docs.append(len(ex["gold_doc_vec"]))
             else:
                 docs.append(self.EMPTY.unsqueeze(0))
                 titles.append(self.EMPTY.unsqueeze(0))
@@ -776,10 +776,10 @@ class BlenderBot2RagAgent(RagAgent):
         memory_dec_toks = []
         num_memory_dec_toks = []
         for ex in valid_exs:
-            if ex.get('memory_decoder_vec') is not None:
-                p_sum_vecs, _lens = self._pad_tensor(ex['memory_decoder_vec'])
+            if ex.get("memory_decoder_vec") is not None:
+                p_sum_vecs, _lens = self._pad_tensor(ex["memory_decoder_vec"])
                 memory_dec_toks.append(p_sum_vecs)
-                num_memory_dec_toks.append(len(ex['memory_decoder_vec']))
+                num_memory_dec_toks.append(len(ex["memory_decoder_vec"]))
             else:
                 num_memory_dec_toks.append(0)
         batch.memory_decoder_vec = padded_3d(memory_dec_toks)
@@ -788,11 +788,11 @@ class BlenderBot2RagAgent(RagAgent):
 
     def eval_step(self, batch):
         output = super().eval_step(batch)
-        if output is None or not hasattr(self.model, 'retriever'):
+        if output is None or not hasattr(self.model, "retriever"):
             return output
-        if hasattr(self.model_api.retriever, 'top_docs'):
+        if hasattr(self.model_api.retriever, "top_docs"):
             output.top_docs = self.model_api.retriever.top_docs
-        if hasattr(self.model_api.retriever, 'search_queries'):
+        if hasattr(self.model_api.retriever, "search_queries"):
             output.search_queries = self.model_api.retriever.search_queries
         return output
 
@@ -841,7 +841,7 @@ class BlenderBot2RagAgent(RagAgent):
         loss, output = super().compute_loss(batch, return_output=True)
         assert isinstance(self.model, BlenderBot2RagModel)
         if (
-            KnowledgeAccessMethod(self.opt['knowledge_access_method'])
+            KnowledgeAccessMethod(self.opt["knowledge_access_method"])
             is KnowledgeAccessMethod.CLASSIFY
             and self.model_api.has_query_generator()
         ):
@@ -857,21 +857,21 @@ class BlenderBot2RagAgent(RagAgent):
                     offset += input_turns_cnt[i]
                 retrieval_type = new_ret_type
             self.record_local_metric(
-                'search_class',
+                "search_class",
                 AverageMetric.many(
                     retrieval_type.eq(RetrievalType.SEARCH.value).int().tolist(),
                     [1] * retrieval_type.size(0),
                 ),
             )
             self.record_local_metric(
-                'memory_class',
+                "memory_class",
                 AverageMetric.many(
                     retrieval_type.eq(RetrievalType.MEMORY.value).int().tolist(),
                     [1] * retrieval_type.size(0),
                 ),
             )
             self.record_local_metric(
-                'none_class',
+                "none_class",
                 AverageMetric.many(
                     retrieval_type.eq(RetrievalType.NONE.value).int().tolist(),
                     [1] * retrieval_type.size(0),
@@ -887,12 +887,12 @@ class BlenderBot2FidAgent(FidAgent, BlenderBot2RagAgent):
     model: BlenderBot2FidModel
 
     def build_model(self) -> Union[BlenderBot2FidModel, T5BlenderBot2FidModel]:
-        if self.generation_model == 't5':
+        if self.generation_model == "t5":
             model = T5BlenderBot2FidModel(self.opt, self.dict)
         else:
             model = BlenderBot2FidModel(self.opt, self.dict)
-        if self.opt['embedding_type'] != 'random':
+        if self.opt["embedding_type"] != "random":
             self._copy_embeddings(
-                model.encoder.embeddings.weight, self.opt['embedding_type']
+                model.encoder.embeddings.weight, self.opt["embedding_type"]
             )
         return model

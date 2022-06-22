@@ -36,11 +36,11 @@ class AbstractHuggingFaceTeacher(DialogTeacher):
     """
 
     def __init__(self, opt, shared=None):
-        self.fold = DatatypeHelper.fold(opt['datatype'])
+        self.fold = DatatypeHelper.fold(opt["datatype"])
         self.hf_split = self.hf_splits_mapping[self.fold]
         self.data_path = self._path(opt)
-        opt['datafile'] = self.data_path
-        make_dir(opt['datafile'])
+        opt["datafile"] = self.data_path
+        make_dir(opt["datafile"])
 
         self.id = "huggingface"
         super().__init__(opt, shared)
@@ -48,9 +48,9 @@ class AbstractHuggingFaceTeacher(DialogTeacher):
     def _path(self, opt):
         if self.hf_name:
             return os.path.join(
-                opt['datapath'], 'huggingface', self.hf_path, self.hf_name, self.fold
+                opt["datapath"], "huggingface", self.hf_path, self.hf_name, self.fold
             )
-        return os.path.join(opt['datapath'], 'huggingface', self.hf_path, self.fold)
+        return os.path.join(opt["datapath"], "huggingface", self.hf_path, self.fold)
 
     @property
     def hf_path(self) -> str:
@@ -83,7 +83,7 @@ class AbstractHuggingFaceTeacher(DialogTeacher):
             if text_part is None:
                 raise KeyError(f'Feature "{col}" not found in data.')
             text_dict[col] = text_part
-        return '\n'.join(text_dict.values()), text_dict
+        return "\n".join(text_dict.values()), text_dict
 
     def _get_label_value(self, row):
         """
@@ -95,7 +95,7 @@ class AbstractHuggingFaceTeacher(DialogTeacher):
         """
         try to return the true label text value from the row and the candidates.
         """
-        if isinstance(self.dataset.features['label'], datasets.features.ClassLabel):
+        if isinstance(self.dataset.features["label"], datasets.features.ClassLabel):
             pre_candidates = self.dataset.features[self.hf_label_field].names
             # construct label and candidates
             if type(label) is int:
@@ -124,9 +124,9 @@ class AbstractHuggingFaceTeacher(DialogTeacher):
             label, candidates = self._get_label_candidates(row, label)
 
             episode_dict = text_dict
-            episode_dict['text'] = query
-            episode_dict['label'] = label
-            episode_dict['label_candidates'] = candidates
+            episode_dict["text"] = query
+            episode_dict["label"] = label
+            episode_dict["label_candidates"] = candidates
             yield episode_dict, True
 
 

@@ -21,10 +21,10 @@ class CMUDoGTest(unittest.TestCase):
                 split_type: str,
             ) -> CMUDocumentGroundedConversationsTeacher:
                 kwargs = {
-                    'task': 'cmu_dog',
-                    'datatype': 'valid',
-                    'cmu_dog_split_type': split_type,
-                    'datapath': data_path,
+                    "task": "cmu_dog",
+                    "datatype": "valid",
+                    "cmu_dog_split_type": split_type,
+                    "datapath": data_path,
                 }
                 parser = setup_args()
                 parser.set_defaults(**kwargs)
@@ -35,8 +35,8 @@ class CMUDoGTest(unittest.TestCase):
                 assert isinstance(task, CMUDocumentGroundedConversationsTeacher)
                 return task
 
-            og_teacher = _split_type_teacher('deduped')
-            sn_teacher = _split_type_teacher('seen')
+            og_teacher = _split_type_teacher("deduped")
+            sn_teacher = _split_type_teacher("seen")
             self.assertEqual(
                 len(og_teacher.rare_word_f1.freq_dist),
                 len(sn_teacher.rare_word_f1.freq_dist),

@@ -44,7 +44,7 @@ class TestImageLoader(unittest.TestCase):
         """
         opt = ParlaiParser().parse_args([])
         opt.update(BASE_IMAGE_ARGS)
-        opt['no_cuda'] = no_cuda
+        opt["no_cuda"] = no_cuda
         for image_mode, dim in IMAGE_MODE_TO_DIM.items():
             if image_mode_partial not in image_mode:
                 continue
@@ -75,24 +75,24 @@ class TestImageLoader(unittest.TestCase):
         Test non-featurized image modes.
         """
         with testing_utils.tempdir() as tmp:
-            image_file = 'tmp.jpg'
+            image_file = "tmp.jpg"
             image_path = os.path.join(tmp, image_file)
-            image_zip_path = os.path.join(tmp, 'tmp.zip')
-            image = Image.new('RGB', (16, 16), color=0)
+            image_zip_path = os.path.join(tmp, "tmp.zip")
+            image = Image.new("RGB", (16, 16), color=0)
 
-            with PathManager.open(image_path, 'wb') as fp:
-                image.save(fp, 'JPEG')
+            with PathManager.open(image_path, "wb") as fp:
+                image.save(fp, "JPEG")
 
             with zipfile.ZipFile(
-                PathManager.open(image_zip_path, 'wb'), mode='w'
+                PathManager.open(image_zip_path, "wb"), mode="w"
             ) as zipf:
                 zipf.write(image_path, arcname=image_file)
 
-            for im in ['raw', 'ascii']:
+            for im in ["raw", "ascii"]:
                 loader = ImageLoader({"image_mode": im})
                 loader.load(image_path)
                 loader.load(f"{image_zip_path}/{image_file}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

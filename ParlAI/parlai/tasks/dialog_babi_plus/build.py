@@ -10,19 +10,19 @@ from parlai.core import build_data
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/dialog_babi_plus/dialog-babi-plus-v1.tgz',
-        'dialog-babi-plus-v1.tgz',
-        'c3ca01e970a607d8ad01a47420d6b493c43c9ca70211bfe15b01a461437b950e',
+        "http://parl.ai/downloads/dialog_babi_plus/dialog-babi-plus-v1.tgz",
+        "dialog-babi-plus-v1.tgz",
+        "c3ca01e970a607d8ad01a47420d6b493c43c9ca70211bfe15b01a461437b950e",
     )
 ]
 
 
 def build(opt):
-    dpath = os.path.join(opt['datapath'], 'dialog-bAbI-plus')
+    dpath = os.path.join(opt["datapath"], "dialog-bAbI-plus")
     version = "v1.1"
 
     if not build_data.built(dpath, version_string=version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)

@@ -7,4 +7,4 @@ from .build import download as download_dodeca
 
 
 def download(datapath):
-    download_dodeca(datapath, 'daily_dialog_ft')
+    download_dodeca(datapath, "daily_dialog_ft")

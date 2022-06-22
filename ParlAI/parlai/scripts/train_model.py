@@ -71,14 +71,14 @@ import subprocess
 def _num_else_inf(opt: Opt, key: str, distributed_warn=False):
     if opt[key] > 0:
         if distributed_warn and is_distributed():
-            nicekey = '--' + key.replace('_', '-')
+            nicekey = "--" + key.replace("_", "-")
             logging.warning(
-                f'Using {nicekey} in distributed mode can lead to slowdowns. '
-                'See https://github.com/facebookresearch/ParlAI/pull/3379 for more info.'
+                f"Using {nicekey} in distributed mode can lead to slowdowns. "
+                "See https://github.com/facebookresearch/ParlAI/pull/3379 for more info."
             )
         value = opt[key]
     else:
-        value = float('inf')
+        value = float("inf")
     return value
 
 
@@ -93,242 +93,242 @@ def setup_args(parser=None) -> ParlaiParser:
         the ParlaiParser with CLI options added.
     """
     if parser is None:
-        parser = ParlaiParser(True, True, 'Train a model')
-    train = parser.add_argument_group('Training Loop Arguments')
+        parser = ParlaiParser(True, True, "Train a model")
+    train = parser.add_argument_group("Training Loop Arguments")
     train.add_argument(
-        '-et',
-        '--evaltask',
-        help='task to use for valid/test (defaults to the one used for training)',
+        "-et",
+        "--evaltask",
+        help="task to use for valid/test (defaults to the one used for training)",
     )
     train.add_argument(
-        '--final-extra-opt',
+        "--final-extra-opt",
         type=str,
-        default='',
+        default="",
         help="A '.opt' file that is used for final eval. Useful for setting skip-generation to false. 'datatype' must be included as part of the opt.",
     )
     train.add_argument(
-        '--eval-batchsize',
+        "--eval-batchsize",
         type=int,
         hidden=True,
-        help='Eval time batch size (defaults to same as -bs)',
+        help="Eval time batch size (defaults to same as -bs)",
     )
     train.add_argument(
-        '--eval-dynamic-batching',  # FIXME: see https://github.com/facebookresearch/ParlAI/issues/3367
+        "--eval-dynamic-batching",  # FIXME: see https://github.com/facebookresearch/ParlAI/issues/3367
         default=None,
-        type='nonestr',
-        choices={None, 'off', 'full', 'batchsort'},
+        type="nonestr",
+        choices={None, "off", "full", "batchsort"},
         help=(
-            'Set dynamic batching at evaluation time. Set to off for '
-            'train-only dynamic batching. Set to none (default) to use same '
-            'setting as --dynamic-batching.'
+            "Set dynamic batching at evaluation time. Set to off for "
+            "train-only dynamic batching. Set to none (default) to use same "
+            "setting as --dynamic-batching."
         ),
     )
     train.add_argument(
-        '--num-workers',
+        "--num-workers",
         default=0,
         type=int,
-        help='Number of background workers (training only)',
+        help="Number of background workers (training only)",
     )
-    train.add_argument('--display-examples', type='bool', default=False, hidden=True)
-    train.add_argument('-eps', '--num-epochs', type=float, default=-1)
-    train.add_argument('-ttim', '--max-train-time', type=float, default=-1)
+    train.add_argument("--display-examples", type="bool", default=False, hidden=True)
+    train.add_argument("-eps", "--num-epochs", type=float, default=-1)
+    train.add_argument("-ttim", "--max-train-time", type=float, default=-1)
     train.add_argument(
-        '-tstep',
-        '--max-train-steps',
-        '--max-lr-steps',
+        "-tstep",
+        "--max-train-steps",
+        "--max-lr-steps",
         type=int,
         default=-1,
-        help='End training after n model updates',
+        help="End training after n model updates",
     )
-    train.add_argument('-ltim', '--log-every-n-secs', type=float, default=-1)
+    train.add_argument("-ltim", "--log-every-n-secs", type=float, default=-1)
     train.add_argument(
-        '-lstep',
-        '--log-every-n-steps',
+        "-lstep",
+        "--log-every-n-steps",
         type=int,
         default=50,
-        help='Log every n training steps',
+        help="Log every n training steps",
     )
     train.add_argument(
-        '-vtim',
-        '--validation-every-n-secs',
+        "-vtim",
+        "--validation-every-n-secs",
         type=float,
         default=-1,
-        help='Validate every n seconds. Saves model to model_file '
-        '(if set) whenever best val metric is found',
+        help="Validate every n seconds. Saves model to model_file "
+        "(if set) whenever best val metric is found",
     )
     train.add_argument(
-        '-vstep',
-        '--validation-every-n-steps',
+        "-vstep",
+        "--validation-every-n-steps",
         type=int,
         default=-1,
-        help='Validate every n training steps. Saves model to model_file '
-        '(if set) whenever best val metric is found',
+        help="Validate every n training steps. Saves model to model_file "
+        "(if set) whenever best val metric is found",
     )
     train.add_argument(
-        '-stim',
-        '--save-every-n-secs',
+        "-stim",
+        "--save-every-n-secs",
         type=float,
         default=-1,
-        help='Saves the model to model_file.checkpoint after '
-        'every n seconds (default -1, never).',
+        help="Saves the model to model_file.checkpoint after "
+        "every n seconds (default -1, never).",
     )
     train.add_argument(
-        '-sval',
-        '--save-after-valid',
-        type='bool',
+        "-sval",
+        "--save-after-valid",
+        type="bool",
         default=False,
-        help='Saves the model to model_file.checkpoint after '
-        'every validation (default %(default)s).',
+        help="Saves the model to model_file.checkpoint after "
+        "every validation (default %(default)s).",
     )
     train.add_argument(
-        '-veps',
-        '--validation-every-n-epochs',
+        "-veps",
+        "--validation-every-n-epochs",
         type=float,
         default=-1,
-        help='Validate every n epochs. Saves model to model_file '
-        '(if set) whenever best val metric is found',
+        help="Validate every n epochs. Saves model to model_file "
+        "(if set) whenever best val metric is found",
     )
     train.add_argument(
-        '-vme',
-        '--validation-max-exs',
+        "-vme",
+        "--validation-max-exs",
         type=int,
         default=-1,
         hidden=True,
-        help='max examples to use during validation (default -1 uses all)',
+        help="max examples to use during validation (default -1 uses all)",
     )
     train.add_argument(
-        '--short-final-eval',
+        "--short-final-eval",
         default=False,
         hidden=True,
-        type='bool',
-        help='If true, obeys --validation-max-exs in the final '
-        'validation and test evaluations.',
+        type="bool",
+        help="If true, obeys --validation-max-exs in the final "
+        "validation and test evaluations.",
     )
     train.add_argument(
-        '-vp',
-        '--validation-patience',
+        "-vp",
+        "--validation-patience",
         type=int,
         default=10,
         help=(
-            'number of iterations of validation where result'
-            ' does not improve before we stop training'
+            "number of iterations of validation where result"
+            " does not improve before we stop training"
         ),
     )
     train.add_argument(
-        '-vmt',
-        '--validation-metric',
-        default='accuracy',
-        help='key into report table for selecting best validation',
+        "-vmt",
+        "--validation-metric",
+        default="accuracy",
+        help="key into report table for selecting best validation",
     )
     train.add_argument(
-        '-vmm',
-        '--validation-metric-mode',
+        "-vmm",
+        "--validation-metric-mode",
         type=str,
-        choices=['max', 'min'],
-        help='how to optimize validation metric (max or min)',
+        choices=["max", "min"],
+        help="how to optimize validation metric (max or min)",
     )
     train.add_argument(
-        '-vcut',
-        '--validation-cutoff',
+        "-vcut",
+        "--validation-cutoff",
         type=float,
         default=1.0,
         hidden=True,
-        help='value at which training will stop if exceeded by metric',
+        help="value at which training will stop if exceeded by metric",
     )
     train.add_argument(
-        '-lfc',
-        '--load-from-checkpoint',
-        type='bool',
+        "-lfc",
+        "--load-from-checkpoint",
+        type="bool",
         default=True,
         hidden=True,
-        help='load model from checkpoint if available',
+        help="load model from checkpoint if available",
     )
     train.add_argument(
-        '-vshare',
-        '--validation-share-agent',
+        "-vshare",
+        "--validation-share-agent",
         default=False,
         hidden=True,
-        help='use a shared copy of the agent for validation. '
-        'this will eventually default to True, but '
-        'currently defaults to False.',
+        help="use a shared copy of the agent for validation. "
+        "this will eventually default to True, but "
+        "currently defaults to False.",
     )
     train.add_argument(
-        '-mcs',
-        '--metrics',
+        "-mcs",
+        "--metrics",
         type=str,
-        default='default',
-        help='list of metrics to show/compute, e.g. all, default,'
-        'or give a list split by , like '
-        'ppl,f1,accuracy,hits@1,rouge,bleu'
-        'the rouge metrics will be computed as rouge-1, rouge-2 and rouge-l',
+        default="default",
+        help="list of metrics to show/compute, e.g. all, default,"
+        "or give a list split by , like "
+        "ppl,f1,accuracy,hits@1,rouge,bleu"
+        "the rouge metrics will be computed as rouge-1, rouge-2 and rouge-l",
     )
     train.add_argument(
-        '-micro',
-        '--aggregate-micro',
-        type='bool',
+        "-micro",
+        "--aggregate-micro",
+        type="bool",
         default=False,
-        help='Report micro-averaged metrics instead of macro averaged metrics.',
+        help="Report micro-averaged metrics instead of macro averaged metrics.",
         recommended=False,
     )
 
     # # # Justin: custom arugments
     train.add_argument(
-        '-sens',
-        '--save-every-n-steps',
+        "-sens",
+        "--save-every-n-steps",
         type=float,
         default=-1,
-        help='Saves the model to model_file.checkpoint_step<steps> after '
-        'every n steps (default -1, never).',
+        help="Saves the model to model_file.checkpoint_step<steps> after "
+        "every n steps (default -1, never).",
     )
 
     train.add_argument(
-        '-sene',
-        '--save-every-n-epochs',
+        "-sene",
+        "--save-every-n-epochs",
         type=float,
         default=-1,
-        help='Saves the model to model_file.checkpoint_step<steps> after '
-        'every n epochs (default -1, never).',
+        help="Saves the model to model_file.checkpoint_step<steps> after "
+        "every n epochs (default -1, never).",
     )
 
     train.add_argument(
-        '-to',
-        '--train_only',
-        type='bool',
+        "-to",
+        "--train_only",
+        type="bool",
         default=False,
-        help='Run training only and skip evaluation',
+        help="Run training only and skip evaluation",
     )
 
     train.add_argument(
-        '-mwoz',
-        '--optimize_for_multiwoz',
-        type='bool',
+        "-mwoz",
+        "--optimize_for_multiwoz",
+        type="bool",
         default=False,
-        help='Submit slurm jobs in parallel to speed up getting final results',
+        help="Submit slurm jobs in parallel to speed up getting final results",
     )
     # # # Justin: end of custom arguments
 
     # arguments added from `eval_model.py`
     parser.add_argument(
-        '-rf',
-        '--report-filename',
+        "-rf",
+        "--report-filename",
         type=str,
-        default='',
-        help='Saves a json file of the evaluation report either as an '
+        default="",
+        help="Saves a json file of the evaluation report either as an "
         'extension to the model-file (if begins with a ".") or a whole '
-        'file path. Set to the empty string to not save at all.',
+        "file path. Set to the empty string to not save at all.",
     )
     parser.add_argument(
-        '--world-logs',
+        "--world-logs",
         type=str,
-        default='',
-        help='Saves a jsonl file of the world logs.'
-        'Set to the empty string to not save at all.',
+        default="",
+        help="Saves a jsonl file of the world logs."
+        "Set to the empty string to not save at all.",
     )
     parser.add_argument(
-        '--save-format',
+        "--save-format",
         type=str,
-        default='conversations',
-        choices=['conversations', 'parlai'],
+        default="conversations",
+        choices=["conversations", "parlai"],
     )
 
     TensorboardLogger.add_cmdline_args(parser, partial_opt=None)
@@ -356,37 +356,37 @@ def load_eval_worlds(agent, opt, datatype):
         The new datatype.
     """
 
-    if 'stream' in opt['datatype']:
-        datatype += ':stream'
+    if "stream" in opt["datatype"]:
+        datatype += ":stream"
     opt = opt.copy()
-    opt['datatype'] = datatype
-    if opt.get('evaltask'):
+    opt["datatype"] = datatype
+    if opt.get("evaltask"):
         # if a different eval task is specified, use it.
-        opt['task'] = opt['evaltask']
-    if opt.get('eval_batchsize'):
+        opt["task"] = opt["evaltask"]
+    if opt.get("eval_batchsize"):
         # override eval time batchsize
-        opt['batchsize'] = opt['eval_batchsize']
-    if opt.get('eval_dynamic_batching'):
+        opt["batchsize"] = opt["eval_batchsize"]
+    if opt.get("eval_dynamic_batching"):
         # FIXME: see issue tracked in https://github.com/facebookresearch/ParlAI/issues/3367
         # override eval time dynamic batching settings
         eval_dyn_batch = (
             None
-            if opt['eval_dynamic_batching'] == 'off'
-            else opt['eval_dynamic_batching']
+            if opt["eval_dynamic_batching"] == "off"
+            else opt["eval_dynamic_batching"]
         )
-        opt['dynamic_batching'] = eval_dyn_batch
+        opt["dynamic_batching"] = eval_dyn_batch
 
-    tasks = opt['task'].split(',')
+    tasks = opt["task"].split(",")
     worlds = []
     # possibly load agent
-    if opt.get('validation_share_agent', False):
+    if opt.get("validation_share_agent", False):
         valid_agent = create_agent_from_shared(agent.share())
     else:
         valid_agent = agent
     # create worlds
     for task in tasks:
         task_opt = opt.copy()  # copy opt since we edit the task
-        task_opt['task'] = task
+        task_opt["task"] = task
         valid_world = create_task(task_opt, valid_agent)
         worlds.append(valid_world)
 
@@ -404,23 +404,23 @@ class TrainLoop:
         # not produced. This line brings them back
         signal.signal(signal.SIGINT, signal.default_int_handler)
         # Possibly load from checkpoint
-        trainstats_suffix = '.trainstats'  # we might load training statistics from here
+        trainstats_suffix = ".trainstats"  # we might load training statistics from here
         if (
-            opt['load_from_checkpoint']
-            and opt.get('model_file')
-            and PathManager.exists(opt['model_file'] + '.checkpoint')
+            opt["load_from_checkpoint"]
+            and opt.get("model_file")
+            and PathManager.exists(opt["model_file"] + ".checkpoint")
         ):
-            opt['init_model'] = opt['model_file'] + '.checkpoint'
-            trainstats_suffix = '.checkpoint.trainstats'
+            opt["init_model"] = opt["model_file"] + ".checkpoint"
+            trainstats_suffix = ".checkpoint.trainstats"
         # Possibly build a dictionary (not all models do this).
-        if not (opt.get('dict_file') or opt.get('model_file')):
+        if not (opt.get("dict_file") or opt.get("model_file")):
             raise RuntimeError(
-                'WARNING: For train_model, please specify either a '
-                'model_file or dict_file.'
+                "WARNING: For train_model, please specify either a "
+                "model_file or dict_file."
             )
-        if 'dict_file' in opt:
-            if opt['dict_file'] is None and opt.get('model_file'):
-                opt['dict_file'] = opt['model_file'] + '.dict'
+        if "dict_file" in opt:
+            if opt["dict_file"] is None and opt.get("model_file"):
+                opt["dict_file"] = opt["model_file"] + ".dict"
             logging.info("building dictionary first...")
             build_dict(opt, skip_if_built=True)
 
@@ -437,47 +437,47 @@ class TrainLoop:
         self.parleys = 0
         self._train_steps = 0
         self._last_log_steps = 0
-        self.update_freq = opt.get('update_freq', 1)
+        self.update_freq = opt.get("update_freq", 1)
 
-        self.max_num_epochs = _num_else_inf(opt, 'num_epochs', distributed_warn=True)
+        self.max_num_epochs = _num_else_inf(opt, "num_epochs", distributed_warn=True)
         self.max_train_time = _num_else_inf(
-            opt, 'max_train_time', distributed_warn=True
+            opt, "max_train_time", distributed_warn=True
         )
-        self.max_train_steps = _num_else_inf(opt, 'max_train_steps')
+        self.max_train_steps = _num_else_inf(opt, "max_train_steps")
         self.log_every_n_secs = _num_else_inf(
-            opt, 'log_every_n_secs', distributed_warn=True
+            opt, "log_every_n_secs", distributed_warn=True
         )
-        self.log_every_n_steps = _num_else_inf(opt, 'log_every_n_steps')
+        self.log_every_n_steps = _num_else_inf(opt, "log_every_n_steps")
         self.val_every_n_secs = _num_else_inf(
-            opt, 'validation_every_n_secs', distributed_warn=True
+            opt, "validation_every_n_secs", distributed_warn=True
         )
         self.val_every_n_epochs = _num_else_inf(
-            opt, 'validation_every_n_epochs', distributed_warn=True
+            opt, "validation_every_n_epochs", distributed_warn=True
         )
-        self.val_every_n_steps = _num_else_inf(opt, 'validation_every_n_steps')
+        self.val_every_n_steps = _num_else_inf(opt, "validation_every_n_steps")
         self.save_every_n_secs = _num_else_inf(
-            opt, 'save_every_n_secs', distributed_warn=True
+            opt, "save_every_n_secs", distributed_warn=True
         )
         self.save_every_n_steps = _num_else_inf(
-            opt, 'save_every_n_steps', distributed_warn=True
+            opt, "save_every_n_steps", distributed_warn=True
         )
         self.save_every_n_epochs = _num_else_inf(
-            opt, 'save_every_n_epochs', distributed_warn=True
+            opt, "save_every_n_epochs", distributed_warn=True
         )
 
         # smart defaults for --validation-metric-mode
-        if opt['validation_metric'] in {'loss', 'ppl', 'mean_rank'}:
-            opt['validation_metric_mode'] = 'min'
-        elif opt['validation_metric'] in {'accuracy', 'hits@1', 'hits@5', 'f1', 'bleu'}:
-            opt['validation_metric_mode'] = 'max'
-        if opt.get('validation_metric_mode') is None:
-            opt['validation_metric_mode'] = 'max'
+        if opt["validation_metric"] in {"loss", "ppl", "mean_rank"}:
+            opt["validation_metric_mode"] = "min"
+        elif opt["validation_metric"] in {"accuracy", "hits@1", "hits@5", "f1", "bleu"}:
+            opt["validation_metric_mode"] = "max"
+        if opt.get("validation_metric_mode") is None:
+            opt["validation_metric_mode"] = "max"
 
         self.last_valid_epoch = 0
         self._last_valid_steps = 0
         self.last_save_epoch = 0
         self._last_save_steps = 0
-        self.valid_optim = 1 if opt['validation_metric_mode'] == 'max' else -1
+        self.valid_optim = 1 if opt["validation_metric_mode"] == "max" else -1
         self.train_reports = []
         self.valid_reports = []
         self.final_valid_report = {}
@@ -492,59 +492,59 @@ class TrainLoop:
 
         # we may have been preempted, make sure we note that amount
         self._preempted_epochs = 0.0
-        if opt.get('model_file') and PathManager.exists(
-            opt['model_file'] + trainstats_suffix
+        if opt.get("model_file") and PathManager.exists(
+            opt["model_file"] + trainstats_suffix
         ):
             # looks like we were preempted. make sure we load up our total
             # training stats, etc
-            with PathManager.open(opt['model_file'] + trainstats_suffix) as ts:
+            with PathManager.open(opt["model_file"] + trainstats_suffix) as ts:
                 obj = json.load(ts)
-                self.parleys = obj.get('parleys', 0)
-                self._preempted_epochs = obj.get('total_epochs', 0)
-                self.train_time.total = obj.get('train_time', 0)
-                self._train_steps = obj.get('train_steps', 0)
-                self.impatience = obj.get('impatience', 0)
-                self.valid_reports = obj.get('valid_reports', [])
+                self.parleys = obj.get("parleys", 0)
+                self._preempted_epochs = obj.get("total_epochs", 0)
+                self.train_time.total = obj.get("train_time", 0)
+                self._train_steps = obj.get("train_steps", 0)
+                self.impatience = obj.get("impatience", 0)
+                self.valid_reports = obj.get("valid_reports", [])
                 if self.valid_reports:
                     self.last_valid_epoch = self.valid_reports[-1].get(
-                        'total_epochs', 0.0
+                        "total_epochs", 0.0
                     )
-                self.train_reports = obj.get('train_reports', [])
-                if 'best_valid' in obj:
-                    self.best_valid = obj['best_valid']
+                self.train_reports = obj.get("train_reports", [])
+                if "best_valid" in obj:
+                    self.best_valid = obj["best_valid"]
                 else:
                     # old method
-                    if opt.get('model_file') and PathManager.exists(
-                        opt['model_file'] + '.best_valid'
+                    if opt.get("model_file") and PathManager.exists(
+                        opt["model_file"] + ".best_valid"
                     ):
                         with PathManager.open(
-                            opt['model_file'] + ".best_valid", 'r'
+                            opt["model_file"] + ".best_valid", "r"
                         ) as f:
                             x = f.readline()
                             self.best_valid = float(x)
                             f.close()
 
-        if opt['tensorboard_log'] and is_primary_worker():
+        if opt["tensorboard_log"] and is_primary_worker():
             self.tb_logger = TensorboardLogger(opt)
-        if opt['wandb_log'] and is_primary_worker():
-            model = self.agent.model if hasattr(self.agent, 'model') else None
+        if opt["wandb_log"] and is_primary_worker():
+            model = self.agent.model if hasattr(self.agent, "model") else None
             self.wb_logger = WandbLogger(opt, model)
 
     def save_model(self, suffix=None):
         """
         Save the model to disk, possibly with a suffix.
         """
-        if not self.opt.get('model_file'):
+        if not self.opt.get("model_file"):
             # nothing to save to, just exit
             return
 
-        fn = self.opt['model_file']
+        fn = self.opt["model_file"]
         if suffix:
             fn += suffix
 
         if not is_primary_worker():
             # never do IO as a non-primary worker
-            if hasattr(self.agent, 'save_nonprimary'):
+            if hasattr(self.agent, "save_nonprimary"):
                 self.agent.save_nonprimary(fn)
             return
 
@@ -558,26 +558,26 @@ class TrainLoop:
                 pass
 
     def _save_train_stats(self, suffix=None):
-        fn = self.opt.get('model_file', None)
+        fn = self.opt.get("model_file", None)
         if not fn:
             return
         if suffix:
             fn += suffix
-        fn += '.trainstats'
-        with PathManager.open(fn, 'w') as f:
+        fn += ".trainstats"
+        with PathManager.open(fn, "w") as f:
             json.dump(
                 {
-                    'parleys': self.parleys,
-                    'train_time': self.train_time.time(),
-                    'train_steps': self._train_steps,
-                    'total_epochs': self._total_epochs,
-                    'train_reports': self.train_reports,
-                    'valid_reports': self.valid_reports,
-                    'best_valid': self.best_valid,
-                    'impatience': self.impatience,
-                    'final_valid_report': dict_report(self.final_valid_report),
-                    'final_test_report': dict_report(self.final_test_report),
-                    'final_extra_valid_report': dict_report(
+                    "parleys": self.parleys,
+                    "train_time": self.train_time.time(),
+                    "train_steps": self._train_steps,
+                    "total_epochs": self._total_epochs,
+                    "train_reports": self.train_reports,
+                    "valid_reports": self.valid_reports,
+                    "best_valid": self.best_valid,
+                    "impatience": self.impatience,
+                    "final_valid_report": dict_report(self.final_valid_report),
+                    "final_test_report": dict_report(self.final_test_report),
+                    "final_extra_valid_report": dict_report(
                         self.final_extra_valid_report
                     ),
                 },
@@ -596,35 +596,35 @@ class TrainLoop:
 
         if self.valid_worlds is None:
             # we need to load the world now
-            self.valid_worlds = load_eval_worlds(self.agent, opt, 'valid')
+            self.valid_worlds = load_eval_worlds(self.agent, opt, "valid")
 
         # run evaluation on valid set
         valid_report = self._run_eval(
-            self.valid_worlds, opt, 'valid', opt['validation_max_exs']
+            self.valid_worlds, opt, "valid", opt["validation_max_exs"]
         )
         v = dict_report(valid_report)
-        v['train_time'] = self.train_time.time()
-        v['parleys'] = self.parleys
-        v['train_steps'] = self._train_steps
-        v['total_exs'] = self._total_exs
-        v['total_epochs'] = self._total_epochs
+        v["train_time"] = self.train_time.time()
+        v["parleys"] = self.parleys
+        v["train_steps"] = self._train_steps
+        v["total_exs"] = self._total_exs
+        v["total_epochs"] = self._total_epochs
         self.valid_reports.append(v)
         # logging
-        if opt['tensorboard_log'] and is_primary_worker():
-            valid_report['total_exs'] = self._total_exs
-            self.tb_logger.log_metrics('valid', self.parleys, valid_report)
+        if opt["tensorboard_log"] and is_primary_worker():
+            valid_report["total_exs"] = self._total_exs
+            self.tb_logger.log_metrics("valid", self.parleys, valid_report)
             # flush on a validation
             self.tb_logger.flush()
-        if opt['wandb_log'] and is_primary_worker():
-            valid_report['total_exs'] = self._total_exs
-            self.wb_logger.log_metrics('valid', self.parleys, valid_report)
+        if opt["wandb_log"] and is_primary_worker():
+            valid_report["total_exs"] = self._total_exs
+            self.wb_logger.log_metrics("valid", self.parleys, valid_report)
 
         # send valid metrics to agent if the agent wants them
-        if hasattr(self.agent, 'receive_metrics'):
+        if hasattr(self.agent, "receive_metrics"):
             self.agent.receive_metrics(valid_report)
 
         # check which metric to look at
-        new_valid = valid_report[opt['validation_metric']]
+        new_valid = valid_report[opt["validation_metric"]]
 
         if isinstance(new_valid, Metric):
             new_valid = new_valid.value()
@@ -635,55 +635,55 @@ class TrainLoop:
             or self.valid_optim * new_valid > self.valid_optim * self.best_valid
         ):
             logging.success(
-                'new best {}: {:.4g}{}'.format(
-                    opt['validation_metric'],
+                "new best {}: {:.4g}{}".format(
+                    opt["validation_metric"],
                     new_valid,
-                    ' (previous best was {:.4g})'.format(self.best_valid)
+                    " (previous best was {:.4g})".format(self.best_valid)
                     if self.best_valid is not None
-                    else '',
+                    else "",
                 )
             )
             self.best_valid = new_valid
             self.impatience = 0
-            if opt.get('model_file'):
+            if opt.get("model_file"):
                 logging.info(f"saving best valid model: {opt['model_file']}")
                 self.save_model()
                 self.saved = True
             if (
-                opt['validation_metric_mode'] == 'max'
-                and self.best_valid >= opt['validation_cutoff']
+                opt["validation_metric_mode"] == "max"
+                and self.best_valid >= opt["validation_cutoff"]
             ) or (
-                opt['validation_metric_mode'] == 'min'
-                and self.best_valid <= opt['validation_cutoff']
+                opt["validation_metric_mode"] == "min"
+                and self.best_valid <= opt["validation_cutoff"]
             ):
-                logging.info('task solved! stopping.')
+                logging.info("task solved! stopping.")
                 return True
         else:
             self.impatience += 1
             logging.report(
-                'did not beat best {}: {} impatience: {}'.format(
-                    opt['validation_metric'], round(self.best_valid, 4), self.impatience
+                "did not beat best {}: {} impatience: {}".format(
+                    opt["validation_metric"], round(self.best_valid, 4), self.impatience
                 )
             )
         self.validate_time.reset()
 
         # saving
-        if opt.get('model_file') and opt.get('save_after_valid'):
+        if opt.get("model_file") and opt.get("save_after_valid"):
             logging.info(f"saving model checkpoint: {opt['model_file']}.checkpoint")
-            self.save_model('.checkpoint')
+            self.save_model(".checkpoint")
             # save every checkpoint
             logging.info(
                 f"saving model checkpoint: {opt['model_file']}.checkpoint_step{self._train_steps}"
             )
-            self.save_model(f'.checkpoint_step{self._train_steps}')
+            self.save_model(f".checkpoint_step{self._train_steps}")
             # fn = self.opt['model_file']
 
         # check if we are out of patience
         if (
-            opt['validation_patience'] > 0
-            and self.impatience >= opt['validation_patience']
+            opt["validation_patience"] > 0
+            and self.impatience >= opt["validation_patience"]
         ):
-            logging.info('ran out of patience! stopping training.')
+            logging.info("ran out of patience! stopping training.")
             return True
         return False
 
@@ -694,44 +694,44 @@ class TrainLoop:
 
         task_opt = opt.copy()
         task = valid_world.getID()
-        task_opt['task'] = task
+        task_opt["task"] = task
         # add task suffix in case of multi-tasking
-        if opt['world_logs']:
-            task_opt['world_logs'] = get_task_world_logs(
+        if opt["world_logs"]:
+            task_opt["world_logs"] = get_task_world_logs(
                 task,
-                task_opt['world_logs'],
-                is_multitask=len(opt['task'].split(',')) > 1,
+                task_opt["world_logs"],
+                is_multitask=len(opt["task"].split(",")) > 1,
             )
 
-        world_logger = WorldLogger(task_opt) if task_opt['world_logs'] else None
+        world_logger = WorldLogger(task_opt) if task_opt["world_logs"] else None
 
         # set up logging
-        log_every_n_secs = opt.get('log_every_n_secs', -1)
+        log_every_n_secs = opt.get("log_every_n_secs", -1)
         if log_every_n_secs <= 0:
-            log_every_n_secs = float('inf')
+            log_every_n_secs = float("inf")
         log_time = TimeLogger()
 
         if is_distributed():
-            logging.warning('Progress bar is approximate in distributed mode.')
+            logging.warning("Progress bar is approximate in distributed mode.")
 
         cnt = 0
 
         # max number of examples to evaluate
-        max_cnt = max_exs if max_exs > 0 else float('inf')
+        max_cnt = max_exs if max_exs > 0 else float("inf")
         total_cnt = valid_world.num_examples()
 
         while not valid_world.epoch_done() and cnt < max_cnt:
-            cnt += opt.get('batchsize', 1)
+            cnt += opt.get("batchsize", 1)
             valid_world.parley()
             if world_logger is not None:
                 world_logger.log(valid_world)
-            if cnt == 0 and opt['display_examples']:
-                print(valid_world.display() + '\n~~')
+            if cnt == 0 and opt["display_examples"]:
+                print(valid_world.display() + "\n~~")
                 print(valid_world.report())
             if log_time.time() > log_every_n_secs:
                 report = valid_world.report()
                 text, report = log_time.log(
-                    report.get('exs', 0), min(max_cnt, total_cnt), report
+                    report.get("exs", 0), min(max_cnt, total_cnt), report
                 )
                 logging.info(text)
 
@@ -740,16 +740,16 @@ class TrainLoop:
             world_logger.reset()  # add final acts to logs
             if is_distributed():
                 rank = get_rank()
-                base_outfile, extension = os.path.splitext(task_opt['world_logs'])
-                outfile = base_outfile + f'_{rank}' + extension
+                base_outfile, extension = os.path.splitext(task_opt["world_logs"])
+                outfile = base_outfile + f"_{rank}" + extension
             else:
-                outfile = task_opt['world_logs']
+                outfile = task_opt["world_logs"]
             if outfile.startswith("."):
-                outfile = opt['model_file'] + outfile
-            world_logger.write(outfile, valid_world, file_format=opt['save_format'])
+                outfile = opt["model_file"] + outfile
+            world_logger.write(outfile, valid_world, file_format=opt["save_format"])
 
         valid_report = valid_world.report()
-        if opt.get('validation_share_agent', False):
+        if opt.get("validation_share_agent", False):
             valid_world.reset()  # make sure world doesn't remember valid data
 
         return valid_report
@@ -778,7 +778,7 @@ class TrainLoop:
             limits the number of examples if max_exs > 0
         """
 
-        logging.info(f'running eval: {datatype}')
+        logging.info(f"running eval: {datatype}")
         timer = Timer()
         reports = []
 
@@ -790,7 +790,7 @@ class TrainLoop:
         tasks = [world.getID() for world in valid_worlds]
         named_reports = dict(zip(tasks, reports))
         report = aggregate_named_reports(
-            named_reports, micro_average=self.opt.get('aggregate_micro', False)
+            named_reports, micro_average=self.opt.get("aggregate_micro", False)
         )
 
         # get the results from all workers
@@ -799,29 +799,29 @@ class TrainLoop:
         # import pdb; pdb.set_trace()
         _save_eval_stats(opt, report)
 
-        metrics = f'{datatype}:\n{nice_report(report)}\n'
-        logging.info(f'eval completed in {timer.time():.2f}s')
+        metrics = f"{datatype}:\n{nice_report(report)}\n"
+        logging.info(f"eval completed in {timer.time():.2f}s")
         logging.report(metrics)
 
         # write to file
-        if write_log and opt.get('model_file') and is_primary_worker():
+        if write_log and opt.get("model_file") and is_primary_worker():
             # Write out metrics
             with PathManager.open(
-                opt['model_file'] + extra_log_suffix + '.' + datatype, 'a'
+                opt["model_file"] + extra_log_suffix + "." + datatype, "a"
             ) as f:
-                f.write(f'{metrics}\n')
+                f.write(f"{metrics}\n")
 
         return report
 
     def _run_final_extra_eval(self, opt):
         final_valid_opt = copy.deepcopy(opt)
-        final_valid_opt_raw = Opt.load_init(opt['final_extra_opt'])
+        final_valid_opt_raw = Opt.load_init(opt["final_extra_opt"])
         final_datatype = final_valid_opt_raw["datatype"]
         for k, v in final_valid_opt_raw.items():
             final_valid_opt[k] = v
         final_max_exs = (
-            final_valid_opt['validation_max_exs']
-            if final_valid_opt.get('short_final_eval')
+            final_valid_opt["validation_max_exs"]
+            if final_valid_opt.get("short_final_eval")
             else -1
         )
         final_valid_world = load_eval_worlds(
@@ -835,7 +835,7 @@ class TrainLoop:
             write_log=True,
             extra_log_suffix="_extra",
         )
-        if opt['wandb_log'] and is_primary_worker():
+        if opt["wandb_log"] and is_primary_worker():
             self.wb_logger.log_final(final_datatype, final_valid_report)
 
         return final_valid_report
@@ -867,18 +867,18 @@ class TrainLoop:
         eta = None
 
         # Determine time_left and num_epochs
-        max_epochs = self.opt.get('num_epochs', 0)
+        max_epochs = self.opt.get("num_epochs", 0)
         if max_epochs > 0 and epochs_completed > 0:
             epoch_progress = epochs_completed / max_epochs
             eta = (1 - epoch_progress) * time_elapsed / epoch_progress
 
-        max_training_time = self.opt.get('max_training_time', -1)
+        max_training_time = self.opt.get("max_training_time", -1)
         if max_training_time > 0:
             time_left = max_training_time - time_elapsed
             if eta is None or time_left < eta:
                 eta = time_left
 
-        max_train_steps = self.opt.get('max_train_steps', -1)
+        max_train_steps = self.opt.get("max_train_steps", -1)
         if max_train_steps > 0 and steps_taken > 0:
             steps_progress = steps_taken / max_train_steps
             eta = (1 - steps_progress) * time_elapsed / steps_progress
@@ -903,11 +903,11 @@ class TrainLoop:
             return time for each of train, log, and validation
         """
         if (
-            self.max_train_time < float('inf')
-            or self.log_every_n_secs < float('inf')
-            or self.val_every_n_secs < float('inf')
-            or self.val_every_n_epochs < float('inf')
-            or self.max_num_epochs < float('inf')
+            self.max_train_time < float("inf")
+            or self.log_every_n_secs < float("inf")
+            or self.val_every_n_secs < float("inf")
+            or self.val_every_n_epochs < float("inf")
+            or self.max_num_epochs < float("inf")
         ):
             self._total_epochs = self._preempted_epochs + sum(
                 all_gather_list(world.get_total_epochs())
@@ -938,8 +938,8 @@ class TrainLoop:
         Output a training log entry.
         """
         opt = self.opt
-        if opt['display_examples']:
-            print(self.world.display() + '\n~~')
+        if opt["display_examples"]:
+            print(self.world.display() + "\n~~")
         logs = []
         # get report
         train_report = self.world.report()
@@ -947,37 +947,37 @@ class TrainLoop:
         self.world.reset_metrics()
 
         train_report_trainstats = dict_report(train_report)
-        train_report_trainstats['total_epochs'] = self._total_epochs
-        train_report_trainstats['total_exs'] = self._total_exs
-        train_report_trainstats['parleys'] = self.parleys
-        train_report_trainstats['train_steps'] = self._train_steps
-        train_report_trainstats['train_time'] = self.train_time.time()
+        train_report_trainstats["total_epochs"] = self._total_epochs
+        train_report_trainstats["total_exs"] = self._total_exs
+        train_report_trainstats["parleys"] = self.parleys
+        train_report_trainstats["train_steps"] = self._train_steps
+        train_report_trainstats["train_time"] = self.train_time.time()
         self.train_reports.append(train_report_trainstats)
 
         # time elapsed
-        logs.append(f'time:{self.train_time.time():.0f}s')
-        logs.append(f'total_exs:{self._total_exs}')
-        logs.append(f'total_steps:{self._train_steps}')
+        logs.append(f"time:{self.train_time.time():.0f}s")
+        logs.append(f"total_exs:{self._total_exs}")
+        logs.append(f"total_steps:{self._train_steps}")
 
         if self._total_epochs >= 0:
             # only if it's unbounded
-            logs.append(f'epochs:{self._total_epochs:.2f}')
+            logs.append(f"epochs:{self._total_epochs:.2f}")
 
         time_left = self._compute_eta(
             self._total_epochs, self.train_time.time(), self._train_steps
         )
         if time_left is not None:
-            logs.append(f'time_left:{max(0,time_left):.0f}s')
+            logs.append(f"time_left:{max(0,time_left):.0f}s")
 
-        log = '{}\n{}\n'.format(' '.join(logs), nice_report(train_report))
+        log = "{}\n{}\n".format(" ".join(logs), nice_report(train_report))
         logging.info(log)
         self.log_time.reset()
         self._last_log_steps = 0
 
-        if opt['tensorboard_log'] and is_primary_worker():
-            self.tb_logger.log_metrics('train', self.parleys, train_report)
-        if opt['wandb_log'] and is_primary_worker():
-            self.wb_logger.log_metrics('train', self.parleys, train_report)
+        if opt["tensorboard_log"] and is_primary_worker():
+            self.tb_logger.log_metrics("train", self.parleys, train_report)
+        if opt["wandb_log"] and is_primary_worker():
+            self.wb_logger.log_metrics("train", self.parleys, train_report)
 
         return train_report
 
@@ -988,14 +988,14 @@ class TrainLoop:
         logging.info(
             f"saving model checkpoint: {opt['model_file']}.checkpoint_step{self._train_steps}"
         )
-        self.save_model(f'.checkpoint_step{self._train_steps}')
-        if opt['tensorboard_log'] and is_primary_worker():
+        self.save_model(f".checkpoint_step{self._train_steps}")
+        if opt["tensorboard_log"] and is_primary_worker():
             self.tb_logger.flush()
         # # # overwrite latest checkpoint
-        self.save_model('.checkpoint')
+        self.save_model(".checkpoint")
         self.save_time.reset()
-        is_fewshot = opt['few_shot']
-        if opt.get('optimize_for_multiwoz'):
+        is_fewshot = opt["few_shot"]
+        if opt.get("optimize_for_multiwoz"):
             # # # submit evaluation jobs via slurm
             # submit eval on valid and test set
             for eval_split in ["valid", "test"]:
@@ -1017,7 +1017,7 @@ class TrainLoop:
 
         Yields a metrics dict with each log.
         """
-        logging.info('training...')
+        logging.info("training...")
         opt = self.opt
         world = self.world
         with world:
@@ -1043,16 +1043,16 @@ class TrainLoop:
                 if self._total_epochs >= self.max_num_epochs:
                     yield self.log()
                     logging.info(
-                        f'num_epochs completed:{self.max_num_epochs} time elapsed:{train_time}s'
+                        f"num_epochs completed:{self.max_num_epochs} time elapsed:{train_time}s"
                     )
                     break
                 if train_time > self.max_train_time:
-                    logging.info(f'max_train_time elapsed:{train_time}s')
+                    logging.info(f"max_train_time elapsed:{train_time}s")
                     break
                 if self._train_steps >= self.max_train_steps:
                     logging.info(
-                        f'max_train_steps elapsed:{self._train_steps} '
-                        f'time elapsed:{train_time}s'
+                        f"max_train_steps elapsed:{self._train_steps} "
+                        f"time elapsed:{train_time}s"
                     )
                     break
                 if (
@@ -1066,7 +1066,7 @@ class TrainLoop:
                     >= self.val_every_n_epochs
                     or self._train_steps - self._last_valid_steps
                     >= self.val_every_n_steps
-                    and not opt['train_only']  # easy option to skip all evaluation
+                    and not opt["train_only"]  # easy option to skip all evaluation
                 ):
                     try:
                         # log before we validate
@@ -1091,7 +1091,7 @@ class TrainLoop:
                     >= self.save_every_n_epochs
                     or self._train_steps - self._last_save_steps
                     >= self.save_every_n_steps
-                    and opt.get('model_file')
+                    and opt.get("model_file")
                 ):
                     self.save_time.reset()
                     self.save_checkpoint()
@@ -1106,7 +1106,7 @@ class TrainLoop:
         # # to reload it. This sync_object ensures all workers wait for the primary
         # worker to finish flushing before loading from disk.
         sync_object(None)
-        if opt.get('model_file'):
+        if opt.get("model_file"):
             # clean up all our memory, just to make sure we don't OOM on GPU when
             # reloading the world
             del world
@@ -1128,21 +1128,21 @@ class TrainLoop:
             pass
 
         # # # provide easy option to skip all evaluation
-        if not opt['train_only']:
+        if not opt["train_only"]:
             # perform final validation/testing
-            valid_worlds = load_eval_worlds(self.agent, opt, 'valid')
-            max_exs = opt['validation_max_exs'] if opt.get('short_final_eval') else -1
+            valid_worlds = load_eval_worlds(self.agent, opt, "valid")
+            max_exs = opt["validation_max_exs"] if opt.get("short_final_eval") else -1
             self.final_valid_report = self._run_eval(
-                valid_worlds, opt, 'valid', max_exs, write_log=True
+                valid_worlds, opt, "valid", max_exs, write_log=True
             )
-            test_worlds = load_eval_worlds(self.agent, opt, 'test')
+            test_worlds = load_eval_worlds(self.agent, opt, "test")
             self.final_test_report = self._run_eval(
-                test_worlds, opt, 'test', max_exs, write_log=True
+                test_worlds, opt, "test", max_exs, write_log=True
             )
 
-            if opt['wandb_log'] and is_primary_worker():
-                self.wb_logger.log_final('valid', self.final_valid_report)
-                self.wb_logger.log_final('test', self.final_test_report)
+            if opt["wandb_log"] and is_primary_worker():
+                self.wb_logger.log_final("valid", self.final_valid_report)
+                self.wb_logger.log_final("test", self.final_test_report)
                 self.wb_logger.finish()
 
             if valid_worlds:
@@ -1154,10 +1154,10 @@ class TrainLoop:
 
             print_announcements(opt)
 
-            if opt['final_extra_opt'] != '':
+            if opt["final_extra_opt"] != "":
                 self.final_extra_valid_report = self._run_final_extra_eval(opt)
 
-            if opt['wandb_log'] and is_primary_worker():
+            if opt["wandb_log"] and is_primary_worker():
                 self.wb_logger.finish()
 
             self._save_train_stats()
@@ -1165,7 +1165,7 @@ class TrainLoop:
             return self.final_valid_report, self.final_test_report
 
 
-@register_script('train_model', aliases=['tm', 'train'])
+@register_script("train_model", aliases=["tm", "train"])
 class TrainModel(ParlaiScript):
     @classmethod
     def setup_args(cls):
@@ -1176,5 +1176,5 @@ class TrainModel(ParlaiScript):
         return self.train_loop.train()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     TrainModel.main()

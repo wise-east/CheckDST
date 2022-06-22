@@ -187,13 +187,13 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
                 for line in f:
                     line = line.strip()
                     if (
-                        "\"restaurant_name\":" in line
-                        and not "\"restaurant_name\": [" in line
+                        '"restaurant_name":' in line
+                        and not '"restaurant_name": [' in line
                     ):
-                        word = line.split("\": \"")[1][:-2]
+                        word = line.split('": "')[1][:-2]
                         restaurant_names["train"].add(word.lower())
-                    if "\"hotel_name\":" in line and not "\"hotel_name\": [" in line:
-                        word = line.split("\": \"")[1][:-2]
+                    if '"hotel_name":' in line and not '"hotel_name": [' in line:
+                        word = line.split('": "')[1][:-2]
                         hotel_names["train"].add(word.lower())
 
         for i in range(1, 20):
@@ -201,13 +201,13 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
                 for line in f:
                     line = line.strip()
                     if (
-                        "\"restaurant_name\":" in line
-                        and not "\"restaurant_name\": [" in line
+                        '"restaurant_name":' in line
+                        and not '"restaurant_name": [' in line
                     ):
-                        word = line.split("\": \"")[1][:-2]
+                        word = line.split('": "')[1][:-2]
                         restaurant_names["dev"].add(word.lower())
-                    if "\"hotel_name\":" in line and not "\"hotel_name\": [" in line:
-                        word = line.split("\": \"")[1][:-2]
+                    if '"hotel_name":' in line and not '"hotel_name": [' in line:
+                        word = line.split('": "')[1][:-2]
                         hotel_names["dev"].add(word.lower())
 
         for i in range(1, 34):
@@ -215,13 +215,13 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
                 for line in f:
                     line = line.strip()
                     if (
-                        "\"restaurant_name\":" in line
-                        and not "\"restaurant_name\": [" in line
+                        '"restaurant_name":' in line
+                        and not '"restaurant_name": [' in line
                     ):
-                        word = line.split("\": \"")[1][:-2]
+                        word = line.split('": "')[1][:-2]
                         restaurant_names["test"].add(word.lower())
-                    if "\"hotel_name\":" in line and not "\"hotel_name\": [" in line:
-                        word = line.split("\": \"")[1][:-2]
+                    if '"hotel_name":' in line and not '"hotel_name": [' in line:
+                        word = line.split('": "')[1][:-2]
                         hotel_names["test"].add(word.lower())
 
         for key in hotel_names:
@@ -266,10 +266,10 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
             with open(fname + "train/dialogues_%03d.json" % i, "r") as f:
                 lines = f.readlines()
                 for i in range(len(lines)):
-                    if "\"restaurant-name\": [" in lines[i]:
+                    if '"restaurant-name": [' in lines[i]:
                         word = self._my_strip(lines[i + 1].strip()[1:-1])
                         restaurant_names["train"].add(word.lower())
-                    if "\"hotel-name\": [" in lines[i]:
+                    if '"hotel-name": [' in lines[i]:
                         word = self._my_strip(lines[i + 1].strip()[1:-1])
                         hotel_names["train"].add(word.lower())
 
@@ -277,10 +277,10 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
             with open(fname + "dev/dialogues_%03d.json" % i, "r") as f:
                 lines = f.readlines()
                 for i in range(len(lines)):
-                    if "\"restaurant-name\": [" in lines[i]:
+                    if '"restaurant-name": [' in lines[i]:
                         word = self._my_strip(lines[i + 1].strip()[1:-1])
                         restaurant_names["dev"].add(word.lower())
-                    if "\"hotel-name\": [" in lines[i]:
+                    if '"hotel-name": [' in lines[i]:
                         word = self._my_strip(lines[i + 1].strip()[1:-1])
                         hotel_names["dev"].add(word.lower())
 
@@ -288,10 +288,10 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
             with open(fname + "test/dialogues_%03d.json" % i, "r") as f:
                 lines = f.readlines()
                 for i in range(len(lines)):
-                    if "\"restaurant-name\": [" in lines[i]:
+                    if '"restaurant-name": [' in lines[i]:
                         word = self._my_strip(lines[i + 1].strip()[1:-1])
                         restaurant_names["test"].add(word.lower())
-                    if "\"hotel-name\": [" in lines[i]:
+                    if '"hotel-name": [' in lines[i]:
                         word = self._my_strip(lines[i + 1].strip()[1:-1])
                         hotel_names["test"].add(word.lower())
 
@@ -336,11 +336,11 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
 
     def _get_curr_belief_states(self, turn):
         belief_states = []
-        for frame in turn['frames']:
-            if 'state' in frame:
-                if 'slot_values' in frame['state']:
-                    for domain_slot_type in frame['state']['slot_values']:
-                        for slot_value in frame['state']['slot_values'][
+        for frame in turn["frames"]:
+            if "state" in frame:
+                if "slot_values" in frame["state"]:
+                    for domain_slot_type in frame["state"]["slot_values"]:
+                        for slot_value in frame["state"]["slot_values"][
                             domain_slot_type
                         ]:
                             domain, slot_type = domain_slot_type.split("-")
@@ -679,10 +679,10 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
 
             if self.opt["test_mode"] == True:
 
-                for turn in dialog['turns'][:-1]:
+                for turn in dialog["turns"][:-1]:
 
-                    curr_turn = turn['utterance'].lower()
-                    curr_speaker = "<user>" if turn['speaker'] == 'USER' else "<system>"
+                    curr_turn = turn["utterance"].lower()
+                    curr_speaker = "<user>" if turn["speaker"] == "USER" else "<system>"
                     curr_context = f"{curr_speaker} {curr_turn}".lower()
                     context.append(curr_context)
                     cum_belief_states = self._get_curr_belief_states(turn)
@@ -753,10 +753,10 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
 
                         packed_example.append(
                             {
-                                'dialogue_id': dialog['dialogue_id'],
-                                'turn_num': turn['turn_id'],
-                                'text': tmp_text,
-                                'labels': ", ".join(processed_cum_belief_states),
+                                "dialogue_id": dialog["dialogue_id"],
+                                "turn_num": turn["turn_id"],
+                                "text": tmp_text,
+                                "labels": ", ".join(processed_cum_belief_states),
                             }
                         )
 
@@ -764,12 +764,12 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
 
             else:
 
-                for turn in dialog['turns']:
+                for turn in dialog["turns"]:
 
                     # print(turn['speaker'])
 
-                    curr_turn = turn['utterance'].lower()
-                    curr_speaker = "<user>" if turn['speaker'] == 'USER' else "<system>"
+                    curr_turn = turn["utterance"].lower()
+                    curr_speaker = "<user>" if turn["speaker"] == "USER" else "<system>"
                     curr_context = f"{curr_speaker} {curr_turn}".lower()
                     context.append(curr_context)
                     cum_belief_states = self._get_curr_belief_states(turn)
@@ -788,10 +788,10 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
                                 cum_belief_states_.sort()
 
                                 a = {
-                                    'dialogue_id': dialog['dialogue_id'],
-                                    'turn_num': turn['turn_id'],
-                                    'text': " ".join(context),
-                                    'labels': ", ".join(cum_belief_states_),
+                                    "dialogue_id": dialog["dialogue_id"],
+                                    "turn_num": turn["turn_id"],
+                                    "text": " ".join(context),
+                                    "labels": ", ".join(cum_belief_states_),
                                 }
 
                             else:
@@ -839,10 +839,10 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
                                         )
 
                                 a = {
-                                    'dialogue_id': dialog['dialogue_id'],
-                                    'turn_num': turn['turn_id'],
-                                    'text': tmp_text,
-                                    'labels': ", ".join(processed_cum_belief_states),
+                                    "dialogue_id": dialog["dialogue_id"],
+                                    "turn_num": turn["turn_id"],
+                                    "text": tmp_text,
+                                    "labels": ", ".join(processed_cum_belief_states),
                                 }
 
                             tmp_text = " ".join(context)
@@ -890,14 +890,14 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
                                     ] = processed_cum_belief_states[idx].replace(x, x_)
 
                             b = {
-                                'dialogue_id': dialog['dialogue_id'],
-                                'turn_num': turn['turn_id'],
-                                'text': tmp_text,
-                                'labels': ", ".join(processed_cum_belief_states),
+                                "dialogue_id": dialog["dialogue_id"],
+                                "turn_num": turn["turn_id"],
+                                "text": tmp_text,
+                                "labels": ", ".join(processed_cum_belief_states),
                             }
 
                             # only add examples that have entities swapped.
-                            if b['labels'] != a['labels']:
+                            if b["labels"] != a["labels"]:
                                 examples.append((a, b))
                             # examples.append((a, b))
 
@@ -937,11 +937,11 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
                                 iidx += 1
                                 examples.append(
                                     {
-                                        'dialogue_id': dialog['dialogue_id'],
-                                        'turn_num': turn['turn_id'],
-                                        'text': " ".join(context),
-                                        'labels': ", ".join(cum_belief_states_),
-                                        'iidx': iidx,
+                                        "dialogue_id": dialog["dialogue_id"],
+                                        "turn_num": turn["turn_id"],
+                                        "text": " ".join(context),
+                                        "labels": ", ".join(cum_belief_states_),
+                                        "iidx": iidx,
                                     }
                                 )
 
@@ -996,13 +996,13 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
                                 iidx += 1
                                 examples.append(
                                     {
-                                        'dialogue_id': dialog['dialogue_id'],
-                                        'turn_num': turn['turn_id'],
-                                        'text': tmp_text,
-                                        'labels': ", ".join(
+                                        "dialogue_id": dialog["dialogue_id"],
+                                        "turn_num": turn["turn_id"],
+                                        "text": tmp_text,
+                                        "labels": ", ".join(
                                             processed_cum_belief_states
                                         ),
-                                        'iidx': iidx,
+                                        "iidx": iidx,
                                     }
                                 )
 
@@ -1017,10 +1017,10 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
                                 cum_belief_states_.sort()
 
                                 a = {
-                                    'dialogue_id': dialog['dialogue_id'],
-                                    'turn_num': turn['turn_id'],
-                                    'text': " ".join(context),
-                                    'labels': ", ".join(cum_belief_states_),
+                                    "dialogue_id": dialog["dialogue_id"],
+                                    "turn_num": turn["turn_id"],
+                                    "text": " ".join(context),
+                                    "labels": ", ".join(cum_belief_states_),
                                 }
 
                             else:
@@ -1068,10 +1068,10 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
                                         )
 
                                 a = {
-                                    'dialogue_id': dialog['dialogue_id'],
-                                    'turn_num': turn['turn_id'],
-                                    'text': tmp_text,
-                                    'labels': ", ".join(processed_cum_belief_states),
+                                    "dialogue_id": dialog["dialogue_id"],
+                                    "turn_num": turn["turn_id"],
+                                    "text": tmp_text,
+                                    "labels": ", ".join(processed_cum_belief_states),
                                 }
 
                             tmp_text = " ".join(context)
@@ -1117,10 +1117,10 @@ class MultiWOZv22DSTTeacher(DialogTeacher):
                                     ] = processed_cum_belief_states[idx].replace(x, x_)
 
                             b = {
-                                'dialogue_id': dialog['dialogue_id'],
-                                'turn_num': turn['turn_id'],
-                                'text': tmp_text,
-                                'labels': ", ".join(processed_cum_belief_states),
+                                "dialogue_id": dialog["dialogue_id"],
+                                "turn_num": turn["turn_id"],
+                                "text": tmp_text,
+                                "labels": ", ".join(processed_cum_belief_states),
                             }
 
                             examples.append((a, b))

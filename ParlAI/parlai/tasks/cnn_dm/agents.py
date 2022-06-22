@@ -18,13 +18,13 @@ def _fix_missing_period(line):
     """
     Adds a period to a line that is missing a period.
     """
-    dm_single_close_quote = u'\u2019'
-    dm_double_close_quote = u'\u201d'
+    dm_single_close_quote = "\u2019"
+    dm_double_close_quote = "\u201d"
     END_TOKENS = [
-        '.',
-        '!',
-        '?',
-        '...',
+        ".",
+        "!",
+        "?",
+        "...",
         "'",
         "`",
         '"',
@@ -40,28 +40,28 @@ def _fix_missing_period(line):
 class CNNDMTeacher(DialogTeacher):
     def __init__(self, opt, shared=None):
         # store datatype
-        self.dt = opt.get('datatype', 'train').split(':')[0]
+        self.dt = opt.get("datatype", "train").split(":")[0]
 
         # store identifier for the teacher in the dialog
-        self.id = 'cnn_dm'
-        self.datapath = os.path.join(opt['datapath'], 'CNN_DM')
+        self.id = "cnn_dm"
+        self.datapath = os.path.join(opt["datapath"], "CNN_DM")
 
-        opt['datafile'] = self._path(opt)
+        opt["datafile"] = self._path(opt)
 
         super().__init__(opt, shared)
 
     def _path(self, opt):
         build(opt)
-        dt = opt['datatype'].split(':')[0]
-        return os.path.join(self.datapath, dt + '.txt')
+        dt = opt["datatype"].split(":")[0]
+        return os.path.join(self.datapath, dt + ".txt")
 
     def setup_data(self, input_path):
-        self.question = 'What is the summary?'
+        self.question = "What is the summary?"
         new_episode = True
         num_missing = 0
         num_added = 0
 
-        print('loading: ' + input_path)
+        print("loading: " + input_path)
 
         with PathManager.open(input_path) as stories_file:
             for story in stories_file:
@@ -86,11 +86,11 @@ class CNNDMTeacher(DialogTeacher):
                     else:
                         article.append(line)
                 text = (
-                    unicodedata.normalize('NFKC', ' '.join(article))
-                    + '\n'
+                    unicodedata.normalize("NFKC", " ".join(article))
+                    + "\n"
                     + self.question
                 )
-                label = [unicodedata.normalize('NFKC', ' '.join(highlights))]
+                label = [unicodedata.normalize("NFKC", " ".join(highlights))]
                 yield ((text, label, None, None), new_episode)
 
         print("{} stories added, {} stories missing.".format(num_added, num_missing))

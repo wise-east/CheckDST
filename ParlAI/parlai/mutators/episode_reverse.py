@@ -26,10 +26,10 @@ class EpisodeReverseMutator(EpisodeMutator):
         cls, parser: ParlaiParser, partial_opt: Optional[Opt] = None
     ) -> ParlaiParser:
         parser.add_argument(
-            '--preserve-context',
+            "--preserve-context",
             default=True,
-            type='bool',
-            help='If extra context is provided, keep it prepended to the first turn',
+            type="bool",
+            help="If extra context is provided, keep it prepended to the first turn",
         )
 
     def __init__(self, opt: Opt):
@@ -39,9 +39,9 @@ class EpisodeReverseMutator(EpisodeMutator):
     def episode_mutation(self, episode: List[Message]) -> List[Message]:
         texts = []
         for turn in episode:
-            texts.append(turn.pop('text'))
-        if self.opt.get('preserve_context'):
-            first_turn = texts[0].split('\n')
+            texts.append(turn.pop("text"))
+        if self.opt.get("preserve_context"):
+            first_turn = texts[0].split("\n")
             context, text = first_turn[:-1], first_turn[-1]
             texts[0] = text
         else:
@@ -49,7 +49,7 @@ class EpisodeReverseMutator(EpisodeMutator):
         texts = list(reversed(texts))
         for i, turn in enumerate(episode):
             text = texts.pop(0)
-            if i == 0 and self.opt.get('preserve_context') and context:
-                text = '\n'.join(context + [text])
-            turn['text'] = text
+            if i == 0 and self.opt.get("preserve_context") and context:
+                text = "\n".join(context + [text])
+            turn["text"] = text
         return episode

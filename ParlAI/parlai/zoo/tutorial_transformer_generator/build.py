@@ -16,10 +16,10 @@ import os.path
 
 
 def download(datapath):
-    model_name = 'tutorial_transformer_generator'
+    model_name = "tutorial_transformer_generator"
     mdir = os.path.join(get_model_dir(datapath), model_name)
-    version = 'v1'
+    version = "v1"
     if not built(mdir, version):
-        opt = {'datapath': datapath}
-        fnames = ['tutorial_transformer_generator_v1.tar.gz']
+        opt = {"datapath": datapath}
+        fnames = ["tutorial_transformer_generator_v1.tar.gz"]
         download_models(opt, fnames, model_name, version=version, use_model_type=False)

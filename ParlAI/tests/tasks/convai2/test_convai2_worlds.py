@@ -16,14 +16,14 @@ from parlai.tasks.convai2.worlds import InteractiveWorld
 class TestConvAI2InteractiveWorld(unittest.TestCase):
     @patch("parlai.tasks.convai2.worlds._load_personas")
     def test_share(self, mock_load_personas):
-        test_personas = ['your persona:I live on a pirate\'s shoulder']
+        test_personas = ["your persona:I live on a pirate's shoulder"]
         with testing_utils.tempdir() as data_path:
             mock_load_personas.return_value = test_personas
             kwargs = {
-                'task': 'convai2',
-                'datapath': data_path,
-                'interactive_task': True,
-                'interactive_mode': True,
+                "task": "convai2",
+                "datapath": data_path,
+                "interactive_task": True,
+                "interactive_mode": True,
             }
             parser = setup_args()
             parser.set_defaults(**kwargs)
@@ -38,5 +38,5 @@ class TestConvAI2InteractiveWorld(unittest.TestCase):
             self.assertEqual(new_world.personas_list, test_personas)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

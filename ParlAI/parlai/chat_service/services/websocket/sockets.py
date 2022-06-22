@@ -15,17 +15,17 @@ def get_rand_id():
     return str(uuid.uuid4())
 
 
-T = TypeVar('T', bound='MessageSocketHandler')
+T = TypeVar("T", bound="MessageSocketHandler")
 
 
 class MessageSocketHandler(WebSocketHandler):
     def __init__(self: T, *args, **kwargs):
-        self.subs: Dict[int, T] = kwargs.pop('subs')
+        self.subs: Dict[int, T] = kwargs.pop("subs")
 
         def _default_callback(message, socketID):
             logging.warning(f"No callback defined for new WebSocket messages.")
 
-        self.message_callback = kwargs.pop('message_callback', _default_callback)
+        self.message_callback = kwargs.pop("message_callback", _default_callback)
         self.sid = get_rand_id()
         super().__init__(*args, **kwargs)
 
@@ -57,13 +57,13 @@ class MessageSocketHandler(WebSocketHandler):
                 See `WebsocketAgent.put_data` for more information about the
                 attachment dict structure.
         """
-        logging.info('websocket message from client: {}'.format(message_text))
+        logging.info("websocket message from client: {}".format(message_text))
         message = json.loads(message_text)
         message = {
-            'text': message.get('text', ''),
-            'payload': message.get('payload'),
-            'sender': {'id': self.sid},
-            'recipient': {'id': 0},
+            "text": message.get("text", ""),
+            "payload": message.get("payload"),
+            "sender": {"id": self.sid},
+            "recipient": {"id": 0},
         }
         self.message_callback(message)
 

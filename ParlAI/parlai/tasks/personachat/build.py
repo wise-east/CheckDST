@@ -11,19 +11,19 @@ from parlai.core.build_data import DownloadableFile
 
 RESOURCES = [
     DownloadableFile(
-        'http://parl.ai/downloads/personachat/personachat.tgz',
-        'personachat.tgz',
-        '507cf8641d333240654798870ea584d854ab5261071c5e3521c20d8fa41d5622',
+        "http://parl.ai/downloads/personachat/personachat.tgz",
+        "personachat.tgz",
+        "507cf8641d333240654798870ea584d854ab5261071c5e3521c20d8fa41d5622",
     )
 ]
 
 
 def build(opt):
-    version = 'v1.0'
-    dpath = os.path.join(opt['datapath'], 'Persona-Chat')
+    version = "v1.0"
+    dpath = os.path.join(opt["datapath"], "Persona-Chat")
 
     if not build_data.built(dpath, version):
-        print('[building data: ' + dpath + ']')
+        print("[building data: " + dpath + "]")
         if build_data.built(dpath):
             # An older version exists, so remove these outdated files.
             build_data.remove_dir(dpath)
