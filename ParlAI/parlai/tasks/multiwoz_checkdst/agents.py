@@ -61,6 +61,8 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
         self.seed = opt.get('rand_seed', 0)
         self.rng = np.random.RandomState(self.seed)
         self.data_aug = opt.get('augmentation_method', "orig")
+        self.keep_original = opt.get("keep_original", False)
+        self.version = opt.get('version', '2.3')
         self.val_reduced = opt.get("val_reduced", False)
         self.test_reduced = opt.get("test_reduced", False)
         self.flag_compute = 1
@@ -76,7 +78,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
         np.random.RandomState(self.seed)
 
         opt['datafile'], data_dir = self._path(opt)
-        self.data_dir = data_dir 
+        self.data_dir = data_dir
         self.datafile = opt['datafile']
 
         if self.data_aug.lower() == "NED":
@@ -107,9 +109,11 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
             """
             fold one of ["train", "valid", "test"]
             """
-            if not os.path.isfile(filename): 
-                logger.error(f"File not found: {filename}. Make sure you placed the SGD dataset in {self.data_dir}")
-                return 
+            if not os.path.isfile(filename):
+                logging.error(
+                    f"File not found: {filename}. Make sure you placed the SGD dataset in {self.data_dir}"
+                )
+                return
 
             with open(filename, "r") as f:
                 for line in f:
@@ -165,9 +169,11 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
             """
             fold one of ["train", "valid", "test"]
             """
-            if not os.path.isfile(filename): 
-                logger.error(f"File not found: {filename}. Make sure you placed the MultiWOZ2.2 dataset in {self.data_dir}")
-                return 
+            if not os.path.isfile(filename):
+                logging.error(
+                    f"File not found: {filename}. Make sure you placed the MultiWOZ2.2 dataset in {self.data_dir}"
+                )
+                return
 
             with open(filename, "r") as f:
                 lines = f.readlines()
@@ -218,11 +224,31 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
     def add_cmdline_args(cls, argparser, partial_opt):
         agent = argparser.add_argument_group('MultiWozDST CheckDST Teacher Args')
         agent.add_argument(
+            '--version',
+            type=str,
+            default='2.3',
+            help="specify to use multiwoz 2.1, 2.2, or 2.3. Defaults to 2.3",
+        )
+        agent.add_argument(
             '-aug',
             '--augmentation_method',
             type=str,
             default="orig",
-            help="one of ['orig', 'PI', 'SDI', 'NED'] where PI: paraphrase invariance, SDI: speech disfluencies invariance, NED: named entity directional invariance",
+            help="one of ['orig', 'PI', 'SDI', 'NED', 'all'] where PI: paraphrase invariance, SDI: speech disfluencies invariance, NED: named entity directional invariance",
+        )
+        agent.add_argument(
+            '--keep_original',
+            type='bool',
+            default=False,
+            help="Keep both the original + augmented samples in task data. This is for examination purposes via display_data",
+        )
+
+        agent.add_argument(
+            '-up',
+            '--use_prompts',
+            type=bool,
+            default=True,
+            help="add natural text instructions for the DST task.",
         )
         agent.add_argument(
             '-swap',
@@ -236,12 +262,6 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
             type='bool',
             default=False,
             help="True if one would like to test agents with small amount of data (default: False).",
-        )
-        agent.add_argument(
-            '--reduce_train_factor',
-            type=int,
-            default=1,
-            help="Factor to use in shrinking the training dataset size",
         )
         agent.add_argument(
             '-fs',
@@ -268,14 +288,6 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
             '--test_reduced', type='bool', default=False, help="use smaller test set."
         )
 
-        agent.add_argument(
-            '-up',
-            '--use_prompts',
-            type=bool,
-            default=True,
-            help="add natural text instructions for the DST task.",
-        )
-
         return argparser
 
     def _load_json(self, file_path):
@@ -286,16 +298,20 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
     def _path(self, opt):
         # set up path to data (specific to each dataset)
         datapath = opt['datapath']
-        # load from environment if available 
+        # load from environment if available
         env_datapath = os.environ.get("DATAPATH", "")
-        datapath = env_datapath if env_datapath else datapath 
+        datapath = env_datapath if env_datapath else datapath
         data_dir = os.path.join(datapath, 'checkdst', opt['augmentation_method'])
 
         # for NER invariance, load from original data and augment it dynamically
         if opt['augmentation_method'].lower() == "ned":
             data_dir = os.path.join(datapath, 'checkdst', opt['augmentation_method'])
+        if opt['augmentation_method'].lower() == "orig":
+            data_dir = os.path.join(datapath, 'checkdst', 'NED')
 
-        data_path = os.path.join(data_dir, 'data_reformat_official_v2.3_slots.json')
+        data_path = os.path.join(
+            data_dir, f'data_reformat_official_v{self.version}_slots.json'
+        )
 
         return data_path, data_dir
 
@@ -306,17 +322,17 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
             messages (str): each item of the reformatted data sample
 
         Returns:
-            List[Dict[str, str]]: data samples with replaced named entities 
+            List[Dict[str, str]]: data samples with replaced named entities
         """
 
         # swap out entities as need be
         augmented_messages = []
         # keep only the examples for which the entities are swapped
-        for episode_idx, m in enumerate(messages):
-            m_copy = m.copy()
-            orig_context = m_copy['context']
+        for episode_idx, msg in enumerate(messages):
+            new_msg = msg.copy()
+            orig_context = new_msg['context']
             new_context = orig_context
-            orig_belief_state = m_copy["slots_inf"]
+            orig_belief_state = new_msg["slots_inf"]
 
             replaced_names = []
             belief_states = orig_belief_state.split(",")
@@ -369,13 +385,14 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
                         orig, replacement
                     )
 
-            m_copy["slots_inf"] = ", ".join(new_belief_states).strip()
-            m_copy['context'] = new_context
+            new_msg["slots_inf"] = ", ".join(new_belief_states).strip()
+            new_msg['context'] = new_context
 
             # only add examples that have entities swapped.
             if new_context != orig_context:
-                augmented_messages.append(m)
-                augmented_messages.append(m_copy)
+                if self.keep_original:
+                    augmented_messages.append(msg)
+                augmented_messages.append(new_msg)
 
         # import pdb; pdb.set_trace()
         changed_dialids = sorted(
@@ -389,8 +406,11 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
             )
         )
 
-        # needed for calculating CheckDST for trippy evaluation 
-        save_path = os.path.join(self.data_dir, f"parlai_changed_dialids_{self.datatype}_fewshot_{self.few_shot}.txt")
+        # needed for calculating CheckDST for trippy evaluation
+        save_path = os.path.join(
+            self.data_dir,
+            f"parlai_changed_dialids_{self.datatype}_fewshot_{self.few_shot}.txt",
+        )
         if not os.path.isfile(save_path):
             with open(save_path, "w") as f:
                 for did in changed_dialids:
@@ -460,22 +480,25 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
                     "turn_num": msg["turn_num"],
                 }
 
-                # make sure that the context is different.
+                # make sure that the augmented version has a context that is different.
                 if msg["orig_context"] != msg["context"]:
-                    unfolded_messages.append(item)
+                    if self.keep_original:
+                        unfolded_messages.append(item)
                     item_ = item.copy()
                     item_['context'] = msg["context"]
+                    item_['aug_type'] = self.data_aug
                     unfolded_messages.append(item_)
 
             self.messages = unfolded_messages
 
             # verify that the data is in correct form: consecutive examples other than for NED should have the same labels
-            for idx in range(0, len(self.messages), 2):
-                orig_label = self.messages[idx]["slots_inf"]
-                augmented_label = self.messages[idx + 1]["slots_inf"]
-                assert orig_label == augmented_label, print(
-                    f"idx: {idx}, {idx+1}\n\t Original example: {self.messages[idx]}\n\tAugmented example: {self.messages[idx+1]}"
-                )
+            if self.keep_original:
+                for idx in range(0, len(self.messages), 2):
+                    orig_label = self.messages[idx]["slots_inf"]
+                    augmented_label = self.messages[idx + 1]["slots_inf"]
+                    assert orig_label == augmented_label, print(
+                        f"idx: {idx}, {idx+1}\n\t Original example: {self.messages[idx]}\n\tAugmented example: {self.messages[idx+1]}"
+                    )
 
         elif self.data_aug.lower() == "ned":
             # dynamically augment examples
@@ -564,7 +587,8 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
     ):
 
         # to switch between computing paraphrase invariance and regular scores
-        self.flag_compute = 1 - self.flag_compute
+        if self.keep_original:
+            self.flag_compute = 1 - self.flag_compute
 
         resp = model_response.get('text', "")
         # if not resp:
@@ -603,20 +627,20 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
                 )
 
         def add_hallucination(type: str):
-            for gt_slot in slots_truth_named_entity:
-                self.metrics.add(
-                    f"all_ne/slot_r_{type}", AverageMetric(gt_slot in slots_pred)
-                )
-                curr_domain = gt_slot.split("--")[0]
-                self.metrics.add(
-                    f"{curr_domain}_ne/slot_r_{type}",
-                    AverageMetric(gt_slot in slots_pred),
-                )
+            # for gt_slot in slots_truth_named_entity:
+            #     self.metrics.add(
+            #         f"all_ne/slot_r_{type}", AverageMetric(gt_slot in slots_pred)
+            #     )
+            #     curr_domain = gt_slot.split("--")[0]
+            #     self.metrics.add(
+            #         f"{curr_domain}_ne/slot_r_{type}",
+            #         AverageMetric(gt_slot in slots_pred),
+            #     )
             for predicted_slot in slots_pred_named_entity:
-                self.metrics.add(
-                    f"all_ne/slot_p_{type}",
-                    AverageMetric(predicted_slot in slots_truth),
-                )
+                # self.metrics.add(
+                #     f"all_ne/slot_p_{type}",
+                #     AverageMetric(predicted_slot in slots_truth),
+                # )
                 curr_domain = predicted_slot.split("--")[0]
                 ne = predicted_slot.split("--")[-1]
                 for tmp_slot in slots_truth:
@@ -627,15 +651,15 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
                     slot_name = tmp_slot.split("--")[0] + " " + tmp_slot.split("--")[1]
                     ne = ne.replace(slot_name, "")
 
-                # print(",,,,,", ne, ",,,,,")
-                self.metrics.add(
-                    f"{curr_domain}_ne/slot_p_{type}",
-                    AverageMetric(predicted_slot in slots_truth),
-                )
-                self.metrics.add(
-                    f"{curr_domain}_ne/hallucination_{type}",
-                    AverageMetric(not (ne.strip() in teacher_action.get("text"))),
-                )
+                # # print(",,,,,", ne, ",,,,,")
+                # self.metrics.add(
+                #     f"{curr_domain}_ne/slot_p_{type}",
+                #     AverageMetric(predicted_slot in slots_truth),
+                # )
+                # self.metrics.add(
+                #     f"{curr_domain}_ne/hallucination_{type}",
+                #     AverageMetric(not (ne.strip() in teacher_action.get("text"))),
+                # )
 
                 # get combined hallucination
                 self.metrics.add(
@@ -645,75 +669,83 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
 
         def add_jga(type: str):
             self.metrics.add(f'jga_{type}', AverageMetric(jga_curr))
-            self.metrics.add(
-                f"named_entities/jga_{type}",
-                AverageMetric(
-                    set(slots_truth_named_entity) == set(slots_pred_named_entity)
-                ),
-            )
-            for domain in slots_truth_per_domain:
-                if domain in slots_pred_per_domain:
-                    self.metrics.add(
-                        f"{domain}/jga_{type}",
-                        AverageMetric(
-                            slots_truth_per_domain[domain]
-                            == slots_pred_per_domain[domain]
-                        ),
-                    )
+            # self.metrics.add(
+            #     f"named_entities/jga_{type}",
+            #     AverageMetric(
+            #         set(slots_truth_named_entity) == set(slots_pred_named_entity)
+            #     ),
+            # )
+            # for domain in slots_truth_per_domain:
+            #     if domain in slots_pred_per_domain:
+            #         self.metrics.add(
+            #             f"{domain}/jga_{type}",
+            #             AverageMetric(
+            #                 slots_truth_per_domain[domain]
+            #                 == slots_pred_per_domain[domain]
+            #             ),
+            #         )
 
         jga_curr = set(slots_truth) == set(slots_pred)
         # print out when predictions are wrong
         if jga_curr == False:
             tag = "perturbed" if self.flag_compute else "orig"
-            # logging.info(f"{tag}\n\tteacher_action: {teacher?action}\n\tslots_truth: {slots_truth}\n\tslots_pred: {slots_pred}")
+            # logging.info(f"{tag}\n\tteacher_action: {teacher_action}")
+            # logging.info(f"\tslots_truth: {slots_truth}\n\tslots_pred: {slots_pred}")
 
         # import pdb
 
         # pdb.set_trace()
 
         # metrics on original test set
-        if self.flag_compute == 0:
+        if self.keep_original:
+            if self.flag_compute == 0:
+                add_jga("original")
+                add_slot_p_r("original")
+                add_hallucination("original")
+                self.metrics.add("ct_original", SumMetric(1))
+            # no need to calculate any other metrics for regular test set
+            if self.data_aug == "orig":
+                return
+
+            # metrics on the perturbed version of the test set
+            if self.flag_compute:
+                self.metrics.add("ct_augment", SumMetric(1))
+                self.metrics.add(
+                    f'consistency', AverageMetric(slots_pred == self.slots_pred_prev)
+                )
+                # the slots should be the same
+                # assert slots_truth == self.slots_truth_prev, (slots_truth, self.slots_truth_prev)
+                add_jga(type="perturbed")
+                add_slot_p_r(type="perturbed")
+                add_hallucination("perturbed")
+
+                # conditional metrics (conditioned on the original prediction being correct)
+                if self.jga_prev:
+                    add_jga(type="conditional")
+                    add_slot_p_r(type="conditional")
+                    add_hallucination("conditional")
+
+                # conditional metrics (conditioned on any of the perturbed or original being correct)
+                if jga_curr or self.jga_prev:
+                    add_jga(type="new_conditional")
+
+            # combined metrics (original + perturbed)
+            add_slot_p_r(type="all")
+            add_jga(type="all")
+            add_hallucination("all")
+
+            self.jga_prev = jga_curr
+            self.slots_truth_prev = slots_truth
+            self.slots_pred_prev = slots_pred
+            self.teacher_action_prev = teacher_action
+        else:
+            # # now calculated externally in order to prevent redundant predictions on the original test set
             add_jga("original")
-            add_slot_p_r("original")
+            # add_slot_p_r("original")
             add_hallucination("original")
             self.metrics.add("ct_original", SumMetric(1))
 
-        # no need to calculate any other metrics for regular test set
-        if self.data_aug == "orig":
-            return
-
-        # metrics on the perturbed version of the test set
-        if self.flag_compute:
-            self.metrics.add("ct_augment", SumMetric(1))
-            self.metrics.add(
-                f'consistency', AverageMetric(slots_pred == self.slots_pred_prev)
-            )
-            # the slots should be the same
-            # assert slots_truth == self.slots_truth_prev, (slots_truth, self.slots_truth_prev)
-            add_jga(type="perturbed")
-            add_slot_p_r(type="perturbed")
-            add_hallucination("perturbed")
-
-            # conditional metrics (conditioned on the original prediction being correct)
-            if self.jga_prev:
-                add_jga(type="conditional")
-                add_slot_p_r(type="conditional")
-                add_hallucination("conditional")
-
-            # conditional metrics (conditioned on any of the perturbed or original being correct)
-            if jga_curr or self.jga_prev:
-                add_jga(type="new_conditional")
-
-        # combined metrics (original + perturbed)
-        add_slot_p_r(type="all")
-        add_jga(type="all")
-        add_hallucination("all")
-
-        self.jga_prev = jga_curr
-        self.slots_truth_prev = slots_truth
-        self.slots_pred_prev = slots_pred
-        self.teacher_action_prev = teacher_action
-
+        # for reference to verify for external calculation
         # keep track of coreference JGA
         if teacher_action.get('need_coref', False):
             self.metrics.add(

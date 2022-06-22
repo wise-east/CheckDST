@@ -23,5 +23,5 @@ for key in ["train", "valid", "test"]:
         with open(target_file, "w") as f: 
             json.dump(target_data, f, indent=2, sort_keys=True)
 
-    add_coref_labels(v22_path)
+    # add_coref_labels(v22_path)
     add_coref_labels(v21_path)

@@ -107,9 +107,7 @@ for fp in fps:
         else:
             model_type = "hugging_face/gpt2"
 
-        cmd += (
-            f"evaluate_on_checkdst.sh -m {fp} -i {inv} -f {fewshot} -d {model_type}"
-        )
+        cmd += f"evaluate_on_checkdst.sh -m {fp} -i {inv} -f {fewshot} -d {model_type}"
 
         if not args.no_execute:
             print(f"Executing command: \n\t{cmd}")

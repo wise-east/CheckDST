@@ -6,7 +6,8 @@ from loguru import logger
 
 
 
-for version in ["2.1", "2.2", "2.3"]: 
+# for version in ["2.1", "2.2", "2.3"]: 
+for version in ["2.1", "2.3"]: 
     for inv in  ["SD", "TP", "orig"]:
         keys = ["train", "valid", "test"]
         # keys = ["test"]

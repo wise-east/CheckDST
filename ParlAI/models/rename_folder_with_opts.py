@@ -38,7 +38,7 @@ for subdir in subdirs:
     newpath += f"_sd{seed}"
 
     # print(str(subdir))
-    date_start_idx = str(subdir).rfind("2021")
+    date_start_idx = str(subdir).rfind("202")
     # import pdb; pdb.set_trace()
     date_end_idx = str(subdir)[date_start_idx:].rfind(":") + 2
     date = str(subdir)[date_start_idx : date_start_idx + date_end_idx + 1]

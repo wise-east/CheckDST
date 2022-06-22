@@ -5,11 +5,12 @@
 #SBATCH --cpus-per-task=10
 ## %j is the job id, %u is the user id
 
+# set -e 
 
 source /data/home/justincho/miniconda/etc/profile.d/conda.sh
-cd /data/home/justincho/ParlAI
-conda activate parlai_internal
-
+cd /data/home/justincho/CheckDST
+source /data/home/justincho/CheckDST/set_envs_mine.sh
+conda activate parlai_checkdst
 
 ############################################################
 # Help                                                     #
@@ -44,7 +45,6 @@ FEWSHOT=False
 VERSION=2.3
 USEPROMPTS=True
 LR=1e-4
-TRAIN_CMD="train_model"
 FP16=True
 JUST_TEST=False
 
@@ -69,8 +69,6 @@ while getopts ":hs:l:i:m:p:v:f:b:g:u:t:" option; do
         VERSION=$OPTARG;;
       b)
         BATCH_SIZE=$OPTARG;;
-      g)
-        LOGFILE=$OPTARG;;
       u)
         UPDATE_FREQ=$OPTARG;;
       t) 
@@ -88,26 +86,27 @@ echo "Version: ${VERSION}"
 echo "Fewshot: ${FEWSHOT}"
 echo "Use prompts: ${USEPROMPTS}"
 
-if [ $FEWSHOT = "True" ]; then 
+if [[ $FEWSHOT == "True" ]]; then 
   N_EPOCH=20 
   SAVE_EPOCH=2
 else 
   N_EPOCH=10
-  SAVE_EPOCH=1
+  SAVE_EPOCH=0.25
 fi 
 
+mkdir -p $MFDIR
 CMD="\
 parlai train_model \
     -m bart \
-    -t multiwoz_dst \
-    --val_reduced_size -1 \
+    -t multiwoz_checkdst \
+    --val_reduced False \
     --version $VERSION \
     --few_shot $FEWSHOT \
     --use_prompts $USEPROMPTS \
     --rand-seed $SD \
     --model-file $MF \
     -eps $N_EPOCH -bs $BATCH_SIZE --update-freq $UPDATE_FREQ  -opt adam -lr $LR \
-    --fp16 $FP16 \
+    --fp16 True \
     --max_lr_steps 400000 \
     --max_train_time 144000 \
     --save-every-n-epochs $SAVE_EPOCH \
@@ -123,12 +122,9 @@ parlai train_model \
     --report-filename ${MF}.report_fs_${FEWSHOT}.json \
     --world-logs ${MF}.world_logs_fs_${FEWSHOT}.jsonl \
     --just_test $JUST_TEST \
-    $INIT_CMD
+    $INIT_CMD |& tee ${MFDIR}log.txt
 "
 
 
 echo $CMD 
 eval $CMD
-
-echo "Copy slurm log file into the model directory"
-cp $LOGFILE $MFDIR

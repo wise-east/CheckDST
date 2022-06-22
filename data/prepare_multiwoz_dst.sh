@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-set -e 
+# set -e 
 
 # Check if the correct environment variables are set: 
 if [[ $LAUG_DOWNLOAD_LINK == "" ]]; then 
@@ -34,16 +34,16 @@ fi
 parlai dd -t multiwoz_dst --version 2.3 
 
 # if MULTIWOZ2.2 directory doesn't exist, download it and format the data using code in multiwoz_dst's agent.py
-if [[ ! -e multiwoz_dst/MULTIWOZ2.2 ]]; then
-    mkdir -p multiwoz_dst/MULTIWOZ2.2/
-    echo "MultiWOZ2.2 data not found. Downloading MultiWOZ2.2 from github repo"
-    git clone git@github.com:budzianowski/multiwoz.git
-    mv multiwoz/data/MultiWOZ_2.2/* multiwoz_dst/MULTIWOZ2.2/
-    rm -rf multiwoz
-    echo "Formatting MultiWOZ2.2"
-    python multiwoz_dst/MULTIWOZ2.2/convert_to_multiwoz_format.py --multiwoz21_data_dir multiwoz_dst/MULTIWOZ2.1/ --output_file multiwoz_dst/MULTIWOZ2.2/data.json
-    parlai dd -t multiwoz_dst --version 2.2  
-fi
+# if [[ ! -e multiwoz_dst/MULTIWOZ2.2 ]]; then
+#     mkdir -p multiwoz_dst/MULTIWOZ2.2/
+#     echo "MultiWOZ2.2 data not found. Downloading MultiWOZ2.2 from github repo"
+#     git clone git@github.com:budzianowski/multiwoz.git
+#     mv multiwoz/data/MultiWOZ_2.2/* multiwoz_dst/MULTIWOZ2.2/
+#     rm -rf multiwoz
+#     echo "Formatting MultiWOZ2.2"
+#     python multiwoz_dst/MULTIWOZ2.2/convert_to_multiwoz_format.py --multiwoz21_data_dir multiwoz_dst/MULTIWOZ2.1/ --output_file multiwoz_dst/MULTIWOZ2.2/data.json
+#     parlai dd -t multiwoz_dst --version 2.2  
+# fi
 
 # Download LAUG data
 if [[ ! -e laug_dst ]]; then
@@ -76,16 +76,16 @@ echo "Check whether replacement was correctly done"
 python check_data_across_testsets.py #this should say "All clear for $augmentation"
 
 ## prepare few shot data for the original dataset 
-for V in 2.1 2.2 2.3; do 
-    echo "Prepare few shot data for version ${V}"
-    python form_multiwoz_dst_few_shot_data.py -p multiwoz_dst/MULTIWOZ${V}/
-done
+# for V in 2.1 2.2 2.3; do 
+#     echo "Prepare few shot data for version ${V}"
+#     python form_multiwoz_dst_few_shot_data.py -p multiwoz_dst/MULTIWOZ${V}/
+# done
 
-## prepare few shot data for the augmented dataset (only done for MultiWOZ2.3)
-for INV in SD TP orig; do
-    echo "Prepare few shot data for ${INV}"
-    python form_multiwoz_dst_few_shot_data.py -p laug_dst/${INV}
-done
+# ## prepare few shot data for the augmented dataset (only done for MultiWOZ2.3)
+# for INV in SD TP orig; do
+#     echo "Prepare few shot data for ${INV}"
+#     python form_multiwoz_dst_few_shot_data.py -p laug_dst/${INV}
+# done
 
 ## match naming convention
 mv laug_dst checkdst

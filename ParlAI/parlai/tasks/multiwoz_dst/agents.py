@@ -32,7 +32,7 @@ class MultiWozDSTTeacher(FixedDialogTeacher):
 
         # # # reading args
         self.decode_all = opt.get('decode_all', False)
-        self.just_test = opt.get('just_test', False)
+        self.small_test = opt.get('small_test', False)
         self.seed = opt.get('rand_seed', 0)
         self.data_aug = opt.get('data_aug', False)
         self.create_aug_data = opt.get('create_aug_data', False)
@@ -40,7 +40,6 @@ class MultiWozDSTTeacher(FixedDialogTeacher):
         self.create_scr_data = opt.get('create_scr_data', False)
         self.version = opt.get('version', '2.3')
         self.val_reduced_size = opt.get("val_reduced_size", True)
-        self.test_reduced = opt.get("test_reduced", False)
         self.few_shot = opt.get("few_shot", False)
         self.use_prompts = opt.get("use_prompts", True)
         # # # set random seeds
@@ -64,16 +63,10 @@ class MultiWozDSTTeacher(FixedDialogTeacher):
             training a correction model (default: False).",
         )
         agent.add_argument(
-            '--just_test',
+            '--small_test',
             type='bool',
             default=False,
             help="True if one would like to test agents with small amount of data (default: False).",
-        )
-        agent.add_argument(
-            '--reduce_train_factor',
-            type=int,
-            default=1,
-            help="Factor to use in shrinking the training dataset size",
         )
         agent.add_argument(
             '-fs',
@@ -120,10 +113,6 @@ class MultiWozDSTTeacher(FixedDialogTeacher):
             help="Use subset of validation set. Set to -1 to use the full set.",
         )
         agent.add_argument(
-            '--test_reduced', type='bool', default=False, help="use smaller test set."
-        )
-
-        agent.add_argument(
             '--version',
             type=str,
             default='2.3',
@@ -157,9 +146,9 @@ class MultiWozDSTTeacher(FixedDialogTeacher):
             self.version = "2.3"
 
         datapath = opt['datapath']
-        # if explicitly set by environment variable, override 
+        # if explicitly set by environment variable, override
         env_datapath = os.environ.get("DATAPATH", "")
-        if env_datapath: 
+        if env_datapath:
             datapath = env_datapath
 
         data_dir = os.path.join(
@@ -212,8 +201,6 @@ class MultiWozDSTTeacher(FixedDialogTeacher):
                 test_path = test_path.replace(".json", "_fewshot.json")
             test_data = self._load_json(test_path)
             self.messages = list(test_data.values())
-            if self.test_reduced:
-                self.messages = self.messages[:100]
 
         elif self.datatype.startswith('valid'):
             valid_path = data_path.replace(".json", "_valid.json")
@@ -239,7 +226,7 @@ class MultiWozDSTTeacher(FixedDialogTeacher):
 
             random.shuffle(self.messages)
 
-        if self.just_test:
+        if self.small_test:
             self.messages = self.messages[:10]
 
         # add prompts

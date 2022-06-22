@@ -29,20 +29,5 @@ def build(opt):
     version = '1.0'
 
     # # check if data had been previously built
-    # if not build_data.built(dpath, version_string=version):
-    #     print('[building data: ' + dpath + ']')
-
-    #     # make a clean directory if needed
-    #     if build_data.built(dpath):
-    #         # an older version exists, so remove these outdated files.
-    #         build_data.remove_dir(dpath)
-    #     build_data.make_dir(dpath)
-
-    #     # download the data.
-    #     for downloadable_file in RESOURCES:
-    #         downloadable_file.download_file(dpath)
-
-    #     # # # TODO: reformat multiwoz
-
-    #     # mark the data as built
+    # TODO build the data with CheckDST/data/prepare_multiwoz_dst.sh
     build_data.mark_done(dpath, version_string=version)

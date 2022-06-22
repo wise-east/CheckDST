@@ -151,7 +151,7 @@ def organize_results(fps):
         axis=1,
     )
 
-    df.to_csv("/data/home/justincho/ParlAI/bash_scripts/all_summary.csv")
+    df.to_csv("/data/home/justincho/CheckDST/ParlAI/bash_scripts/all_summary.csv")
 
     print()
     print("\n".join(problematic_dirs))

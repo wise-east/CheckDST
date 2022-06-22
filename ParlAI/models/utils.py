@@ -1,13 +1,34 @@
 import json
+
+from zmq import ctx_opt_names
 from loguru import logger
 from collections import defaultdict
-from pathlib import Path
 import numpy as np
 import pandas as pd
 import glob
 import re
 import seaborn as sns
 import matplotlib.pyplot as plt
+
+import numpy as np
+from matplotlib.patches import Circle, RegularPolygon
+from matplotlib.path import Path as Path_mpl
+from matplotlib.projections.polar import PolarAxes
+from matplotlib.projections import register_projection
+from matplotlib.spines import Spine
+from matplotlib.transforms import Affine2D
+from pathlib import Path
+
+
+TARGET_METRICS = [
+    "NoHF Orig",
+    "TP cJGA",
+    # "NoHF Swap",
+    "SD cJGA",
+    "test_jga",
+    "coref_jga",
+    "NEI cJGA",
+]
 
 
 def get_test_results_in_train_stats(trainstats_fn):
@@ -134,11 +155,19 @@ def get_parlai_inv_results(main_dir, print_=False, epoch_precision=1):
         # for rf in report_files:
         # print(rf)
         for aug in ["SD", "TP", "NEI"]:
-            inv_report_files = [rf for rf in report_files if aug in rf]
+            inv_report_files = sorted(
+                [rf for rf in report_files if aug in rf],
+                key=lambda x: int(
+                    re.search("step([0-9]*)", x)[1] if "step" in x else 0
+                ),
+            )
             if print_:
                 print(f"{aug} inv report files: {len(inv_report_files)}")
             # break
+            ct = 1
             for irf in inv_report_files:
+                print(irf)
+
                 seed = re.search("sd([0-9]*)", irf)[1]
                 step = re.search("step([0-9]*)", irf)
                 if step:
@@ -154,11 +183,18 @@ def get_parlai_inv_results(main_dir, print_=False, epoch_precision=1):
                 # TODO what todo when not available?
                 ts_fn = Path(irf).with_suffix("").with_suffix(".trainstats")
                 # print(ts_fn)
-                with ts_fn.open("r") as f:
-                    trainstat = json.load(f)
-                epochs = (
-                    round(trainstat["total_epochs"] / epoch_precision) * epoch_precision
-                )
+
+                if ts_fn.is_file():
+                    with ts_fn.open("r") as f:
+                        trainstat = json.load(f)
+                    epochs = (
+                        round(trainstat["total_epochs"] / epoch_precision)
+                        * epoch_precision
+                    )
+                else:
+                    epochs = ct
+                    ct += 1
+                    print(epochs)
 
                 # load test report & valid report results
                 test_fn = Path(irf).with_suffix("").with_suffix(".test_report")
@@ -241,15 +277,7 @@ def melt_and_format_target_df(df, custom_target_metrics=[], get_sum=False):
         #     "NoHF Orig",
         #     "NoHF Swap",
         # ]
-        target_metrics = [
-            "NoHF Orig",
-            "TP cJGA",
-            "NoHF Swap",
-            "SD cJGA",
-            "test_jga",
-            "coref_jga",
-            "NEI cJGA",
-        ]
+        target_metrics = TARGET_METRICS
     else:
         target_metrics = custom_target_metrics
 
@@ -368,3 +396,173 @@ def plot_cjga_trends(df, no_band=True, title="", log_scale=False):
         line.set_linewidth(8.0)
 
     rel.fig.suptitle(title)
+
+
+def example_data():
+    # The following data is from the Denver Aerosol Sources and Health study.
+    # See doi:10.1016/j.atmosenv.2008.12.017
+    #
+    # The data are pollution source profile estimates for five modeled
+    # pollution sources (e.g., cars, wood-burning, etc) that emit 7-9 chemical
+    # species. The radar charts are experimented with here to see if we can
+    # nicely visualize how the modeled source profiles change across four
+    # scenarios:
+    #  1) No gas-phase species present, just seven particulate counts on
+    #     Sulfate
+    #     Nitrate
+    #     Elemental Carbon (EC)
+    #     Organic Carbon fraction 1 (OC)
+    #     Organic Carbon fraction 2 (OC2)
+    #     Organic Carbon fraction 3 (OC3)
+    #     Pyrolized Organic Carbon (OP)
+    #  2)Inclusion of gas-phase specie carbon monoxide (CO)
+    #  3)Inclusion of gas-phase specie ozone (O3).
+    #  4)Inclusion of both gas-phase species is present...
+    data = [
+        TARGET_METRICS,
+        (
+            'Basecase',
+            [
+                [0.88, 0.01, 0.03, 0.03, 0.00, 0.06],
+                [0.01, 0.01, 0.02, 0.71, 0.74, 0.70],
+            ],
+        ),
+    ]
+    return data
+
+
+def radar_factory(num_vars, frame='circle'):
+    """
+    Create a radar chart with `num_vars` axes.
+
+    This function creates a RadarAxes projection and registers it.
+
+    Parameters
+    ----------
+    num_vars : int
+        Number of variables for radar chart.
+    frame : {'circle', 'polygon'}
+        Shape of frame surrounding axes.
+
+    """
+    # calculate evenly-spaced axis angles
+    theta = np.linspace(0, 2 * np.pi, num_vars, endpoint=False)
+
+    class RadarTransform(PolarAxes.PolarTransform):
+        def transform_path_non_affine(self, path):
+            # Paths with non-unit interpolation steps correspond to gridlines,
+            # in which case we force interpolation (to defeat PolarTransform's
+            # autoconversion to circular arcs).
+            if path._interpolation_steps > 1:
+                path = path.interpolated(num_vars)
+            return Path_mpl(self.transform(path.vertices), path.codes)
+
+    class RadarAxes(PolarAxes):
+
+        name = 'radar'
+        # use 1 line segment to connect specified points
+        RESOLUTION = 1
+        PolarTransform = RadarTransform
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            # rotate plot such that the first axis is at the top
+            self.set_theta_zero_location('N')
+
+        def fill(self, *args, closed=True, **kwargs):
+            """Override fill so that line is closed by default"""
+            return super().fill(closed=closed, *args, **kwargs)
+
+        def plot(self, *args, **kwargs):
+            """Override plot so that line is closed by default"""
+            lines = super().plot(*args, **kwargs)
+            for line in lines:
+                self._close_line(line)
+
+        def _close_line(self, line):
+            x, y = line.get_data()
+            # FIXME: markers at x[0], y[0] get doubled-up
+            if x[0] != x[-1]:
+                x = np.append(x, x[0])
+                y = np.append(y, y[0])
+                line.set_data(x, y)
+
+        def set_varlabels(self, labels):
+            self.set_thetagrids(np.degrees(theta), labels)
+
+        def _gen_axes_patch(self):
+            # The Axes patch must be centered at (0.5, 0.5) and of radius 0.5
+            # in axes coordinates.
+            if frame == 'circle':
+                return Circle((0.5, 0.5), 0.5)
+            elif frame == 'polygon':
+                return RegularPolygon((0.5, 0.5), num_vars, radius=0.5, edgecolor="k")
+            else:
+                raise ValueError("Unknown value for 'frame': %s" % frame)
+
+        def _gen_axes_spines(self):
+            if frame == 'circle':
+                return super()._gen_axes_spines()
+            elif frame == 'polygon':
+                # spine_type must be 'left'/'right'/'top'/'bottom'/'circle'.
+                spine = Spine(
+                    axes=self,
+                    spine_type='circle',
+                    path=Path_mpl.unit_regular_polygon(num_vars),
+                )
+                # unit_regular_polygon gives a polygon of radius 1 centered at
+                # (0, 0) but we want a polygon of radius 0.5 centered at (0.5,
+                # 0.5) in axes coordinates.
+                spine.set_transform(
+                    Affine2D().scale(0.5).translate(0.5, 0.5) + self.transAxes
+                )
+                return {'polar': spine}
+            else:
+                raise ValueError("Unknown value for 'frame': %s" % frame)
+
+    register_projection(RadarAxes)
+    return theta
+
+
+print("hi")
+
+# def plot_checkdst_radarchart(df, no_band=True, title="", log_scale=False):
+def plot_checkdst_radarchart():
+
+    N = 6
+    theta = radar_factory(N, frame='polygon')
+
+    data = example_data()
+    spoke_labels = data.pop(0)
+
+    fig, axs = plt.subplots(
+        figsize=(9, 9), nrows=1, ncols=1, subplot_kw=dict(projection='radar')
+    )
+    fig.subplots_adjust(wspace=0.25, hspace=0.20, top=0.85, bottom=0.05)
+
+    colors = ['b', 'r']
+    # Plot the four cases from the example data on separate axes
+    for ax, (title, case_data) in zip([axs], data):
+        print(case_data)
+        ax.set_rgrids([0.25, 0.5, 0.75, 1])
+        # ax.set_title(title, weight='bold', size='medium', position=(0.5, 1.1),
+        #              horizontalalignment='center', verticalalignment='center'))
+
+        for d, color in zip(case_data, colors):
+            d = np.array(d)
+            ax.plot(theta, d, color=color)
+            ax.errorbar(theta, [0.05] * len(d), yerr="error", fmt='o')
+            # ax.fill(theta,  d + 0.05, color=color, alpha=0.25)
+            # ax.fill(theta,  d - 0.05, color="white", alpha=0.25)
+            # ax.fill(theta, d, facecolor=color, alpha=0.25, label='_nolegend_')
+        ax.set_varlabels(spoke_labels)
+
+    # add legend relative to top-left plot
+    labels = ('TripPy', 'BART-DST')
+    legend = axs.legend(labels, loc=(0.9, 0.95), labelspacing=0.1, fontsize='small')
+
+    # fig.text(0.5, 0.965, '5-Factor Solution Profiles Across Four Scenarios',
+    #          horizontalalignment='center', color='black', weight='bold',
+    #          size='large')
+
+    plt.show()
