@@ -5,8 +5,8 @@ import re
 import shlex
 import subprocess
 
-# PATH="/data/home/justincho/CheckDST/ParlAI/models/bart_scratch_multiwoz2.3"
-PATH = "/data/home/justincho/CheckDST/ParlAI/models/bart_pft_multiwoz2.3"
+PATH="/data/home/justincho/CheckDST/ParlAI/models/bart_scratch_multiwoz2.3"
+# PATH = "/data/home/justincho/CheckDST/ParlAI/models/bart_pft_multiwoz2.3"
 
 runs = Path(PATH).glob("*sd[0-9]")
 # pprint(sorted(list(runs)))
@@ -52,6 +52,10 @@ for run in runs:
 
     CMD = ""
     seed = find_seed(run)
+    
+    if seed != "4": 
+        continue 
+    
     print(run, seed)
     checkpoints = [
         fn
