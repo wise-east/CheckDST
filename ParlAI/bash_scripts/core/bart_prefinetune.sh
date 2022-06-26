@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --partition=a100 
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:8
 #SBATCH --time=24:00:00 
 #SBATCH --cpus-per-task=10
 ## %j is the job id, %u is the user id
@@ -8,8 +8,9 @@
 
 
 source /data/home/justincho/miniconda/etc/profile.d/conda.sh
-cd /data/home/justincho/ParlAI
-conda activate parlai_internal
+source /data/home/justincho/CheckDST/set_envs_mine.sh
+cd /data/home/justincho/CheckDST/ParlAI
+conda activate parlai_checkdst
 
 ############################################################
 # Help                                                     #
@@ -17,7 +18,7 @@ conda activate parlai_internal
 Help()
 {
    # Display Help
-   echo "Run evaluation script for a parlai model checkpoint"
+   echo "Run prefinetuning script for a parlai model"
    echo
    echo "Syntax: scriptTemplate [-h|l|t|s|]"
    echo "options:"
@@ -35,9 +36,9 @@ Help()
 ############################################################
 
 
-while getopts ":hs:l:t:e:n:k:g:m:v:" option; do
+while getopts ":hs:l:t:e:n:k:m:v:" option; do
    case $option in
-      h) # display Help
+      h) # display Help/
         Help
         exit;;
       l)
@@ -52,8 +53,6 @@ while getopts ":hs:l:t:e:n:k:g:m:v:" option; do
         TASK_ALIAS=$OPTARG;; 
       k) 
         NOW=$OPTARG;;
-      g) 
-        LOGFILE=$OPTARG;;
       m) 
         VALSETTINGS=$OPTARG;; 
       v)
@@ -71,10 +70,11 @@ echo "Epochs: ${EPOCHS}"
 echo "val settings: $VALSETTINGS"
 
 BATCH_SIZE=8
-EVALTASK="--evaltask multiwoz_dst:version=2.3"
-# EVALTASK=""
-# VALSETTINGS="--validation-metric loss --validation-metric-mode min --validation_cutoff 0"
-VALSETTINGS="--validation-metric 'joint goal acc' --validation-metric-mode max --validation_cutoff 100"
+# EVALTASK="--evaltask multiwoz_dst:version=2.3"
+EVALTASK=""
+VALSETTINGS="--validation-metric loss --validation-metric-mode min --validation_cutoff 0 "
+# VALSETTINGS="--validation-metric 'joint goal acc' --validation-metric-mode max --validation_cutoff 100"
+VALSETTINGS="$VALSETTINGS --skip-generation True"
 
 MFDIR="models/bart_${TASK_ALIAS}_pft/lr${LR}_eps${EPOCHS}_ngpu8_bs${BATCH_SIZE}_${NOW}/"
 MF="${MFDIR}model"
@@ -83,7 +83,7 @@ parlai multiprocessing_train \
     -m bart \
     -eps $EPOCHS -bs $BATCH_SIZE -opt adam -lr $LR \
     -t $TASK \
-    --eval-batchsize 16 \
+    --eval-batchsize 32 \
     --fp16 true \
     --warmup_updates 100 \
     --warmup_rate 1e-5 \
@@ -94,35 +94,23 @@ parlai multiprocessing_train \
     --validation-patience 3 \
     --text-truncate 512 \
     --label-truncate 512 \
-    --skip-generation False \
     -tblog True \
     --report-filename ${MF}.report.json \
     --world-logs ${MF}.world_logs.jsonl \
     $VALSETTINGS \
-    $EVALTASK
+    $EVALTASK |& tee ${MFDIR}log.txt
 "
 
 echo $CMD
 eval $CMD
 
-# copy slurm log file into model directory 
-if [[ -e $LOGFILE && -e $MFDIR ]]; then 
-  cp $LOGFILE $MFDIR
-else
-  if [[ ! -e $LOGFILE ]]; then 
-    echo "Could not find the log file: $LOGFILE"
-  elif [[ ! -e $MFDIR ]]; then 
-    echo "Could not find the model dir: $MFDIR"
-  fi 
-fi 
-
-# whether to run evaluation after completing training
-if [[ "$RUN_EVAL" = True && -e "$MF.test" ]]; then 
-  for INV in SD TP NEI; do 
-    for FEWSHOT in True False; do
-      sbatch evaluate_laug_invariance.sh -d bart -i $INV -m $MF -f $FEWSHOT
-    done
-  done
-else
-  echo "Model training was not completed for this directory. Cannot find: $MF.test"
-fi
+# # whether to run evaluation after completing training
+# if [[ "$RUN_EVAL" = True && -e "$MF.test" ]]; then 
+#   for INV in SD TP NEI; do 
+#     for FEWSHOT in True False; do
+#       sbatch evaluate_laug_invariance.sh -d bart -i $INV -m $MF -f $FEWSHOT
+#     done
+#   done
+# else
+#   echo "Model training was not completed for this directory. Cannot find: $MF.test"
+# fi

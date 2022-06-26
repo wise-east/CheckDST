@@ -3,7 +3,7 @@ import numpy as np
 
 from loguru import logger
 import json
-from .utils import normalize_dial_ids, extract_slot_from_string
+from checkdst.utils import normalize_dial_ids, extract_slot_from_string
 from typing import Dict, List
 import math
 
@@ -28,6 +28,18 @@ class CheckDST:
         # dictionary for holding key results
         self.checkdst_results = {}
 
+        # required keys for each prediction row to contain
+        self.required_keys = {
+            "dial_id" "context",
+            "pred",
+            "gold",
+        }
+
+    # @classmethod
+    # def aggregate_by_seeds(cls, checkdst_list:List[CheckDST])->CheckDST:
+
+    #     return
+
     def get_results(self) -> Dict:
         """Return checkdst results
 
@@ -50,7 +62,12 @@ class CheckDST:
             aug_type (str): type of augmentation used
         """
         # load data
-        preds = pd.read_json(pred_fn, orient="records", lines=True)
+        try:
+            preds = pd.read_json(pred_fn, orient="records", lines=True)
+        except Exception as e:
+            logger.error(e)
+            logger.error(f"Failed to load {str(pred_fn)}")
+            return
 
         # format columns
         preds.set_index("dial_id", inplace=True)
@@ -163,8 +180,8 @@ class CheckDST:
         # store results in results dict
         self.checkdst_results[jga_key] = round(total_jga, 4)
         self.checkdst_results[coref_jga_key] = round(total_coref_jga, 4)
-        self.checkdst_results[f"hallucination_freq_{aug_type}"] = round(
-            hallucination_frequency, 4
+        self.checkdst_results[f"factuality_{aug_type}"] = round(
+            1 - hallucination_frequency, 4
         )
         self.checkdst_results[
             f"hallucination_cts_{aug_type}"
@@ -190,9 +207,21 @@ class CheckDST:
         Returns:
             Dict: _description_
         """
-
         orig_jga_key = f"jga_{orig}"
         aug_jga_key = f"jga_{aug}"
+
+        # only compute cjga if both keys are present. notify which keys are not present.
+        if orig_jga_key not in self.df.keys() or aug_jga_key not in self.df.keys():
+            additional_info = ""
+            if orig_jga_key not in self.df.keys():
+                additional_info += f"{orig_jga_key} is not present."
+            if aug_jga_key not in self.df.keys():
+                additional_info += f" {aug_jga_key} is not present."
+            logger.error(
+                f"Both keys {orig_jga_key} and {aug_jga_key} must be present. {additional_info}"
+            )
+            return
+
         cjgas = []
         conditional_jgas = []
         for idx, row in self.df.iterrows():
@@ -236,7 +265,10 @@ class CheckDST:
         Returns:
             bool: True if all conditions are met
         """
-        raise NotImplementedError
+        for k in self.required_keys():
+            if k not in item.keys():
+                return False
+        raise True
 
     def find_cjga_examples(self):
         """Find cases where jga_aug = 1 but jga_orig = 0 to argue for cjga"""

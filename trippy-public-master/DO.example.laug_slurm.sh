@@ -8,7 +8,7 @@
 
 
 source /data/home/justincho/miniconda/etc/profile.d/conda.sh
-cd /data/home/justincho/trippy-public-master
+cd /data/home/justincho/CheckDST/trippy-public-master
 conda activate trippy
 
 # Parameters ------------------------------------------------------
@@ -91,7 +91,7 @@ for step in test; do
 	    --delexicalize_sys_utts \
 	    --class_aux_feats_inform \
 	    --class_aux_feats_ds \
-		--laug_inv ${INV} \
+		--checkdst_inv ${INV} \
 	    ${args_add} \
 	    2>&1 | tee ${OUT_DIR}/${step}_${INV}.log
     

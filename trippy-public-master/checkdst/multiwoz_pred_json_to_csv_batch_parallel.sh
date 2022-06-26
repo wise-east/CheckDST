@@ -5,7 +5,7 @@
 #SBATCH --job-name=cpu_json2csv
 
 source /data/home/justincho/miniconda/etc/profile.d/conda.sh
-cd /data/home/justincho/trippy-public-master
+cd /data/home/justincho/CheckDST/trippy-public-master
 conda activate trippy
 
 TASK=$1 

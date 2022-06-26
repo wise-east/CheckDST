@@ -4,3 +4,5 @@
 dist/
 *.egg-info
 *.temp
+*.png
+temp.py

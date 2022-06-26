@@ -7,7 +7,7 @@
 #SBATCH --job-name=dialoglue
 
 source /data/home/justincho/miniconda/etc/profile.d/conda.sh
-cd /data/home/justincho/dialoglue/trippy
+cd /data/home/justincho/CheckDST/dialoglue/trippy
 conda activate dialoglue
 
 # Parameters ------------------------------------------------------
@@ -25,24 +25,18 @@ TASK="multiwoz21"
 # # # Shared parameters 
 TASK="multiwoz21"
 # DATA_DIR="/data/home/justincho/trippy-public-master/data/MULTIWOZ2.1"
-DATA_DIR="/data/home/justincho/trippy-public-master/data/MULTIWOZ2.3"
+DATA_DIR="/data/home/justincho/CheckDST/trippy-public-master/data/MULTIWOZ2.3"
 NOW=$(date +"%Y-%m-%d_%T")
 LR="1e-4"
 # BASE_PATH="bert-base-uncased"
-BASE_PATH="/data/home/justincho/trippy-public-master/convbert-dg"
+BASE_PATH="/data/home/justincho/CheckDST/trippy-public-master/convbert-dg"
 SEED=$1
 
-# # # FEWSHOT parameters
-FEWSHOT="True"
-N_EPOCHS=20
-PER_GPU_TRAIN_BATCH_SIZE=4
-SAVE_EPOCHS=2
-
-# # # FULLSHOT Parameters
-# FEWSHOT=False
-# N_EPOCHS=40
-# PER_GPU_TRAIN_BATCH_SIZE=24
-# SAVE_EPOCHS=2
+# # FULLSHOT Parameters
+FEWSHOT=False
+N_EPOCHS=10
+PER_GPU_TRAIN_BATCH_SIZE=24
+SAVE_EPOCHS=0.25
 
 
 # Project paths etc. ----------------------------------------------
@@ -108,10 +102,10 @@ for step in train dev test; do
     		2>&1 | tee ${OUT_DIR}/eval_pred_${step}.log
     fi
 
-	if [ "$step" = "test" ]; then
-		# evaluate on invariances 
-		sbatch /data/home/justincho/trippy-public-master/DO.example.laug ${OUT_DIR} NEI
-		sbatch /data/home/justincho/trippy-public-master/DO.example.laug ${OUT_DIR} TP
-		sbatch /data/home/justincho/trippy-public-master/DO.example.laug ${OUT_DIR} SD
-	fi 
+	# if [ "$step" = "test" ]; then
+	# 	# evaluate on invariances 
+	# 	sbatch /data/home/justincho/CheckDST/trippy-public-master/DO.example.laug ${OUT_DIR} NEI
+	# 	sbatch /data/home/justincho/CheckDST/trippy-public-master/DO.example.laug ${OUT_DIR} TP
+	# 	sbatch /data/home/justincho/CheckDST/trippy-public-master/DO.example.laug ${OUT_DIR} SD
+	# fi 
 done

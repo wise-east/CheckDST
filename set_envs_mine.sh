@@ -1,4 +1,5 @@
 export CONDA_EXEC="${HOME}/miniconda/etc/profile.d/conda.sh"
-export PARLAI_DIR="${HOME}/CheckDST/ParlAI"
+export CHECKDST_DIR="${HOME}/CheckDST"
+export PARLAI_DIR="${CHECKDST_DIR}/ParlAI"
 export LAUG_DOWNLOAD_LINK="http://115.182.62.174:9876/download"
-export DATAPATH="${HOME}/CheckDST/data"
+export DATAPATH="${CHECKDST_DIR}/data"

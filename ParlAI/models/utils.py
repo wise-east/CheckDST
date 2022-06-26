@@ -524,8 +524,6 @@ def radar_factory(num_vars, frame="circle"):
     return theta
 
 
-print("hi")
-
 # def plot_checkdst_radarchart(df, no_band=True, title="", log_scale=False):
 def plot_checkdst_radarchart():
 

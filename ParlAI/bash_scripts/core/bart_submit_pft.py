@@ -15,7 +15,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 tasks = {
-    "all": "wsc,wnli,wic,squad2,google_sgd_dst,paraphrase_classification,wikisql,coqa",
+    # "all": "wsc,wnli,wic,squad2,google_sgd_dst,paraphrase_classification,wikisql,coqa",
     # "-google_sgd": "wsc,wnli,wic,squad2,paraphrase_classification,wikisql,coqa",
     # "-qa": "wsc,wnli,wic,google_sgd_dst,paraphrase_classification,wikisql",
     # "-exp_coref": "squad2,google_sgd_dst,paraphrase_classification,wikisql,coqa",
@@ -26,7 +26,7 @@ tasks = {
     # "+qa": "squad2,coqa",
     # "+paraphrase": "paraphrase_classification",
     # "+copy": "google_sgd_dst,wikisql,squad2,coqa",
-    # "+sgd": "google_sgd_dst",
+    "+sgd": "google_sgd_dst",
     # "+exp_coref": "wsc,wnli,wic",
     # "+all_coref": "wsc,wnli,wic,coqa",
     # "+wikisql": "wikisql",
@@ -36,8 +36,8 @@ tasks = {
 
 if args.learning_rate == -1:
     lrs = [
-        "5e-5",
-        "1e-5",
+        # "5e-5",
+        # "1e-5",
         "5e-6",
     ]
 else:
@@ -54,15 +54,13 @@ val_settings, run_eval = (
 count = 0
 for alias, tasks in tasks.items():
     for lr in lrs:
-        time.sleep(1.1)
+        # time.sleep(1.1)
         now = datetime.now()
         now = datetime.strftime(now, "%Y-%m-%d_%T")
 
-        log_fn = f"/data/home/justincho/ParlAI/bash_scripts/slurm_logs/{alias}_pft_lr_{lr}-{now}.log"
-        cmd = f"sbatch --job-name {alias}_pft --output={log_fn} "
-        cmd += f"{args.model}_prefinetune.sh -t {tasks} -l {lr} -e {epochs} -n {alias} -k {now} -g {log_fn} -m {val_settings} -v '{run_eval}'"
+        cmd = f"sbatch --job-name {alias}_pft "
+        cmd += f"{args.model}_prefinetune.sh -t {tasks} -l {lr} -e {epochs} -n {alias} -k {now} -m {val_settings} -v '{run_eval}'"
         logger.info(f"Executing command: {cmd}")
-        logger.info(f"Logs saved to: {log_fn}")
         subprocess.run(shlex.split(cmd))
         count += 1
 

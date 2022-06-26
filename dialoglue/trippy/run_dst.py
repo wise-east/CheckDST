@@ -115,9 +115,6 @@ def train(
             * args.num_train_epochs
         )
 
-    if args.save_epochs > 0:
-        args.save_steps = t_total // args.num_train_epochs * args.save_epochs
-
     num_warmup_steps = int(t_total * args.warmup_proportion)
 
     # Prepare optimizer and schedule (linear warmup and decay)
@@ -179,6 +176,17 @@ def train(
         pre_model.to(args.device)
         pre_model.bert_model.bert = model.bert
 
+    # import pdb; pdb.set_trace()
+    if args.save_epochs > 0:
+        # args.save_steps = int(t_total // args.num_train_epochs * args.save_epochs)
+        save_epochs = [0.05, 0.25, 0.5, 0.75, 1.0, 1.5, 2, 5, 10]
+        # save_epochs = [0.25, 0.5, 0.75, 1.0, 1.5, 2, 5, 10]
+        args.save_steps = [
+            int(t_total // args.num_train_epochs * ep) for ep in save_epochs
+        ]
+        print(args.save_steps)
+        logger.info(args.save_steps)
+
     # Train!
     logger.info("***** Running training *****")
     logger.info("  Num examples = %d", len(train_dataset))
@@ -238,6 +246,7 @@ def train(
         )
 
         if args.mlm_during:
+            # if False:
             for step, batch in enumerate(epoch_iterator):
                 pre_model.train()
                 pre_model.zero_grad()
@@ -324,10 +333,16 @@ def train(
                     logging_loss = tr_loss
 
                 # Save model checkpoint
+                # if (
+                #     args.local_rank in [-1, 0]
+                #     and args.save_steps > 0
+                #     and global_step % args.save_steps == 0
+                # ):
+
                 if (
                     args.local_rank in [-1, 0]
-                    and args.save_steps > 0
-                    and global_step % args.save_steps == 0
+                    and args.save_steps
+                    and global_step in args.save_steps
                 ):
                     output_dir = os.path.join(
                         args.output_dir, "checkpoint-{}".format(global_step)
@@ -1029,8 +1044,8 @@ def main():
     )
     parser.add_argument(
         "--save_epochs",
-        type=int,
-        default=0,
+        type=float,
+        default=1,
         help="Save checkpoint every X epochs. Overrides --save_steps.",
     )
     parser.add_argument(
@@ -1124,11 +1139,8 @@ def main():
         args.fp16,
     )
 
-    logger.info(f"args.fewshot: {args.fewshot}, type: {type(args.fewshot)}")
-    # args.fewshot = args.fewshot == "True"
-    args.fewshot = True
-    logger.info(f"Use fewshot: {args.fewshot}")
-    # Set seed
+    args.fewshot = False
+
     set_seed(args)
 
     # Load pretrained model and tokenizer

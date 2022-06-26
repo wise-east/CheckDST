@@ -2,12 +2,12 @@
 
 #SBATCH --partition=a100 
 #SBATCH --gres=gpu:1
-#SBATCH --time=48:00:00 # run for one day
+#SBATCH --time=12:00:00 # run for one day
 #SBATCH --cpus-per-task=10
 #SBATCH --job-name=trippy
 
 source /data/home/justincho/miniconda/etc/profile.d/conda.sh
-cd /data/home/justincho/trippy-public-master
+cd /data/home/justincho/CheckDST/trippy-public-master
 conda activate trippy
 
 # Parameters ------------------------------------------------------
@@ -28,14 +28,6 @@ DATA_DIR="data/MULTIWOZ2.3"
 NOW=$(date +"%Y-%m-%d_%T")
 LR="1e-4"
 
-# # # Defaults 
-# Project paths etc. ----------------------------------------------
-SEED=42
-# OUT_DIR="results/multiwoz21_lr${LR}_${NOW}_${SEED}"
-OUT_DIR="results/multiwoz23_lr${LR}_${NOW}_fewshot_${FEWSHOT}_${SEED}"
-# OUT_DIR="results/convbert_multiwoz23_lr${LR}_${NOW}_${SEED}"
-# OUT_DIR="results/convbert_multiwoz21_lr${LR}_${NOW}_${SEED}"
-
 Help()
 {
    # Display Help
@@ -50,6 +42,17 @@ Help()
    echo "s 	   Seed value"
    echo
 }
+
+SEED=""
+FEWSHOT=false
+N_EPOCHS=10
+PER_GPU_TRAIN_BATCH_SIZE=24
+SAVE_EPOCHS=0.25
+METRIC_BERT_DST_ONLY=false # change to true if predictions are already generated and want to transform them from csv to json 
+
+# OUT_DIR="results/multiwoz21_lr${LR}_${NOW}_${SEED}"
+# OUT_DIR="results/convbert_multiwoz23_lr${LR}_${NOW}_${SEED}"
+# OUT_DIR="results/convbert_multiwoz21_lr${LR}_${NOW}_${SEED}"
 
 while getopts ":hd:s:m:f:" option; do
    case $option in
@@ -70,43 +73,38 @@ while getopts ":hd:s:m:f:" option; do
    esac
 done
 
+if [[ $SEED != "" ]] ; then 
+	OUT_DIR="results/multiwoz23_lr${LR}_${NOW}_fewshot_${FEWSHOT}_${SEED}"
+	splits=(train dev test)
+else 
+	echo "No seed is given. We assume that this is intentional and that only evaluation will be done for checkpoints at ${OUT_DIR}"
+	splits=(test dev)
+	# splits=(test)
+fi 
 
-if $FEWSHOT || [ "$FEWSHOT" = "True" ] ; then 
-	FEWSHOT=True
-	N_EPOCHS=20
-	PER_GPU_TRAIN_BATCH_SIZE=4
-	SAVE_EPOCHS=2
-else
-	# FULLSHOT Parameters
-	FEWSHOT=False
-	N_EPOCHS=60
-	PER_GPU_TRAIN_BATCH_SIZE=24
-	SAVE_EPOCHS=4
-fi
+echo $SEED
+echo $OUT_DIR
 
 # Main ------------------------------------------------------------
 
 MODEL_PATH="bert-base-uncased" 
 # MODEL_PATH="convbert-dg"
 
-# for step in test; do
-splits=(train dev test)
-
-if $METRIC_BERT_DST_ONLY ; then 
+if [[ $METRIC_BERT_DST_ONLY == true ]] ; then 
 	splits=(test)
 fi
 
-for step in $splits; do
+for step in ${splits[@]}; do
 	echo $step 
 
     args_add=""
-    if [ "$step" = "train" ]; then
-	args_add="--do_train --predict_type=dummy --seed ${SEED}"
-    elif [ "$step" = "dev" ] || [ "$step" = "test" ]; then
-	args_add="--do_eval --predict_type=${step}"
+    if [[ "$step" = "train" ]] ; then
+		args_add="--do_train --predict_type=dummy --seed ${SEED}"
+	elif [[ "$step" = "dev" ]] || [[ "$step" = "test" ]] ; then
+		args_add="--do_eval --predict_type=${step}"
     fi
 
-	if ! $METRIC_BERT_DST_ONLY ; then 
+	if [[ $METRIC_BERT_DST_ONLY != true ]] ; then 
 		echo "Run training / evaluation inference" 
 
 		mkdir -p ${OUT_DIR}
@@ -130,7 +128,7 @@ for step in $splits; do
 			--eval_all_checkpoints \
 			--adam_epsilon=1e-6 \
 			--label_value_repetitions \
-				--swap_utterances \
+			--swap_utterances \
 			--append_history \
 			--use_history_labels \
 			--delexicalize_sys_utts \
@@ -141,7 +139,7 @@ for step in $splits; do
     fi 
 
 
-    if [ "$step" = "dev" ] || [ "$step" = "test" ]; then
+    if [[ "$step" == "dev" ]] || [[ "$step" == "test" ]]; then
 
 		echo "Run output reformatting"
     	python3 metric_bert_dst.py \
@@ -151,11 +149,11 @@ for step in $splits; do
     		2>&1 | tee ${OUT_DIR}/eval_pred_${step}.log
     fi
 
-	if [ "$step" = "test" ] && ! $METRIC_BERT_DST_ONLY ; then
-		echo "Submit LAUG evaluation jobs"
-		# evaluate on invariances 
-		sbatch DO.example.laug ${OUT_DIR} NEI
-		sbatch DO.example.laug ${OUT_DIR} TP
-		sbatch DO.example.laug ${OUT_DIR} SD
-	fi 
+	# if [[ "$step" = "test" ]] && [[ $METRIC_BERT_DST_ONLY == false ]] ; then
+	# 	echo "Submit LAUG evaluation jobs"
+	# 	# evaluate on invariances 
+	# 	sbatch DO.example.laug_slurm.sh ${OUT_DIR} NEI
+	# 	sbatch DO.example.laug_slurm.sh ${OUT_DIR} TP
+	# 	sbatch DO.example.laug_slurm.sh ${OUT_DIR} SD
+	# fi 
 done

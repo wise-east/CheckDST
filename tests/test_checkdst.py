@@ -1,9 +1,8 @@
 import json
 from pathlib import Path
-
-from pip import main
-from checkdst.utils import load_jsonl, CheckDST
-from pprint import pprint
+from checkdst import CheckDST
+from checkdst.format_parlai_world_logs import format_parlai_world_logs
+from checkdst.utils import f
 import os
 
 DATAPATH = os.environ.get("DATAPATH", "../data")
@@ -33,6 +32,15 @@ def test_checkdst_for_single_dir():
 
     print(checkdst)
     assert checkdst.get_results()["jga_orig"] == 0.5326
+
+
+def test_format_parlai_world_logs():
+
+    sample_fn = Path(
+        "/data/home/justincho/CheckDST/ParlAI/models/pre_emnlp/bart_scratch_multiwoz2.3/fs_False_prompts_True_lr5e-05_bs4_uf1_sd0/model.checkpoint_step3839.NEI_world_logs_fs_False.jsonl"
+    )
+    target_fn = format_parlai_world_logs(sample_fn)
+    assert target_fn.is_file()
 
 
 if __name__ == "__main__":

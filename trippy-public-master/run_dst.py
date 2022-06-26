@@ -122,7 +122,13 @@ def train(
         )
 
     if args.save_epochs > 0:
-        args.save_steps = t_total // args.num_train_epochs * args.save_epochs
+        # args.save_steps = int(t_total // args.num_train_epochs * args.save_epochs)
+        save_epochs = [0.05, 0.25, 0.5, 0.75, 1.0, 1.5, 2, 5, 10]
+        # save_epochs = [0.25, 0.5, 0.75, 1.0, 1.5, 2, 5, 10]
+        args.save_steps = [
+            int(t_total // args.num_train_epochs * ep) for ep in save_epochs
+        ]
+        print(args.save_steps)
 
     num_warmup_steps = int(t_total * args.warmup_proportion)
 
@@ -281,10 +287,16 @@ def train(
                     logging_loss = tr_loss
 
                 # Save model checkpoint
+                # if (
+                #     args.local_rank in [-1, 0]
+                #     and args.save_steps > 0
+                #     and global_step % args.save_steps == 0
+                # ):
+
                 if (
                     args.local_rank in [-1, 0]
-                    and args.save_steps > 0
-                    and global_step % args.save_steps == 0
+                    and args.save_steps
+                    and global_step in args.save_steps
                 ):
                     output_dir = os.path.join(
                         args.output_dir, "checkpoint-{}".format(global_step)
@@ -328,6 +340,20 @@ def evaluate(args, model, tokenizer, processor, prefix=""):
 
     if not os.path.exists(args.output_dir) and args.local_rank in [-1, 0]:
         os.makedirs(args.output_dir)
+
+    # Write final predictions (for evaluation with external tool)
+    output_prediction_file = os.path.join(
+        args.output_dir, "pred_res.%s.%s.json" % (args.predict_type, prefix)
+    )
+    if args.checkdst_inv:
+        output_prediction_file = output_prediction_file.replace(
+            ".json", f"{args.checkdst_inv}.json"
+        )
+    if os.path.isfile(output_prediction_file):
+        logger.info(
+            f"Prediction file already found: {output_prediction_file}. Skipping prediction."
+        )
+        return
 
     args.eval_batch_size = args.per_gpu_eval_batch_size
     eval_sampler = SequentialSampler(
@@ -421,15 +447,6 @@ def evaluate(args, model, tokenizer, processor, prefix=""):
     final_results = {}
     for k in all_results[0].keys():
         final_results[k] = torch.stack([r[k] for r in all_results]).mean()
-
-    # Write final predictions (for evaluation with external tool)
-    output_prediction_file = os.path.join(
-        args.output_dir, "pred_res.%s.%s.json" % (args.predict_type, prefix)
-    )
-    if args.checkdst_inv:
-        output_prediction_file = output_prediction_file.replace(
-            ".json", f"{args.checkdst_inv}.json"
-        )
 
     logger.info(f"Saving predictions to {output_prediction_file}")
     with open(output_prediction_file, "w") as f:
@@ -631,6 +648,7 @@ def load_and_cache_examples(args, model, tokenizer, processor, evaluate=False):
     # Load data features from cache or dataset file
     split_type = args.predict_type if evaluate else "train"
     is_fewshot = "_fewshot_" if args.fewshot else ""
+    # is_fewshot=False
     cached_file = os.path.join(
         args.data_dir, f"cached_{split_type}_{is_fewshot}features"
     )
@@ -947,7 +965,7 @@ def main():
     )
     parser.add_argument(
         "--save_epochs",
-        type=int,
+        type=float,
         default=0,
         help="Save checkpoint every X epochs. Overrides --save_steps.",
     )
@@ -996,28 +1014,18 @@ def main():
     parser.add_argument(
         "--checkdst_inv", default="", type=str, help="type of invariance used"
     )
-    parser.add_argument(
-        "--fewshot", default="", type=str, help="type of invariance used"
-    )
 
     args = parser.parse_args()
     if args.checkdst_inv not in ["NEI", "TP", "SD"]:
         args.checkdst_inv = ""
 
-    # if fewshot in model path, use fewshot data
-    if (
-        "fewshot_True" in args.model_name_or_path
-        or "fs_True" in args.model_name_or_path
-    ):
-        args.fewshot = True
-    else:
-        args.fewshot = False
+    # just deal with fullshot
+    args.fewshot = False
 
     assert args.warmup_proportion >= 0.0 and args.warmup_proportion <= 1.0
     assert args.svd >= 0.0 and args.svd <= 1.0
     assert args.class_aux_feats_ds is False or args.per_gpu_eval_batch_size == 1
     assert not args.class_aux_feats_inform or args.per_gpu_eval_batch_size == 1
-    assert not args.class_aux_feats_ds or args.per_gpu_eval_batch_size == 1
 
     task_name = args.task_name.lower()
     if task_name not in PROCESSORS:
@@ -1173,6 +1181,7 @@ def main():
             args.output_dir, "eval_res.%s.json" % (args.predict_type)
         )
         checkpoints = [args.output_dir]
+        # import pdb; pdb.set_trace()
         if args.eval_all_checkpoints:
             checkpoints = list(
                 os.path.dirname(c)

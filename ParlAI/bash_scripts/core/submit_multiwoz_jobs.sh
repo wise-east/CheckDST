@@ -2,14 +2,13 @@
 
 MODEL=bart
 # INIT_CONFIG="scratch" # one of [scratch, pft, muppet]
-INIT_CONFIG="pft" # one of [scratch, pft, muppet]
+# INIT_CONFIG="pft" # one of [scratch, pft, muppet]
 # INIT_CONFIG="muppet" # one of [scratch, pft, muppet]
-# TODO add soloist
+INIT_CONFIG="soloist"
 USE_SLURM=true # execute directly or submit as sbatch job
 
-
 # for SEED in 0 ; do 
-for SEED in 0 1 2 3 ; do 
+for SEED in 0 1 2 3 4 ; do 
 
     BATCH_SIZE=4
     UPDATE_FREQ=1
@@ -26,6 +25,10 @@ for SEED in 0 1 2 3 ; do
         INIT_CMD="--init-fairseq-model /data/home/justincho/CheckDST/ParlAI/data/models/bart_muppett/model.pt"
     elif [[ $INIT_CONFIG == "pft" ]] ; then 
         INIT_MODEL_PATH="/data/home/justincho/CheckDST/ParlAI/models/pre_emnlp/bart_all_pft/lr5e-6_eps10_ngpu8_bs8_2021-11-11_22:26:26/model"
+        INIT_CMD="--init-model $INIT_MODEL_PATH"
+    elif [[ $INIT_CONFIG == "soloist" ]] ; then 
+        # update to path with best model 
+        INIT_MODEL_PATH="/data/home/justincho/CheckDST/ParlAI/models/bart_+sgd_pft/lr5e-6_eps10_ngpu8_bs8_2022-06-24_02:54:40/model"
         INIT_CMD="--init-model $INIT_MODEL_PATH"
     else 
         INIT_MODEL_PATH="/data/home/justincho/CheckDST/ParlAI/data/models/bart/bart_large/model"
