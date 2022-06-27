@@ -30,7 +30,7 @@ class CheckDST:
             self.df.rename(columns={"dial_id": "dial_idx"}, inplace=True)
             self.df.index.name = "dial_id"
         else:
-            self.df = pd.DataFrame({})
+            self.df = None
 
         # dictionary for holding key results
         self.checkdst_results = {}
@@ -80,14 +80,18 @@ class CheckDST:
         # format columns
         preds.set_index("dial_id", inplace=True)
         preds.rename(columns={k: f"{k}_{aug_type}" for k in preds.keys()}, inplace=True)
-        prev_len = len(self.df)
 
         # add to dataframe
         # import pdb; pdb.set_trace()
-        self.df = self.df.join(preds, on="dial_id")
+        if self.df is not None:
+            prev_len = len(self.df)
+            self.df = self.df.join(preds, on="dial_id")
+        else:
+            prev_len = None
+            self.df = preds
 
         # make sure that the total number of rows doesn't change after merge
-        if prev_len != len(self.df):
+        if prev_len != len(self.df) and prev_len is not None:
             logger.warning(
                 "In most cases, the dataframe's length (# rows) should not have increased in size. Make sure that this is expected."
             )

@@ -15,7 +15,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 tasks = {
-    # "all": "wsc,wnli,wic,squad2,google_sgd_dst,paraphrase_classification,wikisql,coqa",
+    "all": "wsc,wnli,wic,squad2,google_sgd_dst,paraphrase_classification,wikisql,coqa",
     # "-google_sgd": "wsc,wnli,wic,squad2,paraphrase_classification,wikisql,coqa",
     # "-qa": "wsc,wnli,wic,google_sgd_dst,paraphrase_classification,wikisql",
     # "-exp_coref": "squad2,google_sgd_dst,paraphrase_classification,wikisql,coqa",
@@ -26,7 +26,7 @@ tasks = {
     # "+qa": "squad2,coqa",
     # "+paraphrase": "paraphrase_classification",
     # "+copy": "google_sgd_dst,wikisql,squad2,coqa",
-    "+sgd": "google_sgd_dst",
+    # "+sgd": "google_sgd_dst",
     # "+exp_coref": "wsc,wnli,wic",
     # "+all_coref": "wsc,wnli,wic,coqa",
     # "+wikisql": "wikisql",
@@ -45,11 +45,14 @@ else:
 
 epochs = 10
 
-# val_settings, run_eval = "--validation-metric loss --validation-metric-mode min --validation_cutoff 0", False
 val_settings, run_eval = (
-    "--validation-metric 'joint goal acc' --validation-metric-mode max --validation_cutoff 100",
-    True,
+    "--validation-metric loss --validation-metric-mode min --validation_cutoff 0",
+    False,
 )
+# val_settings, run_eval = (
+#     "--validation-metric 'joint goal acc' --validation-metric-mode max --validation_cutoff 100",
+#     True,
+# )
 
 count = 0
 for alias, tasks in tasks.items():

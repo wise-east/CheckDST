@@ -6,8 +6,8 @@ It is model- and data-agnostic: only the prediction files for the original test 
 CheckDST receives predictions in `jsonl` format, where each line is a valid `json` with the following fields: 
 ```json
 {
-    "dial_id": "mul0003-5", # format is flexible, but needs to be the same for samples that will be compared
-    "context": "<user> i 'm looking for a place to stay . it needs to be a guesthouse and include free wifi .", # optional, keep only for analysis   
+    "dial_id": "mul0003-5", 
+    "context": "<user> i 'm looking for a place to stay . it needs to be a guesthouse and include free wifi .",  
     "aug_type": "orig", # describe the augmentation type 
     "pred": "hotel type guesthouse, hotel internet yes,",   
     "gold": "hotel type guesthouse, hotel internet yes,", 
@@ -15,20 +15,30 @@ CheckDST receives predictions in `jsonl` format, where each line is a valid `jso
  }
 ```
 
-While most fields are optional and flexible, `pred` and `gold` **must** be in `<domain> <slot key> <slot value>` format and be separated with commas. Trailing commas are allowed. 
-Optional fields are required to be present, but can be empty as "". 
+**Notes on the json fields** 
+- `dial_id`: unique id that identifies the current user turn. There is no format requirements, but needs to be the same for samples that will be compared
+- `context`: (optional) The dialogue context and the final user utterance. For computing CheckDST metrics, this is optional, but useful to include for analysis. 
+- `aug_type`: Any descriptor for the used augmentation. This will be used as the suffix for the dataframe columns. There is no format requirements. 
+- `pred` & `gold`: the predicted and reference dialogue states, repectively. `pred` and `gold` **must** be in `<domain> <slot key> <slot value>` format and be separated with commas. Trailing commas are allowed.
+- `requires_coref`: (optional) Required only if CorefJGA needs to be calculated. 
+- Optional fields are required to be present, but can be empty as ""
 
-#### Example: 
-Given these two files, 
+
+
+**Example**
+
+Given these two files: 
 - `orig_test_prediction.jsonl`: contains predictions of the original test file
-- `NED_test_prediction.jsonl`: contains predictions with named entities replaced with unseen ones 
+- `NED_test_prediction.jsonl`: contains predictions with named entities replaced with unseen ones
+
+CheckDST can be computed with the following: 
 
 ```python
 from pprint import pprint
 import checkdst
 
 # initialize checkdst object 
-checkdst = CheckDST(gold_data_fn=GOLD_DATA_FN)
+checkdst = CheckDST()
 
 # add predictions on the original test set. this computes JGA, CorefJGA if applicable, and hallucination 
 aug_type, orig_pred_fn = "orig", "orig_test_prediction.jsonl" 
@@ -65,19 +75,15 @@ cd ParlAI
 pip install -e . # install the version of ParlAI included in this repo
 ```
 
-
-
-
 ## Pre-trained / Pre-finetuned model weights 
-
-We share the model weights of the following models: SOLOIST and PrefineDST. 
-- [SOLOIST]()
-- [PrefineDST]()
 
 These models can be loaded via ParlAI and be fine-tuned with our ParlAI script. 
 
 The pre-trained weights for BART (which we use for SimpleTOD) can be found readily in ParlAI and TripPy / ConvBERT-DG models use the basic BERT model that is automatically loaded from the training script. 
 
+We will share the model weights of the following models soon: SOLOIST and PrefineDST. 
+- SOLOIST: TBD
+- PrefineDST: TBD 
 
 ## Preparing the data 
 
