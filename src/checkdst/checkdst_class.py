@@ -9,21 +9,28 @@ import math
 
 
 class CheckDST:
-    def __init__(self, gold_data_fn: str):
+    def __init__(self, gold_data_fn: str = ""):
         """Initialize dataframe with original data (reformatted MultiWOZ data)
-        TODO: directly load from MultiWOZ 2.3 data to remove dependency with fomratting code
+        TODO: directly load from MultiWOZ 2.3 data to remove dependency with formatting code
+        TODO: allow not providing any gold data
 
         Args:
             gold_data_fn (str): filepath to original MultiWOZ data
         """
-        with open(gold_data_fn, "r") as f:
-            self.gold_data = json.load(f)
 
-        # normalize dial_id names
-        self.gold_data = {normalize_dial_ids(k): v for k, v in self.gold_data.items()}
-        self.df = pd.DataFrame(self.gold_data).T
-        self.df.rename(columns={"dial_id": "dial_idx"}, inplace=True)
-        self.df.index.name = "dial_id"
+        if gold_data_fn:
+            with open(gold_data_fn, "r") as f:
+                self.gold_data = json.load(f)
+
+            # normalize dial_id names
+            self.gold_data = {
+                normalize_dial_ids(k): v for k, v in self.gold_data.items()
+            }
+            self.df = pd.DataFrame(self.gold_data).T
+            self.df.rename(columns={"dial_id": "dial_idx"}, inplace=True)
+            self.df.index.name = "dial_id"
+        else:
+            self.df = pd.DataFrame({})
 
         # dictionary for holding key results
         self.checkdst_results = {}
@@ -57,6 +64,7 @@ class CheckDST:
     def add_preds(self, pred_fn: str, aug_type: str, compute: bool = True) -> None:
         """Read CheckDST formatted jsonl files and add them to dataframe
 
+        TODO: allow to be added without gold_fn
         Args:
             pred_fn (str): filepath to CheckDST formatted jsonl file
             aug_type (str): type of augmentation used
@@ -80,7 +88,10 @@ class CheckDST:
 
         # make sure that the total number of rows doesn't change after merge
         if prev_len != len(self.df):
-            logger.error("The dataframe's length should not have increased in size.")
+            logger.warning(
+                "In most cases, the dataframe's length (# rows) should not have increased in size. Make sure that this is expected."
+            )
+            logger.warning(f"Previous size: {prev_len}. New size: {len(self.df)}")
 
         # compute metrics
         if compute:
@@ -128,7 +139,7 @@ class CheckDST:
             # calculate jga and coref jga
             jga = set(slots_pred) == set(slots_truth)
             jgas.append(jga)
-            if row["need_coref"]:
+            if row.get("need_coref", False):
                 coref_jgas.append(jga)
             else:
                 # filler to match number of rows

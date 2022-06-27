@@ -160,13 +160,11 @@ def check_and_format_trippy_pred(pred_fn: PosixPath) -> PosixPath:
 
 
 if __name__ == "__main__":
-    PARLAI_DIR = os.environ["PARLAI_DIR"]
+    CHECKDST_DIR = os.environ["CHECKDST_DIR"]
 
-    fn = (
-        Path(PARLAI_DIR)
-        / "/data/home/justincho/CheckDST/trippy-public-master/results/of_interest/multiwoz23_lr1e-4_2022-01-05_09:19:55_fewshot_False_42/pred_res.test.2366.csv"
-    )
+    fn = sys.argv[1]
+    # fn = (
+    #     Path(CHECKDST_DIR)
+    #     / "trippy-public-master/results/of_interest/multiwoz23_lr1e-4_2022-01-05_09:19:55_fewshot_False_42/pred_res.test.2366.csv"
+    # )
     target_fn = format_trippy_predictions(fn)
-
-    # fn = sys.argv[1]
-    # target_fn = format_trippy_predictions(fn)

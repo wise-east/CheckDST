@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 name = "checkdst"
 version = "0.0.1"
 authors = [
-  { name="Justin Cho", email="jcho@isi.edu" },
+  { name="anon", email="anon" },
 ]
 description = "Scripts for CheckDST"
 readme = "README.md"
@@ -19,5 +19,5 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/wise-east/CheckDST"
-"Bug Tracker" = "https://github.com/wise-east/CheckDST/issues"
+"Homepage" = "anon"
+"Bug Tracker" = "anon"

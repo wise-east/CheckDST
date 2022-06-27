@@ -87,10 +87,9 @@ def check_and_format_parlai_pred(pred_fn: PosixPath) -> bool:
 if __name__ == "__main__":
 
     PARLAI_DIR = os.environ["PARLAI_DIR"]
-    sample_fn = (
-        Path(PARLAI_DIR)
-        / "models/pre_emnlp/bart_scratch_multiwoz2.3/fs_False_prompts_True_lr5e-05_bs4_uf1_sd0/model.checkpoint_step3839.NEI_world_logs_fs_False.jsonl"
-    )
-
+    # sample_fn = (
+    #     Path(PARLAI_DIR)
+    #     / "models/pre_emnlp/bart_scratch_multiwoz2.3/fs_False_prompts_True_lr5e-05_bs4_uf1_sd0/model.checkpoint_step3839.NEI_world_logs_fs_False.jsonl"
+    # )
     sample_fn = Path(sys.argv[1])
     format_parlai_world_logs(sample_fn)

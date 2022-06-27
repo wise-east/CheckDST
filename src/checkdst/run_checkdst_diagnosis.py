@@ -259,23 +259,22 @@ if __name__ == "__main__":
     trippy_dir = Path(CHECKDST_DIR) / "dialoglue/trippy/results/emnlp"
     _, _ = get_all_trippy_checkdst_results(trippy_dir, print_=True, force_reload=True)
 
-    # main_dir=Path(PARLAI_DIR) / "models/bart_pft_multiwoz2.3/"
-    # assert main_dir.is_dir()
-    # scratch_dir=Path(PARLAI_DIR) / "models/bart_scratch_multiwoz2.3/"
-    # assert scratch_dir.is_dir()
-    # soloist_dir=Path(PARLAI_DIR) / "models/bart_soloist_multiwoz2.3/"
-    # assert soloist_dir.is_dir()
-    # muppet_dir=Path(PARLAI_DIR) / "models/bart_muppet_multiwoz2.3/"
-    # assert muppet_dir.is_dir()
+    main_dir = Path(PARLAI_DIR) / "models/bart_pft_multiwoz2.3/"
+    assert main_dir.is_dir()
+    scratch_dir = Path(PARLAI_DIR) / "models/bart_scratch_multiwoz2.3/"
+    assert scratch_dir.is_dir()
+    soloist_dir = Path(PARLAI_DIR) / "models/bart_soloist_multiwoz2.3/"
+    assert soloist_dir.is_dir()
+    muppet_dir = Path(PARLAI_DIR) / "models/bart_muppet_multiwoz2.3/"
+    assert muppet_dir.is_dir()
 
-    # pft_objs, pft_results = get_all_parlai_checkdst_results(main_dir, force_reload=True)
-    # scratch_objs, scratch_results = get_all_parlai_checkdst_results(scratch_dir, force_reload=True)
-    # soloist_objs, soloist_results = get_all_parlai_checkdst_results(soloist_dir, force_reload=True)
-    # muppet_objs, muppet_results = get_all_parlai_checkdst_results(muppet_dir, force_reload=True)
-# plot any diagrams of interest (trippy vs bart-dst)
-
-# extract consistent JGA examples
-
-# perturbed JGA vs consistent JGA comparison
-
-# performan any qualitative anlaysis and add any additional metrics to checkdst
+    pft_objs, pft_results = get_all_parlai_checkdst_results(main_dir, force_reload=True)
+    scratch_objs, scratch_results = get_all_parlai_checkdst_results(
+        scratch_dir, force_reload=True
+    )
+    soloist_objs, soloist_results = get_all_parlai_checkdst_results(
+        soloist_dir, force_reload=True
+    )
+    muppet_objs, muppet_results = get_all_parlai_checkdst_results(
+        muppet_dir, force_reload=True
+    )

@@ -6,3 +6,4 @@ dist/
 *.temp
 *.png
 temp.py
+anon_temp/

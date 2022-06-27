@@ -1,33 +1,106 @@
 # CheckDST
-Official repo for [CheckDST](https://openreview.net/forum?id=I_YteLtAYsM): <em>Measuring Real-World Generalization of Dialogue State Tracking Performance</em>
+### Official repo for CheckDST from <em>Know Thy Strengths: Comprehensive Dialogue State Tracking Diagnostics</em>
 
-- Supported models: 
-    - [ParlAI generation models](#generation-models)
-    - [TripPy](#classification-models)-based classification models 
-        - e.g. [ConvBERT-DG](https://github.com/alexa/dialoglue), [TripPy-COCO](https://arxiv.org/pdf/2010.12850.pdf), etc.
-
-- TBD 
-    - HuggingFace checkpoints
-
-
-## Preparing the data: 
-
-Following these steps will prepare the proper data format for both ParlAI and TripPy models, as well as downloading the original/raw data files provided by all of MultiWOZ2.1, 2.2, and 2.3. 
-
-1. Request for LAUG data: 
-    - The augmented [MultiWOZ 2.3](https://github.com/lexmen318/MultiWOZ-coref) for speech disfluencies and paraphrases can be found in the [LAUG repo](https://github.com/thu-coai/LAUG#supported-datasets). 
-
-1. Set the URL you received for downloading the data as the environment variable `LAUG_DOWNLOAD_LINK` in [set_envs.sh](set_envs.sh) 
-1. Create a new environment (e.g. conda), install ParlAI, and set environment variables
-```bash
-source set_envs.sh 
-conda create -n parlai python=3.7 
-cd ParlAI
-pip install -e . 
-cd ../data
+CheckDST conducts a comprehensive diagnosis for dialogue state tracking (DST) models. 
+It is model- and data-agnostic: only the prediction files for the original test set and the augmented test set has to be provided in the specified format. 
+CheckDST receives predictions in `jsonl` format, where each line is a valid `json` with the following fields: 
+```json
+{
+    "dial_id": "mul0003-5", # format is flexible, but needs to be the same for samples that will be compared
+    "context": "<user> i 'm looking for a place to stay . it needs to be a guesthouse and include free wifi .", # optional, keep only for analysis   
+    "aug_type": "orig", # describe the augmentation type 
+    "pred": "hotel type guesthouse, hotel internet yes,",   
+    "gold": "hotel type guesthouse, hotel internet yes,", 
+    "requires_coref": false # optional 
+ }
 ```
 
-4. Execute the data preparation script `./prepare_multiwoz_dst.sh`
+While most fields are optional and flexible, `pred` and `gold` **must** be in `<domain> <slot key> <slot value>` format and be separated with commas. Trailing commas are allowed. 
+Optional fields are required to be present, but can be empty as "". 
+
+#### Example: 
+Given these two files, 
+- `orig_test_prediction.jsonl`: contains predictions of the original test file
+- `NED_test_prediction.jsonl`: contains predictions with named entities replaced with unseen ones 
+
+```python
+from pprint import pprint
+import checkdst
+
+# initialize checkdst object 
+checkdst = CheckDST(gold_data_fn=GOLD_DATA_FN)
+
+# add predictions on the original test set. this computes JGA, CorefJGA if applicable, and hallucination 
+aug_type, orig_pred_fn = "orig", "orig_test_prediction.jsonl" 
+checkdst.add_preds(orig_pred_fn, aug_type=aug_type)
+
+# add predictions on the augmented test set. this computes JGA, CorefJGA if applicable, and hallucination 
+aug_type, aug_pred_fn = "NED", "NED_test_prediction.jsonl" 
+checkdst.add_preds(aug_pred_fn, aug_type=aug_type)
+
+# compute consistent JGA metrics by comparing JGAs on the original test set and the augmented test set 
+checkdst.compute_cjga(orig="orig", aug=aug_type)
+
+# show results 
+pprint(checkdst.results(), indent=4)
+```
+
+A more detailed example can be found in `src/checkdst/run_checkdst_diagnosis.py`
+
+- This repo provides prediction formatting scripts for the following packages or code bases: 
+    - [ParlAI generation models](#generation-models): `src/checkdst/format_parlai_world_logs.py`
+    - [TripPy](#classification-models)-based classification models: `src/checkdst/format_trippy_predictions.py`
+        - e.g. [ConvBERT-DG](https://github.com/alexa/dialoglue), [TripPy-COCO](https://arxiv.org/pdf/2010.12850.pdf), etc.
+
+
+
+## Minimal Setup 
+
+```bash
+conda create -n checkdst python=3.8 # create virtual environment 
+conda activate checkdst # activate env
+pip install -e . # install checkdst package
+pip install -r requirements.txt
+cd ParlAI  
+pip install -e . # install the version of ParlAI included in this repo
+```
+
+
+
+
+## Pre-trained / Pre-finetuned model weights 
+
+We share the model weights of the following models: SOLOIST and PrefineDST. 
+- [SOLOIST]()
+- [PrefineDST]()
+
+These models can be loaded via ParlAI and be fine-tuned with our ParlAI script. 
+
+The pre-trained weights for BART (which we use for SimpleTOD) can be found readily in ParlAI and TripPy / ConvBERT-DG models use the basic BERT model that is automatically loaded from the training script. 
+
+
+## Preparing the data 
+
+To replicate results from the paper, the MultiWOZ2.3 data must be prepared first. There are a handful of scripts that needs to be run in order to format and place the data in order to accommodate both generation models for ParlAI and TripPy models. 
+
+Take the following steps to download the original/raw data files provided by all of MultiWOZ2.1, 2.2, and 2.3 and format the data properly for training/inference.
+
+1. Request for LAUG data: 
+    - The augmented [MultiWOZ 2.3](https://github.com/lexmen318/MultiWOZ-coref) for speech disfluencies and paraphrases can be found in the [LAUG repo](https://github.com/thu-coai/LAUG#supported-datasets). The URL for this dataset must be requested first before proceeding.
+
+1. Set the URL you received for downloading the data as the environment variable `LAUG_DOWNLOAD_LINK` in [set_envs.sh](set_envs.sh) 
+1. Create a new virtual environment (e.g. conda), install ParlAI (the version stored in this repo), and set environment variables
+    * Make sure that `which python` and `which pip` are properly pointing to your virtual environment's  python and pip. 
+```bash
+source set_envs.sh 
+conda create -n checkdst python=3.8
+conda activate checkdst
+cd ParlAI
+pip install -e . 
+cd .. 
+```
+
+4. Execute the data preparation script `.data/prepare_multiwoz_dst.sh`
     - You can learn more about the data preparation details [here](data/README.md)
 
 **Note** 
@@ -38,8 +111,8 @@ cd ../data
 
 For generation models, we used [ParlAI](https://parl.ai). `ParlAI/` contains a copy of the ParlAI project with compatible modifications to enable evaluating generation models with CheckDSTs. 
 
-Detailed instructions can be found in the [ParlAI CheckDST Readme](ParlAI/CHECKDST_README.md)
-- Instructions on replicating PrefineDST results can also be found here. 
+Detailed instructions can be found in the [ParlAI CheckDST README](ParlAI/CHECKDST_README.md)
+- Instructions on replicating results of generation models, including PrefineDST, can be found here. 
 
 
 ## Classification Models 
@@ -48,4 +121,4 @@ Detailed instructions can be found in the [ParlAI CheckDST Readme](ParlAI/CHECKD
 
 `dialoglue/` contains a copy of the [DialoGLUE repo](https://github.com/alexa/dialoglue) for running the ConvBERT-DG variant of the TripPy model. 
 
-Detailed instructions can be found in the [TripPy CheckDST Readme](trippy-public-master/CHECKDST_README.md)
+Detailed instructions can be found in the [TripPy CheckDST README](trippy-public-master/CHECKDST_README.md)
