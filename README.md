@@ -8,10 +8,10 @@ CheckDST receives predictions in `jsonl` format, where each line is a valid `jso
 {
     "dial_id": "mul0003-5", 
     "context": "<user> i 'm looking for a place to stay . it needs to be a guesthouse and include free wifi .",  
-    "aug_type": "orig", # describe the augmentation type 
+    "aug_type": "orig",
     "pred": "hotel type guesthouse, hotel internet yes,",   
     "gold": "hotel type guesthouse, hotel internet yes,", 
-    "requires_coref": false # optional 
+    "requires_coref": false, 
  }
 ```
 
@@ -20,7 +20,7 @@ CheckDST receives predictions in `jsonl` format, where each line is a valid `jso
 - `context`: (optional) The dialogue context and the final user utterance. For computing CheckDST metrics, this is optional, but useful to include for analysis. 
 - `aug_type`: Any descriptor for the used augmentation. This will be used as the suffix for the dataframe columns. There is no format requirements. 
 - `pred` & `gold`: the predicted and reference dialogue states, repectively. `pred` and `gold` **must** be in `<domain> <slot key> <slot value>` format and be separated with commas. Trailing commas are allowed.
-- `requires_coref`: (optional) Required only if CorefJGA needs to be calculated. 
+- `requires_coref`: (optional) Required only if CorefJGA needs to be calculated. Either True or False. 
 - Optional fields are required to be present, but can be empty as ""
 
 
