@@ -72,8 +72,9 @@ conda activate checkdst # activate env
 pip install -e . # install checkdst package
 pip install -r requirements.txt
 cd ParlAI  
-pip install -e . # install the version of ParlAI included in this repo
+python setup.py develop # install the version of ParlAI included in this repo
 ```
+
 
 ## Pre-trained / Pre-finetuned model weights 
 

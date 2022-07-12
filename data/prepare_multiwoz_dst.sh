@@ -1,10 +1,10 @@
 #!/bin/bash 
 
-echo "**** make sure that ParlAI is installed and that the environment variables is set with `set_envs.sh` ****"
+echo "**** make sure that ParlAI is installed and that the environment variables is set with 'set_envs.sh' ****"
 echo "Otherwise, this script will fail and data will be stored in incorrect locations."
 
 # allow for the environment variables to be set if repository is cloned into home directory 
-if [[ -f "~/CheckDST/set_envs.sh "]] ; then 
+if [[ -f "~/CheckDST/set_envs.sh" ]] ; then 
     source ~/CheckDST/set_envs.sh 
 fi 
 
