@@ -75,6 +75,7 @@ cd ParlAI
 python setup.py develop # install the version of ParlAI included in this repo
 ```
 
+If any message appears such as `error: protobuf 4.21.2 is installed but protobuf<3.20,>=3.9.2 is required by {'tensorboard'}` in the last step, install a supported version, e.g. `pip install protobuf==3.9.2`, and rerun `python setup.py develop`. 
 
 ## Pre-trained / Pre-finetuned model weights 
 
