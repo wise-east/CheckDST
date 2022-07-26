@@ -8,3 +8,4 @@ dist/
 temp.py
 anon_temp/
 set_envs_mine.sh
+*.txt

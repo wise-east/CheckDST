@@ -1,6 +1,6 @@
 # commands for finetuning on multiwoz and evaluating with checkdst 
 
-MODEL=bart
+MODEL=bart # 
 # INIT_CONFIG="scratch" # one of [scratch, pft, muppet]
 # INIT_CONFIG="pft" # one of [scratch, pft, muppet]
 # INIT_CONFIG="muppet" # one of [scratch, pft, muppet]

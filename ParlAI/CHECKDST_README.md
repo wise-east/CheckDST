@@ -8,7 +8,7 @@
     cd ParlAI 
     python setup.py develop 
     ```
-    1. (optional) Before installing `ParlAI`, it may be necessary to replace torch version in `requirements.txt` with one with CUDA support that is compatible with available GPUs, e.g. for a100 gpus: `torch==1.10.1+cu111 torchvision==0.11.2+cu111 torchaudio==0.10.1 -f https://download.pytorch.org/whl/torch_stable.html`  
+    1. (optional) Before installing `ParlAI`, it may be necessary to replace torch version in `requirements.txt` with one with CUDA support that is compatible with available GPUs, e.g. for a100 gpus: `torch==1.10.1+cu111 torchvision==0.11.2+cu111 torchaudio==0.10.1 torchtext -f https://download.pytorch.org/whl/torch_stable.html`  
     1. If this results in dependency errors when running parlai commands, run `python setup.py develop` again. 
 1. (optional) Train a ParlAI model: e.g. `parlai train_model --task multiwoz_checkdst` 
 1. Evaluate on all CheckDST: `parlai eval_model --task multiwoz_checkdst:aug=orig,multiwoz_checkdst:aug=SDI,multiwoz_checkdst:aug=TPI,multiwoz_checkdst:aug=NED --model-file $MODELDIR -dt test` 

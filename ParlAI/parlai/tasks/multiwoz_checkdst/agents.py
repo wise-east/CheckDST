@@ -448,6 +448,10 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
         if self.just_test:
             self.messages = self.messages[:10]
 
+        # filter by domains
+        # if self.domain:
+        #     for episode, msg in enumerate(self.messages):
+
         if self.use_prompts:
             for episode_idx, msg in enumerate(self.messages):
                 context, label = format_context_and_label(
