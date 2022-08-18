@@ -48,6 +48,15 @@ USEPROMPTS=False
 LR=1e-4
 FP16=True
 JUST_TEST=False
+MODEL_SIZE="t5-base"
+DOMAIN="" # blank is all domains 
+MFDIR="$HOME/CheckDST/ParlAI/models"
+if [[ $DOMAIN == "" ]] ; then 
+  MFDIR="$MFDIR/${MODEL_SIZE}/"
+else 
+  MFDIR="$MFDIR/${MODEL_SIZE}_${DOMAIN}/"
+  ADD_OPT="$ADD_OPT --dom ${DOMAIN}" 
+fi 
 
 while getopts ":hs:l:i:m:p:v:f:b:g:u:t:" option; do
    case $option in
@@ -57,7 +66,7 @@ while getopts ":hs:l:i:m:p:v:f:b:g:u:t:" option; do
       m)
         MFDIR=$OPTARG;;
       i)
-        INIT_CMD=$OPTARG;;
+        ADD_OPT=$OPTARG;;
       s)
         SD=$OPTARG;;
       l) 
@@ -80,9 +89,8 @@ while getopts ":hs:l:i:m:p:v:f:b:g:u:t:" option; do
    esac
 done
 
-MODEL_SIZE="t5-base"
-MFDIR="$HOME/CheckDST/ParlAI/models"
-MF="$MFDIR/$MODEL_SIZE/model"
+MF="$MFDIR/model"
+echo "Saving model to: ${MF}"
 echo "Learning rate: ${LR}"
 echo "seed: ${SD}"
 echo "Version: ${VERSION}"
@@ -94,7 +102,7 @@ if [[ $FEWSHOT == "True" ]]; then
   SAVE_EPOCH=2
 else 
   N_EPOCH=10
-  SAVE_EPOCH=0.25
+  SAVE_EPOCH=1
 fi 
 
 mkdir -p $MFDIR
@@ -126,7 +134,7 @@ parlai train_model \
     --report-filename ${MF}.report_fs_${FEWSHOT}.json \
     --world-logs ${MF}.world_logs_fs_${FEWSHOT}.jsonl \
     --just_test $JUST_TEST \
-    $INIT_CMD |& tee ${MF}_log.txt
+    $ADD_OPT |& tee ${MF}_log.txt
 "
 
 

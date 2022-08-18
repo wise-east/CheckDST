@@ -17,6 +17,12 @@ from collections import defaultdict
 from .build import build
 from .mutator import EntityMutator
 
+from parlai.tasks.multiwoz_checkdst.utils import (
+    my_strip,
+    get_dialid2domains,
+    extract_slot_from_string,
+)
+from parlai.tasks.multiwoz_checkdst.utils import NAMED_ENTITY_SLOTS, DOMAINS
 from parlai.tasks.multiwoz_dst.utils.reformat import reformat_parlai
 from parlai.tasks.multiwoz_dst.utils.prompts import format_context_and_label
 import parlai.utils.logging as logging
@@ -28,29 +34,6 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
     """
     MultiWOZ DST Teacher.
     """
-
-    BELIEF_STATE_DELIM = ", "
-    domains = [
-        "attraction",
-        "hotel",
-        "hospital",
-        "restaurant",
-        "police",
-        "taxi",
-        "train",
-    ]
-    named_entity_slots = {
-        "attraction--name",
-        "restaurant--name",
-        "hotel--name",
-        "bus--departure",
-        "bus--destination",
-        "taxi--departure",
-        "taxi--destination",
-        "train--departure",
-        "train--destination",
-    }
-    named_entity_interested = {"restaurant--name", "hotel--name", "attraction--name"}
 
     def __init__(self, opt, shared=None):
         super().__init__(opt, shared)
@@ -68,6 +51,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
         self.flag_compute = 1
         self.use_prompts = opt.get("use_prompts", True)
         self.few_shot = opt.get("few_shot", False)
+        self.specific_domain = opt.get("specific_domain", "")
         mutator = EntityMutator(self.opt, self.rng)
         self.mutator = {
             "scramble": mutator.scramble,
@@ -88,16 +72,6 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
         self._setup_data(opt["datafile"], data_dir)
 
         self.reset()
-
-    def _my_strip(self, s):
-
-        while not s[0].isalpha():
-            s = s[1:]
-
-        while not s[-1].isalpha():
-            s = s[:-1]
-
-        return s
 
     def ner_inv_init(self):
         # copied over from Tianjian's code. Load entity names for swapping
@@ -181,12 +155,12 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
                     entity_name_search_result = re.search('"(.*)-name": \[', lines[i])
                     if entity_name_search_result:
                         domain = entity_name_search_result[1]
-                        word = self._my_strip(lines[i + 1].strip()[1:-1])
+                        word = my_strip(lines[i + 1].strip()[1:-1])
                         if f"{domain}-name" not in names:
                             names[f"{domain}-name"] = defaultdict(set)
                         names[f"{domain}-name"][fold].add(word.lower())
                     # if "\"hotel-name\": [" in lines[i]:
-                    #     word = self._my_strip(lines[i + 1].strip()[1: -1])
+                    #     word = my_strip(lines[i + 1].strip()[1: -1])
                     #     hotel_names[fold].add(word.lower())
 
         for i in range(1, 18):
@@ -279,13 +253,21 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
 
         agent.add_argument(
             "--val_reduced",
-            type="bool",
+            type=bool,
             default=False,
             help="use smaller evaluation set.",
         )
 
         agent.add_argument(
-            "--test_reduced", type="bool", default=False, help="use smaller test set."
+            "--test_reduced", type=bool, default=False, help="use smaller test set."
+        )
+
+        agent.add_argument(
+            "-dom",
+            "--specific_domain",
+            type=str,
+            default="",
+            help=f"Only load data from a specific domain. Must be one of {DOMAINS}",
         )
 
         return argparser
@@ -352,7 +334,7 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
 
                 new_slot_value = None
                 # check if the domain_slot_key is a named entity slot key
-                if domain_slot_key.replace("-", "--") in self.named_entity_slots:
+                if domain_slot_key.replace("-", "--") in NAMED_ENTITY_SLOTS:
                     # replace with googel sgd entity
                     if self.opt["swap_entity"] == "g_sgd":
                         # check if it is in the entity bank
@@ -424,33 +406,40 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
             test_path = data_path.replace(".json", "_test.json")
             if self.few_shot:
                 test_path = test_path.replace(".json", "_fewshot.json")
-            test_data = self._load_json(test_path)
-            self.messages = list(test_data.values())
+            data = self._load_json(test_path)
+            self.messages = list(data.values())
             if self.test_reduced:
                 self.messages = self.messages[:100]
         elif self.datatype.startswith("valid"):
             valid_path = data_path.replace(".json", "_valid.json")
             if self.few_shot:
                 valid_path = valid_path.replace(".json", "_fewshot.json")
-            valid_data = self._load_json(valid_path)
-            self.messages = list(valid_data.values())
+            data = self._load_json(valid_path)
+            self.messages = list(data.values())
             if self.val_reduced:
                 k = min(len(self.messages), 500)
-                self.messages = random.sample(list(valid_data.values()), k=k)
+                self.messages = random.sample(list(data.values()), k=k)
 
         else:
             train_path = data_path.replace(".json", "_train.json")
             if self.few_shot:
                 train_path = train_path.replace(".json", "_fewshot.json")
-            train_data = self._load_json(train_path)
-            self.messages = list(train_data.values())
+            data = self._load_json(train_path)
+            self.messages = list(data.values())
 
         if self.just_test:
             self.messages = self.messages[:10]
 
-        # filter by domains
-        # if self.domain:
-        #     for episode, msg in enumerate(self.messages):
+        # filter by a single domain
+        dialid2domains = get_dialid2domains(self.messages)
+        if self.specific_domain:
+            domain_messages = []
+            for msg in self.messages:
+                dial_domain = dialid2domains[msg["dial_id"]]
+                if dial_domain == set([self.specific_domain]):
+                    domain_messages.append(msg)
+
+            self.messages = domain_messages
 
         if self.use_prompts:
             for episode_idx, msg in enumerate(self.messages):
@@ -513,79 +502,6 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
         if self.datatype.startswith("train"):
             random.shuffle(self.messages)
 
-    def _extract_slot_from_string(self, slots_string):
-        """
-        Either ground truth or generated result should be in the format:
-        "dom slot_type slot_val, dom slot_type slot_val, ..., dom slot_type slot_val,"
-        and this function would reformat the string into list:
-        ["dom--slot_type--slot_val", ... ]
-        """
-        slots_list = []
-
-        if slots_string is None:
-            return [], [], [], []
-
-        slot_val_conversion = {
-            "centre": "center",
-            "3-star": "3",
-            "2-star": "2",
-            "1-star": "1",
-            "0-star": "0",
-            "4-star": "4",
-            "5-star": "5",
-        }
-
-        per_domain_slot_lists = {}
-        named_entity_slot_lists = []
-        named_entity_slot_interested_lists = []
-
-        # # # remove start and ending token if any
-        str_split = slots_string.strip().split()
-        if str_split != [] and str_split[0] in ["<bs>", "</bs>"]:
-            str_split = str_split[1:]
-        if "</bs>" in str_split:
-            str_split = str_split[: str_split.index("</bs>")]
-
-        # split according to ";"
-        # str_split = slots_string.split(self.BELIEF_STATE_DELIM)
-        str_split = " ".join(str_split).split(",")
-        if str_split[-1] == "":
-            str_split = str_split[:-1]
-        str_split = [slot.strip() for slot in str_split]
-
-        for slot_ in str_split:
-            slot = slot_.split()
-            if len(slot) > 2 and slot[0] in self.domains:
-                domain = slot[0]
-                if slot[1] == "book" and slot[2] in ["day", "time", "people", "stay"]:
-                    slot_type = slot[1] + " " + slot[2]
-                    slot_val = " ".join(slot[3:])
-                else:
-                    slot_type = slot[1]
-                    slot_val = " ".join(slot[2:])
-                slot_val = slot_val_conversion.get(slot_val, slot_val)
-                if not slot_val == "dontcare":
-                    slots_list.append(domain + "--" + slot_type + "--" + slot_val)
-                if domain in per_domain_slot_lists:
-                    per_domain_slot_lists[domain].add(slot_type + "--" + slot_val)
-                else:
-                    per_domain_slot_lists[domain] = {slot_type + "--" + slot_val}
-                if domain + "--" + slot_type in self.named_entity_slots:
-                    named_entity_slot_lists.append(
-                        domain + "--" + slot_type + "--" + slot_val
-                    )
-                if domain + "--" + slot_type in self.named_entity_interested:
-                    named_entity_slot_interested_lists.append(
-                        domain + "--" + slot_type + "--" + slot_val
-                    )
-
-        return (
-            slots_list,
-            per_domain_slot_lists,
-            named_entity_slot_lists,
-            named_entity_slot_interested_lists,
-        )
-
     def custom_evaluation(
         self, teacher_action: Message, labels, model_response: Message
     ):
@@ -604,14 +520,14 @@ class MultiWozCheckDSTTeacher(FixedDialogTeacher):
             slots_truth_per_domain,
             slots_truth_named_entity,
             slots_truth_named_entity_interested,
-        ) = self._extract_slot_from_string(labels[0])
+        ) = extract_slot_from_string(labels[0])
         # extract generated slots from model_response
         (
             slots_pred,
             slots_pred_per_domain,
             slots_pred_named_entity,
             slots_pred_named_entity_interested,
-        ) = self._extract_slot_from_string(resp)
+        ) = extract_slot_from_string(resp)
 
         def add_slot_p_r(type: str):
             for gt_slot in slots_truth:
