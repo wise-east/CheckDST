@@ -1,9 +1,0 @@
-**__pycache__**
-data/
-results/
-convbert-dg/
-runs/
-*.out
-*.png
-*.csv
-*_slurm.sh
