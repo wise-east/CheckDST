@@ -4,3 +4,6 @@
 [submodule "trippy"]
 	path = trippy
 	url = git@github.com:wise-east/trippy.git
+[submodule "dialoglue"]
+	path = dialoglue
+	url = git@github.com:wise-east/dialoglue.git
