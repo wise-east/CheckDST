@@ -4,3 +4,6 @@
 [submodule "dialoglue"]
 	path = dialoglue
 	url = git@github.com:wise-east/dialoglue.git
+[submodule "ParlAI_CheckDST"]
+	path = ParlAI_CheckDST
+	url = git@github.com:wise-east/ParlAI_CheckDST.git

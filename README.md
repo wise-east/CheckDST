@@ -86,7 +86,7 @@ To replicate results in our paper, we recommend setting up separate environments
 conda create -n parlai_checkdst python=3.8 # (optional)
 conda activate parlai_checkdst 
 pip install -e . 
-cd ParlAI  
+cd ParlAI_CheckDST  
 python setup.py develop # install the version of ParlAI included in this repo
 ```
 
@@ -131,7 +131,7 @@ We will share the model weights of the following models soon: SOLOIST and Prefin
 
 ## Generation Models 
 
-For generation models, we used [ParlAI](https://parl.ai). `ParlAI/` contains a [fork](https://github.com/wise-east/parlai) of the ParlAI project with compatible modifications to enable evaluating generation models with CheckDSTs and training PrefineDST. Detailed instructions can be found in the [ParlAI CheckDST README](ParlAI/CHECKDST_README.md)
+For generation models, we used [ParlAI](https://parl.ai). `ParlAI_CheckDST/` contains a [modified version](https://github.com/wise-east/ParlAI_CheckDST) of the ParlAI project to enable evaluating generation models with CheckDST metrics and training PrefineDST. Detailed instructions can be found in the [ParlAI CheckDST README](ParlAI_CheckDST/CHECKDST_README.md)
 
 
 ## Span-based Classification Models 
