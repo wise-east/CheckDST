@@ -23,6 +23,12 @@ CheckDST receives predictions in `jsonl` format, where each line is a valid `jso
 - `requires_coref`: (optional) Required only if CorefJGA needs to be calculated. Either True or False. 
 - Optional fields are required to be present, but can be empty as ""
 
+# Setup 
+
+```bash
+git clone git@github.com:wise-east/CheckDST.git # clone main repo
+git submodule update --init # (optional) pull submodules
+```
 
 
 **Example**
