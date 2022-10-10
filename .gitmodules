@@ -1,6 +1,3 @@
-[submodule "ParlAI"]
-	path = ParlAI
-	url = git@github.com:wise-east/ParlAI.git
 [submodule "trippy"]
 	path = trippy
 	url = git@github.com:wise-east/trippy.git
